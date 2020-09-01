@@ -6,7 +6,8 @@ import { modifyUrlObjectForIPFS } from '../utils'
 export default function Redirect(): null {
   const { replace } = useRouter()
 
-  const { href, as } = modifyUrlObjectForIPFS('/create')
+  const debug = process.env.NODE_ENV !== "production";
+  const { href, as } = modifyUrlObjectForIPFS(!debug ? '/emblem-vault-site/create': '/create')
 
   useEffect(() => {
     replace(href, as)

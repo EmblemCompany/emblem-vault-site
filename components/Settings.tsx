@@ -168,7 +168,7 @@ export default function Settings({ isOpen, onClose }: { isOpen: boolean; onClose
           )}
 
           <Link
-            href={`https://github.com/NoahZinsmeister/hypertext/tree/${process.env.COMMIT_SHA}`}
+            href={`https://github.com/EmblemCompany/emblem-vault-site/tree/${process.env.COMMIT_SHA}`}
             target="_blank"
             rel="noopener noreferrer"
             color="blue.500"
