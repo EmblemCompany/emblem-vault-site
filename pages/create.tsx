@@ -151,9 +151,14 @@ export default function Create() {
                 py="2rem"
                 shouldWrapChildren
               >
-                  <Stack direction="row" align="flex-start" spacing="0rem" flexWrap="wrap" shouldWrapChildren>
-                      <input type="file" onChange={() => previewFile()} /><br/>
-                      <img src="" width="200" alt="Image preview..."></img>
+                  <Stack direction="row" align="flex-start" spacing="0rem" flexWrap="wrap" shouldWrapChildren >
+                    <FormControl>
+                      <FormLabel htmlFor="vault-img">Vault Image</FormLabel>
+                      <Box maxW="sm" borderWidth="1px" p={1} rounded="lg" overflow="hidden">
+                        <input type="file" onChange={() => previewFile()} /><br/>
+                        <img src="" width="200" alt="Image preview..."></img>
+                      </Box>
+                    </FormControl>
                   </Stack>
 
                   <Stack direction="row" align="flex-start" spacing="0rem" flexWrap="wrap" shouldWrapChildren>
