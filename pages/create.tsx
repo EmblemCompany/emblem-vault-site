@@ -15,25 +15,33 @@ import {
   RadioGroup,
   Radio,
   Textarea,
-  Button
+  Button,
+  ButtonGroup
 } from "@chakra-ui/core";
 
 import { useWeb3React } from '@web3-react/core'
 import React from "react";
-import {useDropzone} from 'react-dropzone';
 
+function previewFile() {
+  const preview = document.querySelector('img');
+  const file = document.querySelector('input[type=file]').files[0];
+  const reader = new FileReader();
+
+  reader.addEventListener("load", function () {
+    // convert image file to base64 string
+    preview.src = reader.result;
+  }, false);
+
+  if (file) {
+    reader.readAsDataURL(file);
+  }
+}
+
+function createVault() {
+  console.log("Hey baby")
+}
 
 export default function Create() {
-
-  const {
-    getRootProps,
-    getInputProps,
-    isDragActive,
-    isDragAccept,
-    isDragReject
-  } = useDropzone({
-    accept: 'image/jpeg, image/png'
-  });
 
   const [tabIndex, setTabIndex] = React.useState(0)
   const { account } = useWeb3React()
@@ -43,9 +51,9 @@ export default function Create() {
       <Box maxW="sm" borderWidth="1px" rounded="lg" overflow="hidden" >
         <Tabs defaultIndex={0} index={tabIndex} onChange={(index) => setTabIndex(index)}>
           <TabList>
-            <Tab>Yo</Tab>
-            <Tab>What</Tab>
-            <Tab>Up</Tab>
+            <Tab>Make</Tab>
+            <Tab>My</Tab>
+            <Tab>Vault</Tab>
           </TabList>
 
           <TabPanels>
@@ -124,7 +132,10 @@ export default function Create() {
                   </FormControl>
                 </Stack>
                 <Stack direction="row" align="flex-start" spacing="0rem" flexWrap="wrap" shouldWrapChildren>
-                  <Button onClick={() => setTabIndex(2)} >Next</Button>
+                  <ButtonGroup spacing={4}>
+                    <Button onClick={() => setTabIndex(0)} >Back</Button>
+                    <Button onClick={() => setTabIndex(2)} >Next</Button>
+                  </ButtonGroup>
                 </Stack>
               </Stack>
             </TabPanel>
@@ -140,16 +151,19 @@ export default function Create() {
                 py="2rem"
                 shouldWrapChildren
               >
-                <Stack direction="row" align="flex-start" spacing="0rem" flexWrap="wrap" shouldWrapChildren>
-                <div {...getRootProps({className: "dropzone"})}>
-        <input {...getInputProps()} />
-        {isDragAccept && (<p>All files will be accepted</p>)}
-          {isDragReject && (<p>Some files will be rejected</p>)}
-          {!isDragActive && (<p>Drop some files here ...</p>)}
-      </div>
+                  <Stack direction="row" align="flex-start" spacing="0rem" flexWrap="wrap" shouldWrapChildren>
+                      <input type="file" onChange={() => previewFile()} /><br/>
+                      <img src="" width="200" alt="Image preview..."></img>
+                  </Stack>
+
+                  <Stack direction="row" align="flex-start" spacing="0rem" flexWrap="wrap" shouldWrapChildren>
+                    <ButtonGroup spacing={4}>
+                      <Button onClick={() => setTabIndex(1)} >Back</Button>
+                      <Button onClick={() => createVault()} >DO IT!</Button>
+                    </ButtonGroup>
+                  </Stack>
                 </Stack>
-                </Stack>
-                </TabPanel>
+              </TabPanel>
           </TabPanels>
         </Tabs>
       </Box>
