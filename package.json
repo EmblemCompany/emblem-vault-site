@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build && next export",
     "build-ipfs": "IPFS=true next build && next export",
-    "prettier": "prettier --check \"**/*.{js,jsx,ts,tsx}\""
+    "prettier": "prettier --check \"**/*.{js,jsx,ts,tsx}\"",
+    "deploy": "npm run build && touch out/.nojekyll && git add out/ && git commit -m \"deploy pages\" && git subtree push --prefix out origin gh-pages"
   },
   "dependencies": {
     "@chakra-ui/core": "^0.8.0",
@@ -36,7 +37,7 @@
     "node-vibrant": "^3.1.5",
     "react": "17.0.0-rc.0",
     "react-copy-to-clipboard": "^5.0.2",
-    "react-dom": "17.0.0-rc.0",
+    "react-dom": "^17.0.0-rc.1",
     "react-dropzone": "^11.0.3",
     "swr": "^0.2.2"
   },
