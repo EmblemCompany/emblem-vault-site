@@ -24,16 +24,16 @@ import React from "react";
 
 function previewFile() {
   const preview = document.querySelector('img');
-  const file = document.querySelector('input[type=file]').files[0];
+  const inputelement = (document.querySelector('input[type=file]') as HTMLInputElement); //.files[0];
   const reader = new FileReader();
 
   reader.addEventListener("load", function () {
     // convert image file to base64 string
-    preview.src = reader.result;
+    if (preview) preview.src = reader.result?.toString() || '';
   }, false);
 
-  if (file) {
-    reader.readAsDataURL(file);
+  if (inputelement.files) {
+    reader.readAsDataURL(inputelement.files[0]);
   }
 }
 
