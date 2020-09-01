@@ -53,7 +53,7 @@ export default function Create() {
               <Stack
                 direction="column"
                 align="center"
-                spacing="6rem"
+                spacing="2rem"
                 flexGrow={1}
                 justifyContent="center"
                 px="2rem"
@@ -68,9 +68,10 @@ export default function Create() {
                       id="owner-address" 
                       aria-describedby="owner-helper-text" 
                       defaultValue={account || ''}
+                      placeholder="0xdeadbeef"
                       />
                     <FormHelperText id="owner-helper-text">
-                      What is the address of the first owner of this vault?
+                      What is the address of the first owner of this vault? Pro tip: When you connect a web3 wallet, this will populate automagically with your address.
                     </FormHelperText>
                   </FormControl>
                 </Stack>
@@ -97,7 +98,7 @@ export default function Create() {
                 <Stack
                 direction="column"
                 align="center"
-                spacing="4rem"
+                spacing="2rem"
                 flexGrow={1}
                 justifyContent="center"
                 px="2rem"
@@ -116,7 +117,7 @@ export default function Create() {
                 <Stack direction="row" align="flex-start" spacing="0rem" flexWrap="wrap" shouldWrapChildren>
                   <FormControl isRequired>
                     <FormLabel htmlFor="vault-desc">Vault Description</FormLabel>
-                    <Textarea id="vault-desc" size="lg" aria-describedby="vault-desc-text" placeholder="Here is a sample placeholder" />
+                    <Textarea id="vault-desc" size="lg" aria-describedby="vault-desc-text" />
                     <FormHelperText id="vault-desc-text">
                       Want to add some fluffy text to tell people what the point is?
                     </FormHelperText>
@@ -132,7 +133,7 @@ export default function Create() {
                 <Stack
                 direction="column"
                 align="center"
-                spacing="4rem"
+                spacing="2rem"
                 flexGrow={1}
                 justifyContent="center"
                 px="2rem"
