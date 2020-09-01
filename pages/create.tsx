@@ -23,7 +23,7 @@ import React from "react";
 import {useDropzone} from 'react-dropzone';
 
 
-export default function Create(props) {
+export default function Create() {
 
   const {
     getRootProps,
@@ -63,12 +63,12 @@ export default function Create(props) {
                 <Stack direction="row" align="flex-start" spacing="0rem" flexWrap="wrap" shouldWrapChildren>
                   <FormControl isRequired>
                     <FormLabel htmlFor="owner-address">Vault Owner Address</FormLabel>
-                    <Input
-                      type="text"
-                      id="owner-address"
-                      aria-describedby="owner-helper-text"
+                    <Input 
+                      type="text" 
+                      id="owner-address" 
+                      aria-describedby="owner-helper-text" 
                       defaultValue={account || ''}
-                    />
+                      />
                     <FormHelperText id="owner-helper-text">
                       What is the address of the first owner of this vault?
                     </FormHelperText>
@@ -90,11 +90,11 @@ export default function Create(props) {
                 <Stack direction="row" align="flex-start" spacing="0rem" flexWrap="wrap" shouldWrapChildren>
                   <Button onClick={() => setTabIndex(1)} >Next</Button>
                 </Stack>
-              </Stack>
+                </Stack>
             </TabPanel>
 
-            <TabPanel>
-              <Stack
+                <TabPanel>
+                <Stack
                 direction="column"
                 align="center"
                 spacing="4rem"
@@ -129,7 +129,7 @@ export default function Create(props) {
             </TabPanel>
 
             <TabPanel>
-              <Stack
+                <Stack
                 direction="column"
                 align="center"
                 spacing="4rem"
@@ -140,15 +140,15 @@ export default function Create(props) {
                 shouldWrapChildren
               >
                 <Stack direction="row" align="flex-start" spacing="0rem" flexWrap="wrap" shouldWrapChildren>
-                  <div {...getRootProps({ className: "dropzone" })}>
-                    <input {...getInputProps()} />
-                    {isDragAccept && (<p>All files will be accepted</p>)}
-                    {isDragReject && (<p>Some files will be rejected</p>)}
-                    {!isDragActive && (<p>Drop some files here ...</p>)}
-                  </div>
+                <div {...getRootProps({className: "dropzone"})}>
+        <input {...getInputProps()} />
+        {isDragAccept && (<p>All files will be accepted</p>)}
+          {isDragReject && (<p>Some files will be rejected</p>)}
+          {!isDragActive && (<p>Drop some files here ...</p>)}
+      </div>
                 </Stack>
-              </Stack>
-            </TabPanel>
+                </Stack>
+                </TabPanel>
           </TabPanels>
         </Tabs>
       </Box>
