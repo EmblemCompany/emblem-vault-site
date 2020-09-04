@@ -20,31 +20,57 @@ import {
 } from "@chakra-ui/core";
 
 import { useWeb3React } from '@web3-react/core'
-import React from "react";
+import React, { useState } from "react";
 
-function previewFile() {
-  const preview = document.querySelector('img');
-  const inputelement = (document.querySelector('input[type=file]') as HTMLInputElement); //.files[0];
-  const reader = new FileReader();
-
-  reader.addEventListener("load", function () {
-    // convert image file to base64 string
-    if (preview) preview.src = reader.result?.toString() || '';
-  }, false);
-
-  if (inputelement.files) {
-    reader.readAsDataURL(inputelement.files[0]);
-  }
-}
-
-function createVault() {
-  console.log("Hey baby")
-}
-
-export default function Create() {
+export default function Create(props: any) {
 
   const [tabIndex, setTabIndex] = React.useState(0)
   const { account } = useWeb3React()
+
+  const [vaultAddress, setVaultAddress] = React.useState(account || '');
+  const [vaultPubPriv, setVaultPubPriv] = React.useState('Public');
+  const [vaultName, setVaultName] = React.useState('');
+  const [vaultDesc, setVaultDesc] = React.useState('');
+  const [vaultImage, setVaultImage] = React.useState('');
+
+  const handleSubmit = (evt: { preventDefault: () => void; }) => {
+    evt.preventDefault();
+    alert(`Vault properties: name is: ${vaultName}, description is: ${vaultDesc}, address is: ${vaultAddress}, Pub/Priv is: ${vaultPubPriv}, and image data is: ${vaultImage}`)
+
+    fetch('http://104.154.252.216:80/mint', {
+      method: 'POST',
+      headers: {
+        'Authorization': 'Basic YWRtaW46c3VwZXJzZWNyZXQ=',
+        'Content-Type': 'application/json'
+      },
+      // We convert the React state to JSON and send it as the POST body
+      body: JSON.stringify(
+        {"toAddress": vaultAddress,
+        "description":vaultDesc,
+        "name":vaultName,
+        "image":vaultImage}
+      )
+    }).then(function(response) {
+      console.log(response.json())
+      // return response.json();
+    });
+  }
+
+  function previewFile() {
+    const preview = document.querySelector('img');
+    const inputelement = (document.querySelector('input[type=file]') as HTMLInputElement); //.files[0];
+    const reader = new FileReader();
+  
+    reader.addEventListener("load", function () {
+      // convert image file to base64 string
+      if (preview) preview.src = reader.result?.toString() || '';
+      if (preview) setVaultImage(preview.src)
+    }, false);
+  
+    if (inputelement.files) {
+      reader.readAsDataURL(inputelement.files[0]);
+    }
+  }
 
   return (
     <Flex width="full" align="center" justifyContent="center">
@@ -75,8 +101,9 @@ export default function Create() {
                       type="text" 
                       id="owner-address" 
                       aria-describedby="owner-helper-text" 
-                      defaultValue={account || ''}
                       placeholder="0xdeadbeef"
+                      value={vaultAddress}
+                      onChange={e => setVaultAddress(e.target.value)}
                       />
                     <FormHelperText id="owner-helper-text">
                       What is the address of the first owner of this vault? Pro tip: When you connect a web3 wallet, this will populate automagically with your address.
@@ -87,7 +114,7 @@ export default function Create() {
                 <Stack direction="row" align="flex-start" spacing="0rem" flexWrap="wrap" shouldWrapChildren>
                   <FormControl as="fieldset" isRequired>
                     <FormLabel as="legend">Public or Private?</FormLabel>
-                    <RadioGroup defaultValue="Public">
+                    <RadioGroup id="pubpriv" defaultValue="Public" onChange = {e => setVaultPubPriv(e.target.value)}>
                       <Radio value="Public">Public</Radio>
                       <Radio value="Private">Private</Radio>
                     </RadioGroup>
@@ -116,7 +143,13 @@ export default function Create() {
                 <Stack direction="row" align="flex-start" spacing="0rem" flexWrap="wrap" shouldWrapChildren>
                   <FormControl isRequired>
                     <FormLabel htmlFor="vault-name">Vault Name</FormLabel>
-                    <Input type="text" id="vault-name" aria-describedby="vault-name-text" />
+                    <Input 
+                      type="text" 
+                      id="vault-name" 
+                      aria-describedby="vault-name-text"
+                      value={vaultName}
+                      onChange={e => setVaultName(e.target.value)} 
+                    />
                     <FormHelperText id="vault-name-text">
                       Give it some love so you can find it later.
                     </FormHelperText>
@@ -125,7 +158,13 @@ export default function Create() {
                 <Stack direction="row" align="flex-start" spacing="0rem" flexWrap="wrap" shouldWrapChildren>
                   <FormControl isRequired>
                     <FormLabel htmlFor="vault-desc">Vault Description</FormLabel>
-                    <Textarea id="vault-desc" size="lg" aria-describedby="vault-desc-text" />
+                    <Textarea 
+                      id="vault-desc" 
+                      size="lg" 
+                      aria-describedby="vault-desc-text" 
+                      value={vaultDesc}
+                      onChange={e => setVaultDesc(e.target.value)}
+                    />
                     <FormHelperText id="vault-desc-text">
                       Want to add some fluffy text to tell people what the point is?
                     </FormHelperText>
@@ -164,7 +203,7 @@ export default function Create() {
                   <Stack direction="row" align="flex-start" spacing="0rem" flexWrap="wrap" shouldWrapChildren>
                     <ButtonGroup spacing={4}>
                       <Button onClick={() => setTabIndex(1)} >Back</Button>
-                      <Button onClick={() => createVault()} >DO IT!</Button>
+                      <Button onClick={handleSubmit} type="submit">DO IT!</Button>
                     </ButtonGroup>
                   </Stack>
                 </Stack>
