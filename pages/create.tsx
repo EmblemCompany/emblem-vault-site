@@ -37,7 +37,7 @@ export default function Create(props: any) {
     evt.preventDefault();
     alert(`Vault properties: name is: ${vaultName}, description is: ${vaultDesc}, address is: ${vaultAddress}, Pub/Priv is: ${vaultPubPriv}, and image data is: ${vaultImage}`)
 
-    fetch('http://104.154.252.216:80/mint', {
+    fetch('http://35.222.58.227:80/mint', {
       method: 'POST',
       headers: {
         'Authorization': 'Basic YWRtaW46c3VwZXJzZWNyZXQ=',
