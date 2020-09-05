@@ -147,7 +147,7 @@ export default function Settings({ isOpen, onClose }: { isOpen: boolean; onClose
             </Stack>
           </Stack>
         </ModalBody>
-        <ModalFooter justifyContent={permalink === null ? 'flex-end' : 'space-between'}>
+        <ModalFooter justifyContent='space-between' >
           {typeof permalink === 'string' && (
             <Button
               variant="link"
@@ -157,7 +157,7 @@ export default function Settings({ isOpen, onClose }: { isOpen: boolean; onClose
               onClick={(): void => {
                 try {
                   // eslint-disable-next-line
-                  ;(window.navigator as any).share({ title: 'Hypertext', url: permalink }).catch(() => {})
+                  ;(window.navigator as any).share({ title: 'Emblem Vault', url: permalink }).catch(() => {})
                 } catch {
                   copyWithFlag(permalink as string)
                 }
@@ -168,6 +168,15 @@ export default function Settings({ isOpen, onClose }: { isOpen: boolean; onClose
           )}
 
           <Link
+            href={'https://github.com/NoahZinsmeister/hypertext'}
+            target="_blank"
+            rel="noopener noreferrer"
+            color="blue.500"
+          >
+            Credit to Noah Zinsmeister
+          </Link>
+
+          <Link
             href={`https://github.com/EmblemCompany/emblem-vault-site/tree/${process.env.COMMIT_SHA}`}
             target="_blank"
             rel="noopener noreferrer"
@@ -175,6 +184,7 @@ export default function Settings({ isOpen, onClose }: { isOpen: boolean; onClose
           >
             {process.env.COMMIT_SHA?.slice(0, 7)}
           </Link>
+
         </ModalFooter>
       </ModalContent>
     </Modal>
