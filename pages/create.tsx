@@ -25,7 +25,7 @@ import React, { useState } from "react";
 export default function Create(props: any) {
 
   const [tabIndex, setTabIndex] = React.useState(0)
-  const { account } = useWeb3React()
+  const { account, chainId } = useWeb3React()
 
   const [vaultAddress, setVaultAddress] = React.useState(account || '');
   const [vaultPubPriv, setVaultPubPriv] = React.useState('Public');
@@ -48,7 +48,8 @@ export default function Create(props: any) {
         {"toAddress": vaultAddress,
         "description":vaultDesc,
         "name":vaultName,
-        "image":vaultImage}
+        "image":vaultImage,
+        "chainId":chainId}
       )
     }).then(function(response) {
       console.log(response.json())
