@@ -4,7 +4,6 @@ import {
     Grid,
     Text,
     Link,
-    SimpleGrid,
     Image
 } from "@chakra-ui/core";
 
@@ -93,7 +92,7 @@ export default function VaultList(props: any) {
             YOU DON'T SEEM TO HAVE ANY VAULTS. {" "}
             <Link color="#638cd8" href="../create">
               CREATE ONE HERE!
-          </Link>
+            </Link>
           </Text>
         }
       </Flex>
