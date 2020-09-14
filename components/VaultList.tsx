@@ -1,101 +1,94 @@
 import {
-    Box,
-    Flex,
-    Grid,
-    Text,
-    Link,
-    Image
+  Box,
+  Flex,
+  Grid,
+  Text,
+  Link,
+  Image,
+  SimpleGrid
 } from "@chakra-ui/core";
-
+import Loader from "react-loader"
 import { useWeb3React } from '@web3-react/core'
 import React, { useEffect, useState } from "react";
 
-export default function VaultList(props: any) {
-
-    const { account, chainId } = useWeb3React()
-    const [vaults, setVaults] = React.useState([])
-
-    const getVaults = async () => {
-      // const responce = await fetch('http://104.154.252.216/vaults/0x5a63264914a1eCB626e32e8AD683704bA7b0621f', {
-      const responce = await fetch('http://104.154.252.216/vaults/' + account, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-      })
-      const jsonData = await responce.json()
-      setVaults(jsonData)
+export default function VaultList() {
+  const { account, chainId } = useWeb3React()
+  const [vaults, setVaults] = React.useState([])
+  const [state, setState] = React.useState({loaded: false})
+  
+  const validImage = function (data) {
+    if (data.includes('http')) {
+      return true
+    } else {
+      return false
     }
+  }
+  const getVaults = async () => {
+    // const responce = await fetch('https://api.emblemvault.io/vaults/0x5a63264914a1eCB626e32e8AD683704bA7b0621f', {
+    const responce = await fetch('https://api.emblemvault.io/vaults/' + account, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'service': 'evmetadata',
+        'chainId': chainId.toString()
+      },
+    })
+    const jsonData = await responce.json()
+    setState({ loaded: true});
+    setVaults(jsonData)
+  }
 
-    useEffect(() => {
-        getVaults()
-      }, [])
+  useEffect(() => {
+    getVaults()
+  }, [])
 
-    return (
-      <Flex width="full" align="center" justifyContent="center" justifyItems="center">
-        {vaults.length
-          ? vaults.map((vault) => {
-            var url = '/vault/?id=' + vault.tokenId
-            return (
-              <Grid key={vault.tokenId} templateColumns="repeat(5, 1fr)" gap={1}>
-                <Link href={url}>
-                  <Box maxW="sm" borderWidth="1px" rounded="lg" overflow="hidden" >
-                    <Box
-                      mt="1"
-                      fontWeight="semibold"
-                      as="h4"
-                      lineHeight="tight"
-                      isTruncated
-                      p={1}
-                      textAlign="center"
-                    >
-                      {vault.name}
-
-                      <Image src={vault.image
-                        ? vault.image
-                        : "https://circuitsofvalue.com/public/coval-logo.png"
-                      }
-                        size="250px"
-                      />
-                    </Box>
-
-                    <Box p="6">
-                      <Box d="flex" alignItems="baseline">
-                        <Box
-                          color="gray.500"
-                          fontWeight="semibold"
-                          letterSpacing="wide"
-                          fontSize="xs"
-                          textTransform="uppercase"
-                          ml="2"
-                        >
-                          {vault.values.length
-                            ? vault.values.map((coin) => {
-                              return (
-                                <Text key={coin.name}>
-                                  {coin.balance} {coin.name}
-                                </Text>
-                              )
-                            })
-                            : <Text>Nothing in here! Fill 'er up!</Text>
-                          }
-                        </Box>
-                      </Box>
-                    </Box>
-                  </Box>
-                </Link>
-              </Grid>
-            )
-          })
-          :
-          <Text>
-            YOU DON'T SEEM TO HAVE ANY VAULTS. {" "}
-            <Link color="#638cd8" href="../create">
-              CREATE ONE HERE!
-            </Link>
-          </Text>
+  return (
+    <Loader loaded={state.loaded}>
+      <Flex w="100%" justify="center" flexWrap="wrap">
+      {vaults.length ? vaults.map((vault, index) => {
+        var url = './vault/?id=' + vault.tokenId
+        const flexSettings = {
+          flex: "1",
+          minW: "300px",
+          maxW: "300px",
+          borderWidth: "1px",
+          color: "white",
+          mx: "6",
+          mb: "6",
+          rounded: "lg",
+          overflow: "hidden"
+        };
+        const redirect = function() {
+          location.href = url
         }
-      </Flex>
-    )
+        return (
+          <Box key={index} {...flexSettings} onClick={redirect} >
+            <Text fontWeight="semibold" textAlign="center">{vault.name}</Text>
+            <Image src={validImage(vault.image) ? vault.image : "https://circuitsofvalue.com/public/coval-logo.png"} p={2} />
+            {
+              vault.values.length
+                ? vault.values.map((coin) => {
+                  return (
+                    <Text key={coin.name}>
+                      {coin.balance} {coin.name}
+                    </Text>
+                  )
+                })
+                : <Text as="h2" textAlign="center" w="100%" p={0}>Nothing in here! Fill 'er up!</Text>
+            }
+          </Box>
+        )
+      })
+        :
+        <Text>
+          YOU DON'T SEEM TO HAVE ANY VAULTS. {" "}
+          <Link color="#638cd8" href="../create">
+            CREATE ONE HERE!
+            </Link>
+        </Text>
+      }
+    </Flex>
+    </Loader>
+  )
 
 }

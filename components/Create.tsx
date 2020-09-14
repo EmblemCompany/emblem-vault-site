@@ -19,6 +19,7 @@ import {
     ButtonGroup
   } from "@chakra-ui/core";
   
+  import Loader from "react-loader"
   import { useWeb3React } from '@web3-react/core'
   import React, { useState } from "react";
   
@@ -32,27 +33,39 @@ import {
     const [vaultName, setVaultName] = React.useState('');
     const [vaultDesc, setVaultDesc] = React.useState('');
     const [vaultImage, setVaultImage] = React.useState('');
-  
+    const [password, setPassword] = React.useState('');
+    const [state, setState] = React.useState({loaded: true, private: false})
+    
+    const handlePrivateRadio = (e)=>{
+      console.log("Changed Private visibility", e)
+    }
     const handleSubmit = (evt: { preventDefault: () => void; }) => {
       evt.preventDefault();
       alert(`Vault properties: name is: ${vaultName}, description is: ${vaultDesc}, address is: ${vaultAddress}, Pub/Priv is: ${vaultPubPriv}, and image data is: ${vaultImage}`)
-  
-      fetch('http://35.222.58.227:80/mint', {
+      setState({loaded: false, private: state.private})
+      fetch('https://api.emblemvault.io/mint', {
         method: 'POST',
         headers: {
           'Authorization': 'Basic YWRtaW46c3VwZXJzZWNyZXQ=',
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'service': 'kms'
         },
         // We convert the React state to JSON and send it as the POST body
         body: JSON.stringify(
-          {"toAddress": vaultAddress,
-          "description":vaultDesc,
-          "name":vaultName,
-          "image":vaultImage,
-          "chainId":chainId}
+          {
+            "toAddress": vaultAddress,
+            "description": vaultDesc,
+            "name": vaultName,
+            "image": vaultImage,
+            "chainId": chainId,
+            "private": state.private,
+            "password": password || ''
+          }
         )
       }).then(function(response) {
-        console.log(response.json())
+        setState({loaded: true, private: state.private})
+        location.href = location.origin + "/vaultlist"
+        // console.log(response.json())
         // return response.json();
       });
     }
@@ -74,7 +87,8 @@ import {
     }
   
     return (
-      <Flex width="full" align="center" justifyContent="center">
+      <Loader loaded={state.loaded}>
+        <Flex width="full" align="center" justifyContent="center">
         <Box maxW="sm" borderWidth="1px" rounded="lg" overflow="hidden" >
           <Tabs defaultIndex={0} index={tabIndex} onChange={(index) => setTabIndex(index)}>
             <TabList>
@@ -115,7 +129,11 @@ import {
                   <Stack direction="row" align="flex-start" spacing="0rem" flexWrap="wrap" shouldWrapChildren>
                     <FormControl as="fieldset" isRequired>
                       <FormLabel as="legend">Public or Private?</FormLabel>
-                      <RadioGroup id="pubpriv" defaultValue="Public" onChange = {e => setVaultPubPriv(e.target.value)}>
+                      <RadioGroup id="pubpriv" defaultValue="Public" onChange = {e => { 
+                          setVaultPubPriv(e.target.value); 
+                          setState({loaded: state.loaded, private: e.target.value === "Private"})
+                          console.log("Private", e.target.value === "Private")
+                        }}>
                         <Radio value="Public">Public</Radio>
                         <Radio value="Private">Private</Radio>
                       </RadioGroup>
@@ -123,6 +141,15 @@ import {
                         Do you want people to be able to see the contents?
                       </FormHelperText>
                     </FormControl>
+                    {state.private ? 
+                    <FormControl>
+                      <FormLabel as="legend">Password</FormLabel>
+                      <Input 
+                        type="password" 
+                        id="owner-address"
+                        onChange={e => setPassword(e.target.value)}
+                        aria-describedby="owner-helper-text"/>
+                    </FormControl> : ''}
                   </Stack>
                   <Stack direction="row" align="flex-start" spacing="0rem" flexWrap="wrap" shouldWrapChildren>
                     <Button onClick={() => setTabIndex(1)} >Next</Button>
@@ -213,5 +240,6 @@ import {
           </Tabs>
         </Box>
       </Flex>
+      </Loader>
     )
   }

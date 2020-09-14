@@ -18,13 +18,21 @@ export default function Vault() {
     const [vaultDesc, setVaultDesc] = React.useState('');
     const [vaultImage, setVaultImage] = React.useState('');
     const [vaultValues, setVaultValues] = React.useState([]);
-
+    const validImage = function(data){
+      if (data.includes('http')) {
+        return true
+      } else {
+        return false
+      }
+    }
     const getVault = async () => {
-      // const responce = await fetch('http://104.154.252.216/vaults/0x5a63264914a1eCB626e32e8AD683704bA7b0621f', {
-      const responce = await fetch('http://104.154.252.216/meta/' + tokenId, {
+      // const responce = await fetch('https://api.emblemvault.io/vaults/0x5a63264914a1eCB626e32e8AD683704bA7b0621f', {
+      const responce = await fetch('https://api.emblemvault.io/meta/' + tokenId, {
         method: 'GET',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'service': 'evmetadata',
+          'chainId': chainId.toString()
         },
       })
       const jsonData = await responce.json()
@@ -53,7 +61,7 @@ export default function Vault() {
                 >
                   {vaultName}
 
-                    <Image src={vaultImage
+                    <Image src={validImage(vaultImage)
                       ? vaultImage
                       : "https://circuitsofvalue.com/public/coval-logo.png"
                     }

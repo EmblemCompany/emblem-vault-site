@@ -1,6 +1,6 @@
 const debug = process.env.NODE_ENV !== "production";
 module.exports = {
-  reactStrictMode: true,
+  reactStrictMode: false,
   assetPrefix: !debug ? 'https://emblemcompany.github.io/emblem-vault-site/' : '.',
   env: {
     IPFS: process.env.IPFS === 'true' ? 'true' : 'false',

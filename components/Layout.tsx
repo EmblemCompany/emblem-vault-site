@@ -1,5 +1,5 @@
 import { ReactNode } from 'react'
-import { Flex, IconButton, useDisclosure, Badge, LightMode, Stack, Box, Radio } from '@chakra-ui/core'
+import { Flex, IconButton, useDisclosure, Badge, LightMode, Stack, Box, Radio, Button } from '@chakra-ui/core'
 import { useWeb3React } from '@web3-react/core'
 import dynamic from 'next/dynamic'
 
@@ -35,7 +35,14 @@ export default function Layout({ children }: { children: ReactNode }): JSX.Eleme
   const requiredChainId = queryParameters[QueryParameters.CHAIN]
 
   const USDETHPrice = useUSDETHPrice()
-
+  const handleNavigationclick = ()=>{
+    console.log(location.pathname)
+    if (location.pathname.includes("vaultlist")) {
+      location.href = location.origin + "/create"
+    } else {
+      location.href = location.origin + "/vaultlist"
+    }    
+  }
   return (
     <>
       <Settings isOpen={isOpenSettings} onClose={onCloseSettings} />
@@ -50,18 +57,11 @@ export default function Layout({ children }: { children: ReactNode }): JSX.Eleme
       >
         <Flex justifyContent="space-between" flexShrink={0} overflowX="auto" p="1rem">
           <Stack spacing={0} direction="row">
-            <IconButton icon="settings" variant="ghost" onClick={onOpenSettings} aria-label="Settings" />
-            {/* {!!USDETHPrice && (
-              <Radio
-                isChecked={showUSD}
-                onChange={() => {}} // eslint-disable-line @typescript-eslint/no-empty-function
-                onMouseEnter={() => setShowUSD(true)}
-                onMouseLeave={() => setShowUSD(false)}
-                ml="0.5rem"
-              >
-                Show $ values
-              </Radio>
-            )} */}
+            <IconButton m={2} icon="settings" variant="ghost" onClick={onOpenSettings} aria-label="Settings" />            
+              <Button m={2} variant="ghost"  onClick={handleNavigationclick}> {
+                  location.pathname.includes("vaultlist") ? "Create Vault" : "My Vaults"
+              }
+              </Button>
           </Stack>
           <Account triedToEagerConnect={triedToEagerConnect} />
         </Flex>
