@@ -37,10 +37,12 @@ export default function Layout({ children }: { children: ReactNode }): JSX.Eleme
   const USDETHPrice = useUSDETHPrice()
   const handleNavigationclick = ()=>{
     console.log(location.pathname)
+    let pieces = location.pathname.split('/')
+    pieces.pop()
     if (location.pathname.includes("vaultlist")) {
-      location.href = location.origin + "/create"
+      location.href = location.origin + pieces.join('/')+ "/create"
     } else {
-      location.href = location.origin + "/vaultlist"
+      location.href = location.origin + pieces.join('/') + "/vaultlist"
     }    
   }
   return (

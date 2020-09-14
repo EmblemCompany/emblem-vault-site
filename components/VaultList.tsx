@@ -46,7 +46,10 @@ export default function VaultList() {
     <Loader loaded={state.loaded}>
       <Flex w="100%" justify="center" flexWrap="wrap">
       {vaults.length ? vaults.map((vault, index) => {
-        var url = './vault/?id=' + vault.tokenId
+        
+        let pieces = location.pathname.split('/')
+        pieces.pop()
+        let url = location.origin + pieces.join("/") + '/vault/?id=' + vault.tokenId
         const flexSettings = {
           flex: "1",
           minW: "300px",
