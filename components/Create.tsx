@@ -1,7 +1,6 @@
 import {
   FormControl,
   FormLabel,
-  FormErrorMessage,
   FormHelperText,
   Input,
   Stack,
@@ -15,7 +14,6 @@ import {
   RadioGroup,
   Radio,
   Textarea,
-  Text,
   Button,
   ButtonGroup,
 } from '@chakra-ui/core'
@@ -139,7 +137,7 @@ export default function Create(props: any) {
 
                   <Stack direction="row" align="flex-start" spacing="0rem" flexWrap="wrap" shouldWrapChildren>
                     <FormControl as="fieldset" isRequired>
-                      <FormLabel as="legend">Public or Private?</FormLabel>
+                      <FormLabel>Public or Private?</FormLabel>
                       <RadioGroup
                         id="pubpriv"
                         defaultValue="Public"
@@ -158,13 +156,16 @@ export default function Create(props: any) {
                     </FormControl>
                     {state.private ? (
                       <FormControl>
-                        <FormLabel as="legend">Password</FormLabel>
+                        <FormLabel>Password</FormLabel>
                         <Input
                           type="password"
-                          id="owner-address"
+                          id="vault-password"
                           onChange={(e) => setPassword(e.target.value)}
-                          aria-describedby="owner-helper-text"
+                          aria-describedby="password-helper-text"
                         />
+                        <FormHelperText id="password-helper-text">
+                          This password will encrypt and decrypt the contents of this vault
+                        </FormHelperText>
                       </FormControl>
                     ) : (
                       ''
@@ -262,7 +263,7 @@ export default function Create(props: any) {
                     <ButtonGroup spacing={4}>
                       <Button onClick={() => setTabIndex(1)}>Back</Button>
                       <Button
-                        isDisabled={!account && !vaultAddress && !vaultName && !vaultDesc && !service}
+                        isDisabled={!account || !vaultAddress || !vaultName || !vaultDesc || !service}
                         onClick={handleSubmit}
                         type="submit"
                       >
