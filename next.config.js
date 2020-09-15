@@ -1,7 +1,7 @@
 const debug = process.env.NODE_ENV !== "production";
 module.exports = {
   reactStrictMode: false,
-  assetPrefix: !debug ? 'https://emblemcompany.github.io/emblem-vault-site/' : '.',
+  assetPrefix: !debug ? '.' : '.',
   env: {
     IPFS: process.env.IPFS === 'true' ? 'true' : 'false',
     COMMIT_SHA: process.env.VERCEL_GITHUB_COMMIT_SHA || process.env.GITHUB_SHA || 'master',
