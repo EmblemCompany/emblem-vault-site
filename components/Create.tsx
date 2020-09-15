@@ -88,7 +88,7 @@ export default function Create(props: any) {
     }
   }
 
-  const[acct, setAcct] = React.useState('')
+  const [acct, setAcct] = React.useState('')
   useEffect(() => {
     if (account && acct != account) {
       setAcct(account)
