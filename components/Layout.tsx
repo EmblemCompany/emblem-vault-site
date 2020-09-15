@@ -35,15 +35,15 @@ export default function Layout({ children }: { children: ReactNode }): JSX.Eleme
   const requiredChainId = queryParameters[QueryParameters.CHAIN]
 
   const USDETHPrice = useUSDETHPrice()
-  const handleNavigationclick = ()=>{
+  const handleNavigationclick = () => {
     console.log(location.pathname)
     let pieces = location.pathname.split('/')
     pieces.pop()
-    if (location.pathname.includes("vaultlist")) {
-      location.href = location.origin + pieces.join('/')+ "/create"
+    if (location.pathname.includes('vaultlist')) {
+      location.href = location.origin + pieces.join('/') + '/create'
     } else {
-      location.href = location.origin + pieces.join('/') + "/vaultlist"
-    }    
+      location.href = location.origin + pieces.join('/') + '/vaultlist'
+    }
   }
   return (
     <>
@@ -59,11 +59,11 @@ export default function Layout({ children }: { children: ReactNode }): JSX.Eleme
       >
         <Flex justifyContent="space-between" flexShrink={0} overflowX="auto" p="1rem">
           <Stack spacing={0} direction="row">
-            <IconButton m={2} icon="settings" variant="ghost" onClick={onOpenSettings} aria-label="Settings" />            
-              <Button m={2} variant="ghost"  onClick={handleNavigationclick}> {
-                  location.pathname.includes("vaultlist") ? "Create Vault" : "My Vaults"
-              }
-              </Button>
+            <IconButton m={2} icon="settings" variant="ghost" onClick={onOpenSettings} aria-label="Settings" />
+            <Button m={2} variant="ghost" onClick={handleNavigationclick}>
+              {' '}
+              {location.pathname.includes('vaultlist') ? 'Create Vault' : 'My Vaults'}
+            </Button>
           </Stack>
           <Account triedToEagerConnect={triedToEagerConnect} />
         </Flex>

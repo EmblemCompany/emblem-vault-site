@@ -6,8 +6,8 @@ import { modifyUrlObjectForIPFS } from '../utils'
 export default function Redirect(): null {
   const { replace } = useRouter()
 
-  const debug = process.env.NODE_ENV !== "production";
-  const { href, as } = modifyUrlObjectForIPFS(!debug ? '/create': '/create')
+  const debug = process.env.NODE_ENV !== 'production'
+  const { href, as } = modifyUrlObjectForIPFS(!debug ? '/create' : '/create')
 
   useEffect(() => {
     replace(href, as)

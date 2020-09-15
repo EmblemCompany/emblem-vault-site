@@ -147,7 +147,7 @@ export default function Settings({ isOpen, onClose }: { isOpen: boolean; onClose
             </Stack>
           </Stack>
         </ModalBody>
-        <ModalFooter justifyContent='space-between' >
+        <ModalFooter justifyContent="space-between">
           {typeof permalink === 'string' && (
             <Button
               variant="link"
@@ -184,7 +184,6 @@ export default function Settings({ isOpen, onClose }: { isOpen: boolean; onClose
           >
             {process.env.COMMIT_SHA?.slice(0, 7)}
           </Link>
-
         </ModalFooter>
       </ModalContent>
     </Modal>
