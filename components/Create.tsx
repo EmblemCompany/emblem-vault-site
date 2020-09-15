@@ -34,6 +34,7 @@ import {
     const [vaultDesc, setVaultDesc] = React.useState('');
     const [vaultImage, setVaultImage] = React.useState('');
     const [password, setPassword] = React.useState('');
+    const [service, setService] = React.useState('');
     const [state, setState] = React.useState({loaded: true, private: false})
     
     const handlePrivateRadio = (e)=>{
@@ -48,7 +49,7 @@ import {
         headers: {
           'Authorization': 'Basic YWRtaW46c3VwZXJzZWNyZXQ=',
           'Content-Type': 'application/json',
-          'service': 'kms'
+          'service': service
         },
         // We convert the React state to JSON and send it as the POST body
         body: JSON.stringify(
@@ -225,6 +226,18 @@ import {
                           <input type="file" onChange={() => previewFile()} /><br/>
                           <img src="" width="200" alt="Image preview..."></img>
                         </Box>
+                      </FormControl>
+                    </Stack>
+
+                    <Stack direction="row" align="flex-start" spacing="0rem" flexWrap="wrap" shouldWrapChildren>
+                    <FormControl>
+                        <FormLabel htmlFor="service">Password:</FormLabel>
+                        <Input 
+                          type="password" 
+                          id="service" 
+                          aria-describedby="service"
+                          onChange={e => setService(e.target.value)} 
+                        />
                       </FormControl>
                     </Stack>
   
