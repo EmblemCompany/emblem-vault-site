@@ -26,7 +26,7 @@ import React, { useEffect, useState } from 'react'
 
 export default function Create(props: any) {
   const [tabIndex, setTabIndex] = React.useState(0)
-  const { library, account, chainId, active } = useWeb3React()
+  const { account, chainId } = useWeb3React()
 
   const [vaultAddress, setVaultAddress] = React.useState(account || '')
   const [vaultPubPriv, setVaultPubPriv] = React.useState('Public')
@@ -261,7 +261,11 @@ export default function Create(props: any) {
                   <Stack direction="row" align="flex-start" spacing="0rem" flexWrap="wrap" shouldWrapChildren>
                     <ButtonGroup spacing={4}>
                       <Button onClick={() => setTabIndex(1)}>Back</Button>
-                      <Button onClick={handleSubmit} type="submit">
+                      <Button
+                        isDisabled={!account && !vaultAddress && !vaultName && !vaultDesc && !service}
+                        onClick={handleSubmit}
+                        type="submit"
+                      >
                         DO IT!
                       </Button>
                     </ButtonGroup>
