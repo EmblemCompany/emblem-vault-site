@@ -15,17 +15,18 @@ import {
   RadioGroup,
   Radio,
   Textarea,
+  Text,
   Button,
   ButtonGroup,
 } from '@chakra-ui/core'
 
 import Loader from 'react-loader'
 import { useWeb3React } from '@web3-react/core'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 
 export default function Create(props: any) {
   const [tabIndex, setTabIndex] = React.useState(0)
-  const { account, chainId } = useWeb3React()
+  const { library, account, chainId, active } = useWeb3React()
 
   const [vaultAddress, setVaultAddress] = React.useState(account || '')
   const [vaultPubPriv, setVaultPubPriv] = React.useState('Public')
@@ -87,9 +88,18 @@ export default function Create(props: any) {
     }
   }
 
+  const[acct, setAcct] = React.useState('')
+  useEffect(() => {
+    if (account && acct != account) {
+      setAcct(account)
+      setVaultAddress(account)
+    }
+  })
+
   return (
     <Loader loaded={state.loaded}>
-      <Flex width="full" align="center" justifyContent="center">
+      {!account ? <Text>Hey man. Connect to an account. </Text> : 
+        <Flex width="full" align="center" justifyContent="center">
         <Box maxW="sm" borderWidth="1px" rounded="lg" overflow="hidden">
           <Tabs defaultIndex={0} index={tabIndex} onChange={(index) => setTabIndex(index)}>
             <TabList>
@@ -263,6 +273,7 @@ export default function Create(props: any) {
           </Tabs>
         </Box>
       </Flex>
+      }
     </Loader>
   )
 }
