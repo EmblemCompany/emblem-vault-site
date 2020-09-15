@@ -94,7 +94,7 @@ export default function Create(props: any) {
       setAcct(account)
       setVaultAddress(account)
     }
-  })
+  }, [account, acct])
 
   return (
     <Loader loaded={state.loaded}>
