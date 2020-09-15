@@ -98,8 +98,7 @@ export default function Create(props: any) {
 
   return (
     <Loader loaded={state.loaded}>
-      {!account ? <Text>Hey man. Connect to an account. </Text> : 
-        <Flex width="full" align="center" justifyContent="center">
+      <Flex width="full" align="center" justifyContent="center">
         <Box maxW="sm" borderWidth="1px" rounded="lg" overflow="hidden">
           <Tabs defaultIndex={0} index={tabIndex} onChange={(index) => setTabIndex(index)}>
             <TabList>
@@ -273,7 +272,6 @@ export default function Create(props: any) {
           </Tabs>
         </Box>
       </Flex>
-      }
     </Loader>
   )
 }
