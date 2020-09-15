@@ -49,7 +49,7 @@ export default function VaultList() {
         
         let pieces = location.pathname.split('/')
         pieces.pop()
-        let url = location.origin + pieces.join("/") + '/vault/?id=' + vault.tokenId
+        let url = location.origin + pieces.join("/") + '/vault?id=' + vault.tokenId
         const flexSettings = {
           flex: "1",
           minW: "300px",
