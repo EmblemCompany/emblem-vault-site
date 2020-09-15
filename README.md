@@ -1,4 +1,6 @@
-# `hypertext`
+# `emblemvault`
+
+![CI-CD](https://github.com/EmblemCompany/emblem-vault-site/workflows/CI-CD/badge.svg?branch=master)
 
 A text-forward [Uniswap](https://uniswap.org) interface.
 
