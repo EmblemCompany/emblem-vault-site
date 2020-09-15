@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build && next export",
     "build-ipfs": "IPFS=true next build && next export",
-    "prettier": "prettier --check \"**/*.{js,jsx,ts,tsx}\"",
+    "prettier": "prettier --write .",
+    "pretty-check": "prettier --check \"**/*.{js,jsx,ts,tsx}\"",
     "deploy": "npm run build && touch out/.nojekyll && rm -rf docs/ && mv out/ docs/ && cp CNAME docs/ && git add docs/ && git commit -m \"deploy pages\" && git push"
   },
   "dependencies": {
