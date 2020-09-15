@@ -41,9 +41,6 @@ export default function Create(props: any) {
   }
   const handleSubmit = (evt: { preventDefault: () => void }) => {
     evt.preventDefault()
-    alert(
-      `Vault properties: name is: ${vaultName}, description is: ${vaultDesc}, address is: ${vaultAddress}, Pub/Priv is: ${vaultPubPriv}, and image data is: ${vaultImage}`
-    )
     setState({ loaded: false, private: state.private })
     fetch('https://api.emblemvault.io/mint', {
       method: 'POST',
