@@ -2,7 +2,11 @@
 
 ![CI-CD](https://github.com/EmblemCompany/emblem-vault-site/workflows/CI-CD/badge.svg?branch=master)
 
-A text-forward [Uniswap](https://uniswap.org) interface.
+## An entire wallet inside a token
+
+## Dawn, remember to put some readme stuff here
+
+<!-- A text-forward [Uniswap](https://uniswap.org) interface.
 
 ## IPFS/IPNS/DNSLink/ENS
 
@@ -28,4 +32,4 @@ Example: `?input={address}`
 
 ### `output`
 
-Example: `?output={address}`
+Example: `?output={address}` -->
