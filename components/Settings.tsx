@@ -56,7 +56,7 @@ export default function Settings({ isOpen, onClose }: { isOpen: boolean; onClose
           }),
     }
     permalink = resolve(
-      'https://hypertext.finance',
+      'https://emblem.finance',
       `${pathname}?${Object.entries(permalinkParameters)
         .map(([key, value]) => `${key}=${value}`)
         .join('&')}`
@@ -173,7 +173,7 @@ export default function Settings({ isOpen, onClose }: { isOpen: boolean; onClose
             rel="noopener noreferrer"
             color="blue.500"
           >
-            Credit to Noah Zinsmeister
+            Based on Hypertext
           </Link>
 
           <Link
