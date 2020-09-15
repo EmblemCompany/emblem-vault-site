@@ -1,6 +1,6 @@
 {
-  "name": "hypertext",
-  "author": "Noah Zinsmeister",
+  "name": "emblemvault",
+  "author": "Emblem Company",
   "license": "GPL-3.0-or-later",
   "scripts": {
     "dev": "next dev",
