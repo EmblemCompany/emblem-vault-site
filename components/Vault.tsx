@@ -42,53 +42,53 @@ export default function Vault() {
 
   function splitDescription(words) {
     var desc = words.split('Emblem Vault Basic')
-    return desc[0]
+    return desc[0].trim()
   }
 
   return (
     <Loader loaded={state.loaded}>
-    <Flex width="full" align="center" justifyContent="center">
-      <Box maxW="sm" borderWidth="1px" rounded="lg" overflow="hidden" alignItems="center">
-        <Box
-          mt="1"
-          fontWeight="semibold"
-          as="h3"
-          lineHeight="tight"
-          p={2}
-          textAlign="center"
-          textTransform="uppercase"
-          alignItems="center"
-        >
-          {vaultName}
-        </Box>
-        <Stack align="center">
-          <Image
-            src={validImage(vaultImage) ? vaultImage : 'https://circuitsofvalue.com/public/coval-logo.png'}
-            size="300px"
-          />
-        </Stack>
-        <Box p="6">
-          <Box d="flex" alignItems="baseline">
-            <Box color="gray.500" fontWeight="semibold" letterSpacing="wide" fontSize="xs" ml="2">
-              {vaultValues.length ? (
-                vaultValues.map((coin) => {
-                  return (
-                    <Text key={coin.name}>
-                      {coin.balance} {coin.name}
-                    </Text>
-                  )
-                })
-              ) : (
-                <Text>Nothing in here! Fill 'er up!</Text>
-              )}
-            </Box>
+      <Flex width="full" align="center" justifyContent="center">
+        <Box maxW="sm" borderWidth="1px" rounded="lg" overflow="hidden" alignItems="center">
+          <Box
+            mt="1"
+            fontWeight="semibold"
+            as="h3"
+            lineHeight="tight"
+            p={2}
+            textAlign="center"
+            textTransform="uppercase"
+            alignItems="center"
+          >
+            {vaultName}
           </Box>
+          <Stack align="center">
+            <Image
+              src={validImage(vaultImage) ? vaultImage : 'https://circuitsofvalue.com/public/coval-logo.png'}
+              size="300px"
+            />
+          </Stack>
           <Box mt="1" fontWeight="semibold" as="h4" lineHeight="tight">
             {splitDescription(vaultDesc)}
           </Box>
+          <Box p="6">
+            <Box d="flex" alignItems="baseline">
+              <Box color="gray.500" fontWeight="semibold" letterSpacing="wide" fontSize="xs" ml="2">
+                {vaultValues.length ? (
+                  vaultValues.map((coin) => {
+                    return (
+                      <Text key={coin.name}>
+                        {coin.balance} {coin.name}
+                      </Text>
+                    )
+                  })
+                ) : (
+                  <Text>Nothing in here! Fill 'er up!</Text>
+                )}
+              </Box>
+            </Box>
+          </Box>
         </Box>
-      </Box>
-    </Flex>
+      </Flex>
     </Loader>
   )
 }
