@@ -106,3 +106,11 @@ export function modifyUrlObjectForIPFS(
     },
   }
 }
+
+export function validImage(data) {
+  if (data.includes('http') || data.includes('data:image')) {
+    return true
+  } else {
+    return false
+  }
+}

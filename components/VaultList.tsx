@@ -2,19 +2,13 @@ import { Box, Flex, Grid, Text, Link, Image, SimpleGrid } from '@chakra-ui/core'
 import Loader from 'react-loader'
 import { useWeb3React } from '@web3-react/core'
 import React, { useEffect, useState } from 'react'
+import { validImage } from '../utils'
 
 export default function VaultList() {
   const { account, chainId } = useWeb3React()
   const [vaults, setVaults] = React.useState([])
   const [state, setState] = React.useState({ loaded: false })
 
-  const validImage = function (data) {
-    if (data.includes('http') || data.includes('data:image')) {
-      return true
-    } else {
-      return false
-    }
-  }
   const getVaults = async () => {
     // const responce = await fetch('https://api.emblemvault.io/vaults/0x5a63264914a1eCB626e32e8AD683704bA7b0621f', {
     const responce = await fetch('https://api.emblemvault.io/vaults/' + account, {

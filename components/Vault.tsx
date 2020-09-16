@@ -4,6 +4,8 @@ import { useWeb3React } from '@web3-react/core'
 import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
 
+import { validImage } from '../utils'
+
 export default function Vault() {
   const { account, chainId } = useWeb3React()
   const { query, pathname, replace } = useRouter()
@@ -12,13 +14,7 @@ export default function Vault() {
   const [vaultDesc, setVaultDesc] = React.useState('')
   const [vaultImage, setVaultImage] = React.useState('')
   const [vaultValues, setVaultValues] = React.useState([])
-  const validImage = function (data) {
-    if (data.includes('http')) {
-      return true
-    } else {
-      return false
-    }
-  }
+
   const getVault = async () => {
     // const responce = await fetch('https://api.emblemvault.io/vaults/0x5a63264914a1eCB626e32e8AD683704bA7b0621f', {
     const responce = await fetch('https://api.emblemvault.io/meta/' + tokenId, {
