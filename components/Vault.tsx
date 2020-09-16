@@ -64,12 +64,14 @@ export default function Vault() {
           <Stack align="center">
             <Image
               src={validImage(vaultImage) ? vaultImage : 'https://circuitsofvalue.com/public/coval-logo.png'}
-              size="300px"
+              size="250px"
             />
           </Stack>
-          <Box mt="1" fontWeight="semibold" as="h4" lineHeight="tight">
-            {splitDescription(vaultDesc)}
-          </Box>
+          <Stack align="center">
+            <Box mt="1" fontWeight="semibold" as="h4" lineHeight="tight">
+              {splitDescription(vaultDesc)}
+            </Box>
+          </Stack>
           <Box p="6">
             <Box d="flex" alignItems="baseline">
               <Box color="gray.500" fontWeight="semibold" letterSpacing="wide" fontSize="xs" ml="2">
