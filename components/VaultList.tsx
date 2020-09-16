@@ -9,7 +9,7 @@ export default function VaultList() {
   const [state, setState] = React.useState({ loaded: false })
 
   const validImage = function (data) {
-    if (data.includes('http')) {
+    if (data.includes('http') || data.includes('data:image')) {
       return true
     } else {
       return false
