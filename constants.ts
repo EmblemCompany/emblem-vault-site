@@ -21,6 +21,8 @@ export const PERMIT_AND_CALL_ADDRESS = '0xe334094985bB046B95550793EA577F8DC4e611
 export const ZERO = JSBI.BigInt(0)
 export const MAX_UINT256 = JSBI.BigInt('0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff')
 
+export const EMBLEM_API = 'https://api.emblemvault.io'
+
 export enum QueryParameters {
   INPUT = 'input',
   OUTPUT = 'output',

@@ -22,6 +22,8 @@ import Loader from 'react-loader'
 import { useWeb3React } from '@web3-react/core'
 import React, { useEffect, useState } from 'react'
 
+import { EMBLEM_API } from '../constants'
+
 export default function Create(props: any) {
   const [tabIndex, setTabIndex] = React.useState(0)
   const { account, chainId } = useWeb3React()
@@ -41,7 +43,7 @@ export default function Create(props: any) {
   const handleSubmit = (evt: { preventDefault: () => void }) => {
     evt.preventDefault()
     setState({ loaded: false, private: state.private })
-    fetch('https://api.emblemvault.io/mint', {
+    fetch(EMBLEM_API + '/mint', {
       method: 'POST',
       headers: {
         Authorization: 'Basic YWRtaW46c3VwZXJzZWNyZXQ=',

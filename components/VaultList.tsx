@@ -3,6 +3,7 @@ import Loader from 'react-loader'
 import { useWeb3React } from '@web3-react/core'
 import React, { useEffect, useState } from 'react'
 import { validImage } from '../utils'
+import { EMBLEM_API } from '../constants'
 
 export default function VaultList() {
   const { account, chainId } = useWeb3React()
@@ -10,8 +11,7 @@ export default function VaultList() {
   const [state, setState] = React.useState({ loaded: false })
 
   const getVaults = async () => {
-    // const responce = await fetch('https://api.emblemvault.io/vaults/0x5a63264914a1eCB626e32e8AD683704bA7b0621f', {
-    const responce = await fetch('https://api.emblemvault.io/vaults/' + account, {
+    const responce = await fetch(EMBLEM_API + '/vaults/' + account, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
