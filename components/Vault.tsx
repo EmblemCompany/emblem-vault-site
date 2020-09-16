@@ -3,6 +3,7 @@ import { Box, Flex, Image, Text, Stack } from '@chakra-ui/core'
 import { useWeb3React } from '@web3-react/core'
 import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
+import Loader from 'react-loader'
 
 import { validImage } from '../utils'
 import { EMBLEM_API } from '../constants'
@@ -15,6 +16,7 @@ export default function Vault() {
   const [vaultDesc, setVaultDesc] = React.useState('')
   const [vaultImage, setVaultImage] = React.useState('')
   const [vaultValues, setVaultValues] = React.useState([])
+  const [state, setState] = React.useState({ loaded: false })
 
   const getVault = async () => {
     const responce = await fetch(EMBLEM_API + '/meta/' + tokenId, {
@@ -31,13 +33,20 @@ export default function Vault() {
     setVaultDesc(jsonData.description)
     setVaultValues(jsonData.values)
     setVaultDesc(jsonData.description)
+    setState({ loaded: true })
   }
 
   useEffect(() => {
     getVault()
   }, [])
 
+  function splitDescription(words) {
+    var desc = words.split('Emblem Vault Basic')
+    return desc[0]
+  }
+
   return (
+    <Loader loaded={state.loaded}>
     <Flex width="full" align="center" justifyContent="center">
       <Box maxW="sm" borderWidth="1px" rounded="lg" overflow="hidden" alignItems="center">
         <Box
@@ -75,10 +84,11 @@ export default function Vault() {
             </Box>
           </Box>
           <Box mt="1" fontWeight="semibold" as="h4" lineHeight="tight">
-            {vaultDesc}
+            {splitDescription(vaultDesc)}
           </Box>
         </Box>
       </Box>
     </Flex>
+    </Loader>
   )
 }
