@@ -1,4 +1,4 @@
-import { Box, Flex, Grid, Text, Link, Image, SimpleGrid } from '@chakra-ui/core'
+import { Box, Flex, Grid, Text, Link, Image, SimpleGrid, Stack } from '@chakra-ui/core'
 import Loader from 'react-loader'
 import { useWeb3React } from '@web3-react/core'
 import React, { useEffect, useState } from 'react'
@@ -55,10 +55,12 @@ export default function VaultList() {
                 <Text fontWeight="semibold" textAlign="center">
                   {vault.name}
                 </Text>
-                <Image
-                  src={validImage(vault.image) ? vault.image : 'https://circuitsofvalue.com/public/coval-logo.png'}
-                  p={2}
-                />
+                <Stack align="center">
+                  <Image
+                    src={validImage(vault.image) ? vault.image : 'https://circuitsofvalue.com/public/coval-logo.png'}
+                    p={2}
+                  />
+                </Stack>
                 {vault.values.length ? (
                   vault.values.map((coin) => {
                     return (

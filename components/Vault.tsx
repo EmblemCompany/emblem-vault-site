@@ -1,4 +1,4 @@
-import { Box, Flex, Image, Text } from '@chakra-ui/core'
+import { Box, Flex, Image, Text, Stack } from '@chakra-ui/core'
 
 import { useWeb3React } from '@web3-react/core'
 import React, { useEffect, useState } from 'react'
@@ -39,16 +39,25 @@ export default function Vault() {
 
   return (
     <Flex width="full" align="center" justifyContent="center">
-      <Box maxW="sm" borderWidth="1px" rounded="lg" overflow="hidden">
-        <Box mt="1" fontWeight="semibold" as="h3" lineHeight="tight" p={2} textAlign="center" textTransform="uppercase">
+      <Box maxW="sm" borderWidth="1px" rounded="lg" overflow="hidden" alignItems="center">
+        <Box
+          mt="1"
+          fontWeight="semibold"
+          as="h3"
+          lineHeight="tight"
+          p={2}
+          textAlign="center"
+          textTransform="uppercase"
+          alignItems="center"
+        >
           {vaultName}
-
+        </Box>
+        <Stack align="center">
           <Image
             src={validImage(vaultImage) ? vaultImage : 'https://circuitsofvalue.com/public/coval-logo.png'}
-            size="250px"
+            size="300px"
           />
-        </Box>
-
+        </Stack>
         <Box p="6">
           <Box d="flex" alignItems="baseline">
             <Box color="gray.500" fontWeight="semibold" letterSpacing="wide" fontSize="xs" ml="2">
