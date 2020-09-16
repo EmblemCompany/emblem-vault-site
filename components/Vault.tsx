@@ -16,6 +16,7 @@ export default function Vault() {
   const [vaultDesc, setVaultDesc] = React.useState('')
   const [vaultImage, setVaultImage] = React.useState('')
   const [vaultValues, setVaultValues] = React.useState([])
+  const [vaultAddresses, setVaultAddresses] = React.useState([])
   const [state, setState] = React.useState({ loaded: false })
 
   const getVault = async () => {
@@ -33,6 +34,7 @@ export default function Vault() {
     setVaultDesc(jsonData.description)
     setVaultValues(jsonData.values)
     setVaultDesc(jsonData.description)
+    setVaultAddresses(jsonData.addresses)
     setState({ loaded: true })
   }
 
@@ -74,7 +76,8 @@ export default function Vault() {
           </Stack>
           <Box p="6">
             <Box d="flex" alignItems="baseline">
-              <Box color="gray.500" fontWeight="semibold" letterSpacing="wide" fontSize="xs" ml="2">
+              <Box color="gray.500" fontWeight="semibold" letterSpacing="wide" fontSize="sm" ml="2">
+                <h4>Current Contents:</h4>
                 {vaultValues.length ? (
                   vaultValues.map((coin) => {
                     return (
@@ -86,6 +89,18 @@ export default function Vault() {
                 ) : (
                   <Text>Nothing in here! Fill 'er up!</Text>
                 )}
+              </Box>
+            </Box>
+            <Box d="flex" alignItems="baseline">
+              <Box mt="3">
+                <h4>Addresses:</h4>
+                {vaultAddresses.map((addr) => {
+                  return (
+                    <Text fontSize="xs" key={addr.address}>
+                      {addr.coin}: {addr.address}
+                    </Text>
+                  )
+                })}
               </Box>
             </Box>
           </Box>
