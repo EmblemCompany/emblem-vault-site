@@ -63,7 +63,11 @@ export default function VaultList() {
                 </Stack>
                 <Box d="flex" alignItems="baseline">
                   <Box color="gray.500" fontWeight="semibold" letterSpacing="wide" fontSize="sm" ml="2">
-                    {vault.values.length ? (
+                    {vault.isPrivate ? (
+                      <>
+                        <Text>Contents hidden. Click to view the vault and unlock values.</Text>
+                      </>
+                    ) : vault.values.length ? (
                       vault.values.map((coin) => {
                         return (
                           <Text key={coin.name}>
@@ -72,9 +76,7 @@ export default function VaultList() {
                         )
                       })
                     ) : (
-                      <Text as="h2" textAlign="center" w="100%" p={0}>
-                        Nothing in here! Fill 'er up!
-                      </Text>
+                      <Text>Nothing in here! Fill 'er up!</Text>
                     )}
                   </Box>
                 </Box>
