@@ -7,7 +7,7 @@ export default function ColorBox(props: BoxProps): JSX.Element {
   const { colorMode } = useColorMode()
 
   return (
-    <Box bg={BG[colorMode]} color={COLOR[colorMode]} transition="background-color 250ms" {...rest}>
+    <Box bg={BG[colorMode]} color={COLOR[colorMode]} opacity={0.95} transition="background-color 250ms" {...rest}>
       {children}
     </Box>
   )

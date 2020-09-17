@@ -1,5 +1,6 @@
 import { ReactNode } from 'react'
-import { Flex, IconButton, useDisclosure, Badge, LightMode, Stack, Box, Radio, Button } from '@chakra-ui/core'
+import BackgroundVideo from './BackgroundVideo';
+import { Flex, IconButton, useDisclosure, Badge, LightMode, Stack, Box, Radio, Button} from '@chakra-ui/core'
 import { useWeb3React } from '@web3-react/core'
 import dynamic from 'next/dynamic'
 
@@ -48,7 +49,7 @@ export default function Layout({ children }: { children: ReactNode }): JSX.Eleme
   return (
     <>
       <Settings isOpen={isOpenSettings} onClose={onCloseSettings} />
-
+      <BackgroundVideo />
       <ColorBox
         as={Flex}
         flexDirection="column"
