@@ -99,26 +99,23 @@ export default function Vault() {
                     <>
                       <Text>Contents hidden. Enter password to unlock.</Text>
                       <Input
-                          type="password"
-                          id="vault-password"
-                          onChange={(e) => tryDecrypt(e.target.value)}
-                          aria-describedby="password-helper-text"
-                        />
+                        type="password"
+                        id="vault-password"
+                        onChange={(e) => tryDecrypt(e.target.value)}
+                        aria-describedby="password-helper-text"
+                      />
                     </>
-                  ): (
-                    vaultValues.length ? (
-                      vaultValues.map((coin) => {
-                        return (
-                          <Text key={coin.name}>
-                            {coin.balance} {coin.name}
-                          </Text>
-                        )
-                      })
-                      ) : (
-                        <Text>Nothing in here! Fill 'er up!</Text>
+                  ) : vaultValues.length ? (
+                    vaultValues.map((coin) => {
+                      return (
+                        <Text key={coin.name}>
+                          {coin.balance} {coin.name}
+                        </Text>
                       )
-                    )
-                  }
+                    })
+                  ) : (
+                    <Text>Nothing in here! Fill 'er up!</Text>
+                  )}
                 </Box>
               </Box>
               <Box d="flex" alignItems="baseline" justifyContent="space-between" mt="4">
