@@ -1,4 +1,4 @@
-import { Box, Flex, Image, Text, Stack, Button, ButtonGroup, useDisclosure } from '@chakra-ui/core'
+import { Box, Flex, Image, Text, Stack, Button, ButtonGroup, Input, useDisclosure } from '@chakra-ui/core'
 
 import { useWeb3React } from '@web3-react/core'
 import React, { useEffect, useState } from 'react'
@@ -20,6 +20,7 @@ export default function Vault() {
   const [vaultImage, setVaultImage] = React.useState('')
   const [vaultValues, setVaultValues] = React.useState([])
   const [vaultAddresses, setVaultAddresses] = React.useState([])
+  const [vaultPrivacy, setVaultPrivacy] = React.useState(false)
   const [currCoin, setCurrCoin] = React.useState('')
   const [currAddr, setCurrAddr] = React.useState('')
   const [state, setState] = React.useState({ loaded: false })
@@ -42,6 +43,8 @@ export default function Vault() {
     setVaultValues(jsonData.values)
     setVaultDesc(jsonData.description)
     setVaultAddresses(jsonData.addresses)
+    // setVaultPrivacy(jsonData.isPrivate)
+    setVaultPrivacy(true)
     setState({ loaded: true })
   }
 
@@ -54,9 +57,8 @@ export default function Vault() {
     return desc[0].trim()
   }
 
-  function openAddrModal(coin, addr) {
-    console.log('inside open addr modal')
-    console.log(coin)
+  function tryDecrypt(pass) {
+    console.log(pass)
   }
 
   return (
@@ -93,17 +95,30 @@ export default function Vault() {
               <Box d="flex" alignItems="baseline">
                 <Box color="gray.500" fontWeight="semibold" letterSpacing="wide" fontSize="sm" ml="2">
                   <h4>Current Contents:</h4>
-                  {vaultValues.length ? (
-                    vaultValues.map((coin) => {
-                      return (
-                        <Text key={coin.name}>
-                          {coin.balance} {coin.name}
-                        </Text>
+                  {vaultPrivacy ? (
+                    <>
+                      <Text>Contents hidden. Enter password to unlock.</Text>
+                      <Input
+                          type="password"
+                          id="vault-password"
+                          onChange={(e) => tryDecrypt(e.target.value)}
+                          aria-describedby="password-helper-text"
+                        />
+                    </>
+                  ): (
+                    vaultValues.length ? (
+                      vaultValues.map((coin) => {
+                        return (
+                          <Text key={coin.name}>
+                            {coin.balance} {coin.name}
+                          </Text>
+                        )
+                      })
+                      ) : (
+                        <Text>Nothing in here! Fill 'er up!</Text>
                       )
-                    })
-                  ) : (
-                    <Text>Nothing in here! Fill 'er up!</Text>
-                  )}
+                    )
+                  }
                 </Box>
               </Box>
               <Box d="flex" alignItems="baseline" justifyContent="space-between" mt="4">
