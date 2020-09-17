@@ -61,19 +61,23 @@ export default function VaultList() {
                     p={2}
                   />
                 </Stack>
-                {vault.values.length ? (
-                  vault.values.map((coin) => {
-                    return (
-                      <Text key={coin.name}>
-                        {coin.balance} {coin.name}
+                <Box d="flex" alignItems="baseline">
+                  <Box color="gray.500" fontWeight="semibold" letterSpacing="wide" fontSize="sm" ml="2">
+                    {vault.values.length ? (
+                      vault.values.map((coin) => {
+                        return (
+                          <Text key={coin.name}>
+                            {coin.balance} {coin.name}
+                          </Text>
+                        )
+                      })
+                    ) : (
+                      <Text as="h2" textAlign="center" w="100%" p={0}>
+                        Nothing in here! Fill 'er up!
                       </Text>
-                    )
-                  })
-                ) : (
-                  <Text as="h2" textAlign="center" w="100%" p={0}>
-                    Nothing in here! Fill 'er up!
-                  </Text>
-                )}
+                    )}
+                  </Box>
+                </Box>
               </Box>
             )
           })
