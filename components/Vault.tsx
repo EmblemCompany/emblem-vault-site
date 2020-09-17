@@ -37,6 +37,7 @@ export default function Vault() {
       },
     })
     const jsonData = await responce.json()
+    console.log(jsonData)
     setVaultName(jsonData.name)
     setVaultImage(jsonData.image)
     setVaultDesc(jsonData.description)
@@ -44,7 +45,6 @@ export default function Vault() {
     setVaultDesc(jsonData.description)
     setVaultAddresses(jsonData.addresses)
     // setVaultPrivacy(jsonData.isPrivate)
-    setVaultPrivacy(true)
     setState({ loaded: true })
   }
 
