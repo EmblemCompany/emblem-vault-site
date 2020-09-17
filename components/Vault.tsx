@@ -108,8 +108,8 @@ export default function Vault() {
                   ) : vaultValues.length ? (
                     vaultValues.map((coin) => {
                       return (
-                        <Text key={coin.name}>
-                          {coin.balance} {coin.name}
+                        <Text key={coin.name} isTruncated>
+                          {coin.name}: {coin.balance}
                         </Text>
                       )
                     })
