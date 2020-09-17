@@ -1,6 +1,4 @@
 import React, { useEffect, useState } from 'react'
-import { useRouter } from 'next/router'
-import { useWeb3React } from '@web3-react/core'
 import {
   Modal,
   ModalOverlay,
@@ -11,9 +9,7 @@ import {
   ModalFooter,
   Text,
   Stack,
-  useColorMode,
   Button,
-  Image,
 } from '@chakra-ui/core'
 import copy from 'copy-to-clipboard'
 import QRCode from 'qrcode.react'
@@ -61,7 +57,7 @@ export default function AddrModal({
         <ModalBody>
           <Stack direction="column">
             <Stack direction="row" align="center" justify="center">
-              <QRCode value={address} size="175" />
+              <QRCode value={address} onClick={() => copyWithFlag(address)}/>
             </Stack>
 
             <Stack direction="row" justify="space-between" mt="6">
@@ -69,7 +65,7 @@ export default function AddrModal({
             </Stack>
             <Stack direction="row" justify="space-between">
               <Button onClick={() => copyWithFlag(address)}>
-                {copied ? <Text color="white">Copied!</Text> : <Text color="white">{address}</Text>}
+                {copied ? <Text color="white">Copied!</Text> : <Text color="white" isTruncated>{address}</Text>}
               </Button>
             </Stack>
           </Stack>
