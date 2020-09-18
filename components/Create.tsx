@@ -49,7 +49,6 @@ export default function Create(props: any) {
 
   const handleSubmit = (evt: { preventDefault: () => void }) => {
     evt.preventDefault()
-    setShowNotify(true)
     setState({ loaded: false, private: state.private })
     fetch(EMBLEM_API + '/mint', {
       method: 'POST',
@@ -73,6 +72,7 @@ export default function Create(props: any) {
       setState({ loaded: true, private: state.private })
       let body = await response.json()
       setHash(body.data.tx)
+      setShowNotify(true)
     })
   }
 
@@ -309,25 +309,32 @@ export default function Create(props: any) {
           </Tabs>
         </Box>
       </Flex>
-      {hash ? (
-        <TransactionToast
-          hash={hash}
-          onComplete={() => {
-            location.href = location.origin + '/vaultlist'
-          }}
-        />
-      ) : (
-        null
-      )}
-      {showNotify ? (
-        <Notify
-          color="green"
-          message="Creating your vault ..."
-          onClose={() => {
-            setShowNotify(false)
-          }}
-        />
-      ) : null}
+      {showNotify || hash ?
+        <Stack direction="column" align="left" shouldWrapChildren>
+          {showNotify ? (
+            <Notify
+              color="green"
+              message="Creating your vault ..."
+              onClose={() => {
+                setShowNotify(false)
+              }}
+            />
+          ) : (
+            null
+          )}
+          {hash ? (
+            <TransactionToast
+              hash={hash}
+              onComplete={() => {
+                location.href = location.origin + '/vaultlist'
+              }}
+            />
+          ) : (
+            null
+          )}
+          </Stack>
+        : null
+      }
     </Loader>
   )
 }
