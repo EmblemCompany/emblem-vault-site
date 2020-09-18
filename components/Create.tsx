@@ -21,7 +21,7 @@ import {
 import Loader from 'react-loader'
 import { useWeb3React } from '@web3-react/core'
 import React, { useEffect, useState } from 'react'
-
+import { TransactionToast } from './TransactionToast'
 import { EMBLEM_API } from '../constants'
 
 export default function Create(props: any) {
@@ -37,6 +37,7 @@ export default function Create(props: any) {
   const [service, setService] = React.useState('')
   const [isCovalApproved, setIsCovalApproved] = React.useState(false)
   const [state, setState] = React.useState({ loaded: true, private: false })
+  const [hash, setHash] = React.useState(null)
 
   const handlePrivateRadio = (e) => {
     console.log('Changed Private visibility', e)
@@ -68,11 +69,10 @@ export default function Create(props: any) {
         private: state.private,
         password: password || '',
       }),
-    }).then(function (response) {
+    }).then(async function (response) {
       setState({ loaded: true, private: state.private })
-      location.href = location.origin + '/vaultlist'
-      // console.log(response.json())
-      // return response.json();
+      let body = await response.json()
+      setHash(body.data.tx)
     })
   }
 
@@ -301,6 +301,7 @@ export default function Create(props: any) {
           </Tabs>
         </Box>
       </Flex>
+      { hash ? <TransactionToast hash={hash} onComplete={()=>{location.href = location.origin + '/vaultlist'}} /> : ''}
     </Loader>
   )
 }
