@@ -24,6 +24,7 @@ import { useWeb3React } from '@web3-react/core'
 import React, { useEffect, useState } from 'react'
 import { TransactionToast } from './TransactionToast'
 import { EMBLEM_API } from '../constants'
+import { ErrorMsg } from './ErrorMsg'
 
 export default function Create(props: any) {
   const [tabIndex, setTabIndex] = React.useState(0)
@@ -39,6 +40,7 @@ export default function Create(props: any) {
   const [isCovalApproved, setIsCovalApproved] = React.useState(false)
   const [state, setState] = React.useState({ loaded: true, private: false })
   const [hash, setHash] = React.useState(null)
+  const [showError, setShowError] = React.useState(false)
 
   const handlePrivateRadio = (e) => {
     console.log('Changed Private visibility', e)
@@ -47,6 +49,7 @@ export default function Create(props: any) {
   const approveCovalFlow = () => {
     alert('Approve?')
     setIsCovalApproved(true)
+    setShowError(true)
   }
 
   const handleSubmit = (evt: { preventDefault: () => void }) => {
@@ -273,7 +276,7 @@ export default function Create(props: any) {
                   {isCovalApproved ? (
                     <Stack direction="row" align="flex-start" spacing="0rem" flexWrap="wrap" shouldWrapChildren>
                       <Box maxW="sm" borderWidth="1px" p={1} rounded="lg" overflow="hidden">
-                        <Text>Creating a vault costs 1337 Coval</Text>
+                        <Text>Creating a vault costs exactly 1337 Coval</Text>
                       </Box>
                     </Stack>
                   ) : null}
@@ -320,6 +323,15 @@ export default function Create(props: any) {
       ) : (
         ''
       )}
+      {showError ? (
+        <ErrorMsg
+          color="green"
+          message="Creating your vault ..."
+          onClose={() => {
+            setShowError(false)
+          }}
+        />
+      ) : null}
     </Loader>
   )
 }
