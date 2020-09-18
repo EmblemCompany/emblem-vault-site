@@ -1,6 +1,6 @@
-import React from 'react';
+import React from 'react'
 
-import classes from './BackgroundVideo.module.css';
+import classes from './BackgroundVideo.module.css'
 
 const BackgroundVideo = () => {
     const videoSource = "https://circuitsofvalue.com/public/circuits.mp4"

@@ -7,13 +7,13 @@
 } */
 
 /* Style the video: 100% width and height to cover the entire window */
-.Video {    
-    position: absolute;
-    right: 0;
-    bottom: 0;
-    min-width: 100%;
-    min-height: 100%;
-    border-bottom: 2px solid #548280 !important;
-    opacity: 0.6;
-    z-index: -1;
-  }
+.Video {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  min-width: 100%;
+  min-height: 100%;
+  border-bottom: 2px solid #548280 !important;
+  opacity: 0.6;
+  z-index: -1;
+}

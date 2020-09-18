@@ -123,7 +123,6 @@ export default function Vault() {
                   <ButtonGroup spacing={4}>
                     {vaultAddresses.map((addr) => {
                       return (
-                        // <Button key={addr.address} onClick={() => openAddrModal(addr.coin, addr.address)}>
                         <Button
                           key={addr.address}
                           onClick={() => {
@@ -132,7 +131,7 @@ export default function Vault() {
                             onOpenAddrModal()
                           }}
                         >
-                          Put {addr.coin} In
+                          Put {addr.coin == 'ETH' ? addr.coin + '/ERC20' : addr.coin} In
                         </Button>
                       )
                     })}

@@ -21,6 +21,18 @@ export const PERMIT_AND_CALL_ADDRESS = '0xe334094985bB046B95550793EA577F8DC4e611
 export const ZERO = JSBI.BigInt(0)
 export const MAX_UINT256 = JSBI.BigInt('0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff')
 
+export const mainnetContractAddresses = {
+  vaultHandler: {
+    1: '0x6b3595068778dd592e39a122f4f5a5cf09c90fe2',
+  },
+  emblemVault: {
+    1: '0x82c7a8f707110f5fbb16184a5933e9f78a34c6ab',
+  },
+  coval: {
+    1: '0x3d658390460295fb963f54dc0899cfb1c30776df',
+  },
+}
+
 export const EMBLEM_API = 'https://api.emblemvault.io'
 
 export enum QueryParameters {
