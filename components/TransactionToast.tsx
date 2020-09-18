@@ -5,7 +5,7 @@ import { useWeb3React } from '@web3-react/core'
 import { useTransactions } from '../context'
 import { shortenHex, EtherscanType, formatEtherscanLink } from '../utils'
 
-export function TransactionToast({ hash }: { hash: string }): JSX.Element {
+export function TransactionToast({ hash, onComplete }: { hash: string, onComplete: () => void }): JSX.Element {
   const { library, chainId } = useWeb3React()
 
   const [, { removeTransaction }] = useTransactions()
@@ -17,6 +17,9 @@ export function TransactionToast({ hash }: { hash: string }): JSX.Element {
 
       library.waitForTransaction(hash).then((receipt: { status: number }) => {
         if (mounted) {
+          if (onComplete) {
+            onComplete()
+          }
           setConfirmed(receipt.status === 1 ? true : false)
         }
       })
