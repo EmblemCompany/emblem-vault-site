@@ -6,7 +6,7 @@ const BackgroundVideo = () => {
   const videoSource = 'https://circuitsofvalue.com/public/circuits.mp4'
   return (
     // <div className={classes.Container} >
-    <video id="VideoBG" autoPlay="autoplay" loop="loop" muted className={classes.Video}>
+    <video id="VideoBG" autoPlay={true} loop={true} muted className={classes.Video}>
       <source src={videoSource} type="video/mp4" />
       Your browser does not support the video tag.
     </video>
