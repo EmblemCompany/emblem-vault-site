@@ -16,6 +16,7 @@ import {
   Textarea,
   Button,
   ButtonGroup,
+  Text,
 } from '@chakra-ui/core'
 
 import Loader from 'react-loader'
@@ -269,6 +270,14 @@ export default function Create(props: any) {
                     </FormControl>
                   </Stack>
 
+                  {isCovalApproved ? (
+                    <Stack direction="row" align="flex-start" spacing="0rem" flexWrap="wrap" shouldWrapChildren>
+                      <Box maxW="sm" borderWidth="1px" p={1} rounded="lg" overflow="hidden">
+                        <Text>Creating a vault costs 1337 Coval</Text>
+                      </Box>
+                    </Stack>
+                  ) : null}
+
                   <Stack direction="row" align="flex-start" spacing="0rem" flexWrap="wrap" shouldWrapChildren>
                     <ButtonGroup spacing={4}>
                       <Button onClick={() => setTabIndex(1)}>Back</Button>
@@ -301,7 +310,16 @@ export default function Create(props: any) {
           </Tabs>
         </Box>
       </Flex>
-      { hash ? <TransactionToast hash={hash} onComplete={()=>{location.href = location.origin + '/vaultlist'}} /> : ''}
+      {hash ? (
+        <TransactionToast
+          hash={hash}
+          onComplete={() => {
+            location.href = location.origin + '/vaultlist'
+          }}
+        />
+      ) : (
+        ''
+      )}
     </Loader>
   )
 }

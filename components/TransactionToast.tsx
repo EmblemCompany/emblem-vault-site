@@ -5,7 +5,7 @@ import { useWeb3React } from '@web3-react/core'
 import { useTransactions } from '../context'
 import { shortenHex, EtherscanType, formatEtherscanLink } from '../utils'
 
-export function TransactionToast({ hash, onComplete }: { hash: string, onComplete?: () => void }): JSX.Element {
+export function TransactionToast({ hash, onComplete }: { hash: string; onComplete?: () => void }): JSX.Element {
   const { library, chainId } = useWeb3React()
 
   const [, { removeTransaction }] = useTransactions()
