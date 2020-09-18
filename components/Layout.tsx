@@ -1,6 +1,6 @@
 import { ReactNode } from 'react'
-import BackgroundVideo from './BackgroundVideo';
-import { Flex, IconButton, useDisclosure, Badge, LightMode, Stack, Box, Radio, Button} from '@chakra-ui/core'
+import BackgroundVideo from './BackgroundVideo'
+import { Flex, IconButton, useDisclosure, Badge, LightMode, Stack, Box, Radio, Button } from '@chakra-ui/core'
 import { useWeb3React } from '@web3-react/core'
 import dynamic from 'next/dynamic'
 

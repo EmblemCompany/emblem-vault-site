@@ -35,11 +35,18 @@ export default function Create(props: any) {
   const [vaultImage, setVaultImage] = React.useState('')
   const [password, setPassword] = React.useState('')
   const [service, setService] = React.useState('')
+  const [isCovalApproved, setIsCovalApproved] = React.useState(false)
   const [state, setState] = React.useState({ loaded: true, private: false })
 
   const handlePrivateRadio = (e) => {
     console.log('Changed Private visibility', e)
   }
+
+  const approveCovalFlow = () => {
+    alert('Approve?')
+    setIsCovalApproved(true)
+  }
+
   const handleSubmit = (evt: { preventDefault: () => void }) => {
     evt.preventDefault()
     setState({ loaded: false, private: state.private })
@@ -265,13 +272,27 @@ export default function Create(props: any) {
                   <Stack direction="row" align="flex-start" spacing="0rem" flexWrap="wrap" shouldWrapChildren>
                     <ButtonGroup spacing={4}>
                       <Button onClick={() => setTabIndex(1)}>Back</Button>
-                      <Button
-                        isDisabled={!account || !vaultAddress || !vaultName || !vaultDesc || !service}
-                        onClick={handleSubmit}
-                        type="submit"
-                      >
-                        DO IT!
-                      </Button>
+                      {!account ? (
+                        <Button isDisabled onClick={handleSubmit} type="submit">
+                          No Wallet Connected!
+                        </Button>
+                      ) : !vaultAddress || !vaultName || !vaultDesc ? (
+                        <Button isDisabled onClick={handleSubmit} type="submit">
+                          Missing Fields!
+                        </Button>
+                      ) : !service ? (
+                        <Button isDisabled onClick={handleSubmit} type="submit">
+                          Creation Password?
+                        </Button>
+                      ) : !isCovalApproved ? (
+                        <Button onClick={approveCovalFlow} type="submit">
+                          Approve Coval
+                        </Button>
+                      ) : (
+                        <Button onClick={handleSubmit} type="submit">
+                          DO IT!
+                        </Button>
+                      )}
                     </ButtonGroup>
                   </Stack>
                 </Stack>
