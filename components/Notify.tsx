@@ -1,7 +1,6 @@
 import { Button, IconButton, ButtonGroup } from '@chakra-ui/core'
-import React, { useState } from 'react'
 
-export function ErrorMsg({
+export function Notify({
   message,
   color,
   onClose,
@@ -10,7 +9,6 @@ export function ErrorMsg({
   color: string
   onClose?: () => void
 }): JSX.Element {
-  const [showError, setShowError] = React.useState(false)
 
   return (
     <ButtonGroup spacing={0}>

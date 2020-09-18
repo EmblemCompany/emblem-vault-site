@@ -24,7 +24,7 @@ import { useWeb3React } from '@web3-react/core'
 import React, { useEffect, useState } from 'react'
 import { TransactionToast } from './TransactionToast'
 import { EMBLEM_API } from '../constants'
-import { ErrorMsg } from './ErrorMsg'
+import { Notify } from './Notify'
 
 export default function Create(props: any) {
   const [tabIndex, setTabIndex] = React.useState(0)
@@ -40,20 +40,16 @@ export default function Create(props: any) {
   const [isCovalApproved, setIsCovalApproved] = React.useState(false)
   const [state, setState] = React.useState({ loaded: true, private: false })
   const [hash, setHash] = React.useState(null)
-  const [showError, setShowError] = React.useState(false)
-
-  const handlePrivateRadio = (e) => {
-    console.log('Changed Private visibility', e)
-  }
+  const [showNotify, setShowNotify] = React.useState(false)
 
   const approveCovalFlow = () => {
     alert('Approve?')
     setIsCovalApproved(true)
-    setShowError(true)
   }
 
   const handleSubmit = (evt: { preventDefault: () => void }) => {
     evt.preventDefault()
+    setShowNotify(true)
     setState({ loaded: false, private: state.private })
     fetch(EMBLEM_API + '/mint', {
       method: 'POST',
@@ -178,7 +174,7 @@ export default function Create(props: any) {
                           aria-describedby="password-helper-text"
                         />
                         <FormHelperText id="password-helper-text">
-                          This password will encrypt and decrypt the contents of this vault
+                          This password will be used to encrypt and decrypt the contents of this vault
                         </FormHelperText>
                       </FormControl>
                     ) : (
@@ -226,7 +222,7 @@ export default function Create(props: any) {
                         onChange={(e) => setVaultDesc(e.target.value)}
                       />
                       <FormHelperText id="vault-desc-text">
-                        Want to add some fluffy text to tell people what the point is?
+                        Add some fluffy text to tell people what the point is!
                       </FormHelperText>
                     </FormControl>
                   </Stack>
@@ -255,7 +251,7 @@ export default function Create(props: any) {
                       <FormLabel htmlFor="vault-img">Vault Image</FormLabel>
                       <Box maxW="sm" borderWidth="1px" p={1} rounded="lg" overflow="hidden">
                         <input type="file" onChange={() => previewFile()} />
-                        <br />
+                        <br /><br />
                         <img src="" width="200" alt="Image preview..."></img>
                       </Box>
                     </FormControl>
@@ -263,7 +259,7 @@ export default function Create(props: any) {
 
                   <Stack direction="row" align="flex-start" spacing="0rem" flexWrap="wrap" shouldWrapChildren>
                     <FormControl>
-                      <FormLabel htmlFor="service">Password:</FormLabel>
+                      <FormLabel htmlFor="service">API password:</FormLabel>
                       <Input
                         type="password"
                         id="service"
@@ -276,7 +272,7 @@ export default function Create(props: any) {
                   {isCovalApproved ? (
                     <Stack direction="row" align="flex-start" spacing="0rem" flexWrap="wrap" shouldWrapChildren>
                       <Box maxW="sm" borderWidth="1px" p={1} rounded="lg" overflow="hidden">
-                        <Text>Creating a vault costs exactly 1337 Coval</Text>
+                        <Text>Creating a vault spends 1337 Coval from your wallet</Text>
                       </Box>
                     </Stack>
                   ) : null}
@@ -321,14 +317,14 @@ export default function Create(props: any) {
           }}
         />
       ) : (
-        ''
+        null
       )}
-      {showError ? (
-        <ErrorMsg
+      {showNotify ? (
+        <Notify
           color="green"
           message="Creating your vault ..."
           onClose={() => {
-            setShowError(false)
+            setShowNotify(false)
           }}
         />
       ) : null}
