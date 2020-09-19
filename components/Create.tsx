@@ -19,12 +19,15 @@ import {
   Text,
 } from '@chakra-ui/core'
 
+import { Token, TokenAmount } from '@uniswap/sdk'
 import Loader from 'react-loader'
 import { useWeb3React } from '@web3-react/core'
 import React, { useEffect, useState } from 'react'
 import { TransactionToast } from './TransactionToast'
-import { EMBLEM_API } from '../constants'
+import { EMBLEM_API , contractAddresses, MAX_UINT256} from '../constants'
 import { Notify } from './Notify'
+import { Contract } from '@ethersproject/contracts'
+import { useContract } from '../hooks'
 
 export default function Create(props: any) {
   const [tabIndex, setTabIndex] = React.useState(0)
@@ -40,11 +43,54 @@ export default function Create(props: any) {
   const [isCovalApproved, setIsCovalApproved] = React.useState(false)
   const [state, setState] = React.useState({ loaded: true, private: false })
   const [hash, setHash] = React.useState(null)
+  const [tokenId, setTokenId] = React.useState(null)
+  const [mintPassword, setMintPassword] = React.useState(null)
   const [showNotify, setShowNotify] = React.useState(false)
+  const [decimals, setDecimals] = React.useState(null)
+  const [allowance, setAllowance] = React.useState(null)
+  const [balance, setBalance] = React.useState(null)
+  const [price, setPrice] = React.useState(null)
+  
+
+
+  const handlerContract = useContract(contractAddresses.vaultHandler[chainId], contractAddresses.vaultHandlerAbi, true)
+  const covalContract = useContract(contractAddresses.coval[chainId], contractAddresses.covalAbi, true)
+  
+  interface ErrorWithCode extends Error {
+    code?: number
+  }
+
+  const getContractStates = async () => {
+    setDecimals(await covalContract.decimals())
+    setAllowance(await covalContract.allowance(account, contractAddresses.vaultHandler[chainId]).then((balance: { toString: () => string }) => balance.toString()))
+    setBalance(await covalContract.balanceOf(account).then((balance: { toString: () => string }) => balance.toString()))
+    setPrice(await handlerContract.price().then((balance: { toString: () => string }) => balance.toString()))
+    console.log("balance", balance, "allowance", allowance, "price", price, Number(allowance) >= Number(price))
+    if (Number(allowance) >= Number(price)) {
+      setIsCovalApproved(true)
+    } else {
+      setIsCovalApproved(false)
+    }
+  }
+
+  const fireMetaMask = () => {
+    (handlerContract as Contract)
+      .buyWithPaymentOnly(vaultAddress, tokenId, mintPassword)
+      .then(({ hash }: { hash: string }) => {
+        setHash(hash)
+      })
+      .catch((error: ErrorWithCode) => {
+        if (error?.code !== 4001) {
+          console.log(`tx failed.`, error)
+        }
+      })
+  }
 
   const approveCovalFlow = () => {
-    alert('Approve?')
-    setIsCovalApproved(true)
+    (covalContract as Contract)
+      .approve(contractAddresses.vaultHandler[chainId], "100000000000000").then(({ hash }: { hash: string }) => {
+        setHash(hash)
+      })
   }
 
   const handleSubmit = (evt: { preventDefault: () => void }) => {
@@ -72,6 +118,8 @@ export default function Create(props: any) {
       setState({ loaded: true, private: state.private })
       let body = await response.json()
       setHash(body.data.tx)
+      setTokenId(body.data.tokenId)
+      setMintPassword(body.password)
       setShowNotify(true)
     })
   }
@@ -103,6 +151,10 @@ export default function Create(props: any) {
       setVaultAddress(account)
     }
   }, [account, acct])
+
+  useEffect(()=>{
+    getContractStates()
+  })
 
   return (
     <Loader loaded={state.loaded}>
@@ -272,31 +324,50 @@ export default function Create(props: any) {
                   {isCovalApproved ? (
                     <Stack direction="row" align="flex-start" spacing="0rem" flexWrap="wrap" shouldWrapChildren>
                       <Box maxW="sm" borderWidth="1px" p={1} rounded="lg" overflow="hidden">
-                        <Text>Creating a vault spends 1337 Coval from your wallet</Text>
-                      </Box>
+                        <Text>Creating a vault spends {price} Coval from your wallet</Text>
+                      </Box>                      
                     </Stack>
                   ) : null}
+
+                  {Number(balance) < Number(price) ? (
+                    <Stack direction="row" align="flex-start" spacing="0rem" flexWrap="wrap" shouldWrapChildren>
+                      <Box maxW="sm" borderWidth="1px" p={1} rounded="lg" overflow="hidden">
+                        <Button onClick={()=>{
+                          location.href = location.origin + "/buy?chain="+chainId+"&output=0x3D658390460295FB963f54dC0899cfb1c30776Df&input=0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
+                        }}>Buy coval</Button>
+                      </Box>                      
+                    </Stack>
+                  ) : 
+                  <Stack direction="row" align="flex-start" spacing="0rem" flexWrap="wrap" shouldWrapChildren>
+                    <Box maxW="sm" borderWidth="1px" p={1} rounded="lg" overflow="hidden">
+                      <Text>Circuits of Value Balance: {balance}</Text>
+                    </Box>                      
+                  </Stack>}
 
                   <Stack direction="row" align="flex-start" spacing="0rem" flexWrap="wrap" shouldWrapChildren>
                     <ButtonGroup spacing={4}>
                       <Button onClick={() => setTabIndex(1)}>Back</Button>
                       {!account ? (
-                        <Button isDisabled onClick={handleSubmit} type="submit">
+                        <Button isDisabled type="submit">
                           No Wallet Connected!
                         </Button>
                       ) : !vaultAddress || !vaultName || !vaultDesc ? (
-                        <Button isDisabled onClick={handleSubmit} type="submit">
+                        <Button isDisabled type="submit">
                           Missing Fields!
                         </Button>
                       ) : !service ? (
-                        <Button isDisabled onClick={handleSubmit} type="submit">
+                        <Button isDisabled type="submit">
                           Creation Password?
                         </Button>
                       ) : !isCovalApproved ? (
                         <Button onClick={approveCovalFlow} type="submit">
                           Approve Coval
                         </Button>
-                      ) : (
+                      ) : balance < price ? (
+                        <Button isDisabled type="submit">
+                          Insufficient Balance
+                        </Button>
+                      ) :(
                         <Button onClick={handleSubmit} type="submit">
                           DO IT!
                         </Button>
@@ -326,7 +397,8 @@ export default function Create(props: any) {
             <TransactionToast
               hash={hash}
               onComplete={() => {
-                location.href = location.origin + '/vaultlist'
+                setHash(null)
+                fireMetaMask()
               }}
             />
           ) : (

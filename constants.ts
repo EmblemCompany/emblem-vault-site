@@ -1,4 +1,6 @@
 import { JSBI } from '@uniswap/sdk'
+import { abi as HandlerABI } from './abi/handler.json'
+import { abi as CovalABI } from './abi/coval.json'
 
 export const BG = { light: 'gray.50', dark: 'gray.900' }
 export const COLOR = { light: 'black', dark: 'white' }
@@ -21,16 +23,21 @@ export const PERMIT_AND_CALL_ADDRESS = '0xe334094985bB046B95550793EA577F8DC4e611
 export const ZERO = JSBI.BigInt(0)
 export const MAX_UINT256 = JSBI.BigInt('0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff')
 
-export const mainnetContractAddresses = {
+export const contractAddresses = {
   vaultHandler: {
-    1: '0x6b3595068778dd592e39a122f4f5a5cf09c90fe2',
+    1: '0x26C40CE48EE3fc0B2d3C07eA7a64479F3B34F428',
+    4: '0xb03D438771478e22a177df6595b287b2D20f7c52'
   },
+  vaultHandlerAbi: HandlerABI,
   emblemVault: {
     1: '0x82c7a8f707110f5fbb16184a5933e9f78a34c6ab',
+    4: '0xe70AbBc99D8eB32124BF022196c493DB4fBc50FD'
   },
   coval: {
     1: '0x3d658390460295fb963f54dc0899cfb1c30776df',
+    4: '0x44c1a9d7d1f932b4c2811a70edffdd6ae2eb60e6'
   },
+  covalAbi: CovalABI
 }
 
 export const EMBLEM_API = 'https://api.emblemvault.io'
