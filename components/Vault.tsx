@@ -77,7 +77,7 @@ export default function Vault() {
     // console.log(tokenId)
     emblemContract.transferFrom(account, BURN_ADDRESS, tokenId).then(({ hash }: { hash: string }) => {
       setHash(hash)
-      setClaiming(true);
+      setClaiming(true)
     })
   }
 
@@ -197,18 +197,16 @@ export default function Vault() {
           </Box>
         </Flex>
         {hash ? (
-            <TransactionToast
-              hash={hash}
-              onComplete={() => {
-                setHash(null)
-                if (claiming) {
-                  alert('Claim tx complete. Now ask server for keys')
-                }
-              }}
-            />
-          ) : (
-            null
-          )}
+          <TransactionToast
+            hash={hash}
+            onComplete={() => {
+              setHash(null)
+              if (claiming) {
+                alert('Claim tx complete. Now ask server for keys')
+              }
+            }}
+          />
+        ) : null}
       </Loader>
     </>
   )
