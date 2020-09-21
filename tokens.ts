@@ -14,6 +14,13 @@ export const Coval = new Token(
   'Coval',
   'Circuits of Value'
 )
+export const CovalTest = new Token(
+  ChainId.RINKEBY,
+  '0x44c1a9d7d1f932b4c2811a70edffdd6ae2eb60e6',
+  8,
+  'Coval',
+  'Circuits of Value'
+)
 
 export const DEFAULT_TOKENS = [
   ...Object.values(WETH),
@@ -21,6 +28,8 @@ export const DEFAULT_TOKENS = [
   // stablecoins
   DAI,
   USDC,
+  Coval,
+  // new Token(ChainId.RINKEBY, '0x44c1a9d7d1f932b4c2811a70edffdd6ae2eb60e6', 8, 'Coval', 'Circuits of Value'),
   new Token(ChainId.MAINNET, '0xdAC17F958D2ee523a2206206994597C13D831ec7', 6, 'USDT', 'Tether USD'),
   // stablecoin derivatives
   new Token(ChainId.MAINNET, '0x5d3a536E4D6DbD6114cc1Ead35777bAB948E3643', 8, 'cDAI', 'Compound Dai'),
