@@ -23,7 +23,7 @@ import Loader from 'react-loader'
 import { useWeb3React } from '@web3-react/core'
 import React, { useEffect, useState } from 'react'
 import { TransactionToast } from './TransactionToast'
-import { EMBLEM_API, contractAddresses} from '../constants'
+import { EMBLEM_API, contractAddresses } from '../constants'
 import { Notify } from './Notify'
 import { Contract } from '@ethersproject/contracts'
 import { useContract } from '../hooks'
@@ -49,22 +49,24 @@ export default function Create(props: any) {
   const [allowance, setAllowance] = React.useState(null)
   const [balance, setBalance] = React.useState(null)
   const [price, setPrice] = React.useState(null)
-  
-
 
   const handlerContract = useContract(contractAddresses.vaultHandler[chainId], contractAddresses.vaultHandlerAbi, true)
   const covalContract = useContract(contractAddresses.coval[chainId], contractAddresses.covalAbi, true)
-  
+
   interface ErrorWithCode extends Error {
     code?: number
   }
 
   const getContractStates = async () => {
     setDecimals(await covalContract.decimals())
-    setAllowance(await covalContract.allowance(account, contractAddresses.vaultHandler[chainId]).then((balance: { toString: () => string }) => balance.toString()))
+    setAllowance(
+      await covalContract
+        .allowance(account, contractAddresses.vaultHandler[chainId])
+        .then((balance: { toString: () => string }) => balance.toString())
+    )
     setBalance(await covalContract.balanceOf(account).then((balance: { toString: () => string }) => balance.toString()))
     setPrice(await handlerContract.price().then((balance: { toString: () => string }) => balance.toString()))
-    console.log("balance", balance, "allowance", allowance, "price", price, Number(allowance) >= Number(price))
+    console.log('balance', balance, 'allowance', allowance, 'price', price, Number(allowance) >= Number(price))
     if (Number(allowance) >= Number(price)) {
       setIsCovalApproved(true)
     } else {
@@ -73,7 +75,7 @@ export default function Create(props: any) {
   }
 
   const fireMetaMask = () => {
-    (handlerContract as Contract)
+    ;(handlerContract as Contract)
       .buyWithPaymentOnly(vaultAddress, tokenId, mintPassword)
       .then(({ hash }: { hash: string }) => {
         setHash(hash)
@@ -86,8 +88,9 @@ export default function Create(props: any) {
   }
 
   const approveCovalFlow = () => {
-    (covalContract as Contract)
-      .approve(contractAddresses.vaultHandler[chainId], "100000000000000").then(({ hash }: { hash: string }) => {
+    ;(covalContract as Contract)
+      .approve(contractAddresses.vaultHandler[chainId], '100000000000000')
+      .then(({ hash }: { hash: string }) => {
         setHash(hash)
       })
   }
@@ -151,7 +154,7 @@ export default function Create(props: any) {
     }
   }, [account, acct])
 
-  useEffect(()=>{
+  useEffect(() => {
     getContractStates()
   })
 
@@ -302,7 +305,8 @@ export default function Create(props: any) {
                       <FormLabel htmlFor="vault-img">Vault Image</FormLabel>
                       <Box maxW="sm" borderWidth="1px" p={1} rounded="lg" overflow="hidden">
                         <input type="file" onChange={() => previewFile()} />
-                        <br /><br />
+                        <br />
+                        <br />
                         <img src="" width="200" alt="Image preview..."></img>
                       </Box>
                     </FormControl>
@@ -324,24 +328,33 @@ export default function Create(props: any) {
                     <Stack direction="row" align="flex-start" spacing="0rem" flexWrap="wrap" shouldWrapChildren>
                       <Box maxW="sm" borderWidth="1px" p={1} rounded="lg" overflow="hidden">
                         <Text>Creating a vault spends {price} Coval from your wallet</Text>
-                      </Box>                      
+                      </Box>
                     </Stack>
                   ) : null}
 
                   {Number(balance) < Number(price) ? (
                     <Stack direction="row" align="flex-start" spacing="0rem" flexWrap="wrap" shouldWrapChildren>
                       <Box maxW="sm" borderWidth="1px" p={1} rounded="lg" overflow="hidden">
-                        <Button onClick={()=>{
-                          location.href = location.origin + "/buy?chain="+chainId+"&output=0x3D658390460295FB963f54dC0899cfb1c30776Df&input=0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
-                        }}>Buy coval</Button>
-                      </Box>                      
+                        <Button
+                          onClick={() => {
+                            location.href =
+                              location.origin +
+                              '/buy?chain=' +
+                              chainId +
+                              '&output=0x3D658390460295FB963f54dC0899cfb1c30776Df&input=0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'
+                          }}
+                        >
+                          Buy coval
+                        </Button>
+                      </Box>
                     </Stack>
-                  ) : 
-                  <Stack direction="row" align="flex-start" spacing="0rem" flexWrap="wrap" shouldWrapChildren>
-                    <Box maxW="sm" borderWidth="1px" p={1} rounded="lg" overflow="hidden">
-                      <Text>Circuits of Value Balance: {balance}</Text>
-                    </Box>                      
-                  </Stack>}
+                  ) : (
+                    <Stack direction="row" align="flex-start" spacing="0rem" flexWrap="wrap" shouldWrapChildren>
+                      <Box maxW="sm" borderWidth="1px" p={1} rounded="lg" overflow="hidden">
+                        <Text>Circuits of Value Balance: {balance}</Text>
+                      </Box>
+                    </Stack>
+                  )}
 
                   <Stack direction="row" align="flex-start" spacing="0rem" flexWrap="wrap" shouldWrapChildren>
                     <ButtonGroup spacing={4}>
@@ -366,7 +379,7 @@ export default function Create(props: any) {
                         <Button isDisabled type="submit">
                           Insufficient Balance
                         </Button>
-                      ) :(
+                      ) : (
                         <Button onClick={handleSubmit} type="submit">
                           DO IT!
                         </Button>
@@ -379,7 +392,7 @@ export default function Create(props: any) {
           </Tabs>
         </Box>
       </Flex>
-      {showNotify || hash ?
+      {showNotify || hash ? (
         <Stack direction="column" align="left" shouldWrapChildren>
           {showNotify ? (
             <Notify
@@ -389,9 +402,7 @@ export default function Create(props: any) {
                 setShowNotify(false)
               }}
             />
-          ) : (
-            null
-          )}
+          ) : null}
           {hash ? (
             <TransactionToast
               hash={hash}
@@ -400,12 +411,9 @@ export default function Create(props: any) {
                 fireMetaMask()
               }}
             />
-          ) : (
-            null
-          )}
-          </Stack>
-        : null
-      }
+          ) : null}
+        </Stack>
+      ) : null}
     </Loader>
   )
 }

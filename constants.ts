@@ -27,19 +27,19 @@ export const MAX_UINT256 = JSBI.BigInt('0xffffffffffffffffffffffffffffffffffffff
 export const contractAddresses = {
   vaultHandler: {
     1: '0x26C40CE48EE3fc0B2d3C07eA7a64479F3B34F428',
-    4: '0xb03D438771478e22a177df6595b287b2D20f7c52'
+    4: '0xb03D438771478e22a177df6595b287b2D20f7c52',
   },
   vaultHandlerAbi: HandlerABI,
   emblemVault: {
     1: '0x82c7a8f707110f5fbb16184a5933e9f78a34c6ab',
-    4: '0xe70AbBc99D8eB32124BF022196c493DB4fBc50FD'
+    4: '0xe70AbBc99D8eB32124BF022196c493DB4fBc50FD',
   },
   emblemAbi: EmblemABI,
   coval: {
     1: '0x3d658390460295fb963f54dc0899cfb1c30776df',
-    4: '0x44c1a9d7d1f932b4c2811a70edffdd6ae2eb60e6'
+    4: '0x44c1a9d7d1f932b4c2811a70edffdd6ae2eb60e6',
   },
-  covalAbi: CovalABI
+  covalAbi: CovalABI,
 }
 
 export const BURN_ADDRESS = "0x5D152dd902CC9198B97E5b6Cf5fc23a8e4330180"

@@ -9,7 +9,6 @@ export function Notify({
   color: string
   onClose?: () => void
 }): JSX.Element {
-
   return (
     <ButtonGroup spacing={0}>
       <Button variantColor={color} style={{ borderTopRightRadius: 0, borderBottomRightRadius: 0 }}>
