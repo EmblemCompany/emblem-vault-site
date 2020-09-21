@@ -59,6 +59,7 @@ export default function VaultList() {
                   <Image
                     src={validImage(vault.image) ? vault.image : 'https://circuitsofvalue.com/public/coval-logo.png'}
                     p={2}
+                    width="250px"
                   />
                 </Stack>
                 <Box d="flex" alignItems="baseline">

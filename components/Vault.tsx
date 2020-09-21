@@ -120,12 +120,12 @@ export default function Vault() {
             <Stack align="center">
               <Image
                 src={validImage(vaultImage) ? vaultImage : 'https://circuitsofvalue.com/public/coval-logo.png'}
-                size="250px"
+                width="250px"
               />
             </Stack>
             <Stack align="center">
-              <Box mt="1" as="h4" lineHeight="tight">
-                {splitDescription(vaultDesc)}
+              <Box mt="1" ml="4" as="h4" lineHeight="tight">
+                <Text as="h4" ml="4" mr="4">{splitDescription(vaultDesc)}</Text>
               </Box>
             </Stack>
             <Box p="6">
