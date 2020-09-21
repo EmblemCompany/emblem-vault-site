@@ -23,7 +23,7 @@ export default function Vault() {
   const [vaultValues, setVaultValues] = useState([])
   const [vaultAddresses, setVaultAddresses] = useState([])
   const [vaultPrivacy, setVaultPrivacy] = useState(false)
-  const [vaultChainId, setVaultChainId] = useState(1)
+  const [vaultChainId, setVaultChainId] = useState(null)
   const [hash, setHash] = useState(null)
   const [currCoin, setCurrCoin] = useState('')
   const [currAddr, setCurrAddr] = useState('')
@@ -124,6 +124,7 @@ export default function Vault() {
   }, [])
 
   useEffect(() => {
+    console.log('Account chainid = ' + chainId + ' and vaultchainid = ' + vaultChainId)
     account && chainId && vaultChainId && chainId == vaultChainId ? getContractStates() : null
   })
 
@@ -142,7 +143,7 @@ export default function Vault() {
 
       <Loader loaded={state.loaded}>
         <Flex width="full" align="center" justifyContent="center">
-          <Box maxW="sm" borderWidth="1px" rounded="lg" overflow="hidden" alignItems="center">
+          <Box maxW="sm" borderWidth="1px" borderColor={vaultChainId == 4 ? "orange !important" : null} rounded="lg" overflow="hidden" alignItems="center">
             <Box
               mt="1"
               fontWeight="semibold"
@@ -162,7 +163,7 @@ export default function Vault() {
               />
             </Stack>
             <Stack align="center">
-              <Box mt="1" ml="4" as="h4" lineHeight="tight">
+              <Box mt="1" ml="4" lineHeight="tight">
                 <Text as="h4" ml="4" mr="4">
                   {splitDescription(vaultDesc)}
                 </Text>
