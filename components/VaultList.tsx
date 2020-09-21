@@ -25,10 +25,7 @@ export default function VaultList() {
   }
 
   useEffect(() => {
-    account && chainId ?
-    getVaults()
-    : 
-    setState({ loaded: true })
+    account && chainId ? getVaults() : setState({ loaded: true })
   }, [])
 
   return (

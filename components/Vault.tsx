@@ -43,7 +43,7 @@ export default function Vault() {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
-        service: 'evmetadata'
+        service: 'evmetadata',
       },
     })
     const jsonData = await responce.json()
@@ -87,10 +87,7 @@ export default function Vault() {
   }, [])
 
   useEffect(() => {
-    account && chainId && vaultChainId && (chainId == vaultChainId)?
-      getContractStates()
-    :
-      null
+    account && chainId && vaultChainId && chainId == vaultChainId ? getContractStates() : null
   })
 
   function splitDescription(words) {
@@ -134,10 +131,10 @@ export default function Vault() {
             </Stack>
             <Box p="6">
               <Box d="flex" alignItems="baseline">
-                <Box color="gray.500"letterSpacing="wide" fontSize="sm" ml="2">
-                <Text as="h4" fontWeight="semibold">
+                <Box color="gray.500" letterSpacing="wide" fontSize="sm" ml="2">
+                  <Text as="h4" fontWeight="semibold">
                     Current Contents:
-                    </Text>
+                  </Text>
                   {vaultPrivacy ? (
                     <>
                       <Text>Contents hidden. Enter password to unlock.</Text>
@@ -182,18 +179,24 @@ export default function Vault() {
                 </Stack>
               </Box>
               <Box d="flex" alignItems="baseline" justifyContent="space-between" mt="4">
-                  <Button
-                    width="100%"
-                    as="a"
-                    {...{
-                      href: 'https://' + ((vaultChainId == 4) ? 'rinkeby.' : '') + 'opensea.io/assets/' + contractAddresses.emblemVault[vaultChainId] + '/' + tokenId,
-                      target: '_blank',
-                      rel: 'noopener noreferrer',
-                    }}
-                  >
-                    {mine ? 'Sell/Gift/Send' : 'Make an Offer'}
-                  </Button>
-                </Box>
+                <Button
+                  width="100%"
+                  as="a"
+                  {...{
+                    href:
+                      'https://' +
+                      (vaultChainId == 4 ? 'rinkeby.' : '') +
+                      'opensea.io/assets/' +
+                      contractAddresses.emblemVault[vaultChainId] +
+                      '/' +
+                      tokenId,
+                    target: '_blank',
+                    rel: 'noopener noreferrer',
+                  }}
+                >
+                  {mine ? 'Sell/Gift/Send' : 'Make an Offer'}
+                </Button>
+              </Box>
               <Box d="flex" alignItems="baseline" justifyContent="space-between" mt="4">
                 {mine ? (
                   <Button
