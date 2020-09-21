@@ -91,7 +91,11 @@ export default function Layout({ children }: { children: ReactNode }): JSX.Eleme
             )
           ) : (
             // [DEFAULT_TOKENS.filter((tokenrrr) => tokenrrr.chainId == chainId)[0], firstToken, secondToken]
-            [chainId == 1 ? Coval : CovalTest, firstToken, secondToken]
+            [
+              chainId == 1 ? Coval : CovalTest,
+              firstToken ? (firstToken.symbol != 'Coval' ? firstToken : null) : null,
+              secondToken ? (secondToken.symbol != 'Coval' ? secondToken : null) : null,
+            ]
               .filter((token) => token)
               .filter((token) => !token?.equals(WETH[token.chainId]))
               .map((token) => (
