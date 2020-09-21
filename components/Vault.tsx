@@ -7,7 +7,10 @@ import Loader from 'react-loader'
 import dynamic from 'next/dynamic'
 
 import { validImage } from '../utils'
-import { EMBLEM_API } from '../constants'
+import { TransactionToast } from './TransactionToast'
+import { EMBLEM_API, contractAddresses } from '../constants'
+import { Contract } from '@ethersproject/contracts'
+import { useContract } from '../hooks'
 
 const AddrModal = dynamic(() => import('./AddrModal'))
 
@@ -21,9 +24,16 @@ export default function Vault() {
   const [vaultValues, setVaultValues] = React.useState([])
   const [vaultAddresses, setVaultAddresses] = React.useState([])
   const [vaultPrivacy, setVaultPrivacy] = React.useState(false)
+  const [hash, setHash] = React.useState(null)
   const [currCoin, setCurrCoin] = React.useState('')
   const [currAddr, setCurrAddr] = React.useState('')
   const [state, setState] = React.useState({ loaded: false })
+  const [allowed, setAllowed] = React.useState(false)
+  const [mine, setMine] = React.useState(false)
+  
+
+  const handlerContract = useContract(contractAddresses.vaultHandler[chainId], contractAddresses.vaultHandlerAbi, true)
+  const emblemContract = useContract(contractAddresses.emblemVault[chainId], contractAddresses.emblemAbi, true)
 
   const { isOpen: isOpenAddrModal, onOpen: onOpenAddrModal, onClose: onCloseAddrModal } = useDisclosure()
 
@@ -44,13 +54,39 @@ export default function Vault() {
     setVaultValues(jsonData.values)
     setVaultDesc(jsonData.description)
     setVaultAddresses(jsonData.addresses)
-    // setVaultPrivacy(jsonData.isPrivate)
     setState({ loaded: true })
   }
+
+  const getContractStates = async () => {
+    let owner = await emblemContract.ownerOf(tokenId)
+    setMine(owner === account)
+    if (mine) {
+      console.log("Mine!")
+      setAllowed(await emblemContract.isApprovedForAll(account, contractAddresses.vaultHandler[chainId]))
+    }
+  }
+
+  const handleApprove = async () => {
+    emblemContract.setApprovalForAll(contractAddresses.vaultHandler[chainId], true).then(({ hash }: { hash: string }) => {
+      setHash(hash)
+    })
+  }
+
+  const handleClaim = async () => {
+    console.log(tokenId)
+    handlerContract.claim(tokenId).then(({ hash }: { hash: string }) => {
+      setHash(hash)
+    })
+  }
+  
 
   useEffect(() => {
     getVault()
   }, [])
+
+  useEffect(()=>{
+    getContractStates()
+  })
 
   function splitDescription(words) {
     var desc = words.split('Emblem Vault Basic')
@@ -133,14 +169,35 @@ export default function Vault() {
                         >
                           Put {addr.coin == 'ETH' ? addr.coin + '/ERC20' : addr.coin} In
                         </Button>
-                      )
-                    })}
-                  </ButtonGroup>
+                      )                      
+                    })}                    
+                  </ButtonGroup>                  
                 </Stack>
               </Box>
+              <Box d="flex" alignItems="baseline" justifyContent="space-between" mt="4">
+                {mine ? (<Button width="100%" onClick={()=>{
+                  if (allowed) {
+                    handleClaim()
+                  } else {
+                    handleApprove()
+                  }
+                }}>
+                  {allowed? 'Claim': "Approve"}
+                </Button>): ''}
+              </Box>              
             </Box>
-          </Box>
+          </Box>          
         </Flex>
+        {hash ? (
+            <TransactionToast
+              hash={hash}
+              onComplete={() => {
+                setHash(null)
+              }}
+            />
+          ) : (
+            null
+          )}
       </Loader>
     </>
   )

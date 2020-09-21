@@ -1,6 +1,7 @@
 import { JSBI } from '@uniswap/sdk'
 import { abi as HandlerABI } from './abi/handler.json'
 import { abi as CovalABI } from './abi/coval.json'
+import { abi as EmblemABI } from './abi/emblem.json'
 
 export const BG = { light: 'gray.50', dark: 'gray.900' }
 export const COLOR = { light: 'black', dark: 'white' }
@@ -33,6 +34,7 @@ export const contractAddresses = {
     1: '0x82c7a8f707110f5fbb16184a5933e9f78a34c6ab',
     4: '0xe70AbBc99D8eB32124BF022196c493DB4fBc50FD'
   },
+  emblemAbi: EmblemABI,
   coval: {
     1: '0x3d658390460295fb963f54dc0899cfb1c30776df',
     4: '0x44c1a9d7d1f932b4c2811a70edffdd6ae2eb60e6'

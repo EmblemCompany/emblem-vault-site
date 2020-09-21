@@ -19,12 +19,11 @@ import {
   Text,
 } from '@chakra-ui/core'
 
-import { Token, TokenAmount } from '@uniswap/sdk'
 import Loader from 'react-loader'
 import { useWeb3React } from '@web3-react/core'
 import React, { useEffect, useState } from 'react'
 import { TransactionToast } from './TransactionToast'
-import { EMBLEM_API , contractAddresses, MAX_UINT256} from '../constants'
+import { EMBLEM_API, contractAddresses} from '../constants'
 import { Notify } from './Notify'
 import { Contract } from '@ethersproject/contracts'
 import { useContract } from '../hooks'
