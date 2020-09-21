@@ -1,7 +1,7 @@
 import { Box, Flex, Image, Text, Stack, Button, ButtonGroup, Input, useDisclosure } from '@chakra-ui/core'
 
 import { useWeb3React } from '@web3-react/core'
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
 import Loader from 'react-loader'
 import dynamic from 'next/dynamic'
@@ -9,7 +9,7 @@ import dynamic from 'next/dynamic'
 import { validImage } from '../utils'
 import { TransactionToast } from './TransactionToast'
 import { EMBLEM_API, BURN_ADDRESS, contractAddresses } from '../constants'
-import { Contract } from '@ethersproject/contracts'
+// import { Contract } from '@ethersproject/contracts'
 import { useContract } from '../hooks'
 
 const AddrModal = dynamic(() => import('./AddrModal'))
@@ -17,21 +17,21 @@ const AddrModal = dynamic(() => import('./AddrModal'))
 export default function Vault() {
   const { account, chainId } = useWeb3React()
   const { query, pathname, replace } = useRouter()
-  const [tokenId, setTokenId] = React.useState(query.id)
-  const [vaultName, setVaultName] = React.useState('')
-  const [vaultDesc, setVaultDesc] = React.useState('')
-  const [vaultImage, setVaultImage] = React.useState('')
-  const [vaultValues, setVaultValues] = React.useState([])
-  const [vaultAddresses, setVaultAddresses] = React.useState([])
-  const [vaultPrivacy, setVaultPrivacy] = React.useState(false)
-  const [vaultChainId, setVaultChainId] = React.useState(1)
-  const [hash, setHash] = React.useState(null)
-  const [currCoin, setCurrCoin] = React.useState('')
-  const [currAddr, setCurrAddr] = React.useState('')
-  const [state, setState] = React.useState({ loaded: false })
-  const [allowed, setAllowed] = React.useState(false)
-  const [mine, setMine] = React.useState(false)
-  const [claiming, setClaiming] = React.useState(false)
+  const [tokenId, setTokenId] = useState(query.id)
+  const [vaultName, setVaultName] = useState('')
+  const [vaultDesc, setVaultDesc] = useState('')
+  const [vaultImage, setVaultImage] = useState('')
+  const [vaultValues, setVaultValues] = useState([])
+  const [vaultAddresses, setVaultAddresses] = useState([])
+  const [vaultPrivacy, setVaultPrivacy] = useState(false)
+  const [vaultChainId, setVaultChainId] = useState(1)
+  const [hash, setHash] = useState(null)
+  const [currCoin, setCurrCoin] = useState('')
+  const [currAddr, setCurrAddr] = useState('')
+  const [state, setState] = useState({ loaded: false })
+  const [allowed, setAllowed] = useState(false)
+  const [mine, setMine] = useState(false)
+  const [claiming, setClaiming] = useState(false)
 
   const handlerContract = useContract(contractAddresses.vaultHandler[chainId], contractAddresses.vaultHandlerAbi, true)
   const emblemContract = useContract(contractAddresses.emblemVault[chainId], contractAddresses.emblemAbi, true)

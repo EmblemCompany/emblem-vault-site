@@ -21,7 +21,7 @@ import {
 
 import Loader from 'react-loader'
 import { useWeb3React } from '@web3-react/core'
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { TransactionToast } from './TransactionToast'
 import { EMBLEM_API, contractAddresses } from '../constants'
 import { Notify } from './Notify'
@@ -29,27 +29,27 @@ import { Contract } from '@ethersproject/contracts'
 import { useContract } from '../hooks'
 
 export default function Create(props: any) {
-  const [tabIndex, setTabIndex] = React.useState(0)
+  const [tabIndex, setTabIndex] = useState(0)
   const { account, chainId } = useWeb3React()
 
-  const [vaultAddress, setVaultAddress] = React.useState(account || '')
-  const [vaultPubPriv, setVaultPubPriv] = React.useState('Public')
-  const [vaultName, setVaultName] = React.useState('')
-  const [vaultDesc, setVaultDesc] = React.useState('')
-  const [vaultImage, setVaultImage] = React.useState('')
-  const [password, setPassword] = React.useState('')
-  const [service, setService] = React.useState('')
-  const [isCovalApproved, setIsCovalApproved] = React.useState(false)
-  const [state, setState] = React.useState({ loaded: true, private: false })
-  const [hash, setHash] = React.useState(null)
-  const [tokenId, setTokenId] = React.useState(null)
-  const [mintPassword, setMintPassword] = React.useState(null)
-  const [showNotify, setShowNotify] = React.useState(false)
-  const [decimals, setDecimals] = React.useState(null)
-  const [allowance, setAllowance] = React.useState(null)
-  const [balance, setBalance] = React.useState(null)
-  const [price, setPrice] = React.useState(null)
-  const [creating, setCreating] = React.useState(false)
+  const [vaultAddress, setVaultAddress] = useState(account || '')
+  const [vaultPubPriv, setVaultPubPriv] = useState('Public')
+  const [vaultName, setVaultName] = useState('')
+  const [vaultDesc, setVaultDesc] = useState('')
+  const [vaultImage, setVaultImage] = useState('')
+  const [password, setPassword] = useState('')
+  const [service, setService] = useState('')
+  const [isCovalApproved, setIsCovalApproved] = useState(false)
+  const [state, setState] = useState({ loaded: true, private: false })
+  const [hash, setHash] = useState(null)
+  const [tokenId, setTokenId] = useState(null)
+  const [mintPassword, setMintPassword] = useState(null)
+  const [showNotify, setShowNotify] = useState(false)
+  const [decimals, setDecimals] = useState(null)
+  const [allowance, setAllowance] = useState(null)
+  const [balance, setBalance] = useState(null)
+  const [price, setPrice] = useState(null)
+  const [creating, setCreating] = useState(false)
 
   const handlerContract = useContract(contractAddresses.vaultHandler[chainId], contractAddresses.vaultHandlerAbi, true)
   const covalContract = useContract(contractAddresses.coval[chainId], contractAddresses.covalAbi, true)
@@ -150,7 +150,7 @@ export default function Create(props: any) {
     }
   }
 
-  const [acct, setAcct] = React.useState('')
+  const [acct, setAcct] = useState('')
   useEffect(() => {
     if (account && acct != account) {
       setAcct(account)

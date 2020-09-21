@@ -1,14 +1,14 @@
-import { Box, Flex, Grid, Text, Link, Image, SimpleGrid, Stack } from '@chakra-ui/core'
+import { Box, Flex, Text, Link, Image, Stack } from '@chakra-ui/core'
 import Loader from 'react-loader'
 import { useWeb3React } from '@web3-react/core'
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { validImage } from '../utils'
 import { EMBLEM_API } from '../constants'
 
 export default function VaultList() {
   const { account, chainId } = useWeb3React()
-  const [vaults, setVaults] = React.useState([])
-  const [state, setState] = React.useState({ loaded: false })
+  const [vaults, setVaults] = useState([])
+  const [state, setState] = useState({ loaded: false })
 
   const getVaults = async () => {
     const responce = await fetch(EMBLEM_API + '/vaults/' + account, {
