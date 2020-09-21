@@ -357,7 +357,10 @@ export default function Create(props: any) {
                   ) : (
                     <Stack direction="row" align="flex-start" spacing="0rem" flexWrap="wrap" shouldWrapChildren>
                       <Box maxW="sm" borderWidth="1px" p={1} rounded="lg" overflow="hidden">
-                        <Text>Circuits of Value Balance: {balance * Math.pow(10, -decimals)}</Text>
+                        <Text>
+                          Circuits of Value Balance:{' '}
+                          {account ? balance * Math.pow(10, -decimals) : '¯\\_(ツ)_/¯ No wallet connected'}
+                        </Text>
                       </Box>
                     </Stack>
                   )}
