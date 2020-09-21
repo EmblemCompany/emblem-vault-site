@@ -24,6 +24,7 @@ export default function Vault() {
   const [vaultValues, setVaultValues] = React.useState([])
   const [vaultAddresses, setVaultAddresses] = React.useState([])
   const [vaultPrivacy, setVaultPrivacy] = React.useState(false)
+  const [vaultChainId, setVaultChainId] = React.useState(1)
   const [hash, setHash] = React.useState(null)
   const [currCoin, setCurrCoin] = React.useState('')
   const [currAddr, setCurrAddr] = React.useState('')
@@ -42,8 +43,7 @@ export default function Vault() {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
-        service: 'evmetadata',
-        chainId: chainId.toString(),
+        service: 'evmetadata'
       },
     })
     const jsonData = await responce.json()
@@ -54,6 +54,7 @@ export default function Vault() {
     setVaultValues(jsonData.values)
     setVaultDesc(jsonData.description)
     setVaultAddresses(jsonData.addresses)
+    setVaultChainId(jsonData.network == 'mainnet' ? 1 : 4)
     setState({ loaded: true })
   }
 
@@ -86,7 +87,10 @@ export default function Vault() {
   }, [])
 
   useEffect(() => {
-    getContractStates()
+    account && chainId && vaultChainId && (chainId == vaultChainId)?
+      getContractStates()
+    :
+      null
   })
 
   function splitDescription(words) {
@@ -124,14 +128,16 @@ export default function Vault() {
               />
             </Stack>
             <Stack align="center">
-              <Box mt="1" fontWeight="semibold" as="h4" lineHeight="tight">
+              <Box mt="1" as="h4" lineHeight="tight">
                 {splitDescription(vaultDesc)}
               </Box>
             </Stack>
             <Box p="6">
               <Box d="flex" alignItems="baseline">
-                <Box color="gray.500" fontWeight="semibold" letterSpacing="wide" fontSize="sm" ml="2">
-                  <h4>Current Contents:</h4>
+                <Box color="gray.500"letterSpacing="wide" fontSize="sm" ml="2">
+                <Text as="h4" fontWeight="semibold">
+                    Current Contents:
+                    </Text>
                   {vaultPrivacy ? (
                     <>
                       <Text>Contents hidden. Enter password to unlock.</Text>
@@ -175,6 +181,19 @@ export default function Vault() {
                   </ButtonGroup>
                 </Stack>
               </Box>
+              <Box d="flex" alignItems="baseline" justifyContent="space-between" mt="4">
+                  <Button
+                    width="100%"
+                    as="a"
+                    {...{
+                      href: 'https://' + ((vaultChainId == 4) ? 'rinkeby.' : '') + 'opensea.io/assets/' + contractAddresses.emblemVault[vaultChainId] + '/' + tokenId,
+                      target: '_blank',
+                      rel: 'noopener noreferrer',
+                    }}
+                  >
+                    {mine ? 'Sell/Gift/Send' : 'Make an Offer'}
+                  </Button>
+                </Box>
               <Box d="flex" alignItems="baseline" justifyContent="space-between" mt="4">
                 {mine ? (
                   <Button

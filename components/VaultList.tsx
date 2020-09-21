@@ -25,7 +25,10 @@ export default function VaultList() {
   }
 
   useEffect(() => {
+    account && chainId ?
     getVaults()
+    : 
+    setState({ loaded: true })
   }, [])
 
   return (
@@ -52,7 +55,7 @@ export default function VaultList() {
             }
             return (
               <Box key={index} {...flexSettings} onClick={redirect}>
-                <Text fontWeight="semibold" textAlign="center">
+                <Text fontWeight="semibold" textAlign="center" mt={2}>
                   {vault.name}
                 </Text>
                 <Stack align="center">

@@ -155,7 +155,10 @@ export default function Create(props: any) {
   }, [account, acct])
 
   useEffect(() => {
-    getContractStates()
+    account && chainId ?
+      getContractStates()
+    :
+      null
   })
 
   return (
@@ -327,31 +330,32 @@ export default function Create(props: any) {
                   {isCovalApproved ? (
                     <Stack direction="row" align="flex-start" spacing="0rem" flexWrap="wrap" shouldWrapChildren>
                       <Box maxW="sm" borderWidth="1px" p={1} rounded="lg" overflow="hidden">
-                        <Text>Creating a vault spends {price} Coval from your wallet</Text>
+                        <Text>Creating a vault spends {price * Math.pow(10,-decimals)} Coval from your wallet</Text>
                       </Box>
                     </Stack>
                   ) : null}
 
                   {Number(balance) < Number(price) ? (
-                    <Stack direction="row" align="flex-start" spacing="0rem" flexWrap="wrap" shouldWrapChildren>
-                      <Box maxW="sm" borderWidth="1px" p={1} rounded="lg" overflow="hidden">
+                    <Box d="flex" alignItems="baseline" justifyContent="space-between" mt="2">
                         <Button
-                          onClick={() => {
-                            location.href =
-                              location.origin +
-                              '/buy?chain=' +
-                              chainId +
-                              '&output=0x3D658390460295FB963f54dC0899cfb1c30776Df&input=0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'
-                          }}
+                        width="100%"
+                        as="a"
+                        {...{
+                          href: location.origin +
+                          '/buy?chain=' +
+                          chainId +
+                          '&output=0x3D658390460295FB963f54dC0899cfb1c30776Df&input=0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
+                          target: "_blank",
+                          rel: 'noopener noreferrer',
+                        }}
                         >
                           Buy coval
                         </Button>
-                      </Box>
-                    </Stack>
+                    </Box>
                   ) : (
                     <Stack direction="row" align="flex-start" spacing="0rem" flexWrap="wrap" shouldWrapChildren>
                       <Box maxW="sm" borderWidth="1px" p={1} rounded="lg" overflow="hidden">
-                        <Text>Circuits of Value Balance: {balance}</Text>
+                        <Text>Circuits of Value Balance: {balance * Math.pow(10,-decimals)}</Text>
                       </Box>
                     </Stack>
                   )}
