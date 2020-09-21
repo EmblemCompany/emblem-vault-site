@@ -73,11 +73,10 @@ export default function Vault() {
       })
   }
 
-  const handleClaim = async () => {
-    // console.log(tokenId)
+  const handleClaim = async () => {    
     emblemContract.transferFrom(account, BURN_ADDRESS, tokenId).then(({ hash }: { hash: string }) => {
-      setHash(hash)
-      setClaiming(true);
+      setClaiming(true)
+      setTimeout(()=>{setHash(hash)}, 100) // Solving State race condition where transaction watcher wouldn't notice we were claiming
     })
   }
 
@@ -200,9 +199,9 @@ export default function Vault() {
             <TransactionToast
               hash={hash}
               onComplete={() => {
-                setHash(null)
                 if (claiming) {
                   alert('Claim tx complete. Now ask server for keys')
+                  setHash(null)
                 }
               }}
             />
