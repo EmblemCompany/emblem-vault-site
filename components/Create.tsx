@@ -80,7 +80,9 @@ export default function Create(props: any) {
       .buyWithPaymentOnly(vaultAddress, tokenId, mintPassword)
       .then(({ hash }: { hash: string }) => {
         setCreating(true)
-        setTimeout(()=>{setHash(hash)}, 100) // Solving State race condition where transaction watcher wouldn't notice we were creating
+        setTimeout(() => {
+          setHash(hash)
+        }, 100) // Solving State race condition where transaction watcher wouldn't notice we were creating
       })
       .catch((error: ErrorWithCode) => {
         if (error?.code !== 4001) {
@@ -415,8 +417,8 @@ export default function Create(props: any) {
                 if (!creating) {
                   fireMetaMask()
                 } else {
-                  location.href = location.origin + "/vaultlist"
-                }                
+                  location.href = location.origin + '/vaultlist'
+                }
               }}
             />
           ) : null}

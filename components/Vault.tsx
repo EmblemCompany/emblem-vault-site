@@ -74,10 +74,12 @@ export default function Vault() {
       })
   }
 
-  const handleClaim = async () => {    
+  const handleClaim = async () => {
     emblemContract.transferFrom(account, BURN_ADDRESS, tokenId).then(({ hash }: { hash: string }) => {
       setClaiming(true)
-      setTimeout(()=>{setHash(hash)}, 100) // Solving State race condition where transaction watcher wouldn't notice we were claiming
+      setTimeout(() => {
+        setHash(hash)
+      }, 100) // Solving State race condition where transaction watcher wouldn't notice we were claiming
     })
   }
 
@@ -125,7 +127,9 @@ export default function Vault() {
             </Stack>
             <Stack align="center">
               <Box mt="1" ml="4" as="h4" lineHeight="tight">
-                <Text as="h4" ml="4" mr="4">{splitDescription(vaultDesc)}</Text>
+                <Text as="h4" ml="4" mr="4">
+                  {splitDescription(vaultDesc)}
+                </Text>
               </Box>
             </Stack>
             <Box p="6">
@@ -218,18 +222,16 @@ export default function Vault() {
           </Box>
         </Flex>
         {hash ? (
-            <TransactionToast
-              hash={hash}
-              onComplete={() => {
-                if (claiming) {
-                  alert('Claim tx complete. Now ask server for keys')
-                  setHash(null)
-                }
-              }}
-            />
-          ) : (
-            null
-          )}
+          <TransactionToast
+            hash={hash}
+            onComplete={() => {
+              if (claiming) {
+                alert('Claim tx complete. Now ask server for keys')
+                setHash(null)
+              }
+            }}
+          />
+        ) : null}
       </Loader>
     </>
   )
