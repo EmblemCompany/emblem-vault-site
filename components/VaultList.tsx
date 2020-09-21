@@ -76,7 +76,10 @@ export default function VaultList() {
                         )
                       })
                     ) : (
-                      <Text>Nothing in here! Click to fill 'er up!</Text>
+                      <Text>
+                        Nothing in here! <br />
+                        Click to fill 'er up!
+                      </Text>
                     )}
                   </Box>
                 </Box>
