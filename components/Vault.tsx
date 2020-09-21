@@ -145,11 +145,26 @@ export default function Vault() {
           <Box
             maxW="sm"
             borderWidth="1px"
-            borderColor={vaultChainId == 4 ? 'orange !important' : null}
+            borderColor={vaultChainId != chainId ? 'orange !important' : null}
             rounded="lg"
             overflow="hidden"
             alignItems="center"
           >
+            {vaultChainId != chainId ? (
+              <Box
+                mt="1"
+                fontWeight="semibold"
+                as="h3"
+                lineHeight="tight"
+                p={2}
+                textAlign="center"
+                textTransform="uppercase"
+                alignItems="center"
+                color="orange !important"
+              >
+                Your vault is on a different network than you are.
+              </Box>
+            ) : null}
             <Box
               mt="1"
               fontWeight="semibold"
