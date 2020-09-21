@@ -24,6 +24,15 @@ export default function VaultList() {
     setVaults(jsonData)
   }
 
+  const [acct, setAcct] = useState('')
+  useEffect(() => {
+    if (account && acct != account) {
+      setAcct(account)
+      setState({ loaded: false })
+      getVaults()
+    }
+  }, [account, acct])
+
   useEffect(() => {
     account && chainId ? getVaults() : setState({ loaded: true })
   }, [])
