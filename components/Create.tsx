@@ -49,6 +49,7 @@ export default function Create(props: any) {
   const [allowance, setAllowance] = React.useState(null)
   const [balance, setBalance] = React.useState(null)
   const [price, setPrice] = React.useState(null)
+  const [creating, setCreating] = React.useState(false)
 
   const handlerContract = useContract(contractAddresses.vaultHandler[chainId], contractAddresses.vaultHandlerAbi, true)
   const covalContract = useContract(contractAddresses.coval[chainId], contractAddresses.covalAbi, true)
@@ -78,7 +79,8 @@ export default function Create(props: any) {
     ;(handlerContract as Contract)
       .buyWithPaymentOnly(vaultAddress, tokenId, mintPassword)
       .then(({ hash }: { hash: string }) => {
-        setHash(hash)
+        setCreating(true)
+        setTimeout(()=>{setHash(hash)}, 100) // Solving State race condition where transaction watcher wouldn't notice we were creating
       })
       .catch((error: ErrorWithCode) => {
         if (error?.code !== 4001) {
@@ -410,7 +412,11 @@ export default function Create(props: any) {
               hash={hash}
               onComplete={() => {
                 setHash(null)
-                fireMetaMask()
+                if (!creating) {
+                  fireMetaMask()
+                } else {
+                  location.href = location.origin + "/vaultlist"
+                }                
               }}
             />
           ) : null}
