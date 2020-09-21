@@ -14,6 +14,7 @@ import TokenBalance from './TokenBalance'
 import { WETH, ChainId, Token } from '@uniswap/sdk'
 import WalletConnect from './WalletConnect'
 import { QueryParameters } from '../constants'
+import { Coval } from '../tokens'
 
 const Settings = dynamic(() => import('./Settings'))
 
@@ -89,7 +90,7 @@ export default function Layout({ children }: { children: ReactNode }): JSX.Eleme
               </Box>
             )
           ) : (
-            [firstToken, secondToken]
+            [Coval, firstToken, secondToken]
               .filter((token) => token)
               .filter((token) => !token?.equals(WETH[token.chainId]))
               .map((token) => (
