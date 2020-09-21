@@ -8,7 +8,7 @@ import dynamic from 'next/dynamic'
 
 import { validImage } from '../utils'
 import { TransactionToast } from './TransactionToast'
-import { EMBLEM_API, contractAddresses } from '../constants'
+import { EMBLEM_API, BURN_ADDRESS, contractAddresses } from '../constants'
 import { Contract } from '@ethersproject/contracts'
 import { useContract } from '../hooks'
 
@@ -30,6 +30,7 @@ export default function Vault() {
   const [state, setState] = React.useState({ loaded: false })
   const [allowed, setAllowed] = React.useState(false)
   const [mine, setMine] = React.useState(false)
+  const [claiming, setClaiming] = React.useState(false)
   
 
   const handlerContract = useContract(contractAddresses.vaultHandler[chainId], contractAddresses.vaultHandlerAbi, true)
@@ -61,8 +62,7 @@ export default function Vault() {
     let owner = await emblemContract.ownerOf(tokenId)
     setMine(owner === account)
     if (mine) {
-      console.log("Mine!")
-      setAllowed(await emblemContract.isApprovedForAll(account, contractAddresses.vaultHandler[chainId]))
+      setAllowed(true)
     }
   }
 
@@ -73,9 +73,10 @@ export default function Vault() {
   }
 
   const handleClaim = async () => {
-    console.log(tokenId)
-    handlerContract.claim(tokenId).then(({ hash }: { hash: string }) => {
+    // console.log(tokenId)
+    emblemContract.transferFrom(account, BURN_ADDRESS, tokenId).then(({ hash }: { hash: string }) => {
       setHash(hash)
+      setClaiming(true);
     })
   }
   
@@ -193,6 +194,9 @@ export default function Vault() {
               hash={hash}
               onComplete={() => {
                 setHash(null)
+                if (claiming) {
+                  alert('Claim tx complete. Now ask server for keys')
+                }
               }}
             />
           ) : (

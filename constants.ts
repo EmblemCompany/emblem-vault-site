@@ -42,6 +42,8 @@ export const contractAddresses = {
   covalAbi: CovalABI
 }
 
+export const BURN_ADDRESS = "0x5D152dd902CC9198B97E5b6Cf5fc23a8e4330180"
+
 export const EMBLEM_API = 'https://api.emblemvault.io'
 
 export enum QueryParameters {
