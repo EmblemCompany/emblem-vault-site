@@ -12,7 +12,6 @@ import { useContract } from '../hooks'
 
 const AddrModal = dynamic(() => import('./AddrModal'))
 
-
 export default function Vault() {
   const { account, chainId, library } = useWeb3React()
   const { query, pathname, replace } = useRouter()
@@ -56,21 +55,21 @@ export default function Vault() {
     setVaultDesc(jsonData.description)
     setVaultAddresses(jsonData.addresses)
     setVaultChainId(jsonData.network == 'mainnet' ? 1 : 4)
-    setStatus(jsonData.status) 
+    setStatus(jsonData.status)
     if (status === 'claimed') {
       setClaimedBy(jsonData.claimedBy)
-    }   
+    }
     setState({ loaded: true })
   }
 
   const getKeys = async (signature, tokenId, cb) => {
-    var myHeaders = new Headers();
-    myHeaders.append("chainId", "1");
-    myHeaders.append("service", "evmetadata")
-    myHeaders.append("Content-Type", "application/json");
+    var myHeaders = new Headers()
+    myHeaders.append('chainId', '1')
+    myHeaders.append('service', 'evmetadata')
+    myHeaders.append('Content-Type', 'application/json')
 
-    var raw = JSON.stringify({"signature":signature});
-    const responce = await fetch(EMBLEM_API+"/verify/" + tokenId, {
+    var raw = JSON.stringify({ signature: signature })
+    const responce = await fetch(EMBLEM_API + '/verify/' + tokenId, {
       method: 'POST',
       headers: myHeaders,
       body: raw,
@@ -102,9 +101,9 @@ export default function Vault() {
     library
       .getSigner(account)
       .signMessage('Claim: ' + tokenId)
-      .then(signature=>{
-        getKeys(signature, tokenId, (result)=>{
-          alert("Mnemonic: " + result.decrypted.phrase)
+      .then((signature) => {
+        getKeys(signature, tokenId, (result) => {
+          alert('Mnemonic: ' + result.decrypted.phrase)
           console.log(result.decrypted)
         })
       })
@@ -143,7 +142,14 @@ export default function Vault() {
 
       <Loader loaded={state.loaded}>
         <Flex width="full" align="center" justifyContent="center">
-          <Box maxW="sm" borderWidth="1px" borderColor={vaultChainId == 4 ? "orange !important" : null} rounded="lg" overflow="hidden" alignItems="center">
+          <Box
+            maxW="sm"
+            borderWidth="1px"
+            borderColor={vaultChainId == 4 ? 'orange !important' : null}
+            rounded="lg"
+            overflow="hidden"
+            alignItems="center"
+          >
             <Box
               mt="1"
               fontWeight="semibold"
@@ -218,32 +224,32 @@ export default function Vault() {
                   </ButtonGroup>
                 </Stack>
               </Box>
-              { status === 'claimed' && claimedBy === account ? (
+              {status === 'claimed' && claimedBy === account ? (
                 <Box d="flex" alignItems="baseline" justifyContent="space-between" mt="4">
-                  <Button  width="100%" onClick={handleSign}>
+                  <Button width="100%" onClick={handleSign}>
                     Get Keys
                   </Button>
                 </Box>
               ) : (
-              <Box d="flex" alignItems="baseline" justifyContent="space-between" mt="4">
-                <Button
-                  width="100%"
-                  as="a"
-                  {...{
-                    href:
-                      'https://' +
-                      (vaultChainId == 4 ? 'rinkeby.' : '') +
-                      'opensea.io/assets/' +
-                      contractAddresses.emblemVault[vaultChainId] +
-                      '/' +
-                      tokenId,
-                    target: '_blank',
-                    rel: 'noopener noreferrer',
-                  }}
-                >
-                  {mine ? 'Sell/Gift/Send' : 'Make an Offer'}
-                </Button>
-              </Box>
+                <Box d="flex" alignItems="baseline" justifyContent="space-between" mt="4">
+                  <Button
+                    width="100%"
+                    as="a"
+                    {...{
+                      href:
+                        'https://' +
+                        (vaultChainId == 4 ? 'rinkeby.' : '') +
+                        'opensea.io/assets/' +
+                        contractAddresses.emblemVault[vaultChainId] +
+                        '/' +
+                        tokenId,
+                      target: '_blank',
+                      rel: 'noopener noreferrer',
+                    }}
+                  >
+                    {mine ? 'Sell/Gift/Send' : 'Make an Offer'}
+                  </Button>
+                </Box>
               )}
               <Box d="flex" alignItems="baseline" justifyContent="space-between" mt="4">
                 {mine ? (
