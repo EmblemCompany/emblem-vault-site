@@ -401,7 +401,7 @@ export default function Create(props: any) {
           {showNotify ? (
             <Notify
               color="green"
-              message="Creating your vault ..."
+              message="Asking the blockchain if it is willing to create your vault ..."
               onClose={() => {
                 setShowNotify(false)
               }}
