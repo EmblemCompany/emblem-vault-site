@@ -5,17 +5,16 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
 import Loader from 'react-loader'
 import dynamic from 'next/dynamic'
-
 import { validImage } from '../utils'
 import { TransactionToast } from './TransactionToast'
 import { EMBLEM_API, BURN_ADDRESS, contractAddresses } from '../constants'
-// import { Contract } from '@ethersproject/contracts'
 import { useContract } from '../hooks'
 
 const AddrModal = dynamic(() => import('./AddrModal'))
 
+
 export default function Vault() {
-  const { account, chainId } = useWeb3React()
+  const { account, chainId, library } = useWeb3React()
   const { query, pathname, replace } = useRouter()
   const [tokenId, setTokenId] = useState(query.id)
   const [vaultName, setVaultName] = useState('')
@@ -32,6 +31,8 @@ export default function Vault() {
   const [allowed, setAllowed] = useState(false)
   const [mine, setMine] = useState(false)
   const [claiming, setClaiming] = useState(false)
+  const [status, setStatus] = useState('claimed')
+  const [claimedBy, setClaimedBy] = useState(null)
 
   const handlerContract = useContract(contractAddresses.vaultHandler[chainId], contractAddresses.vaultHandlerAbi, true)
   const emblemContract = useContract(contractAddresses.emblemVault[chainId], contractAddresses.emblemAbi, true)
@@ -55,7 +56,28 @@ export default function Vault() {
     setVaultDesc(jsonData.description)
     setVaultAddresses(jsonData.addresses)
     setVaultChainId(jsonData.network == 'mainnet' ? 1 : 4)
+    setStatus(jsonData.status) 
+    if (status === 'claimed') {
+      setClaimedBy(jsonData.claimedBy)
+    }   
     setState({ loaded: true })
+  }
+
+  const getKeys = async (signature, tokenId, cb) => {
+    var myHeaders = new Headers();
+    myHeaders.append("chainId", "1");
+    myHeaders.append("service", "evmetadata")
+    myHeaders.append("Content-Type", "application/json");
+
+    var raw = JSON.stringify({"signature":signature});
+    const responce = await fetch(EMBLEM_API+"/verify/" + tokenId, {
+      method: 'POST',
+      headers: myHeaders,
+      body: raw,
+      redirect: 'follow',
+    })
+    const jsonData = await responce.json()
+    return cb(jsonData)
   }
 
   const getContractStates = async () => {
@@ -64,6 +86,7 @@ export default function Vault() {
     if (mine) {
       setAllowed(true)
     }
+    console.log('status', status, 'claimedBy', claimedBy)
   }
 
   const handleApprove = async () => {
@@ -71,6 +94,19 @@ export default function Vault() {
       .setApprovalForAll(contractAddresses.vaultHandler[chainId], true)
       .then(({ hash }: { hash: string }) => {
         setHash(hash)
+      })
+  }
+
+  const handleSign = async () => {
+    // library. .personal.sign(library.toHex("Claim:358746"),library.eth.defaultAccount, (err,res) => console.log(err,res))
+    library
+      .getSigner(account)
+      .signMessage('Claim: ' + tokenId)
+      .then(signature=>{
+        getKeys(signature, tokenId, (result)=>{
+          alert("Mnemonic: " + result.decrypted.phrase)
+          console.log(result.decrypted)
+        })
       })
   }
 
@@ -181,6 +217,13 @@ export default function Vault() {
                   </ButtonGroup>
                 </Stack>
               </Box>
+              { status === 'claimed' && claimedBy === account ? (
+                <Box d="flex" alignItems="baseline" justifyContent="space-between" mt="4">
+                  <Button  width="100%" onClick={handleSign}>
+                    Get Keys
+                  </Button>
+                </Box>
+              ) : (
               <Box d="flex" alignItems="baseline" justifyContent="space-between" mt="4">
                 <Button
                   width="100%"
@@ -200,6 +243,7 @@ export default function Vault() {
                   {mine ? 'Sell/Gift/Send' : 'Make an Offer'}
                 </Button>
               </Box>
+              )}
               <Box d="flex" alignItems="baseline" justifyContent="space-between" mt="4">
                 {mine ? (
                   <Button
