@@ -30,7 +30,6 @@ export default function Vault() {
   const [state, setState] = React.useState({ loaded: false })
   const [allowed, setAllowed] = React.useState(false)
   const [mine, setMine] = React.useState(false)
-  
 
   const handlerContract = useContract(contractAddresses.vaultHandler[chainId], contractAddresses.vaultHandlerAbi, true)
   const emblemContract = useContract(contractAddresses.emblemVault[chainId], contractAddresses.emblemAbi, true)
@@ -61,15 +60,17 @@ export default function Vault() {
     let owner = await emblemContract.ownerOf(tokenId)
     setMine(owner === account)
     if (mine) {
-      console.log("Mine!")
+      console.log('Mine!')
       setAllowed(await emblemContract.isApprovedForAll(account, contractAddresses.vaultHandler[chainId]))
     }
   }
 
   const handleApprove = async () => {
-    emblemContract.setApprovalForAll(contractAddresses.vaultHandler[chainId], true).then(({ hash }: { hash: string }) => {
-      setHash(hash)
-    })
+    emblemContract
+      .setApprovalForAll(contractAddresses.vaultHandler[chainId], true)
+      .then(({ hash }: { hash: string }) => {
+        setHash(hash)
+      })
   }
 
   const handleClaim = async () => {
@@ -78,13 +79,12 @@ export default function Vault() {
       setHash(hash)
     })
   }
-  
 
   useEffect(() => {
     getVault()
   }, [])
 
-  useEffect(()=>{
+  useEffect(() => {
     getContractStates()
   })
 
@@ -169,35 +169,40 @@ export default function Vault() {
                         >
                           Put {addr.coin == 'ETH' ? addr.coin + '/ERC20' : addr.coin} In
                         </Button>
-                      )                      
-                    })}                    
-                  </ButtonGroup>                  
+                      )
+                    })}
+                  </ButtonGroup>
                 </Stack>
               </Box>
               <Box d="flex" alignItems="baseline" justifyContent="space-between" mt="4">
-                {mine ? (<Button width="100%" onClick={()=>{
-                  if (allowed) {
-                    handleClaim()
-                  } else {
-                    handleApprove()
-                  }
-                }}>
-                  {allowed? 'Claim': "Approve"}
-                </Button>): ''}
-              </Box>              
+                {mine ? (
+                  <Button
+                    width="100%"
+                    onClick={() => {
+                      if (allowed) {
+                        handleClaim()
+                      } else {
+                        handleApprove()
+                      }
+                    }}
+                  >
+                    {allowed ? 'Claim' : 'Approve'}
+                  </Button>
+                ) : (
+                  ''
+                )}
+              </Box>
             </Box>
-          </Box>          
+          </Box>
         </Flex>
         {hash ? (
-            <TransactionToast
-              hash={hash}
-              onComplete={() => {
-                setHash(null)
-              }}
-            />
-          ) : (
-            null
-          )}
+          <TransactionToast
+            hash={hash}
+            onComplete={() => {
+              setHash(null)
+            }}
+          />
+        ) : null}
       </Loader>
     </>
   )
