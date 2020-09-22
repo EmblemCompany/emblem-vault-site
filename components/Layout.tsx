@@ -144,6 +144,22 @@ export default function Layout({ children }: { children: ReactNode }): JSX.Eleme
               ))}
           </Stack>
         )}
+        <Stack position="absolute" bottom={0} right={0} alignItems="flex-end" spacing="1rem">
+          <Button
+            as="a"
+            {...{
+              href:
+                location.origin +
+                '/buy?chain=' +
+                chainId +
+                '&output=0x3D658390460295FB963f54dC0899cfb1c30776Df&input=0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
+              target: '_blank',
+              rel: 'noopener noreferrer',
+            }}
+          >
+            Buy coval
+          </Button>
+        </Stack>
       </ColorBox>
     </>
   )
