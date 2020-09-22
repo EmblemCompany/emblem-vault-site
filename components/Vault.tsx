@@ -64,7 +64,7 @@ export default function Vault() {
 
   const getKeys = async (signature, tokenId, cb) => {
     var myHeaders = new Headers()
-    myHeaders.append('chainId', '1')
+    myHeaders.append('chainId', chainId.toString())
     myHeaders.append('service', 'evmetadata')
     myHeaders.append('Content-Type', 'application/json')
 
