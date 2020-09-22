@@ -12,7 +12,6 @@ import { useContract } from '../hooks'
 
 const AddrModal = dynamic(() => import('./AddrModal'))
 
-
 export default function Vault() {
   const { account, chainId, library } = useWeb3React()
   const { query, pathname, replace } = useRouter()
@@ -23,7 +22,7 @@ export default function Vault() {
   const [vaultValues, setVaultValues] = useState([])
   const [vaultAddresses, setVaultAddresses] = useState([])
   const [vaultPrivacy, setVaultPrivacy] = useState(false)
-  const [vaultChainId, setVaultChainId] = useState(1)
+  const [vaultChainId, setVaultChainId] = useState(null)
   const [hash, setHash] = useState(null)
   const [currCoin, setCurrCoin] = useState('')
   const [currAddr, setCurrAddr] = useState('')
@@ -56,21 +55,21 @@ export default function Vault() {
     setVaultDesc(jsonData.description)
     setVaultAddresses(jsonData.addresses)
     setVaultChainId(jsonData.network == 'mainnet' ? 1 : 4)
-    setStatus(jsonData.status) 
+    setStatus(jsonData.status)
     if (status === 'claimed') {
       setClaimedBy(jsonData.claimedBy)
-    }   
+    }
     setState({ loaded: true })
   }
 
   const getKeys = async (signature, tokenId, cb) => {
-    var myHeaders = new Headers();
-    myHeaders.append("chainId", "1");
-    myHeaders.append("service", "evmetadata")
-    myHeaders.append("Content-Type", "application/json");
+    var myHeaders = new Headers()
+    myHeaders.append('chainId', '1')
+    myHeaders.append('service', 'evmetadata')
+    myHeaders.append('Content-Type', 'application/json')
 
-    var raw = JSON.stringify({"signature":signature});
-    const responce = await fetch(EMBLEM_API+"/verify/" + tokenId, {
+    var raw = JSON.stringify({ signature: signature })
+    const responce = await fetch(EMBLEM_API + '/verify/' + tokenId, {
       method: 'POST',
       headers: myHeaders,
       body: raw,
@@ -102,9 +101,9 @@ export default function Vault() {
     library
       .getSigner(account)
       .signMessage('Claim: ' + tokenId)
-      .then(signature=>{
-        getKeys(signature, tokenId, (result)=>{
-          alert("Mnemonic: " + result.decrypted.phrase)
+      .then((signature) => {
+        getKeys(signature, tokenId, (result) => {
+          alert('Mnemonic: ' + result.decrypted.phrase)
           console.log(result.decrypted)
         })
       })
@@ -124,6 +123,7 @@ export default function Vault() {
   }, [])
 
   useEffect(() => {
+    console.log('Account chainid = ' + chainId + ' and vaultchainid = ' + vaultChainId)
     account && chainId && vaultChainId && chainId == vaultChainId ? getContractStates() : null
   })
 
@@ -142,7 +142,29 @@ export default function Vault() {
 
       <Loader loaded={state.loaded}>
         <Flex width="full" align="center" justifyContent="center">
-          <Box maxW="sm" borderWidth="1px" rounded="lg" overflow="hidden" alignItems="center">
+          <Box
+            maxW="sm"
+            borderWidth="1px"
+            borderColor={vaultChainId != chainId ? 'orange.500' : null}
+            rounded="lg"
+            overflow="hidden"
+            alignItems="center"
+          >
+            {vaultChainId != chainId ? (
+              <Box
+                mt="1"
+                fontWeight="semibold"
+                as="h3"
+                lineHeight="tight"
+                p={2}
+                textAlign="center"
+                textTransform="uppercase"
+                alignItems="center"
+                color="orange.500"
+              >
+                Your vault is on a different network than you are.
+              </Box>
+            ) : null}
             <Box
               mt="1"
               fontWeight="semibold"
@@ -162,7 +184,7 @@ export default function Vault() {
               />
             </Stack>
             <Stack align="center">
-              <Box mt="1" ml="4" as="h4" lineHeight="tight">
+              <Box mt="1" ml="4" lineHeight="tight">
                 <Text as="h4" ml="4" mr="4">
                   {splitDescription(vaultDesc)}
                 </Text>
@@ -217,32 +239,32 @@ export default function Vault() {
                   </ButtonGroup>
                 </Stack>
               </Box>
-              { status === 'claimed' && claimedBy === account ? (
+              {status === 'claimed' && claimedBy === account ? (
                 <Box d="flex" alignItems="baseline" justifyContent="space-between" mt="4">
-                  <Button  width="100%" onClick={handleSign}>
+                  <Button width="100%" onClick={handleSign}>
                     Get Keys
                   </Button>
                 </Box>
               ) : (
-              <Box d="flex" alignItems="baseline" justifyContent="space-between" mt="4">
-                <Button
-                  width="100%"
-                  as="a"
-                  {...{
-                    href:
-                      'https://' +
-                      (vaultChainId == 4 ? 'rinkeby.' : '') +
-                      'opensea.io/assets/' +
-                      contractAddresses.emblemVault[vaultChainId] +
-                      '/' +
-                      tokenId,
-                    target: '_blank',
-                    rel: 'noopener noreferrer',
-                  }}
-                >
-                  {mine ? 'Sell/Gift/Send' : 'Make an Offer'}
-                </Button>
-              </Box>
+                <Box d="flex" alignItems="baseline" justifyContent="space-between" mt="4">
+                  <Button
+                    width="100%"
+                    as="a"
+                    {...{
+                      href:
+                        'https://' +
+                        (vaultChainId == 4 ? 'rinkeby.' : '') +
+                        'opensea.io/assets/' +
+                        contractAddresses.emblemVault[vaultChainId] +
+                        '/' +
+                        tokenId,
+                      target: '_blank',
+                      rel: 'noopener noreferrer',
+                    }}
+                  >
+                    {mine ? 'Sell/Gift/Send' : 'Make an Offer'}
+                  </Button>
+                </Box>
               )}
               <Box d="flex" alignItems="baseline" justifyContent="space-between" mt="4">
                 {mine ? (
