@@ -44,7 +44,8 @@ export default function Create(props: any) {
   const [hash, setHash] = useState(null)
   const [tokenId, setTokenId] = useState(null)
   const [mintPassword, setMintPassword] = useState(null)
-  const [showNotify, setShowNotify] = useState(false)
+  const [showPreVaultMsg, setShowPreVaultMsg] = useState(false)
+  const [showMakingVaultMsg, setShowMakingVaultMsg] = useState(false)
   const [decimals, setDecimals] = useState(null)
   const [allowance, setAllowance] = useState(null)
   const [balance, setBalance] = useState(null)
@@ -76,12 +77,13 @@ export default function Create(props: any) {
   }
 
   const fireMetaMask = () => {
+    setCreating(true)
     ;(handlerContract as Contract)
       .buyWithPaymentOnly(vaultAddress, tokenId, mintPassword)
       .then(({ hash }: { hash: string }) => {
-        setCreating(true)
         setTimeout(() => {
           setHash(hash)
+          setShowMakingVaultMsg(true)
         }, 100) // Solving State race condition where transaction watcher wouldn't notice we were creating
       })
       .catch((error: ErrorWithCode) => {
@@ -126,7 +128,7 @@ export default function Create(props: any) {
       setHash(body.data.tx)
       setTokenId(body.data.tokenId)
       setMintPassword(body.password)
-      setShowNotify(true)
+      setShowPreVaultMsg(true)
     })
   }
 
@@ -388,6 +390,10 @@ export default function Create(props: any) {
                         <Button isDisabled type="submit">
                           Insufficient Balance
                         </Button>
+                      ) : hash || creating || showPreVaultMsg || showMakingVaultMsg ? (
+                        <Button isDisabled type="submit">
+                          Making Vault ...
+                        </Button>
                       ) : (
                         <Button onClick={handleSubmit} type="submit">
                           DO IT!
@@ -401,14 +407,23 @@ export default function Create(props: any) {
           </Tabs>
         </Box>
       </Flex>
-      {showNotify || hash ? (
+      {showPreVaultMsg || showMakingVaultMsg || hash ? (
         <Stack direction="column" align="left" shouldWrapChildren>
-          {showNotify ? (
+          {showPreVaultMsg ? (
             <Notify
               color="green"
               message="Asking the blockchain if it is willing to create your vault ..."
               onClose={() => {
-                setShowNotify(false)
+                setShowPreVaultMsg(false)
+              }}
+            />
+          ) : null}
+          {showMakingVaultMsg ? (
+            <Notify
+              color="green"
+              message="Chaining blocks together to create your vault ..."
+              onClose={() => {
+                setShowMakingVaultMsg(false)
               }}
             />
           ) : null}
@@ -419,7 +434,9 @@ export default function Create(props: any) {
                 setHash(null)
                 if (!creating) {
                   fireMetaMask()
+                  setShowPreVaultMsg(false)
                 } else {
+                  setShowMakingVaultMsg(false)
                   location.href = location.origin + '/vaultlist'
                 }
               }}
