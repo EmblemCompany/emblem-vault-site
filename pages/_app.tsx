@@ -66,6 +66,18 @@ export default class App extends NextApp {
         <Head>
           <title key="title">Emblem Vault</title>
           <meta key="description" name="Description" content="An entire wallet inside a token" />
+          <script src="https://cdn.trackjs.com/agent/v3/latest/t.js"></script>
+          <script
+              dangerouslySetInnerHTML={{
+                __html: `
+                window.TrackJS && TrackJS.install({ 
+                  token: "45e5b3e45c734f6c890f25e66f17d43d",
+                  application: "ev"
+                  // for more configuration options, see https://docs.trackjs.com
+                });
+              `,
+              }}
+            />
         </Head>
         <Web3ReactProvider getLibrary={getLibrary}>
           <ThemeProvider theme={theme}>
