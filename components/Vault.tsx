@@ -11,6 +11,7 @@ import { EMBLEM_API, BURN_ADDRESS, contractAddresses } from '../constants'
 import { useContract } from '../hooks'
 
 const AddrModal = dynamic(() => import('./AddrModal'))
+const KeysModal = dynamic(() => import('./KeysModal'))
 
 export default function Vault() {
   const { account, chainId, library } = useWeb3React()
@@ -32,11 +33,15 @@ export default function Vault() {
   const [claiming, setClaiming] = useState(false)
   const [status, setStatus] = useState('claimed')
   const [claimedBy, setClaimedBy] = useState(null)
+  const [mnemonic, setMnemonic] = useState('')
+  const [privKeyBTC, setPrivKeyBTC] = useState('')
+  const [privKeyETH, setPrivKeyETH] = useState('')
 
   const handlerContract = useContract(contractAddresses.vaultHandler[chainId], contractAddresses.vaultHandlerAbi, true)
   const emblemContract = useContract(contractAddresses.emblemVault[chainId], contractAddresses.emblemAbi, true)
 
   const { isOpen: isOpenAddrModal, onOpen: onOpenAddrModal, onClose: onCloseAddrModal } = useDisclosure()
+  const { isOpen: isOpenKeysModal, onOpen: onOpenKeysModal, onClose: onCloseKeysModal } = useDisclosure()
 
   const getVault = async () => {
     const responce = await fetch(EMBLEM_API + '/meta/' + tokenId, {
@@ -103,7 +108,11 @@ export default function Vault() {
       .signMessage('Claim: ' + tokenId)
       .then((signature) => {
         getKeys(signature, tokenId, (result) => {
-          alert('Mnemonic: ' + result.decrypted.phrase)
+          // alert('Mnemonic: ' + result.decrypted.phrase)
+          setMnemonic(result.decrypted.phrase)
+          setPrivKeyBTC('BTC KEY')
+          setPrivKeyETH('ETH KEY')
+          onOpenKeysModal()
           console.log(result.decrypted)
         })
       })
@@ -139,6 +148,14 @@ export default function Vault() {
   return (
     <>
       <AddrModal isOpen={isOpenAddrModal} onClose={onCloseAddrModal} addrCoin={currCoin} addrAddr={currAddr} />
+
+      <KeysModal
+        isOpen={isOpenKeysModal}
+        onClose={onCloseKeysModal}
+        mnemonic={mnemonic}
+        privKeyBTC={privKeyBTC}
+        privKeyETH={privKeyETH}
+      />
 
       <Loader loaded={state.loaded}>
         <Flex width="full" align="center" justifyContent="center">
