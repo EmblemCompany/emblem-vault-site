@@ -437,7 +437,7 @@ export default function Create(props: any) {
                   setShowPreVaultMsg(false)
                 } else {
                   setShowMakingVaultMsg(false)
-                  location.href = location.origin + '/vaultlist'
+                  location.href = location.origin + '/vault?id=' + tokenId
                 }
               }}
             />

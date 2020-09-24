@@ -1,17 +1,23 @@
-import { Box, Flex, Text, Link, Image, Stack } from '@chakra-ui/core'
+import { Box, Flex, Text, Link, Image, Stack, Spinner } from '@chakra-ui/core'
 import Loader from 'react-loader'
+import Refreshing from './Refreshing'
+import { useRouter } from 'next/router'
 import { useWeb3React } from '@web3-react/core'
 import { useEffect, useState } from 'react'
 import { validImage } from '../utils'
 import { EMBLEM_API } from '../constants'
 
 export default function VaultList() {
+  const { query } = useRouter()
   const { account, chainId } = useWeb3React()
   const [vaults, setVaults] = useState([])
   const [state, setState] = useState({ loaded: false })
+  const [loadingApi, setLoadingApi] = useState(false)
+  const [address, setAddress] = useState(query.address)
 
-  const getVaults = async () => {
-    const responce = await fetch(EMBLEM_API + '/vaults/' + account, {
+  const getVaults = async () => {    
+    loadCache()
+    const response = await fetch(EMBLEM_API + '/vaults/' + (address ? address : account), {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -19,9 +25,24 @@ export default function VaultList() {
         chainId: chainId.toString(),
       },
     })
-    const jsonData = await responce.json()
+    const jsonData = await response.json()
     setState({ loaded: true })
     setVaults(jsonData)
+    saveCache(jsonData)
+    setLoadingApi(false)
+  }
+
+  const loadCache = ()=>{
+    let vaults = JSON.parse(localStorage.getItem((address ? address : account) + '_'+ chainId+'_vaults')) // Load vaults from storage before updating from server!
+    if (vaults) {
+      setState({ loaded: true })
+      setVaults(vaults)
+      setLoadingApi(true)
+    }
+  }
+
+ const saveCache = (vaults)=>{
+    localStorage.setItem((address ? address : account) + '_'+ chainId+'_vaults', JSON.stringify(vaults))  // Save new state for later
   }
 
   const [acct, setAcct] = useState('')
@@ -48,6 +69,8 @@ export default function VaultList() {
 
   return (
     <Loader loaded={state.loaded}>
+      {loadingApi ? (<Refreshing/>) : ''}
+      
       <Flex w="100%" justify="center" flexWrap="wrap">
         {vaults.length ? (
           vaults.map((vault, index) => {
@@ -64,6 +87,7 @@ export default function VaultList() {
               mb: '6',
               rounded: 'lg',
               overflow: 'hidden',
+              borderColor: vault.status =='claimed'? 'green !important': ''
             }
             const redirect = function () {
               location.href = url

@@ -6,3 +6,8 @@ body {
   text-rendering: optimizeSpeed;
   line-height: 1.5;
 }
+
+html, body {
+  max-width: 100% !important;
+  overflow-x: hidden !important;
+}

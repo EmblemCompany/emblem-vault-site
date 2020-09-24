@@ -1,14 +1,16 @@
-import { Box, Flex, Image, Text, Stack, Button, ButtonGroup, Input, useDisclosure } from '@chakra-ui/core'
+import { Box, Flex, Image, Text, Stack, Button, ButtonGroup, Input, useDisclosure, Spinner } from '@chakra-ui/core'
 
 import { useWeb3React } from '@web3-react/core'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
+import Refreshing from './Refreshing'
 import Loader from 'react-loader'
 import dynamic from 'next/dynamic'
 import { validImage } from '../utils'
 import { TransactionToast } from './TransactionToast'
 import { EMBLEM_API, BURN_ADDRESS, contractAddresses } from '../constants'
 import { useContract } from '../hooks'
+import Tilt from 'react-tilt'
 
 const AddrModal = dynamic(() => import('./AddrModal'))
 const KeysModal = dynamic(() => import('./KeysModal'))
@@ -17,6 +19,7 @@ export default function Vault() {
   const { account, chainId, library } = useWeb3React()
   const { query, pathname, replace } = useRouter()
   const [tokenId, setTokenId] = useState(query.id)
+  const [experimental, setExperimental] = useState(query.experimental)
   const [vaultName, setVaultName] = useState('')
   const [vaultDesc, setVaultDesc] = useState('')
   const [vaultImage, setVaultImage] = useState('')
@@ -36,14 +39,16 @@ export default function Vault() {
   const [mnemonic, setMnemonic] = useState('')
   const [privKeyBTC, setPrivKeyBTC] = useState('')
   const [privKeyETH, setPrivKeyETH] = useState('')
+  const [loadingApi, setLoadingApi] = useState(false)
+  const [decryptedEffect, setDecryptedEffect] = useState('')
 
-  const handlerContract = useContract(contractAddresses.vaultHandler[chainId], contractAddresses.vaultHandlerAbi, true)
   const emblemContract = useContract(contractAddresses.emblemVault[chainId], contractAddresses.emblemAbi, true)
 
   const { isOpen: isOpenAddrModal, onOpen: onOpenAddrModal, onClose: onCloseAddrModal } = useDisclosure()
   const { isOpen: isOpenKeysModal, onOpen: onOpenKeysModal, onClose: onCloseKeysModal } = useDisclosure()
 
   const getVault = async () => {
+    loadCache()
     const responce = await fetch(EMBLEM_API + '/meta/' + tokenId, {
       method: 'GET',
       headers: {
@@ -53,6 +58,12 @@ export default function Vault() {
     })
     const jsonData = await responce.json()
     console.log(jsonData)
+    setStates(jsonData)
+    saveCache(jsonData)
+    setLoadingApi(false)
+  }
+
+  const setStates = (jsonData)=>{
     setVaultName(jsonData.name)
     setVaultImage(jsonData.image)
     setVaultDesc(jsonData.description)
@@ -65,6 +76,22 @@ export default function Vault() {
       setClaimedBy(jsonData.claimedBy)
     }
     setState({ loaded: true })
+    let isPvt = jsonData.addresses.filter(item=>{return item.address.includes('private:')}).length > 0
+    console.log("pvt", isPvt)
+    setVaultPrivacy(isPvt)
+  }
+
+  const loadCache = ()=>{
+    let vault = JSON.parse(localStorage.getItem(account + '_'+ chainId+'_' + tokenId +'_vault')) // Load vaults from storage before updating from server!
+    if (vault) {
+      setState({ loaded: true })
+      setStates(vault)
+      setLoadingApi(true)
+    }
+  }
+
+  const saveCache = (vault)=>{
+    localStorage.setItem(account + '_'+ chainId+'_' + tokenId +'_vault', JSON.stringify(vault))  // Save new state for later
   }
 
   const getKeys = async (signature, tokenId, cb) => {
@@ -129,6 +156,48 @@ export default function Vault() {
     })
   }
 
+  const startDecryptEffect = async ()=>{
+    var theLetters = "abcdefghijklmnopqrstuvwxyz"; //You can customize what letters it will cycle through
+    var ctnt = "Decrypting"; // Your text goes here
+    var speed = 5; // ms per frame
+    var increment = 8; // frames per step. Must be >2
+
+        
+    var clen = ctnt.length;       
+    var si = 0;
+    var stri = 0;
+    var block = "";
+    var fixed = "";
+    (function rustle (i) {          
+      setTimeout(function () {
+        if (--i){rustle(i);}
+        nextFrame(i);
+        si = si + 1;        
+      }, speed);
+      })(clen*increment+1); 
+      function nextFrame(pos){
+        for (var i=0; i<clen-stri; i++) {
+          //Random number
+          var num = Math.floor(theLetters.length * Math.random());
+          //Get random letter
+          var letter = theLetters.charAt(num);
+          block = block + letter;
+        }
+        if (si == (increment-1)){
+          stri++;
+        }
+        if (si == increment){
+        // Add a letter; 
+        // every speed*10 ms
+        fixed = fixed +  ctnt.charAt(stri - 1);
+        si = 0;
+        }
+        // $("#output").html(fixed + block);
+        setDecryptedEffect(fixed + block)
+        block = "";
+      }
+  }
+
   useEffect(() => {
     getVault()
   }, [])
@@ -139,11 +208,12 @@ export default function Vault() {
   })
 
   function splitDescription(words) {
-    var desc = words.split('Emblem Vault Basic')
+    var desc = words.split('\n\n\n\n')
     return desc[0].trim()
   }
 
   function tryDecrypt(pass) {
+    startDecryptEffect()
     console.log(pass)
   }
 
@@ -160,14 +230,18 @@ export default function Vault() {
       />
 
       <Loader loaded={state.loaded}>
+      {loadingApi ? (<Refreshing/>) : ''}
+      <Tilt className="Tilt" options={{ max : experimental? 19: 0, scale: 1 }}  >      
         <Flex width="full" align="center" justifyContent="center">
           <Box
             maxW="sm"
             borderWidth="1px"
-            borderColor={vaultChainId != chainId ? 'orange.500' : null}
+            borderColor={vaultChainId != chainId ? 'orange.500' : status == 'claimed' ? 'green.500' : null}
             rounded="lg"
             overflow="hidden"
             alignItems="center"
+            mt={15}
+            minW={390}
           >
             {vaultChainId != chainId ? (
               <Box
@@ -181,7 +255,7 @@ export default function Vault() {
                 alignItems="center"
                 color="orange.500"
               >
-                Your vault is on a different network than you are.
+                Vault is on a different network than you are.
               </Box>
             ) : null}
             <Box
@@ -217,7 +291,7 @@ export default function Vault() {
                   </Text>
                   {vaultPrivacy ? (
                     <>
-                      <Text>Contents hidden. Enter password to unlock.</Text>
+                      <Text pb={2} color={decryptedEffect? 'green.500': null } >{decryptedEffect? decryptedEffect : 'Contents hidden. Enter password to unlock.'}</Text>
                       <Input
                         type="password"
                         id="vault-password"
@@ -238,6 +312,7 @@ export default function Vault() {
                   )}
                 </Box>
               </Box>
+              {!vaultPrivacy ? (
               <Box d="flex" alignItems="baseline" justifyContent="space-between" mt="4">
                 <Stack direction="row" align="center" spacing="1rem" flexWrap="wrap" shouldWrapChildren>
                   <ButtonGroup spacing={4}>
@@ -257,7 +332,7 @@ export default function Vault() {
                     })}
                   </ButtonGroup>
                 </Stack>
-              </Box>
+              </Box> ) : null }
               {status === 'claimed' && claimedBy === account ? (
                 <Box d="flex" alignItems="baseline" justifyContent="space-between" mt="4">
                   <Button width="100%" onClick={handleSign}>
@@ -306,12 +381,12 @@ export default function Vault() {
             </Box>
           </Box>
         </Flex>
+      </Tilt>
         {hash ? (
           <TransactionToast
             hash={hash}
             onComplete={() => {
               if (claiming) {
-                alert('Claim tx complete. Now ask server for keys')
                 setHash(null)
               }
             }}
