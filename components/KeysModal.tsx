@@ -96,6 +96,7 @@ export default function KeysModal({
                 height="unset"
                 p={1}
                 onClick={() => copyWithFlag(phrase, 'phrase')}
+                isActive={true}
               >
                 {phraseCopied ? <Text color="white">Copied!</Text> : <Text color="white">{phrase}</Text>}
               </Button>
