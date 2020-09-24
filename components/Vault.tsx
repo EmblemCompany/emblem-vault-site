@@ -1,4 +1,4 @@
-import { Box, Flex, Image, Text, Stack, Button, ButtonGroup, Input, useDisclosure, Spinner } from '@chakra-ui/core'
+import { Box, Flex, Image, Text, Stack, Button, ButtonGroup, Input, Link, useDisclosure, Spinner } from '@chakra-ui/core'
 
 import { useWeb3React } from '@web3-react/core'
 import { useEffect, useState } from 'react'
@@ -44,6 +44,7 @@ export default function Vault() {
   const [decryptedEffect, setDecryptedEffect] = useState('')
   const [decryptedEffectRunning, setDecryptedEffectRunning] = useState(false)
   const [decryptPassword, setDecryptPassword] = useState('')
+  const [invalidVault, setInvalidVault] = useState(false)
 
   const emblemContract = useContract(contractAddresses.emblemVault[chainId], contractAddresses.emblemAbi, true)
 
@@ -60,10 +61,17 @@ export default function Vault() {
       },
     })
     const jsonData = await responce.json()
-    console.log(jsonData)
-    setStates(jsonData)
-    saveCache(jsonData)
-    setLoadingApi(false)
+    console.log('vault response was ', jsonData)
+      if (!jsonData.name) {
+        setState({ loaded: true })
+        setInvalidVault(true)
+      } else {
+        setStates(jsonData)
+        saveCache(jsonData)
+        setLoadingApi(false)
+        setInvalidVault(false)
+      }
+
   }
 
   const setStates = (jsonData) => {
@@ -257,6 +265,7 @@ export default function Vault() {
 
   return (
     <>
+
       <AddrModal isOpen={isOpenAddrModal} onClose={onCloseAddrModal} addrCoin={currCoin} addrAddr={currAddr} />
 
       <KeysModal
@@ -269,6 +278,7 @@ export default function Vault() {
 
       <Loader loaded={state.loaded}>
         {loadingApi ? <Refreshing /> : ''}
+        {!invalidVault ? (
         <Tilt className="Tilt" options={{ max: experimental ? 19 : 0, scale: 1 }}>
           <Flex width="full" align="center" justifyContent="center">
             <Box
@@ -424,6 +434,17 @@ export default function Vault() {
             </Box>
           </Flex>
         </Tilt>
+        ) : (
+          <Stack align="center">
+          <Image width="md" src="https://starwarsblog.starwars.com/wp-content/uploads/2017/06/25-star-wars-quotes-obi-wan-kenobi-identification-tall.jpg"></Image>
+          <Text>
+            THESE ARE NOT THE VAULTS YOU ARE LOOKING FOR{' '}
+            <Link color="#638cd8" href="../create">
+              CREATE ONE HERE!
+            </Link>
+          </Text>
+          </Stack>
+        )}
         {hash ? (
           <TransactionToast
             hash={hash}
