@@ -157,7 +157,6 @@ export default function Vault() {
       setTimeout(() => {
         setHash(hash)
         handleSign()
-        onOpenKeysModal()
       }, 100) // Solving State race condition where transaction watcher wouldn't notice we were claiming
     })
   }
