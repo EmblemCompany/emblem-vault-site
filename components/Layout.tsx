@@ -144,7 +144,14 @@ export default function Layout({ children }: { children: ReactNode }): JSX.Eleme
               ))}
           </Stack>
         )}
-        <Stack position="absolute" bottom={0} right={0} alignItems="flex-end" spacing="1rem">
+        <Stack
+          position="absolute"
+          bottom={1}
+          right={1}
+          p={isTestnet ? '1.5rem' : '1rem'}
+          alignItems="flex-end"
+          spacing="1rem"
+        >
           <Button
             as="a"
             {...{
@@ -157,7 +164,7 @@ export default function Layout({ children }: { children: ReactNode }): JSX.Eleme
               rel: 'noopener noreferrer',
             }}
           >
-            Buy coval
+            Buy Coval
           </Button>
         </Stack>
       </ColorBox>
