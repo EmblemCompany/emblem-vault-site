@@ -79,7 +79,10 @@ export default function Vault() {
       setClaimedBy(jsonData.claimedBy)
     }
     setState({ loaded: true })
-    let isPvt = jsonData.addresses.filter(item=>{return item.address.includes('private:')}).length > 0
+    let isPvt =
+      jsonData.addresses.filter((item) => {
+        return item.address.includes('private:')
+      }).length > 0
     // console.log("pvt", isPvt)
     setVaultPrivacy(isPvt)
   }
@@ -178,7 +181,9 @@ export default function Vault() {
       setTimeout(function () {
         if (--i) {
           rustle(i)
-        } else {setDecryptedEffectRunning(false)}
+        } else {
+          setDecryptedEffectRunning(false)
+        }
         nextFrame(i)
         si = si + 1
       }, speed)
@@ -204,7 +209,7 @@ export default function Vault() {
       setDecryptedEffect(fixed + block)
       block = ''
     }
-  }  
+  }
 
   useEffect(() => {
     getVault()
@@ -221,30 +226,30 @@ export default function Vault() {
   }
 
   function tryDecrypt(key) {
-    if (decryptPassword) {key = decryptPassword}
+    if (decryptPassword) {
+      key = decryptPassword
+    }
     startDecryptEffect()
-    let ciphertext = vaultAddresses[0].address.replace('private:','')
+    let ciphertext = vaultAddresses[0].address.replace('private:', '')
     try {
-      var bytes = CryptoJS.AES.decrypt(ciphertext, key);
+      var bytes = CryptoJS.AES.decrypt(ciphertext, key)
       JSON.parse(bytes.toString(CryptoJS.enc.Utf8))
       setVaultPrivacy(false)
       setDecryptPassword(key)
       setVaultAddresses(decryptAddresses(key))
-    } catch(err) {
-      
-    }
+    } catch (err) {}
   }
 
-  function decryptAddresses(key){
-    vaultAddresses.forEach(item=>{
+  function decryptAddresses(key) {
+    vaultAddresses.forEach((item) => {
       let cipherText = item.address.replace('private:', '')
       item.address = decrypt(cipherText, key)
     })
     return vaultAddresses
   }
 
-  function decrypt(cipherText, key){
-    var bytes = CryptoJS.AES.decrypt(cipherText, key);
+  function decrypt(cipherText, key) {
+    var bytes = CryptoJS.AES.decrypt(cipherText, key)
     var decryptedData = JSON.parse(bytes.toString(CryptoJS.enc.Utf8))
     return decryptedData
   }
