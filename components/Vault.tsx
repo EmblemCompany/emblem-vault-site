@@ -44,7 +44,6 @@ export default function Vault() {
   const [currCoin, setCurrCoin] = useState('')
   const [currAddr, setCurrAddr] = useState('')
   const [state, setState] = useState({ loaded: false })
-  const [allowed, setAllowed] = useState(false)
   const [mine, setMine] = useState(false)
   const [claiming, setClaiming] = useState(false)
   const [status, setStatus] = useState('claimed')
@@ -140,9 +139,6 @@ export default function Vault() {
   const getContractStates = async () => {
     let owner = await emblemContract.ownerOf(tokenId)
     setMine(owner === account)
-    if (mine) {
-      setAllowed(true)
-    }
     // console.log('status', status, 'claimedBy', claimedBy)
   }
 
@@ -426,14 +422,10 @@ export default function Vault() {
                       <Button
                         width="100%"
                         onClick={() => {
-                          if (allowed) {
-                            handleClaim()
-                          } else {
-                            handleApprove()
-                          }
+                          handleClaim()
                         }}
                       >
-                        {allowed ? 'Claim' : 'Approve'}
+                        Claim
                       </Button>
                     </Box>
                   ) : null}
