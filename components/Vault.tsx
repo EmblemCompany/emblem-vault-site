@@ -269,6 +269,12 @@ export default function Vault() {
         {loadingApi ? <Refreshing /> : ''}
         <Tilt className="Tilt" options={{ max: experimental ? 19 : 0, scale: 1 }}>
           <Flex width="full" align="center" justifyContent="center">
+            <Stack direction="column" align="center">
+            {status == 'claimed' ?
+            <Text color="green.500">CLAIMED</Text>
+            :
+            null
+            }
             <Box
               maxW="sm"
               borderWidth="1px"
@@ -276,7 +282,6 @@ export default function Vault() {
               rounded="lg"
               overflow="hidden"
               alignItems="center"
-              mt={15}
               minW={390}
             >
               {vaultChainId != chainId ? (
@@ -419,6 +424,7 @@ export default function Vault() {
                 </Box>
               </Box>
             </Box>
+            </Stack>
           </Flex>
         </Tilt>
         {hash ? (
