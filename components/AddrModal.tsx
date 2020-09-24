@@ -29,7 +29,6 @@ export default function AddrModal({
 }): JSX.Element {
   const address = addrAddr
   const coin = addrCoin
-  let permalink: string | null = null
 
   const { colorMode } = useColorMode()
 
@@ -74,26 +73,7 @@ export default function AddrModal({
             </Stack>
           </Stack>
         </ModalBody>
-        <ModalFooter justifyContent="space-between">
-          {typeof permalink === 'string' && (
-            <Button
-              variant="link"
-              isDisabled={copied}
-              color="blue.500"
-              width="min-content"
-              onClick={(): void => {
-                try {
-                  // eslint-disable-next-line
-                  ;(window.navigator as any).share({ title: 'Emblem Vault', url: permalink }).catch(() => {})
-                } catch {
-                  copyWithFlag(permalink as string)
-                }
-              }}
-            >
-              {copied ? 'Copied' : 'Share Permalink'}
-            </Button>
-          )}
-        </ModalFooter>
+        <ModalFooter></ModalFooter>
       </ModalContent>
     </Modal>
   )
