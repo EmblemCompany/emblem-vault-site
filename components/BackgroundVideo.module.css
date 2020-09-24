@@ -16,4 +16,5 @@
   border-bottom: 2px solid #548280 !important;
   opacity: 0.6;
   z-index: -1;
+  object-fit: cover
 }
