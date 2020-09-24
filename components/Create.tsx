@@ -28,6 +28,8 @@ import { EMBLEM_API, contractAddresses } from '../constants'
 import { Notify } from './Notify'
 import { Contract } from '@ethersproject/contracts'
 import { useContract } from '../hooks'
+import { isETHAddress } from '../utils'
+import { isValidName } from '@ethersproject/hash'
 
 export default function Create(props: any) {
   const [tabIndex, setTabIndex] = useState(0)
@@ -189,7 +191,7 @@ export default function Create(props: any) {
                   shouldWrapChildren
                 >
                   <Stack direction="row" align="flex-start" spacing="0rem" flexWrap="wrap" shouldWrapChildren>
-                    <FormControl isRequired>
+                    <FormControl isRequired isInvalid={!isETHAddress(vaultAddress)}>
                       <FormLabel htmlFor="owner-address">Vault Owner Address</FormLabel>
                       <Input
                         type="text"
@@ -204,6 +206,7 @@ export default function Create(props: any) {
                         What is the address of the first owner of this vault? Pro tip: When you connect a web3 wallet,
                         this will populate automagically with your address.
                       </FormHelperText>
+                      <FormErrorMessage>Address is not a valid ETH address</FormErrorMessage>
                     </FormControl>
                   </Stack>
 
@@ -261,7 +264,7 @@ export default function Create(props: any) {
                   shouldWrapChildren
                 >
                   <Stack direction="row" align="flex-start" spacing="0rem" flexWrap="wrap" shouldWrapChildren>
-                    <FormControl isRequired>
+                    <FormControl isRequired isInvalid={vaultName && vaultName.length < 3}>
                       <FormLabel htmlFor="vault-name">Vault Name</FormLabel>
                       <Input
                         type="text"
@@ -273,15 +276,11 @@ export default function Create(props: any) {
                         onChange={(e) => setVaultName(e.target.value)}
                       />
                       <FormHelperText id="vault-name-text">Give it some love so you can find it later.</FormHelperText>
-                      {vaultName && vaultName.length < 3 ? (
-                        <FormErrorMessage>Name must be at least 3 characters</FormErrorMessage>
-                      ) : (
-                        ''
-                      )}
+                      <FormErrorMessage>Name needs at least 3 characters. 200 is max.</FormErrorMessage>
                     </FormControl>
                   </Stack>
                   <Stack direction="row" align="flex-start" spacing="0rem" flexWrap="wrap" shouldWrapChildren>
-                    <FormControl isRequired>
+                    <FormControl isRequired isInvalid={vaultDesc && vaultDesc.length < 3}>
                       <FormLabel htmlFor="vault-desc">Vault Description</FormLabel>
                       <Textarea
                         id="vault-desc"
@@ -295,6 +294,7 @@ export default function Create(props: any) {
                       <FormHelperText id="vault-desc-text">
                         Add some fluffy text to tell people what the point is!
                       </FormHelperText>
+                      <FormErrorMessage>Description needs to be at least 3 characters. 1024 is max.</FormErrorMessage>
                     </FormControl>
                   </Stack>
                   <Stack direction="row" align="flex-start" spacing="0rem" flexWrap="wrap" shouldWrapChildren>
@@ -367,9 +367,7 @@ export default function Create(props: any) {
                         Buy coval
                       </Button>
                     </Box>
-                  ) : (
-                    null
-                  )}
+                  ) : null}
 
                   <Stack direction="row" align="flex-start" spacing="0rem" flexWrap="wrap" shouldWrapChildren>
                     <ButtonGroup spacing={4}>
@@ -378,7 +376,12 @@ export default function Create(props: any) {
                         <Button isDisabled type="submit">
                           No Wallet Connected!
                         </Button>
-                      ) : !vaultAddress || !vaultName || vaultName.length < 3 || !vaultDesc || vaultDesc.length < 3 ? (
+                      ) : !vaultAddress ||
+                        !isETHAddress(vaultAddress) ||
+                        !vaultName ||
+                        vaultName.length < 3 ||
+                        !vaultDesc ||
+                        vaultDesc.length < 3 ? (
                         <Button isDisabled type="submit">
                           Check Fields!
                         </Button>
