@@ -1,15 +1,4 @@
-import {
-  Box,
-  Flex,
-  Image,
-  Text,
-  Stack,
-  Button,
-  ButtonGroup,
-  Input,
-  Link,
-  useDisclosure,
-} from '@chakra-ui/core'
+import { Box, Flex, Image, Text, Stack, Button, ButtonGroup, Input, Link, useDisclosure } from '@chakra-ui/core'
 
 import { useWeb3React } from '@web3-react/core'
 import { useEffect, useState } from 'react'
@@ -368,24 +357,22 @@ export default function Vault() {
                   </Box>
                   {!vaultPrivacy ? (
                     <Box d="flex" alignItems="baseline" justifyContent="space-between" mt="4">
-                      <Stack direction="row" align="center" spacing="1rem" flexWrap="wrap" shouldWrapChildren>
-                        <ButtonGroup spacing={4}>
-                          {vaultAddresses.map((addr) => {
-                            return (
-                              <Button
-                                key={addr.address}
-                                onClick={() => {
-                                  setCurrCoin(addr.coin)
-                                  setCurrAddr(addr.address)
-                                  onOpenAddrModal()
-                                }}
-                              >
-                                Put {addr.coin == 'ETH' ? addr.coin + '/ERC20' : addr.coin} In
-                              </Button>
-                            )
-                          })}
-                        </ButtonGroup>
-                      </Stack>
+                      <ButtonGroup justifyContent="space-between">
+                        {vaultAddresses.map((addr) => {
+                          return (
+                            <Button
+                              key={addr.address}
+                              onClick={() => {
+                                setCurrCoin(addr.coin)
+                                setCurrAddr(addr.address)
+                                onOpenAddrModal()
+                              }}
+                            >
+                              Put {addr.coin == 'ETH' ? addr.coin + '/ERC20' : addr.coin} In
+                            </Button>
+                          )
+                        })}
+                      </ButtonGroup>
                     </Box>
                   ) : null}
                   {status === 'claimed' && claimedBy === account ? (
