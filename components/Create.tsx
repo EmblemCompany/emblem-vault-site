@@ -191,7 +191,7 @@ export default function Create(props: any) {
                   shouldWrapChildren
                 >
                   <Stack direction="row" align="flex-start" spacing="0rem" flexWrap="wrap" shouldWrapChildren>
-                    <FormControl isRequired isInvalid={!isETHAddress(vaultAddress)}>
+                    <FormControl isRequired isInvalid={vaultAddress && !isETHAddress(vaultAddress)}>
                       <FormLabel htmlFor="owner-address">Vault Owner Address</FormLabel>
                       <Input
                         type="text"
