@@ -114,6 +114,7 @@ export default function Vault() {
       redirect: 'follow',
     })
     const jsonData = await responce.json()
+    console.log('getKeyss response is ' + jsonData)
     return cb(jsonData)
   }
 
@@ -141,6 +142,7 @@ export default function Vault() {
       .signMessage('Claim: ' + tokenId)
       .then((signature) => {
         getKeys(signature, tokenId, (result) => {
+          console.log('HandleSign response is ' + result)
           // alert('Mnemonic: ' + result.decrypted.phrase)
           setMnemonic(result.decrypted.phrase)
           setPrivKeyBTC('BTC KEY')
@@ -269,12 +271,6 @@ export default function Vault() {
         {loadingApi ? <Refreshing /> : ''}
         <Tilt className="Tilt" options={{ max: experimental ? 19 : 0, scale: 1 }}>
           <Flex width="full" align="center" justifyContent="center">
-            <Stack direction="column" align="center">
-            {status == 'claimed' ?
-            <Text color="green.500">CLAIMED</Text>
-            :
-            null
-            }
             <Box
               maxW="sm"
               borderWidth="1px"
@@ -404,8 +400,9 @@ export default function Vault() {
                     </Button>
                   </Box>
                 )}
-                <Box d="flex" alignItems="baseline" justifyContent="space-between" mt="4">
-                  {mine ? (
+
+                {mine ? (
+                  <Box d="flex" alignItems="baseline" justifyContent="space-between" mt="4">
                     <Button
                       width="100%"
                       onClick={() => {
@@ -418,13 +415,13 @@ export default function Vault() {
                     >
                       {allowed ? 'Claim' : 'Approve'}
                     </Button>
-                  ) : (
-                    ''
-                  )}
-                </Box>
+                  </Box>
+                ) : null}
               </Box>
+              <Stack direction="column" align="center">
+                {status == 'claimed' ? <Text color="green.500">CLAIMED</Text> : null}
+              </Stack>
             </Box>
-            </Stack>
           </Flex>
         </Tilt>
         {hash ? (

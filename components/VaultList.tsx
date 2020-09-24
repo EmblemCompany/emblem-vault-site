@@ -71,7 +71,7 @@ export default function VaultList() {
     <Loader loaded={state.loaded}>
       {loadingApi ? <Refreshing /> : ''}
 
-      <Flex w="100%" justify="center" flexWrap="wrap">
+      <Flex w="100%" justify="center" flexWrap="wrap" mt={10}>
         {vaults.length ? (
           vaults.map((vault, index) => {
             let pieces = location.pathname.split('/')
@@ -126,6 +126,9 @@ export default function VaultList() {
                     )}
                   </Box>
                 </Box>
+                <Stack align="center" mt={3}>
+                  {vault.status == 'claimed' ? <Text color="green.500">CLAIMED</Text> : null}
+                </Stack>
               </Box>
             )
           })
