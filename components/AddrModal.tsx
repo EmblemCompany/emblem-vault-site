@@ -10,7 +10,7 @@ import {
   Text,
   Stack,
   Button,
-  useColorMode
+  useColorMode,
 } from '@chakra-ui/core'
 import copy from 'copy-to-clipboard'
 import QRCode from 'qrcode.react'
@@ -69,13 +69,7 @@ export default function AddrModal({
             </Stack>
             <Stack direction="row" justify="space-between">
               <Button onClick={() => copyWithFlag(address)}>
-                {copied ? (
-                  <Text>Copied!</Text>
-                ) : (
-                  <Text isTruncated>
-                    {address}
-                  </Text>
-                )}
+                {copied ? <Text>Copied!</Text> : <Text isTruncated>{address}</Text>}
               </Button>
             </Stack>
           </Stack>
