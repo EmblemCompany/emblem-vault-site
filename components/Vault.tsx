@@ -66,7 +66,7 @@ export default function Vault() {
     setLoadingApi(false)
   }
 
-  const setStates = (jsonData)=>{
+  const setStates = (jsonData) => {
     setVaultName(jsonData.name)
     setVaultImage(jsonData.image)
     setVaultDesc(jsonData.description)
@@ -84,8 +84,8 @@ export default function Vault() {
     setVaultPrivacy(isPvt)
   }
 
-  const loadCache = ()=>{
-    let vault = JSON.parse(localStorage.getItem(account + '_'+ chainId+'_' + tokenId +'_vault')) // Load vaults from storage before updating from server!
+  const loadCache = () => {
+    let vault = JSON.parse(localStorage.getItem(account + '_' + chainId + '_' + tokenId + '_vault')) // Load vaults from storage before updating from server!
     if (vault) {
       setState({ loaded: true })
       setStates(vault)
@@ -93,8 +93,8 @@ export default function Vault() {
     }
   }
 
-  const saveCache = (vault)=>{
-    localStorage.setItem(account + '_'+ chainId+'_' + tokenId +'_vault', JSON.stringify(vault))  // Save new state for later
+  const saveCache = (vault) => {
+    localStorage.setItem(account + '_' + chainId + '_' + tokenId + '_vault', JSON.stringify(vault)) // Save new state for later
   }
 
   const getKeys = async (signature, tokenId, cb) => {
@@ -159,51 +159,52 @@ export default function Vault() {
     })
   }
 
-  const startDecryptEffect = async ()=>{
+  const startDecryptEffect = async () => {
     if (decryptedEffectRunning) {
       return
     }
     setDecryptedEffectRunning(true)
-    var theLetters = "abcdefghijklmnopqrstuvwxyz"; //You can customize what letters it will cycle through
-    var ctnt = "Decrypting"; // Your text goes here
-    var speed = 5; // ms per frame
-    var increment = 8; // frames per step. Must be >2
+    var theLetters = 'abcdefghijklmnopqrstuvwxyz' //You can customize what letters it will cycle through
+    var ctnt = 'Decrypting' // Your text goes here
+    var speed = 5 // ms per frame
+    var increment = 8 // frames per step. Must be >2
 
-        
-    var clen = ctnt.length;       
-    var si = 0;
-    var stri = 0;
-    var block = "";
-    var fixed = "";
-    (function rustle (i) {          
+    var clen = ctnt.length
+    var si = 0
+    var stri = 0
+    var block = ''
+    var fixed = ''
+    ;(function rustle(i) {
       setTimeout(function () {
-        if (--i){rustle(i);} else {setDecryptedEffectRunning(false)}
-        nextFrame(i);
-        si = si + 1;        
-      }, speed);
-      })(clen*increment+1); 
-      function nextFrame(pos){
-        for (var i=0; i<clen-stri; i++) {
-          //Random number
-          var num = Math.floor(theLetters.length * Math.random());
-          //Get random letter
-          var letter = theLetters.charAt(num);
-          block = block + letter;
-        }
-        if (si == (increment-1)){
-          stri++;
-        }
-        if (si == increment){
-        // Add a letter; 
-        // every speed*10 ms
-        fixed = fixed +  ctnt.charAt(stri - 1);
-        si = 0;
-        }
-        // $("#output").html(fixed + block);
-        setDecryptedEffect(fixed + block)
-        block = "";
+        if (--i) {
+          rustle(i)
+        } else {setDecryptedEffectRunning(false)}
+        nextFrame(i)
+        si = si + 1
+      }, speed)
+    })(clen * increment + 1)
+    function nextFrame(pos) {
+      for (var i = 0; i < clen - stri; i++) {
+        //Random number
+        var num = Math.floor(theLetters.length * Math.random())
+        //Get random letter
+        var letter = theLetters.charAt(num)
+        block = block + letter
       }
-  }
+      if (si == increment - 1) {
+        stri++
+      }
+      if (si == increment) {
+        // Add a letter;
+        // every speed*10 ms
+        fixed = fixed + ctnt.charAt(stri - 1)
+        si = 0
+      }
+      // $("#output").html(fixed + block);
+      setDecryptedEffect(fixed + block)
+      block = ''
+    }
+  }  
 
   useEffect(() => {
     getVault()
@@ -261,20 +262,34 @@ export default function Vault() {
       />
 
       <Loader loaded={state.loaded}>
-      {loadingApi ? (<Refreshing/>) : ''}
-      <Tilt className="Tilt" options={{ max : experimental? 19: 0, scale: 1 }}  >      
-        <Flex width="full" align="center" justifyContent="center">
-          <Box
-            maxW="sm"
-            borderWidth="1px"
-            borderColor={vaultChainId != chainId ? 'orange.500' : status == 'claimed' ? 'green.500' : null}
-            rounded="lg"
-            overflow="hidden"
-            alignItems="center"
-            mt={15}
-            minW={390}
-          >
-            {vaultChainId != chainId ? (
+        {loadingApi ? <Refreshing /> : ''}
+        <Tilt className="Tilt" options={{ max: experimental ? 19 : 0, scale: 1 }}>
+          <Flex width="full" align="center" justifyContent="center">
+            <Box
+              maxW="sm"
+              borderWidth="1px"
+              borderColor={vaultChainId != chainId ? 'orange.500' : status == 'claimed' ? 'green.500' : null}
+              rounded="lg"
+              overflow="hidden"
+              alignItems="center"
+              mt={15}
+              minW={390}
+            >
+              {vaultChainId != chainId ? (
+                <Box
+                  mt="1"
+                  fontWeight="semibold"
+                  as="h3"
+                  lineHeight="tight"
+                  p={2}
+                  textAlign="center"
+                  textTransform="uppercase"
+                  alignItems="center"
+                  color="orange.500"
+                >
+                  BEWARE: Vault is on a different network than you are.
+                </Box>
+              ) : null}
               <Box
                 mt="1"
                 fontWeight="semibold"
@@ -284,135 +299,124 @@ export default function Vault() {
                 textAlign="center"
                 textTransform="uppercase"
                 alignItems="center"
-                color="orange.500"
               >
-                Vault is on a different network than you are.
+                {vaultName}
               </Box>
-            ) : null}
-            <Box
-              mt="1"
-              fontWeight="semibold"
-              as="h3"
-              lineHeight="tight"
-              p={2}
-              textAlign="center"
-              textTransform="uppercase"
-              alignItems="center"
-            >
-              {vaultName}
-            </Box>
-            <Stack align="center">
-              <Image
-                src={validImage(vaultImage) ? vaultImage : 'https://circuitsofvalue.com/public/coval-logo.png'}
-                width="250px"
-              />
-            </Stack>
-            <Stack align="center">
-              <Box mt="1" ml="4" lineHeight="tight">
-                <Text as="h4" ml="4" mr="4">
-                  {splitDescription(vaultDesc)}
-                </Text>
-              </Box>
-            </Stack>
-            <Box p="6">
-              <Box d="flex" alignItems="baseline">
-                <Box color="gray.500" letterSpacing="wide" fontSize="sm" ml="2">
-                  <Text as="h4" fontWeight="semibold">
-                    Current Contents:
+              <Stack align="center">
+                <Image
+                  src={validImage(vaultImage) ? vaultImage : 'https://circuitsofvalue.com/public/coval-logo.png'}
+                  width="250px"
+                />
+              </Stack>
+              <Stack align="center">
+                <Box mt="1" ml="4" lineHeight="tight">
+                  <Text as="h4" ml="4" mr="4">
+                    {splitDescription(vaultDesc)}
                   </Text>
-                  {vaultPrivacy ? (
-                    <>
-                      <Text pb={2} color={decryptedEffect? 'green.500': null } >{decryptedEffect? decryptedEffect : 'Contents hidden. Enter password to unlock.'}</Text>
-                      <Input
-                        type="password"
-                        id="vault-password"
-                        onChange={(e) => tryDecrypt(e.target.value)}
-                        aria-describedby="password-helper-text"
-                      />
-                    </>
-                  ) : vaultValues.length ? (
-                    vaultValues.map((coin) => {
-                      return (
-                        <Text key={coin.name} isTruncated>
-                          {coin.name}: {coin.balance}
+                </Box>
+              </Stack>
+              <Box p="6">
+                <Box d="flex" alignItems="baseline">
+                  <Box color="gray.500" letterSpacing="wide" fontSize="sm" ml="2">
+                    <Text as="h4" fontWeight="semibold">
+                      Current Contents:
+                    </Text>
+                    {vaultPrivacy ? (
+                      <>
+                        <Text pb={2} color={decryptedEffect ? 'green.500' : null}>
+                          {decryptedEffect ? decryptedEffect : 'Contents hidden. Enter password to unlock.'}
                         </Text>
-                      )
-                    })
+                        <Input
+                          type="password"
+                          id="vault-password"
+                          onChange={(e) => tryDecrypt(e.target.value)}
+                          aria-describedby="password-helper-text"
+                        />
+                      </>
+                    ) : vaultValues.length ? (
+                      vaultValues.map((coin) => {
+                        return (
+                          <Text key={coin.name} isTruncated>
+                            {coin.name}: {coin.balance}
+                          </Text>
+                        )
+                      })
+                    ) : (
+                      <Text>Nothing in here! Fill 'er up!</Text>
+                    )}
+                  </Box>
+                </Box>
+                {!vaultPrivacy ? (
+                  <Box d="flex" alignItems="baseline" justifyContent="space-between" mt="4">
+                    <Stack direction="row" align="center" spacing="1rem" flexWrap="wrap" shouldWrapChildren>
+                      <ButtonGroup spacing={4}>
+                        {vaultAddresses.map((addr) => {
+                          return (
+                            <Button
+                              key={addr.address}
+                              onClick={() => {
+                                setCurrCoin(addr.coin)
+                                setCurrAddr(addr.address)
+                                onOpenAddrModal()
+                              }}
+                            >
+                              Put {addr.coin == 'ETH' ? addr.coin + '/ERC20' : addr.coin} In
+                            </Button>
+                          )
+                        })}
+                      </ButtonGroup>
+                    </Stack>
+                  </Box>
+                ) : null}
+                {status === 'claimed' && claimedBy === account ? (
+                  <Box d="flex" alignItems="baseline" justifyContent="space-between" mt="4">
+                    <Button width="100%" onClick={handleSign}>
+                      Get Keys
+                    </Button>
+                  </Box>
+                ) : (
+                  <Box d="flex" alignItems="baseline" justifyContent="space-between" mt="4">
+                    <Button
+                      width="100%"
+                      as="a"
+                      {...{
+                        href:
+                          'https://' +
+                          (vaultChainId == 4 ? 'rinkeby.' : '') +
+                          'opensea.io/assets/' +
+                          contractAddresses.emblemVault[vaultChainId] +
+                          '/' +
+                          tokenId,
+                        target: '_blank',
+                        rel: 'noopener noreferrer',
+                      }}
+                    >
+                      {mine ? 'Sell/Gift/Send' : 'Make an Offer'}
+                    </Button>
+                  </Box>
+                )}
+                <Box d="flex" alignItems="baseline" justifyContent="space-between" mt="4">
+                  {mine ? (
+                    <Button
+                      width="100%"
+                      onClick={() => {
+                        if (allowed) {
+                          handleClaim()
+                        } else {
+                          handleApprove()
+                        }
+                      }}
+                    >
+                      {allowed ? 'Claim' : 'Approve'}
+                    </Button>
                   ) : (
-                    <Text>Nothing in here! Fill 'er up!</Text>
+                    ''
                   )}
                 </Box>
               </Box>
-              {!vaultPrivacy ? (
-              <Box d="flex" alignItems="baseline" justifyContent="space-between" mt="4">
-                <Stack direction="row" align="center" spacing="1rem" flexWrap="wrap" shouldWrapChildren>
-                  <ButtonGroup spacing={4}>
-                    {vaultAddresses.map((addr) => {
-                      return (
-                        <Button
-                          key={addr.address}
-                          onClick={() => {
-                            setCurrCoin(addr.coin)
-                            setCurrAddr(addr.address)
-                            onOpenAddrModal()
-                          }}
-                        >
-                          Put {addr.coin == 'ETH' ? addr.coin + '/ERC20' : addr.coin} In
-                        </Button>
-                      )
-                    })}
-                  </ButtonGroup>
-                </Stack>
-              </Box> ) : null }
-              {status === 'claimed' && claimedBy === account ? (
-                <Box d="flex" alignItems="baseline" justifyContent="space-between" mt="4">
-                  <Button width="100%" onClick={handleSign}>
-                    Get Keys
-                  </Button>
-                </Box>
-              ) : (
-                <Box d="flex" alignItems="baseline" justifyContent="space-between" mt="4">
-                  <Button
-                    width="100%"
-                    as="a"
-                    {...{
-                      href:
-                        'https://' +
-                        (vaultChainId == 4 ? 'rinkeby.' : '') +
-                        'opensea.io/assets/' +
-                        contractAddresses.emblemVault[vaultChainId] +
-                        '/' +
-                        tokenId,
-                      target: '_blank',
-                      rel: 'noopener noreferrer',
-                    }}
-                  >
-                    {mine ? 'Sell/Gift/Send' : 'Make an Offer'}
-                  </Button>
-                </Box>
-              )}
-              <Box d="flex" alignItems="baseline" justifyContent="space-between" mt="4">
-                {mine ? (
-                  <Button
-                    width="100%"
-                    onClick={() => {
-                      if (allowed) {
-                        handleClaim()
-                      } else {
-                        handleApprove()
-                      }
-                    }}
-                  >
-                    {allowed ? 'Claim' : 'Approve'}
-                  </Button>
-                ) : (
-                  ''
-                )}
-              </Box>
             </Box>
-          </Box>
-        </Flex>
-      </Tilt>
+          </Flex>
+        </Tilt>
         {hash ? (
           <TransactionToast
             hash={hash}

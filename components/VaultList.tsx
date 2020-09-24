@@ -15,7 +15,7 @@ export default function VaultList() {
   const [loadingApi, setLoadingApi] = useState(false)
   const [address, setAddress] = useState(query.address)
 
-  const getVaults = async () => {    
+  const getVaults = async () => {
     loadCache()
     const response = await fetch(EMBLEM_API + '/vaults/' + (address ? address : account), {
       method: 'GET',
@@ -32,8 +32,8 @@ export default function VaultList() {
     setLoadingApi(false)
   }
 
-  const loadCache = ()=>{
-    let vaults = JSON.parse(localStorage.getItem((address ? address : account) + '_'+ chainId+'_vaults')) // Load vaults from storage before updating from server!
+  const loadCache = () => {
+    let vaults = JSON.parse(localStorage.getItem((address ? address : account) + '_' + chainId + '_vaults')) // Load vaults from storage before updating from server!
     if (vaults) {
       setState({ loaded: true })
       setVaults(vaults)
@@ -41,8 +41,8 @@ export default function VaultList() {
     }
   }
 
- const saveCache = (vaults)=>{
-    localStorage.setItem((address ? address : account) + '_'+ chainId+'_vaults', JSON.stringify(vaults))  // Save new state for later
+  const saveCache = (vaults) => {
+    localStorage.setItem((address ? address : account) + '_' + chainId + '_vaults', JSON.stringify(vaults)) // Save new state for later
   }
 
   const [acct, setAcct] = useState('')
@@ -69,8 +69,8 @@ export default function VaultList() {
 
   return (
     <Loader loaded={state.loaded}>
-      {loadingApi ? (<Refreshing/>) : ''}
-      
+      {loadingApi ? <Refreshing /> : ''}
+
       <Flex w="100%" justify="center" flexWrap="wrap">
         {vaults.length ? (
           vaults.map((vault, index) => {
@@ -87,7 +87,7 @@ export default function VaultList() {
               mb: '6',
               rounded: 'lg',
               overflow: 'hidden',
-              borderColor: vault.status =='claimed'? 'green !important': ''
+              borderColor: vault.status == 'claimed' ? 'green !important' : '',
             }
             const redirect = function () {
               location.href = url
