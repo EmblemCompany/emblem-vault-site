@@ -11,6 +11,7 @@ import { TransactionToast } from './TransactionToast'
 import { EMBLEM_API, BURN_ADDRESS, contractAddresses } from '../constants'
 import { useContract } from '../hooks'
 import Tilt from 'react-tilt'
+import CryptoJS from 'crypto-js'
 
 const AddrModal = dynamic(() => import('./AddrModal'))
 const KeysModal = dynamic(() => import('./KeysModal'))
@@ -41,6 +42,8 @@ export default function Vault() {
   const [privKeyETH, setPrivKeyETH] = useState('')
   const [loadingApi, setLoadingApi] = useState(false)
   const [decryptedEffect, setDecryptedEffect] = useState('')
+  const [decryptedEffectRunning, setDecryptedEffectRunning] = useState(false)
+  const [decryptPassword, setDecryptPassword] = useState('')
 
   const emblemContract = useContract(contractAddresses.emblemVault[chainId], contractAddresses.emblemAbi, true)
 
@@ -80,7 +83,7 @@ export default function Vault() {
       jsonData.addresses.filter((item) => {
         return item.address.includes('private:')
       }).length > 0
-    console.log('pvt', isPvt)
+    // console.log("pvt", isPvt)
     setVaultPrivacy(isPvt)
   }
 
@@ -120,7 +123,7 @@ export default function Vault() {
     if (mine) {
       setAllowed(true)
     }
-    console.log('status', status, 'claimedBy', claimedBy)
+    // console.log('status', status, 'claimedBy', claimedBy)
   }
 
   const handleApprove = async () => {
@@ -143,7 +146,7 @@ export default function Vault() {
           setPrivKeyBTC('BTC KEY')
           setPrivKeyETH('ETH KEY')
           onOpenKeysModal()
-          console.log(result.decrypted)
+          // console.log(result.decrypted)
         })
       })
   }
@@ -160,6 +163,10 @@ export default function Vault() {
   }
 
   const startDecryptEffect = async () => {
+    if (decryptedEffectRunning) {
+      return
+    }
+    setDecryptedEffectRunning(true)
     var theLetters = 'abcdefghijklmnopqrstuvwxyz' //You can customize what letters it will cycle through
     var ctnt = 'Decrypting' // Your text goes here
     var speed = 5 // ms per frame
@@ -174,6 +181,8 @@ export default function Vault() {
       setTimeout(function () {
         if (--i) {
           rustle(i)
+        } else {
+          setDecryptedEffectRunning(false)
         }
         nextFrame(i)
         si = si + 1
@@ -207,7 +216,7 @@ export default function Vault() {
   }, [])
 
   useEffect(() => {
-    console.log('Account chainid = ' + chainId + ' and vaultchainid = ' + vaultChainId)
+    // console.log('Account chainid = ' + chainId + ' and vaultchainid = ' + vaultChainId)
     account && chainId && vaultChainId && chainId == vaultChainId ? getContractStates() : null
   })
 
@@ -216,9 +225,33 @@ export default function Vault() {
     return desc[0].trim()
   }
 
-  function tryDecrypt(pass) {
+  function tryDecrypt(key) {
+    if (decryptPassword) {
+      key = decryptPassword
+    }
     startDecryptEffect()
-    console.log(pass)
+    let ciphertext = vaultAddresses[0].address.replace('private:', '')
+    try {
+      var bytes = CryptoJS.AES.decrypt(ciphertext, key)
+      JSON.parse(bytes.toString(CryptoJS.enc.Utf8))
+      setVaultPrivacy(false)
+      setDecryptPassword(key)
+      setVaultAddresses(decryptAddresses(key))
+    } catch (err) {}
+  }
+
+  function decryptAddresses(key) {
+    vaultAddresses.forEach((item) => {
+      let cipherText = item.address.replace('private:', '')
+      item.address = decrypt(cipherText, key)
+    })
+    return vaultAddresses
+  }
+
+  function decrypt(cipherText, key) {
+    var bytes = CryptoJS.AES.decrypt(cipherText, key)
+    var decryptedData = JSON.parse(bytes.toString(CryptoJS.enc.Utf8))
+    return decryptedData
   }
 
   return (
