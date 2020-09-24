@@ -133,7 +133,7 @@ export default function Vault() {
       redirect: 'follow',
     })
     const jsonData = await responce.json()
-    console.log('getKeyss response is ' + jsonData)
+    console.log('getKeys response is ', jsonData)
     return cb(jsonData)
   }
 
