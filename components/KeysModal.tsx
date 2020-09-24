@@ -9,8 +9,10 @@ import {
   Text,
   Stack,
   Button,
+  useColorMode,
 } from '@chakra-ui/core'
 import copy from 'copy-to-clipboard'
+import { COLOR } from '../constants'
 
 export default function KeysModal({
   isOpen,
@@ -28,6 +30,8 @@ export default function KeysModal({
   const phrase = mnemonic
   const btcKey = privKeyBTC
   const ethKey = privKeyETH
+
+  const { colorMode } = useColorMode()
 
   const [phraseCopied, setPhraseCopied] = useState(false)
   useEffect(() => {
@@ -79,15 +83,15 @@ export default function KeysModal({
   return (
     <Modal isOpen={isOpen} onClose={onClose} isCentered>
       <ModalOverlay />
-      <ModalContent>
+      <ModalContent color={COLOR[colorMode]}>
         <ModalHeader>
-          <Text color="white">Your Vault Keys</Text>
+          <Text>Your Vault Keys</Text>
         </ModalHeader>
         <ModalCloseButton />
         <ModalBody>
           <Stack direction="column">
             <Stack direction="row">
-              <Text color="white">Your mnemonic phrase (click to copy);</Text>
+              <Text>Your mnemonic phrase (click to copy);</Text>
             </Stack>
             <Stack direction="row">
               <Button
@@ -98,39 +102,27 @@ export default function KeysModal({
                 onClick={() => copyWithFlag(phrase, 'phrase')}
                 isActive={true}
               >
-                {phraseCopied ? <Text color="white">Copied!</Text> : <Text color="white">{phrase}</Text>}
+                {phraseCopied ? <Text>Copied!</Text> : <Text>{phrase}</Text>}
               </Button>
             </Stack>
 
             <Stack direction="row" mt={4}>
-              <Text color="white">Your BTC private key (click to copy);</Text>
+              <Text>Your BTC private key (click to copy);</Text>
             </Stack>
 
             <Stack direction="row" justify="space-between">
               <Button onClick={() => copyWithFlag(btcKey, 'BTCKey')}>
-                {BTCKeyCopied ? (
-                  <Text color="white">Copied!</Text>
-                ) : (
-                  <Text color="white" isTruncated>
-                    {btcKey}
-                  </Text>
-                )}
+                {BTCKeyCopied ? <Text>Copied!</Text> : <Text isTruncated>{btcKey}</Text>}
               </Button>
             </Stack>
 
             <Stack direction="row" mt={4}>
-              <Text color="white">Your ETH private key (click to copy);</Text>
+              <Text>Your ETH private key (click to copy);</Text>
             </Stack>
 
             <Stack direction="row" justify="space-between">
               <Button onClick={() => copyWithFlag(ethKey, 'ETHKey')}>
-                {ETHKeyCopied ? (
-                  <Text color="white">Copied!</Text>
-                ) : (
-                  <Text color="white" isTruncated>
-                    {ethKey}
-                  </Text>
-                )}
+                {ETHKeyCopied ? <Text>Copied!</Text> : <Text isTruncated>{ethKey}</Text>}
               </Button>
             </Stack>
           </Stack>

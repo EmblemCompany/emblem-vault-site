@@ -10,9 +10,11 @@ import {
   Text,
   Stack,
   Button,
+  useColorMode
 } from '@chakra-ui/core'
 import copy from 'copy-to-clipboard'
 import QRCode from 'qrcode.react'
+import { COLOR } from '../constants'
 
 export default function AddrModal({
   isOpen,
@@ -28,6 +30,8 @@ export default function AddrModal({
   const address = addrAddr
   const coin = addrCoin
   let permalink: string | null = null
+
+  const { colorMode } = useColorMode()
 
   const [copied, setCopied] = useState(false)
   useEffect(() => {
@@ -49,9 +53,9 @@ export default function AddrModal({
   return (
     <Modal isOpen={isOpen} onClose={onClose} isCentered>
       <ModalOverlay />
-      <ModalContent>
+      <ModalContent color={COLOR[colorMode]}>
         <ModalHeader>
-          <Text color="white">Send Stuff Here</Text>
+          <Text>Send Stuff Here</Text>
         </ModalHeader>
         <ModalCloseButton />
         <ModalBody>
@@ -61,14 +65,14 @@ export default function AddrModal({
             </Stack>
 
             <Stack direction="row" justify="space-between" mt="6">
-              <Text color="white">{coin} address (click to copy)</Text>
+              <Text>{coin} address (click to copy)</Text>
             </Stack>
             <Stack direction="row" justify="space-between">
               <Button onClick={() => copyWithFlag(address)}>
                 {copied ? (
-                  <Text color="white">Copied!</Text>
+                  <Text>Copied!</Text>
                 ) : (
-                  <Text color="white" isTruncated>
+                  <Text isTruncated>
                     {address}
                   </Text>
                 )}
