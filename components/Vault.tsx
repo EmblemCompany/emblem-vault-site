@@ -1,4 +1,16 @@
-import { Box, Flex, Image, Text, Stack, Button, ButtonGroup, Input, Link, useDisclosure, Spinner } from '@chakra-ui/core'
+import {
+  Box,
+  Flex,
+  Image,
+  Text,
+  Stack,
+  Button,
+  ButtonGroup,
+  Input,
+  Link,
+  useDisclosure,
+  Spinner,
+} from '@chakra-ui/core'
 
 import { useWeb3React } from '@web3-react/core'
 import { useEffect, useState } from 'react'
@@ -62,16 +74,15 @@ export default function Vault() {
     })
     const jsonData = await responce.json()
     console.log('vault response was ', jsonData)
-      if (!jsonData.name) {
-        setState({ loaded: true })
-        setInvalidVault(true)
-      } else {
-        setStates(jsonData)
-        saveCache(jsonData)
-        setLoadingApi(false)
-        setInvalidVault(false)
-      }
-
+    if (!jsonData.name) {
+      setState({ loaded: true })
+      setInvalidVault(true)
+    } else {
+      setStates(jsonData)
+      saveCache(jsonData)
+      setLoadingApi(false)
+      setInvalidVault(false)
+    }
   }
 
   const setStates = (jsonData) => {
@@ -265,7 +276,6 @@ export default function Vault() {
 
   return (
     <>
-
       <AddrModal isOpen={isOpenAddrModal} onClose={onCloseAddrModal} addrCoin={currCoin} addrAddr={currAddr} />
 
       <KeysModal
@@ -279,18 +289,32 @@ export default function Vault() {
       <Loader loaded={state.loaded}>
         {loadingApi ? <Refreshing /> : ''}
         {!invalidVault ? (
-        <Tilt className="Tilt" options={{ max: experimental ? 19 : 0, scale: 1 }}>
-          <Flex width="full" align="center" justifyContent="center">
-            <Box
-              maxW="sm"
-              borderWidth="1px"
-              borderColor={vaultChainId != chainId ? 'orange.500' : status == 'claimed' ? 'green.500' : null}
-              rounded="lg"
-              overflow="hidden"
-              alignItems="center"
-              minW={390}
-            >
-              {vaultChainId != chainId ? (
+          <Tilt className="Tilt" options={{ max: experimental ? 19 : 0, scale: 1 }}>
+            <Flex width="full" align="center" justifyContent="center">
+              <Box
+                maxW="sm"
+                borderWidth="1px"
+                borderColor={vaultChainId != chainId ? 'orange.500' : status == 'claimed' ? 'green.500' : null}
+                rounded="lg"
+                overflow="hidden"
+                alignItems="center"
+                minW={390}
+              >
+                {vaultChainId != chainId ? (
+                  <Box
+                    mt="1"
+                    fontWeight="semibold"
+                    as="h3"
+                    lineHeight="tight"
+                    p={2}
+                    textAlign="center"
+                    textTransform="uppercase"
+                    alignItems="center"
+                    color="orange.500"
+                  >
+                    BEWARE: Vault is on a different network than you are.
+                  </Box>
+                ) : null}
                 <Box
                   mt="1"
                   fontWeight="semibold"
@@ -300,149 +324,138 @@ export default function Vault() {
                   textAlign="center"
                   textTransform="uppercase"
                   alignItems="center"
-                  color="orange.500"
                 >
-                  BEWARE: Vault is on a different network than you are.
+                  {vaultName}
                 </Box>
-              ) : null}
-              <Box
-                mt="1"
-                fontWeight="semibold"
-                as="h3"
-                lineHeight="tight"
-                p={2}
-                textAlign="center"
-                textTransform="uppercase"
-                alignItems="center"
-              >
-                {vaultName}
-              </Box>
-              <Stack align="center">
-                <Image
-                  src={validImage(vaultImage) ? vaultImage : 'https://circuitsofvalue.com/public/coval-logo.png'}
-                  width="250px"
-                />
-              </Stack>
-              <Stack align="center">
-                <Box mt="1" ml="4" lineHeight="tight">
-                  <Text as="h4" ml="4" mr="4">
-                    {splitDescription(vaultDesc)}
-                  </Text>
-                </Box>
-              </Stack>
-              <Box p="6">
-                <Box d="flex" alignItems="baseline">
-                  <Box color="gray.500" letterSpacing="wide" fontSize="sm" ml="2">
-                    <Text as="h4" fontWeight="semibold">
-                      Current Contents:
+                <Stack align="center">
+                  <Image
+                    src={validImage(vaultImage) ? vaultImage : 'https://circuitsofvalue.com/public/coval-logo.png'}
+                    width="250px"
+                  />
+                </Stack>
+                <Stack align="center">
+                  <Box mt="1" ml="4" lineHeight="tight">
+                    <Text as="h4" ml="4" mr="4">
+                      {splitDescription(vaultDesc)}
                     </Text>
-                    {vaultPrivacy ? (
-                      <>
-                        <Text pb={2} color={decryptedEffect ? 'green.500' : null}>
-                          {decryptedEffect ? decryptedEffect : 'Contents hidden. Enter password to unlock.'}
-                        </Text>
-                        <Input
-                          type="password"
-                          id="vault-password"
-                          onChange={(e) => tryDecrypt(e.target.value)}
-                          aria-describedby="password-helper-text"
-                        />
-                      </>
-                    ) : vaultValues.length ? (
-                      vaultValues.map((coin) => {
-                        return (
-                          <Text key={coin.name} isTruncated>
-                            {coin.name}: {coin.balance}
+                  </Box>
+                </Stack>
+                <Box p="6">
+                  <Box d="flex" alignItems="baseline">
+                    <Box color="gray.500" letterSpacing="wide" fontSize="sm" ml="2">
+                      <Text as="h4" fontWeight="semibold">
+                        Current Contents:
+                      </Text>
+                      {vaultPrivacy ? (
+                        <>
+                          <Text pb={2} color={decryptedEffect ? 'green.500' : null}>
+                            {decryptedEffect ? decryptedEffect : 'Contents hidden. Enter password to unlock.'}
                           </Text>
-                        )
-                      })
-                    ) : (
-                      <Text>Nothing in here! Fill 'er up!</Text>
-                    )}
-                  </Box>
-                </Box>
-                {!vaultPrivacy ? (
-                  <Box d="flex" alignItems="baseline" justifyContent="space-between" mt="4">
-                    <Stack direction="row" align="center" spacing="1rem" flexWrap="wrap" shouldWrapChildren>
-                      <ButtonGroup spacing={4}>
-                        {vaultAddresses.map((addr) => {
+                          <Input
+                            type="password"
+                            id="vault-password"
+                            onChange={(e) => tryDecrypt(e.target.value)}
+                            aria-describedby="password-helper-text"
+                          />
+                        </>
+                      ) : vaultValues.length ? (
+                        vaultValues.map((coin) => {
                           return (
-                            <Button
-                              key={addr.address}
-                              onClick={() => {
-                                setCurrCoin(addr.coin)
-                                setCurrAddr(addr.address)
-                                onOpenAddrModal()
-                              }}
-                            >
-                              Put {addr.coin == 'ETH' ? addr.coin + '/ERC20' : addr.coin} In
-                            </Button>
+                            <Text key={coin.name} isTruncated>
+                              {coin.name}: {coin.balance}
+                            </Text>
                           )
-                        })}
-                      </ButtonGroup>
-                    </Stack>
+                        })
+                      ) : (
+                        <Text>Nothing in here! Fill 'er up!</Text>
+                      )}
+                    </Box>
                   </Box>
-                ) : null}
-                {status === 'claimed' && claimedBy === account ? (
-                  <Box d="flex" alignItems="baseline" justifyContent="space-between" mt="4">
-                    <Button width="100%" onClick={handleSign}>
-                      Get Keys
-                    </Button>
-                  </Box>
-                ) : (
-                  <Box d="flex" alignItems="baseline" justifyContent="space-between" mt="4">
-                    <Button
-                      width="100%"
-                      as="a"
-                      {...{
-                        href:
-                          'https://' +
-                          (vaultChainId == 4 ? 'rinkeby.' : '') +
-                          'opensea.io/assets/' +
-                          contractAddresses.emblemVault[vaultChainId] +
-                          '/' +
-                          tokenId,
-                        target: '_blank',
-                        rel: 'noopener noreferrer',
-                      }}
-                    >
-                      {mine ? 'Sell/Gift/Send' : 'Make an Offer'}
-                    </Button>
-                  </Box>
-                )}
+                  {!vaultPrivacy ? (
+                    <Box d="flex" alignItems="baseline" justifyContent="space-between" mt="4">
+                      <Stack direction="row" align="center" spacing="1rem" flexWrap="wrap" shouldWrapChildren>
+                        <ButtonGroup spacing={4}>
+                          {vaultAddresses.map((addr) => {
+                            return (
+                              <Button
+                                key={addr.address}
+                                onClick={() => {
+                                  setCurrCoin(addr.coin)
+                                  setCurrAddr(addr.address)
+                                  onOpenAddrModal()
+                                }}
+                              >
+                                Put {addr.coin == 'ETH' ? addr.coin + '/ERC20' : addr.coin} In
+                              </Button>
+                            )
+                          })}
+                        </ButtonGroup>
+                      </Stack>
+                    </Box>
+                  ) : null}
+                  {status === 'claimed' && claimedBy === account ? (
+                    <Box d="flex" alignItems="baseline" justifyContent="space-between" mt="4">
+                      <Button width="100%" onClick={handleSign}>
+                        Get Keys
+                      </Button>
+                    </Box>
+                  ) : (
+                    <Box d="flex" alignItems="baseline" justifyContent="space-between" mt="4">
+                      <Button
+                        width="100%"
+                        as="a"
+                        {...{
+                          href:
+                            'https://' +
+                            (vaultChainId == 4 ? 'rinkeby.' : '') +
+                            'opensea.io/assets/' +
+                            contractAddresses.emblemVault[vaultChainId] +
+                            '/' +
+                            tokenId,
+                          target: '_blank',
+                          rel: 'noopener noreferrer',
+                        }}
+                      >
+                        {mine ? 'Sell/Gift/Send' : 'Make an Offer'}
+                      </Button>
+                    </Box>
+                  )}
 
-                {mine ? (
-                  <Box d="flex" alignItems="baseline" justifyContent="space-between" mt="4">
-                    <Button
-                      width="100%"
-                      onClick={() => {
-                        if (allowed) {
-                          handleClaim()
-                        } else {
-                          handleApprove()
-                        }
-                      }}
-                    >
-                      {allowed ? 'Claim' : 'Approve'}
-                    </Button>
-                  </Box>
-                ) : null}
+                  {mine ? (
+                    <Box d="flex" alignItems="baseline" justifyContent="space-between" mt="4">
+                      <Button
+                        width="100%"
+                        onClick={() => {
+                          if (allowed) {
+                            handleClaim()
+                          } else {
+                            handleApprove()
+                          }
+                        }}
+                      >
+                        {allowed ? 'Claim' : 'Approve'}
+                      </Button>
+                    </Box>
+                  ) : null}
+                </Box>
+                <Stack direction="column" align="center">
+                  {status == 'claimed' ? <Text color="green.500">CLAIMED</Text> : null}
+                </Stack>
               </Box>
-              <Stack direction="column" align="center">
-                {status == 'claimed' ? <Text color="green.500">CLAIMED</Text> : null}
-              </Stack>
-            </Box>
-          </Flex>
-        </Tilt>
+            </Flex>
+          </Tilt>
         ) : (
           <Stack align="center">
-          <Image width="md" src="https://starwarsblog.starwars.com/wp-content/uploads/2017/06/25-star-wars-quotes-obi-wan-kenobi-identification-tall.jpg"></Image>
-          <Text>
-            THESE ARE NOT THE VAULTS YOU ARE LOOKING FOR{' '}
-            <Link color="#638cd8" href="../create">
-              CREATE ONE HERE!
-            </Link>
-          </Text>
+            <Image
+              width="md"
+              src="https://starwarsblog.starwars.com/wp-content/uploads/2017/06/25-star-wars-quotes-obi-wan-kenobi-identification-tall.jpg"
+            ></Image>
+            <Text>
+              THESE ARE NOT THE VAULTS YOU ARE LOOKING FOR{' '}
+              <Link color="#638cd8" href="../create">
+                CREATE ONE HERE!
+              </Link>
+            </Text>
           </Stack>
         )}
         {hash ? (

@@ -89,9 +89,9 @@ export default function KeysModal({
         </ModalHeader>
         <ModalCloseButton />
         <ModalBody>
-          <Stack direction="column">
+          <Stack direction="column" mb={10}>
             <Stack direction="row">
-              <Text>Your mnemonic phrase (click to copy);</Text>
+              <Text>Your mnemonic phrase (click to copy):</Text>
             </Stack>
             <Stack direction="row">
               <Button
@@ -107,21 +107,21 @@ export default function KeysModal({
             </Stack>
 
             <Stack direction="row" mt={4}>
-              <Text>Your BTC private key (click to copy);</Text>
+              <Text>Your BTC private key (click to copy):</Text>
             </Stack>
 
             <Stack direction="row" justify="space-between">
-              <Button onClick={() => copyWithFlag(btcKey, 'BTCKey')}>
-                {BTCKeyCopied ? <Text>Copied!</Text> : <Text isTruncated>{btcKey}</Text>}
+              <Button whiteSpace="unset" height="unset" onClick={() => copyWithFlag(btcKey, 'BTCKey')}>
+                {BTCKeyCopied ? <Text>Copied!</Text> : <Text>{btcKey}</Text>}
               </Button>
             </Stack>
 
             <Stack direction="row" mt={4}>
-              <Text>Your ETH private key (click to copy);</Text>
+              <Text>Your ETH private key (click to copy):</Text>
             </Stack>
 
             <Stack direction="row" justify="space-between">
-              <Button onClick={() => copyWithFlag(ethKey, 'ETHKey')}>
+              <Button whiteSpace="unset" height="unset" onClick={() => copyWithFlag(ethKey, 'ETHKey')}>
                 {ETHKeyCopied ? <Text>Copied!</Text> : <Text isTruncated>{ethKey}</Text>}
               </Button>
             </Stack>
