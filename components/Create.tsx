@@ -2,6 +2,7 @@ import {
   FormControl,
   FormLabel,
   FormHelperText,
+  FormErrorMessage,
   Input,
   Stack,
   Tabs,
@@ -195,6 +196,7 @@ export default function Create(props: any) {
                         id="owner-address"
                         aria-describedby="owner-helper-text"
                         placeholder="0xdeadbeef"
+                        maxLength={42}
                         value={vaultAddress}
                         onChange={(e) => setVaultAddress(e.target.value)}
                       />
@@ -265,10 +267,17 @@ export default function Create(props: any) {
                         type="text"
                         id="vault-name"
                         aria-describedby="vault-name-text"
+                        minLength={3}
+                        maxLength={200}
                         value={vaultName}
                         onChange={(e) => setVaultName(e.target.value)}
                       />
                       <FormHelperText id="vault-name-text">Give it some love so you can find it later.</FormHelperText>
+                      {vaultName && vaultName.length < 3 ? (
+                        <FormErrorMessage>Name must be at least 3 characters</FormErrorMessage>
+                      ) : (
+                        ''
+                      )}
                     </FormControl>
                   </Stack>
                   <Stack direction="row" align="flex-start" spacing="0rem" flexWrap="wrap" shouldWrapChildren>
@@ -278,6 +287,8 @@ export default function Create(props: any) {
                         id="vault-desc"
                         size="lg"
                         aria-describedby="vault-desc-text"
+                        minLength={3}
+                        maxLength={1024}
                         value={vaultDesc}
                         onChange={(e) => setVaultDesc(e.target.value)}
                       />
@@ -374,9 +385,9 @@ export default function Create(props: any) {
                         <Button isDisabled type="submit">
                           No Wallet Connected!
                         </Button>
-                      ) : !vaultAddress || !vaultName || !vaultDesc ? (
+                      ) : !vaultAddress || !vaultName || vaultName.length < 3 || !vaultDesc || vaultDesc.length < 3 ? (
                         <Button isDisabled type="submit">
-                          Missing Fields!
+                          Check Fields!
                         </Button>
                       ) : !service ? (
                         <Button isDisabled type="submit">
