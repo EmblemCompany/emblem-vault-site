@@ -9,7 +9,6 @@ import {
   Input,
   Link,
   useDisclosure,
-  Spinner,
 } from '@chakra-ui/core'
 
 import { useWeb3React } from '@web3-react/core'
@@ -30,7 +29,7 @@ const KeysModal = dynamic(() => import('./KeysModal'))
 
 export default function Vault() {
   const { account, chainId, library } = useWeb3React()
-  const { query, pathname, replace } = useRouter()
+  const { query } = useRouter()
   const [tokenId, setTokenId] = useState(query.id)
   const [experimental, setExperimental] = useState(query.experimental)
   const [vaultName, setVaultName] = useState('')
