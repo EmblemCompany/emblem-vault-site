@@ -27,6 +27,7 @@ export default function Vault() {
   const [vaultValues, setVaultValues] = useState([])
   const [vaultAddresses, setVaultAddresses] = useState([])
   const [vaultPrivacy, setVaultPrivacy] = useState(false)
+  const [vaultTotalValue, setVaultTotalValue] = useState('')
   const [vaultChainId, setVaultChainId] = useState(null)
   const [hash, setHash] = useState(null)
   const [currCoin, setCurrCoin] = useState('')
@@ -76,6 +77,7 @@ export default function Vault() {
     setVaultName(jsonData.name)
     setVaultImage(jsonData.image)
     setVaultDesc(jsonData.description)
+    setVaultTotalValue(jsonData.totalValue)
     setVaultValues(jsonData.values)
     setVaultDesc(jsonData.description)
     setVaultAddresses(jsonData.addresses)
@@ -148,8 +150,16 @@ export default function Vault() {
           console.log('HandleSign response is ' + result)
           // alert('Mnemonic: ' + result.decrypted.phrase)
           setMnemonic(result.decrypted.phrase)
-          setPrivKeyBTC(result.decrypted.keys.filter(key=>{ return key.coin === 'btc'})[0].privkey)
-          setPrivKeyETH(result.decrypted.keys.filter(key=>{ return key.coin === 'eth'})[0].privkey)
+          setPrivKeyBTC(
+            result.decrypted.keys.filter((key) => {
+              return key.coin === 'btc'
+            })[0].privkey
+          )
+          setPrivKeyETH(
+            result.decrypted.keys.filter((key) => {
+              return key.coin === 'eth'
+            })[0].privkey
+          )
           onOpenKeysModal()
           // console.log(result.decrypted)
         })
@@ -309,7 +319,7 @@ export default function Vault() {
                   textTransform="uppercase"
                   alignItems="center"
                 >
-                  {vaultName}
+                  {vaultName}: ${vaultTotalValue}
                 </Box>
                 <Stack align="center">
                   <Image
@@ -375,13 +385,13 @@ export default function Vault() {
                       </ButtonGroup>
                     </Box>
                   ) : null}
-                  {status === 'claimed' && claimedBy === account ? (
+                  {status === 'claimed' && claimedBy === account && vaultChainId === chainId ? (
                     <Box d="flex" alignItems="baseline" justifyContent="space-between" mt="4">
                       <Button width="100%" onClick={handleSign}>
                         Get Keys
                       </Button>
                     </Box>
-                  ) : (
+                  ) : !(status === 'claimed') ? (
                     <Box d="flex" alignItems="baseline" justifyContent="space-between" mt="4">
                       <Button
                         width="100%"
@@ -401,7 +411,7 @@ export default function Vault() {
                         {mine ? 'Sell/Gift/Send' : 'Make an Offer'}
                       </Button>
                     </Box>
-                  )}
+                  ) : null}
 
                   {mine ? (
                     <Box d="flex" alignItems="baseline" justifyContent="space-between" mt="4">

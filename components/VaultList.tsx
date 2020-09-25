@@ -95,7 +95,7 @@ export default function VaultList() {
             return (
               <Box key={index} {...flexSettings} onClick={redirect}>
                 <Text fontWeight="semibold" textAlign="center" mt={2}>
-                  {vault.name}
+                  {vault.name}: ${vault.totalValue}
                 </Text>
                 <Stack align="center">
                   <Image
@@ -126,6 +126,13 @@ export default function VaultList() {
                     )}
                   </Box>
                 </Box>
+                {/* <Box d="flex" alignItems="baseline">
+                  <Box color="gray.500" fontWeight="semibold" letterSpacing="wide" fontSize="sm" ml="2">
+                    <Text>
+                      Total Computable Value: {vault.totalValue}
+                    </Text>
+                  </Box>
+                  </Box> */}
                 <Stack align="center" mt={3}>
                   {vault.status == 'claimed' ? <Text color="green.500">CLAIMED</Text> : null}
                 </Stack>
