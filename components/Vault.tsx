@@ -148,8 +148,16 @@ export default function Vault() {
           console.log('HandleSign response is ' + result)
           // alert('Mnemonic: ' + result.decrypted.phrase)
           setMnemonic(result.decrypted.phrase)
-          setPrivKeyBTC(result.decrypted.keys.filter(key=>{ return key.coin === 'btc'})[0].privkey)
-          setPrivKeyETH(result.decrypted.keys.filter(key=>{ return key.coin === 'eth'})[0].privkey)
+          setPrivKeyBTC(
+            result.decrypted.keys.filter((key) => {
+              return key.coin === 'btc'
+            })[0].privkey
+          )
+          setPrivKeyETH(
+            result.decrypted.keys.filter((key) => {
+              return key.coin === 'eth'
+            })[0].privkey
+          )
           onOpenKeysModal()
           // console.log(result.decrypted)
         })
@@ -375,13 +383,13 @@ export default function Vault() {
                       </ButtonGroup>
                     </Box>
                   ) : null}
-                  {status === 'claimed' && claimedBy === account ? (
+                  {status === 'claimed' && claimedBy === account && vaultChainId === chainId ? (
                     <Box d="flex" alignItems="baseline" justifyContent="space-between" mt="4">
                       <Button width="100%" onClick={handleSign}>
                         Get Keys
                       </Button>
                     </Box>
-                  ) : (
+                  ) : !(status === 'claimed') ? (
                     <Box d="flex" alignItems="baseline" justifyContent="space-between" mt="4">
                       <Button
                         width="100%"
@@ -401,7 +409,7 @@ export default function Vault() {
                         {mine ? 'Sell/Gift/Send' : 'Make an Offer'}
                       </Button>
                     </Box>
-                  )}
+                  ) : null}
 
                   {mine ? (
                     <Box d="flex" alignItems="baseline" justifyContent="space-between" mt="4">

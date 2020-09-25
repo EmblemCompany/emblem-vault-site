@@ -106,7 +106,7 @@ export default function KeysModal({
               </Button>
             </Stack>
 
-             <Stack direction="row" mt={4}>
+            <Stack direction="row" mt={4}>
               <Text>Your BTC private key (click to copy):</Text>
             </Stack>
 
