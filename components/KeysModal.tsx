@@ -98,7 +98,7 @@ export default function KeysModal({
                 width="100%"
                 whiteSpace="unset"
                 height="unset"
-                p={1}
+                p={2}
                 onClick={() => copyWithFlag(phrase, 'phrase')}
                 isActive={true}
               >
@@ -111,7 +111,7 @@ export default function KeysModal({
             </Stack>
 
             <Stack direction="row" justify="space-between">
-              <Button whiteSpace="unset" height="unset" onClick={() => copyWithFlag(btcKey, 'BTCKey')}>
+              <Button whiteSpace="unset" height="unset" p={2} onClick={() => copyWithFlag(btcKey, 'BTCKey')}>
                 {BTCKeyCopied ? <Text>Copied!</Text> : <Text isTruncated>{btcKey}</Text>}
               </Button>
             </Stack>
@@ -121,7 +121,7 @@ export default function KeysModal({
             </Stack>
 
             <Stack direction="row" justify="space-between">
-              <Button whiteSpace="unset" height="unset" onClick={() => copyWithFlag(ethKey, 'ETHKey')}>
+              <Button whiteSpace="unset" height="unset" p={2} onClick={() => copyWithFlag(ethKey, 'ETHKey')}>
                 {ETHKeyCopied ? <Text>Copied!</Text> : <Text isTruncated>{ethKey}</Text>}
               </Button>
             </Stack>
