@@ -106,13 +106,13 @@ export default function KeysModal({
               </Button>
             </Stack>
 
-            {/* <Stack direction="row" mt={4}>
+             <Stack direction="row" mt={4}>
               <Text>Your BTC private key (click to copy):</Text>
             </Stack>
 
             <Stack direction="row" justify="space-between">
               <Button whiteSpace="unset" height="unset" onClick={() => copyWithFlag(btcKey, 'BTCKey')}>
-                {BTCKeyCopied ? <Text>Copied!</Text> : <Text>{btcKey}</Text>}
+                {BTCKeyCopied ? <Text>Copied!</Text> : <Text isTruncated>{btcKey}</Text>}
               </Button>
             </Stack>
 
@@ -124,7 +124,7 @@ export default function KeysModal({
               <Button whiteSpace="unset" height="unset" onClick={() => copyWithFlag(ethKey, 'ETHKey')}>
                 {ETHKeyCopied ? <Text>Copied!</Text> : <Text isTruncated>{ethKey}</Text>}
               </Button>
-            </Stack> */}
+            </Stack>
           </Stack>
         </ModalBody>
       </ModalContent>
