@@ -27,6 +27,7 @@ export default function Vault() {
   const [vaultValues, setVaultValues] = useState([])
   const [vaultAddresses, setVaultAddresses] = useState([])
   const [vaultPrivacy, setVaultPrivacy] = useState(false)
+  const [vaultTotalValue, setVaultTotalValue] = useState('')
   const [vaultChainId, setVaultChainId] = useState(null)
   const [hash, setHash] = useState(null)
   const [currCoin, setCurrCoin] = useState('')
@@ -76,6 +77,7 @@ export default function Vault() {
     setVaultName(jsonData.name)
     setVaultImage(jsonData.image)
     setVaultDesc(jsonData.description)
+    setVaultTotalValue(jsonData.totalValue)
     setVaultValues(jsonData.values)
     setVaultDesc(jsonData.description)
     setVaultAddresses(jsonData.addresses)
@@ -317,7 +319,7 @@ export default function Vault() {
                   textTransform="uppercase"
                   alignItems="center"
                 >
-                  {vaultName}
+                  {vaultName}: ${vaultTotalValue}
                 </Box>
                 <Stack align="center">
                   <Image
