@@ -171,7 +171,6 @@ export default function Vault() {
       setClaiming(true)
       setTimeout(() => {
         setHash(hash)
-        handleSign()
       }, 100) // Solving State race condition where transaction watcher wouldn't notice we were claiming
     })
   }
@@ -385,13 +384,8 @@ export default function Vault() {
                       </ButtonGroup>
                     </Box>
                   ) : null}
-                  {status === 'claimed' && claimedBy === account && vaultChainId === chainId ? (
-                    <Box d="flex" alignItems="baseline" justifyContent="space-between" mt="4">
-                      <Button width="100%" onClick={handleSign}>
-                        Get Keys
-                      </Button>
-                    </Box>
-                  ) : !(status === 'claimed') ? (
+
+                  { !(status === 'claimed') ? (
                     <Box d="flex" alignItems="baseline" justifyContent="space-between" mt="4">
                       <Button
                         width="100%"
@@ -411,9 +405,10 @@ export default function Vault() {
                         {mine ? 'Sell/Gift/Send' : 'Make an Offer'}
                       </Button>
                     </Box>
-                  ) : null}
+                   ) : null
+                  }
 
-                  {mine ? (
+                  {!(status === 'claimed') && account && vaultChainId === chainId && mine? (
                     <Box d="flex" alignItems="baseline" justifyContent="space-between" mt="4">
                       <Button
                         width="100%"
@@ -424,7 +419,15 @@ export default function Vault() {
                         Claim
                       </Button>
                     </Box>
+
+                    ) : status === 'claimed' && claimedBy === account && vaultChainId === chainId ? (
+                    <Box d="flex" alignItems="baseline" justifyContent="space-between" mt="4">
+                      <Button width="100%" onClick={handleSign}>
+                        Get Keys
+                      </Button>
+                    </Box>
                   ) : null}
+
                 </Box>
                 <Stack direction="column" align="center">
                   {status == 'claimed' ? <Text color="green.500">CLAIMED</Text> : null}
@@ -452,6 +455,10 @@ export default function Vault() {
             onComplete={() => {
               if (claiming) {
                 setHash(null)
+                setStatus('claimed')
+                setClaiming(false)
+                setClaimedBy(account)
+                handleSign()
               }
             }}
           />
