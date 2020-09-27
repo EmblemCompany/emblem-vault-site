@@ -28,7 +28,7 @@ export default function Vault() {
   const [vaultValues, setVaultValues] = useState([])
   const [vaultAddresses, setVaultAddresses] = useState([])
   const [vaultPrivacy, setVaultPrivacy] = useState(false)
-  const [vaultTotalValue, setVaultTotalValue] = useState('')
+  const [vaultTotalValue, setVaultTotalValue] = useState(0)
   const [vaultChainId, setVaultChainId] = useState(null)
   const [hash, setHash] = useState(null)
   const [currCoin, setCurrCoin] = useState('')
@@ -78,7 +78,7 @@ export default function Vault() {
     setVaultName(jsonData.name)
     setVaultImage(jsonData.image)
     setVaultDesc(jsonData.description)
-    setVaultTotalValue(jsonData.totalValue)
+    setVaultTotalValue(jsonData.totalValue || 0)
     setVaultValues(jsonData.values)
     setVaultDesc(jsonData.description)
     setVaultAddresses(jsonData.addresses)
@@ -105,7 +105,7 @@ export default function Vault() {
     }
   }
 
-  const getBalances = async (address) => {
+  const getEthBalances = async (address, cb) => {
     const responce = await fetch(EMBLEM_API + '/eth/balance/' + address, {
       method: 'GET',
       headers: {
@@ -114,7 +114,24 @@ export default function Vault() {
       },
     })
     const jsonData = await responce.json()
-    setVaultValues(jsonData.values)
+    // setVaultValues(vaultValues.concat(jsonData.values))
+    console.log(Number(vaultTotalValue),  Number(jsonData.totalValue))
+    setVaultTotalValue(Number(vaultTotalValue) + Number(jsonData.totalValue))
+    console.log("get eth balances", jsonData.values)
+    return cb(jsonData.values)
+  }
+
+  const getBtcBalance = async (values, address) => {
+    const responce = await fetch(EMBLEM_API + '/btc/balance/' + address, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        service: 'evmetadata',
+      },
+    })
+    const jsonData = await responce.json()
+    setVaultValues(values.concat(jsonData.values))
+    // setVaultTotalValue(Number(vaultTotalValue) + Number(jsonData.totalValue))
   }
 
   const saveCache = (vault) => {
@@ -142,7 +159,6 @@ export default function Vault() {
   const getContractStates = async () => {
     let owner = await emblemContract.ownerOf(tokenId)
     setMine(owner === account)
-    // console.log('status', status, 'claimedBy', claimedBy)
   }
 
   const handleApprove = async () => {
@@ -161,7 +177,6 @@ export default function Vault() {
       .then((signature) => {
         getKeys(signature, tokenId, (result) => {
           console.log('HandleSign response is ' + result)
-          // alert('Mnemonic: ' + result.decrypted.phrase)
           setMnemonic(result.decrypted.phrase)
           setPrivKeyBTC(
             result.decrypted.keys.filter((key) => {
@@ -174,7 +189,6 @@ export default function Vault() {
             })[0].privkey
           )
           onOpenKeysModal()
-          // console.log(result.decrypted)
         })
       })
   }
@@ -263,8 +277,9 @@ export default function Vault() {
       setVaultPrivacy(false)
       setDecryptPassword(key)
       setVaultAddresses(decryptAddresses(key))
-      console.log("Getting Balances for vaultAddresses[0].address", vaultAddresses[0].address)
-      getBalances(vaultAddresses[0].address)
+      getEthBalances(vaultAddresses.filter(item=>{return item.coin === 'ETH'})[0].address, (values)=>{
+        getBtcBalance(values, vaultAddresses.filter(item=>{return item.coin === 'BTC'})[0].address)
+      })      
     } catch (err) {}
   }
 
