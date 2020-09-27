@@ -104,6 +104,18 @@ export default function Vault() {
     }
   }
 
+  const getBalances = async (address) => {
+    const responce = await fetch(EMBLEM_API + '/eth/balance/' + address, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        service: 'evmetadata',
+      },
+    })
+    const jsonData = await responce.json()
+    setVaultValues(jsonData.values)
+  }
+
   const saveCache = (vault) => {
     localStorage.setItem(account + '_' + chainId + '_' + tokenId + '_vault', JSON.stringify(vault)) // Save new state for later
   }
@@ -250,6 +262,8 @@ export default function Vault() {
       setVaultPrivacy(false)
       setDecryptPassword(key)
       setVaultAddresses(decryptAddresses(key))
+      console.log("Getting Balances for vaultAddresses[0].address", vaultAddresses[0].address)
+      getBalances(vaultAddresses[0].address)
     } catch (err) {}
   }
 
