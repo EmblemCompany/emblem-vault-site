@@ -7,6 +7,7 @@ import Refreshing from './Refreshing'
 import Loader from 'react-loader'
 import dynamic from 'next/dynamic'
 import { validImage } from '../utils'
+import { Notify } from './Notify'
 import { TransactionToast } from './TransactionToast'
 import { EMBLEM_API, BURN_ADDRESS, contractAddresses } from '../constants'
 import { useContract } from '../hooks'
@@ -381,12 +382,11 @@ export default function Vault() {
                   </Box>
                   {!vaultPrivacy ? (
                     <Box d="flex" alignItems="baseline" justifyContent="space-between" mt="4">
-                      <ButtonGroup justifyContent="space-between">
+                      <ButtonGroup justifyContent="space-between" spacing={6}>
                         {vaultAddresses.map((addr) => {
                           return (
                             <Button
                               key={addr.address}
-                              p={2}
                               onClick={() => {
                                 setCurrCoin(addr.coin)
                                 setCurrAddr(addr.address)
@@ -430,8 +430,9 @@ export default function Vault() {
                         onClick={() => {
                           handleClaim()
                         }}
+                        isDisabled={claiming}
                       >
-                        Claim
+                        {claiming ? 'Claiming ...' : 'Claim'}
                       </Button>
                     </Box>
                   ) : status === 'claimed' && claimedBy === account && vaultChainId === chainId ? (
@@ -463,18 +464,22 @@ export default function Vault() {
           </Stack>
         )}
         {hash ? (
-          <TransactionToast
-            hash={hash}
-            onComplete={() => {
-              if (claiming) {
-                setHash(null)
-                setStatus('claimed')
-                setClaiming(false)
-                setClaimedBy(account)
-                handleSign()
-              }
-            }}
-          />
+          <>
+            <Notify color="green" message="Claiming Vault ..." onClose={() => {}} />
+            <br />
+            <TransactionToast
+              hash={hash}
+              onComplete={() => {
+                if (claiming) {
+                  setHash(null)
+                  setStatus('claimed')
+                  setClaiming(false)
+                  setClaimedBy(account)
+                  handleSign()
+                }
+              }}
+            />
+          </>
         ) : null}
       </Loader>
     </>
