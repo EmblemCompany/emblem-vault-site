@@ -368,12 +368,11 @@ export default function Vault() {
                   </Box>
                   {!vaultPrivacy ? (
                     <Box d="flex" alignItems="baseline" justifyContent="space-between" mt="4">
-                      <ButtonGroup justifyContent="space-between">
+                      <ButtonGroup justifyContent="space-between" spacing={6}>
                         {vaultAddresses.map((addr) => {
                           return (
                             <Button
                               key={addr.address}
-                              p={2}
                               onClick={() => {
                                 setCurrCoin(addr.coin)
                                 setCurrAddr(addr.address)
