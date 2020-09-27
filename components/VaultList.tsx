@@ -30,7 +30,7 @@ export default function VaultList() {
     setVaults(jsonData)
     saveCache(jsonData)
     setLoadingApi(false)
-    console.log(jsonData)
+    // console.log(jsonData)
   }
 
   const loadCache = () => {
