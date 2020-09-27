@@ -318,7 +318,8 @@ export default function Vault() {
                   textTransform="uppercase"
                   alignItems="center"
                 >
-                  {vaultName}: ${vaultTotalValue}
+                  {vaultName}
+                  {!vaultPrivacy ? ': ~$' + vaultTotalValue : null}
                 </Box>
                 <Stack align="center">
                   <Image
@@ -371,6 +372,7 @@ export default function Vault() {
                           return (
                             <Button
                               key={addr.address}
+                              p={2}
                               onClick={() => {
                                 setCurrCoin(addr.coin)
                                 setCurrAddr(addr.address)
@@ -385,7 +387,7 @@ export default function Vault() {
                     </Box>
                   ) : null}
 
-                  { !(status === 'claimed') ? (
+                  {!(status === 'claimed') ? (
                     <Box d="flex" alignItems="baseline" justifyContent="space-between" mt="4">
                       <Button
                         width="100%"
@@ -405,10 +407,9 @@ export default function Vault() {
                         {mine ? 'Sell/Gift/Send' : 'Make an Offer'}
                       </Button>
                     </Box>
-                   ) : null
-                  }
+                  ) : null}
 
-                  {!(status === 'claimed') && account && vaultChainId === chainId && mine? (
+                  {!(status === 'claimed') && account && vaultChainId === chainId && mine ? (
                     <Box d="flex" alignItems="baseline" justifyContent="space-between" mt="4">
                       <Button
                         width="100%"
@@ -419,15 +420,13 @@ export default function Vault() {
                         Claim
                       </Button>
                     </Box>
-
-                    ) : status === 'claimed' && claimedBy === account && vaultChainId === chainId ? (
+                  ) : status === 'claimed' && claimedBy === account && vaultChainId === chainId ? (
                     <Box d="flex" alignItems="baseline" justifyContent="space-between" mt="4">
                       <Button width="100%" onClick={handleSign}>
                         Get Keys
                       </Button>
                     </Box>
                   ) : null}
-
                 </Box>
                 <Stack direction="column" align="center">
                   {status == 'claimed' ? <Text color="green.500">CLAIMED</Text> : null}

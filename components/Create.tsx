@@ -71,7 +71,16 @@ export default function Create(props: any) {
     )
     setBalance(await covalContract.balanceOf(account).then((balance: { toString: () => string }) => balance.toString()))
     setPrice(await handlerContract.price().then((balance: { toString: () => string }) => balance.toString()))
-    console.log('balance', balance, 'allowance', allowance, 'price', price, Number(allowance) >= Number(price), Number(balance) > Number(price))
+    console.log(
+      'balance',
+      balance,
+      'allowance',
+      allowance,
+      'price',
+      price,
+      Number(allowance) >= Number(price),
+      Number(balance) > Number(price)
+    )
     if (Number(allowance) >= Number(price)) {
       setIsCovalApproved(true)
     } else {

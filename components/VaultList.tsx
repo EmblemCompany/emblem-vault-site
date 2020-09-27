@@ -30,6 +30,7 @@ export default function VaultList() {
     setVaults(jsonData)
     saveCache(jsonData)
     setLoadingApi(false)
+    console.log(jsonData)
   }
 
   const loadCache = () => {
@@ -95,7 +96,8 @@ export default function VaultList() {
             return (
               <Box key={index} {...flexSettings} onClick={redirect}>
                 <Text fontWeight="semibold" textAlign="center" mt={2}>
-                  {vault.name}: ${vault.totalValue}
+                  {vault.name}
+                  {!vault.private ? ': ~$' + vault.totalValue : null}
                 </Text>
                 <Stack align="center">
                   <Image
@@ -106,7 +108,7 @@ export default function VaultList() {
                 </Stack>
                 <Box d="flex" alignItems="baseline">
                   <Box color="gray.500" fontWeight="semibold" letterSpacing="wide" fontSize="sm" ml="2">
-                    {vault.isPrivate ? (
+                    {vault.private ? (
                       <>
                         <Text>Contents hidden. Click to view the vault and unlock values.</Text>
                       </>
