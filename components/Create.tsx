@@ -29,7 +29,6 @@ import { Notify } from './Notify'
 import { Contract } from '@ethersproject/contracts'
 import { useContract } from '../hooks'
 import { isETHAddress } from '../utils'
-import { isValidName } from '@ethersproject/hash'
 
 export default function Create(props: any) {
   const [tabIndex, setTabIndex] = useState(0)
