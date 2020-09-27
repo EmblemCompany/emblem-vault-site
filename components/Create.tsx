@@ -145,7 +145,7 @@ export default function Create(props: any) {
   }
 
   function previewFile() {
-    const preview = document.querySelector('img')
+    const preview = document.querySelector('#preview') as HTMLImageElement
     const inputelement = document.querySelector('input[type=file]') as HTMLInputElement //.files[0];
     const reader = new FileReader()
 
@@ -333,7 +333,7 @@ export default function Create(props: any) {
                         <input type="file" onChange={() => previewFile()} />
                         <br />
                         <br />
-                        <img src="" width="200" alt="Image preview..."></img>
+                        <img id="preview" src="" width="200" alt="Image preview..."></img>
                       </Box>
                     </FormControl>
                   </Stack>
