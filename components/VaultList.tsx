@@ -89,6 +89,7 @@ export default function VaultList() {
               rounded: 'lg',
               overflow: 'hidden',
               borderColor: vault.status == 'claimed' ? 'green !important' : '',
+              cursor: 'pointer'
             }
             const redirect = function () {
               location.href = url
