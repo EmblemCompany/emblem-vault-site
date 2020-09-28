@@ -89,7 +89,7 @@ export default function VaultList() {
               rounded: 'lg',
               overflow: 'hidden',
               borderColor: vault.status == 'claimed' ? 'green !important' : '',
-              cursor: 'pointer'
+              cursor: 'pointer',
             }
             const redirect = function () {
               location.href = url
@@ -116,15 +116,17 @@ export default function VaultList() {
                     ) : vault.values.length ? (
                       vault.values.map((coin, index) => {
                         if (index < 4)
-                        return (
-                          <Text key={coin.name} isTruncated>
-                            {coin.name}: {coin.balance}
-                          </Text>
-                        )
+                          return (
+                            <Text key={coin.name} isTruncated>
+                              {coin.name}: {coin.balance}
+                            </Text>
+                          )
                         else if (index == 4)
-                        return (
-                          <Text fontWeight="bold" mt={2}>... Click to see the rest ...</Text>
-                        )
+                          return (
+                            <Text fontWeight="bold" mt={2}>
+                              ... Click to see the rest ...
+                            </Text>
+                          )
                       })
                     ) : (
                       <Text>

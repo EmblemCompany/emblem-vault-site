@@ -114,8 +114,8 @@ export default function Create(props: any) {
 
   const handleSubmit = (evt: { preventDefault: () => void }) => {
     evt.preventDefault()
-    if (service !== "kms") {
-      return alert("incorrect password")
+    if (service !== 'kms') {
+      return alert('incorrect password')
     }
     setState({ loaded: false, private: state.private })
     fetch(EMBLEM_API + '/mint', {

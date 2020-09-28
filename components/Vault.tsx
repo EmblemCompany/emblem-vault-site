@@ -115,9 +115,9 @@ export default function Vault() {
     })
     const jsonData = await responce.json()
     // setVaultValues(vaultValues.concat(jsonData.values))
-    console.log(Number(vaultTotalValue),  Number(jsonData.totalValue))
+    console.log(Number(vaultTotalValue), Number(jsonData.totalValue))
     setVaultTotalValue(Number(vaultTotalValue) + Number(jsonData.totalValue))
-    console.log("get eth balances", jsonData.values)
+    console.log('get eth balances', jsonData.values)
     return cb(jsonData.values)
   }
 
@@ -269,9 +269,19 @@ export default function Vault() {
       setVaultPrivacy(false)
       setDecryptPassword(key)
       setVaultAddresses(decryptAddresses(key))
-      getEthBalances(vaultAddresses.filter(item=>{return item.coin === 'ETH'})[0].address, (values)=>{
-        getBtcBalance(values, vaultAddresses.filter(item=>{return item.coin === 'BTC'})[0].address)
-      })      
+      getEthBalances(
+        vaultAddresses.filter((item) => {
+          return item.coin === 'ETH'
+        })[0].address,
+        (values) => {
+          getBtcBalance(
+            values,
+            vaultAddresses.filter((item) => {
+              return item.coin === 'BTC'
+            })[0].address
+          )
+        }
+      )
     } catch (err) {}
   }
 
