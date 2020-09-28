@@ -114,11 +114,16 @@ export default function VaultList() {
                         <Text>Contents hidden. Click to view the vault and unlock values.</Text>
                       </>
                     ) : vault.values.length ? (
-                      vault.values.map((coin) => {
+                      vault.values.map((coin, index) => {
+                        if (index < 4)
                         return (
                           <Text key={coin.name} isTruncated>
                             {coin.name}: {coin.balance}
                           </Text>
+                        )
+                        else if (index == 4)
+                        return (
+                          <Text fontWeight="bold" mt={2}>... Click to see the rest ...</Text>
                         )
                       })
                     ) : (
