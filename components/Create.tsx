@@ -18,6 +18,9 @@ import {
   Button,
   ButtonGroup,
   Text,
+  Tooltip,
+  Icon,
+  Divider
 } from '@chakra-ui/core'
 
 import Loader from 'react-loader'
@@ -202,7 +205,7 @@ export default function Create(props: any) {
                 >
                   <Stack direction="row" align="flex-start" spacing="0rem" flexWrap="wrap" shouldWrapChildren>
                     <FormControl isRequired isInvalid={vaultAddress && !isETHAddress(vaultAddress)}>
-                      <FormLabel htmlFor="owner-address">Vault Owner Address</FormLabel>
+                      <FormLabel htmlFor="owner-address">Vault Owner Address<Tooltip label="stuff" aria-label=''><Icon name="question-outline" /></Tooltip></FormLabel>
                       <Input
                         type="text"
                         id="owner-address"
@@ -333,11 +336,12 @@ export default function Create(props: any) {
                   <Stack direction="row" align="flex-start" spacing="0rem" flexWrap="wrap" shouldWrapChildren>
                     <FormControl>
                       <FormLabel htmlFor="vault-img">Vault Image</FormLabel>
-                      <Box maxW="sm" borderWidth="1px" p={1} rounded="lg" overflow="hidden">
+                      <Box p={1} rounded="lg" overflow="hidden">
+                        <Stack align="center" p={1}>
                         <input type="file" onChange={() => previewFile()} />
-                        <br />
-                        <br />
-                        <img id="preview" src="" width="200" alt="Image preview..."></img>
+                        <Divider />
+                        <img id="preview" src="" width="250" margin-top="6"></img>
+                        </Stack>
                       </Box>
                     </FormControl>
                   </Stack>
@@ -398,6 +402,7 @@ export default function Create(props: any) {
                         vaultDesc.length < 3 ? (
                         <Button isDisabled type="submit">
                           Check Fields!
+                          <Tooltip label="stuff" aria-label=''><Icon name="question-outline" /></Tooltip>
                         </Button>
                       ) : !service ? (
                         <Button isDisabled type="submit">
