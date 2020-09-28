@@ -240,7 +240,7 @@ export default function Create(props: any) {
                       </FormHelperText>
                     </FormControl>
                     {state.private ? (
-                      <FormControl>
+                      <FormControl isRequired>
                         <FormLabel>Password</FormLabel>
                         <Input
                           type="password"
