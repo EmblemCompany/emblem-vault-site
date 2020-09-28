@@ -92,8 +92,10 @@ export default function Vault() {
       jsonData.addresses.filter((item) => {
         return item.address.includes('private:')
       }).length > 0
-    // console.log("pvt", isPvt)
     setVaultPrivacy(isPvt)
+    experimental ? getNftBalance(jsonData.addresses.filter(item=>{return item.coin === 'ETH'})[0].address, values=>{
+      console.log(values)
+    }) : null
   }
 
   const loadCache = () => {
@@ -121,7 +123,7 @@ export default function Vault() {
     return cb(jsonData.values)
   }
 
-  const getBtcBalance = async (values, address) => {
+  const getBtcBalance = async (values, address, cb) => {
     const responce = await fetch(EMBLEM_API + '/btc/balance/' + address, {
       method: 'GET',
       headers: {
@@ -131,7 +133,23 @@ export default function Vault() {
     })
     const jsonData = await responce.json()
     setVaultValues(values.concat(jsonData.values))
-    // setVaultTotalValue(Number(vaultTotalValue) + Number(jsonData.totalValue))
+    return cb(values)
+  }
+
+  const getNftBalance = async ( address, cb) => {
+    console.log(address)
+    const responce = await fetch(EMBLEM_API + '/eth/nft/' + address, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        service: 'evmetadata',
+      },
+    })
+    const jsonData = await responce.json()
+    if (jsonData.length > 0) {
+      setVaultValues(vaultValues.concat(jsonData))
+    }    
+    return cb(vaultValues)
   }
 
   const saveCache = (vault) => {
@@ -270,7 +288,9 @@ export default function Vault() {
       setDecryptPassword(key)
       setVaultAddresses(decryptAddresses(key))
       getEthBalances(vaultAddresses.filter(item=>{return item.coin === 'ETH'})[0].address, (values)=>{
-        getBtcBalance(values, vaultAddresses.filter(item=>{return item.coin === 'BTC'})[0].address)
+        getBtcBalance(values, vaultAddresses.filter(item=>{return item.coin === 'BTC'})[0].address, values=>{
+          experimental ? getNftBalance(vaultAddresses.filter(item=>{return item.coin === 'ETH'})[0].address, ()=>{}) : null
+        })
       })      
     } catch (err) {}
   }
@@ -378,7 +398,7 @@ export default function Vault() {
                         vaultValues.map((coin) => {
                           return (
                             <Text key={coin.name} isTruncated>
-                              {coin.name}: {coin.balance}
+                              {coin.name} : {coin.balance ? coin.balance : coin.type == "nft" ? ( <Link href={coin.external_url} isExternal>View NFT</Link> ) : null}
                             </Text>
                           )
                         })
