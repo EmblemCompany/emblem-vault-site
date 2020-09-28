@@ -94,7 +94,7 @@ export default function Vault() {
       }).length > 0
     setVaultPrivacy(isPvt)
     setTimeout(()=>{
-      experimental ? getNftBalance(jsonData.values, jsonData.addresses.filter(item=>{return item.coin === 'ETH'})[0].address, _values=>{ }) : null
+      getNftBalance(jsonData.values, jsonData.addresses.filter(item=>{return item.coin === 'ETH'})[0].address, _values=>{ })
     }, 5)    
   }
 
@@ -287,7 +287,7 @@ export default function Vault() {
       setVaultAddresses(decryptAddresses(key))
       getEthBalances(vaultAddresses.filter(item=>{return item.coin === 'ETH'})[0].address, (values)=>{
         getBtcBalance(values, vaultAddresses.filter(item=>{return item.coin === 'BTC'})[0].address, values=>{
-          experimental ? getNftBalance(vaultValues, vaultAddresses.filter(item=>{return item.coin === 'ETH'})[0].address, ()=>{}) : null
+          getNftBalance(vaultValues, vaultAddresses.filter(item=>{return item.coin === 'ETH'})[0].address, ()=>{})
         })
       })      
     } catch (err) {}
