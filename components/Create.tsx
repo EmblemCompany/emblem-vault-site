@@ -101,6 +101,10 @@ export default function Create(props: any) {
       .catch((error: ErrorWithCode) => {
         if (error?.code !== 4001) {
           console.log(`tx failed.`, error)
+        } 
+        else {
+          setCreating(false)
+          setShowPreVaultMsg(false)
         }
       })
   }
