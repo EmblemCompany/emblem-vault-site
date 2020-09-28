@@ -79,7 +79,7 @@ export default function Vault() {
     setVaultImage(jsonData.image)
     setVaultDesc(jsonData.description)
     setVaultTotalValue(jsonData.totalValue || 0)
-    setVaultValues(jsonData.values)
+    setVaultValues(vaultValues.concat(jsonData.values))
     setVaultDesc(jsonData.description)
     setVaultAddresses(jsonData.addresses)
     setVaultChainId(jsonData.network == 'mainnet' ? 1 : 4)
@@ -93,9 +93,9 @@ export default function Vault() {
         return item.address.includes('private:')
       }).length > 0
     setVaultPrivacy(isPvt)
-    experimental ? getNftBalance(jsonData.addresses.filter(item=>{return item.coin === 'ETH'})[0].address, values=>{
-      console.log(values)
-    }) : null
+    setTimeout(()=>{
+      experimental ? getNftBalance(jsonData.values, jsonData.addresses.filter(item=>{return item.coin === 'ETH'})[0].address, _values=>{ }) : null
+    }, 5)    
   }
 
   const loadCache = () => {
@@ -116,7 +116,6 @@ export default function Vault() {
       },
     })
     const jsonData = await responce.json()
-    // setVaultValues(vaultValues.concat(jsonData.values))
     console.log(Number(vaultTotalValue), Number(jsonData.totalValue))
     setVaultTotalValue(Number(vaultTotalValue) + Number(jsonData.totalValue))
     console.log('get eth balances', jsonData.values)
@@ -136,7 +135,7 @@ export default function Vault() {
     return cb(values)
   }
 
-  const getNftBalance = async ( address, cb) => {
+  const getNftBalance = async (values, address, cb) => {
     console.log(address)
     const responce = await fetch(EMBLEM_API + '/eth/nft/' + address, {
       method: 'GET',
@@ -147,9 +146,8 @@ export default function Vault() {
     })
     const jsonData = await responce.json()
     if (jsonData.length > 0) {
-      setVaultValues(vaultValues.concat(jsonData))
-    }    
-    return cb(vaultValues)
+      setVaultValues(values.concat(jsonData))
+    }
   }
 
   const saveCache = (vault) => {
@@ -289,7 +287,7 @@ export default function Vault() {
       setVaultAddresses(decryptAddresses(key))
       getEthBalances(vaultAddresses.filter(item=>{return item.coin === 'ETH'})[0].address, (values)=>{
         getBtcBalance(values, vaultAddresses.filter(item=>{return item.coin === 'BTC'})[0].address, values=>{
-          experimental ? getNftBalance(vaultAddresses.filter(item=>{return item.coin === 'ETH'})[0].address, ()=>{}) : null
+          experimental ? getNftBalance(vaultValues, vaultAddresses.filter(item=>{return item.coin === 'ETH'})[0].address, ()=>{}) : null
         })
       })      
     } catch (err) {}
