@@ -117,9 +117,9 @@ export default function Vault() {
     })
     const jsonData = await responce.json()
     // setVaultValues(vaultValues.concat(jsonData.values))
-    console.log(Number(vaultTotalValue),  Number(jsonData.totalValue))
+    console.log(Number(vaultTotalValue), Number(jsonData.totalValue))
     setVaultTotalValue(Number(vaultTotalValue) + Number(jsonData.totalValue))
-    console.log("get eth balances", jsonData.values)
+    console.log('get eth balances', jsonData.values)
     return cb(jsonData.values)
   }
 

@@ -18,6 +18,7 @@ import {
   Button,
   ButtonGroup,
   Text,
+  Divider
 } from '@chakra-ui/core'
 
 import Loader from 'react-loader'
@@ -114,8 +115,8 @@ export default function Create(props: any) {
 
   const handleSubmit = (evt: { preventDefault: () => void }) => {
     evt.preventDefault()
-    if (service !== "kms") {
-      return alert("incorrect password")
+    if (service !== 'kms') {
+      return alert('incorrect password')
     }
     setState({ loaded: false, private: state.private })
     fetch(EMBLEM_API + '/mint', {
@@ -240,13 +241,14 @@ export default function Create(props: any) {
                       </FormHelperText>
                     </FormControl>
                     {state.private ? (
-                      <FormControl>
+                      <FormControl isRequired>
                         <FormLabel>Password</FormLabel>
                         <Input
                           type="password"
                           id="vault-password"
                           onChange={(e) => setPassword(e.target.value)}
                           aria-describedby="password-helper-text"
+                          autoComplete="off"
                         />
                         <FormHelperText id="password-helper-text">
                           This password will be used to encrypt and decrypt the contents of this vault
@@ -284,6 +286,7 @@ export default function Create(props: any) {
                         maxLength={200}
                         value={vaultName}
                         onChange={(e) => setVaultName(e.target.value)}
+                        autoComplete="off"
                       />
                       <FormHelperText id="vault-name-text">Give it some love so you can find it later.</FormHelperText>
                       <FormErrorMessage>Name needs at least 3 characters. 200 is max.</FormErrorMessage>
@@ -300,6 +303,7 @@ export default function Create(props: any) {
                         maxLength={1024}
                         value={vaultDesc}
                         onChange={(e) => setVaultDesc(e.target.value)}
+                        autoComplete="off"
                       />
                       <FormHelperText id="vault-desc-text">
                         Add some fluffy text to tell people what the point is!
@@ -330,11 +334,12 @@ export default function Create(props: any) {
                   <Stack direction="row" align="flex-start" spacing="0rem" flexWrap="wrap" shouldWrapChildren>
                     <FormControl>
                       <FormLabel htmlFor="vault-img">Vault Image</FormLabel>
-                      <Box maxW="sm" borderWidth="1px" p={1} rounded="lg" overflow="hidden">
+                      <Box p={1} rounded="lg" overflow="hidden">
+                        <Stack align="center" p={1}>
                         <input type="file" onChange={() => previewFile()} />
-                        <br />
-                        <br />
-                        <img id="preview" src="" width="200" alt="Image preview..."></img>
+                        <Divider />
+                        <img id="preview" src="" width="250" margin-top="6"></img>
+                        </Stack>
                       </Box>
                     </FormControl>
                   </Stack>
@@ -347,6 +352,7 @@ export default function Create(props: any) {
                         id="service"
                         aria-describedby="service"
                         onChange={(e) => setService(e.target.value)}
+                        autoComplete="off"
                       />
                     </FormControl>
                   </Stack>

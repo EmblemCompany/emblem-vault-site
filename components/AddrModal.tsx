@@ -63,10 +63,10 @@ export default function AddrModal({
               <QRCode value={address} onClick={() => copyWithFlag(address)} />
             </Stack>
 
-            <Stack direction="row" justify="space-between" mt="6">
+            <Stack direction="row" justify="center" mt="6">
               <Text>{coin} address (click to copy)</Text>
             </Stack>
-            <Stack direction="row" justify="space-between">
+            <Stack direction="row" justify="center">
               <Button onClick={() => copyWithFlag(address)}>
                 {copied ? <Text>Copied!</Text> : <Text isTruncated>{address}</Text>}
               </Button>
