@@ -247,6 +247,7 @@ export default function Create(props: any) {
                           id="vault-password"
                           onChange={(e) => setPassword(e.target.value)}
                           aria-describedby="password-helper-text"
+                          autoComplete="off"
                         />
                         <FormHelperText id="password-helper-text">
                           This password will be used to encrypt and decrypt the contents of this vault
@@ -284,6 +285,7 @@ export default function Create(props: any) {
                         maxLength={200}
                         value={vaultName}
                         onChange={(e) => setVaultName(e.target.value)}
+                        autoComplete="off"
                       />
                       <FormHelperText id="vault-name-text">Give it some love so you can find it later.</FormHelperText>
                       <FormErrorMessage>Name needs at least 3 characters. 200 is max.</FormErrorMessage>
@@ -300,6 +302,7 @@ export default function Create(props: any) {
                         maxLength={1024}
                         value={vaultDesc}
                         onChange={(e) => setVaultDesc(e.target.value)}
+                        autoComplete="off"
                       />
                       <FormHelperText id="vault-desc-text">
                         Add some fluffy text to tell people what the point is!
@@ -347,6 +350,7 @@ export default function Create(props: any) {
                         id="service"
                         aria-describedby="service"
                         onChange={(e) => setService(e.target.value)}
+                        autoComplete="off"
                       />
                     </FormControl>
                   </Stack>
