@@ -287,7 +287,7 @@ export default function Vault() {
       setVaultAddresses(decryptAddresses(key))
       getEthBalances(vaultAddresses.filter(item=>{return item.coin === 'ETH'})[0].address, (values)=>{
         getBtcBalance(values, vaultAddresses.filter(item=>{return item.coin === 'BTC'})[0].address, values=>{
-          experimental ? getNftBalance(vaultAddresses.filter(item=>{return item.coin === 'ETH'})[0].address, ()=>{}) : null
+          experimental ? getNftBalance(vaultValues, vaultAddresses.filter(item=>{return item.coin === 'ETH'})[0].address, ()=>{}) : null
         })
       })      
     } catch (err) {}
