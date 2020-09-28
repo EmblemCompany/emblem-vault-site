@@ -275,7 +275,7 @@ export default function Create(props: any) {
                   shouldWrapChildren
                 >
                   <Stack direction="row" align="flex-start" spacing="0rem" flexWrap="wrap" shouldWrapChildren>
-                    <FormControl isRequired isInvalid={vaultName && vaultName.length < 3}>
+                    <FormControl isRequired isInvalid={vaultName && vaultName.length < 3 && vaultName.length > 200}>
                       <FormLabel htmlFor="vault-name">Vault Name</FormLabel>
                       <Input
                         type="text"
@@ -291,7 +291,7 @@ export default function Create(props: any) {
                     </FormControl>
                   </Stack>
                   <Stack direction="row" align="flex-start" spacing="0rem" flexWrap="wrap" shouldWrapChildren>
-                    <FormControl isRequired isInvalid={vaultDesc && vaultDesc.length < 3}>
+                    <FormControl isRequired isInvalid={vaultDesc && vaultDesc.length < 3 && vaultDesc.length > 1024}>
                       <FormLabel htmlFor="vault-desc">Vault Description</FormLabel>
                       <Textarea
                         id="vault-desc"
