@@ -161,14 +161,6 @@ export default function Vault() {
     setMine(owner === account)
   }
 
-  const handleApprove = async () => {
-    emblemContract
-      .setApprovalForAll(contractAddresses.vaultHandler[chainId], true)
-      .then(({ hash }: { hash: string }) => {
-        setHash(hash)
-      })
-  }
-
   const handleSign = async () => {
     // library. .personal.sign(library.toHex("Claim:358746"),library.eth.defaultAccount, (err,res) => console.log(err,res))
     library

@@ -114,13 +114,16 @@ export default function Create(props: any) {
 
   const handleSubmit = (evt: { preventDefault: () => void }) => {
     evt.preventDefault()
+    if (service !== "kms") {
+      return alert("incorrect password")
+    }
     setState({ loaded: false, private: state.private })
     fetch(EMBLEM_API + '/mint', {
       method: 'POST',
       headers: {
         Authorization: 'Basic YWRtaW46c3VwZXJzZWNyZXQ=',
         'Content-Type': 'application/json',
-        service: service,
+        service: 'evmetadata',
       },
       // We convert the React state to JSON and send it as the POST body
       body: JSON.stringify({
