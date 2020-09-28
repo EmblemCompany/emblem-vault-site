@@ -18,8 +18,6 @@ import {
   Button,
   ButtonGroup,
   Text,
-  Tooltip,
-  Icon,
   Divider
 } from '@chakra-ui/core'
 
@@ -205,7 +203,7 @@ export default function Create(props: any) {
                 >
                   <Stack direction="row" align="flex-start" spacing="0rem" flexWrap="wrap" shouldWrapChildren>
                     <FormControl isRequired isInvalid={vaultAddress && !isETHAddress(vaultAddress)}>
-                      <FormLabel htmlFor="owner-address">Vault Owner Address<Tooltip label="stuff" aria-label=''><Icon name="question-outline" /></Tooltip></FormLabel>
+                      <FormLabel htmlFor="owner-address">Vault Owner Address</FormLabel>
                       <Input
                         type="text"
                         id="owner-address"
@@ -402,7 +400,6 @@ export default function Create(props: any) {
                         vaultDesc.length < 3 ? (
                         <Button isDisabled type="submit">
                           Check Fields!
-                          <Tooltip label="stuff" aria-label=''><Icon name="question-outline" /></Tooltip>
                         </Button>
                       ) : !service ? (
                         <Button isDisabled type="submit">
