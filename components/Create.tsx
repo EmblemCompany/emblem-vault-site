@@ -121,7 +121,6 @@ export default function Create(props: any) {
     fetch(EMBLEM_API + '/mint', {
       method: 'POST',
       headers: {
-        Authorization: 'Basic YWRtaW46c3VwZXJzZWNyZXQ=',
         'Content-Type': 'application/json',
         service: 'evmetadata',
       },
