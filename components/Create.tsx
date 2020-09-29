@@ -28,7 +28,6 @@ import { useWeb3React } from '@web3-react/core'
 import { useEffect, useState } from 'react'
 import { TransactionToast } from './TransactionToast'
 import { EMBLEM_API, contractAddresses } from '../constants'
-import { Notify } from './Notify'
 import { Contract } from '@ethersproject/contracts'
 import { useContract } from '../hooks'
 import { isETHAddress } from '../utils'
@@ -59,6 +58,7 @@ export default function Create(props: any) {
   const [balance, setBalance] = useState(null)
   const [price, setPrice] = useState(null)
   const [creating, setCreating] = useState(false)
+  const [approving, setApproving] = useState(false)
 
   const handlerContract = useContract(contractAddresses.vaultHandler[chainId], contractAddresses.vaultHandlerAbi, true)
   const covalContract = useContract(contractAddresses.coval[chainId], contractAddresses.covalAbi, true)
@@ -100,6 +100,7 @@ export default function Create(props: any) {
       .then(({ hash }: { hash: string }) => {
         setTimeout(() => {
           setHash(hash)
+          // setCreating(false)
           setShowMakingVaultMsg(true)
         }, 100) // Solving State race condition where transaction watcher wouldn't notice we were creating
       })
@@ -114,10 +115,16 @@ export default function Create(props: any) {
   }
 
   const approveCovalFlow = () => {
+    setApproving(true)
     ;(covalContract as Contract)
       .approve(contractAddresses.vaultHandler[chainId], '100000000000000')
       .then(({ hash }: { hash: string }) => {
         setHash(hash)
+      })
+      .catch((error: ErrorWithCode) => {
+        if (error?.code == 4001) {
+          setApproving(false)
+        }
       })
   }
 
@@ -410,9 +417,13 @@ export default function Create(props: any) {
                         <Button isDisabled type="submit">
                           Creation Password?
                         </Button>
-                      ) : !isCovalApproved ? (
+                      ) : !isCovalApproved && !approving ? (
                         <Button onClick={approveCovalFlow} type="submit">
                           Approve Coval
+                        </Button>
+                      ) : !isCovalApproved && approving ? (
+                        <Button isDisabled type="submit">
+                          Approving ...
                         </Button>
                       ) : Number(balance) < Number(price) ? (
                         <Button isDisabled type="submit">
@@ -442,6 +453,12 @@ export default function Create(props: any) {
                     Making vault ... one moment
                   </Alert>
                 ) : null}
+                {approving ? (
+                  <Alert status="info">
+                    <AlertIcon />
+                    Handling approval flow ...
+                  </Alert>
+                ) : null}
               </TabPanel>
             </TabPanels>
           </Tabs>
@@ -453,11 +470,17 @@ export default function Create(props: any) {
           onComplete={() => {
             setHash(null)
             if (!creating) {
-              fireMetaMask()
-              setShowPreVaultMsg(false)
+              if (!approving) {
+                fireMetaMask()
+                setShowPreVaultMsg(false)
+              } else {
+                setApproving(false)
+              }
             } else {
-              setShowMakingVaultMsg(false)
-              location.href = location.origin + '/vault?id=' + tokenId
+              setTimeout(() => {
+                setShowMakingVaultMsg(false)
+                location.href = location.origin + '/vault?id=' + tokenId
+              }, 500)
             }
           }}
         />

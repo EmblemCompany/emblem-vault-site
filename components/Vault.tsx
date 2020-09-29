@@ -20,7 +20,6 @@ import Refreshing from './Refreshing'
 import Loader from 'react-loader'
 import dynamic from 'next/dynamic'
 import { validImage } from '../utils'
-import { Notify } from './Notify'
 import { TransactionToast } from './TransactionToast'
 import { EMBLEM_API, BURN_ADDRESS, contractAddresses } from '../constants'
 import { useContract } from '../hooks'
@@ -75,7 +74,7 @@ export default function Vault() {
       },
     })
     const jsonData = await responce.json()
-    console.log('vault response was ', jsonData)
+    // console.log('vault response was ', jsonData)
     if (!jsonData.name) {
       setState({ loaded: true })
       setInvalidVault(true)
@@ -100,6 +99,7 @@ export default function Vault() {
     if (status === 'claimed') {
       setClaimedBy(jsonData.claimedBy)
     }
+    // console.log('inside getstates. mine is ', mine)
     setState({ loaded: true })
     let isPvt =
       jsonData.addresses.filter((item) => {
@@ -135,9 +135,9 @@ export default function Vault() {
       },
     })
     const jsonData = await responce.json()
-    console.log(Number(vaultTotalValue), Number(jsonData.totalValue))
+    // console.log(Number(vaultTotalValue), Number(jsonData.totalValue))
     setVaultTotalValue(Number(vaultTotalValue) + Number(jsonData.totalValue))
-    console.log('get eth balances', jsonData.values)
+    // console.log('get eth balances', jsonData.values)
     return cb(jsonData.values)
   }
 
@@ -155,7 +155,7 @@ export default function Vault() {
   }
 
   const getNftBalance = async (values, address, cb) => {
-    console.log(address)
+    // console.log(address)
     const responce = await fetch(EMBLEM_API + '/eth/nft/' + address, {
       method: 'GET',
       headers: {
@@ -187,7 +187,7 @@ export default function Vault() {
       redirect: 'follow',
     })
     const jsonData = await responce.json()
-    console.log('getKeys response is ', jsonData)
+    // console.log('getKeys response is ', jsonData)
     return cb(jsonData)
   }
 
@@ -203,7 +203,7 @@ export default function Vault() {
       .signMessage('Claim: ' + tokenId)
       .then((signature) => {
         getKeys(signature, tokenId, (result) => {
-          console.log('HandleSign response is ' + result)
+          // console.log('HandleSign response is ' + result)
           setMnemonic(result.decrypted.phrase)
           setPrivKeyBTC(
             result.decrypted.keys.filter((key) => {
@@ -285,6 +285,7 @@ export default function Vault() {
   useEffect(() => {
     // console.log('Account chainid = ' + chainId + ' and vaultchainid = ' + vaultChainId)
     account && chainId && vaultChainId && chainId == vaultChainId ? getContractStates() : null
+    // console.log('in the usefeect that clls getcontractstates')
   })
 
   function splitDescription(words) {

@@ -17,20 +17,22 @@ export default function VaultList() {
 
   const getVaults = async () => {
     loadCache()
-    const response = await fetch(EMBLEM_API + '/vaults/' + (address ? address : account), {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        service: 'evmetadata',
-        chainId: chainId.toString(),
-      },
-    })
-    const jsonData = await response.json()
-    setState({ loaded: true })
-    setVaults(jsonData)
-    saveCache(jsonData)
-    setLoadingApi(false)
-    // console.log(jsonData)
+    try {
+      const response = await fetch(EMBLEM_API + '/vaults/' + (address ? address : account), {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          service: 'evmetadata',
+          chainId: chainId.toString(),
+        },
+      })
+      const jsonData = await response.json()
+      setState({ loaded: true })
+      setVaults(jsonData)
+      saveCache(jsonData)
+      setLoadingApi(false)
+      // console.log(jsonData)
+    } catch (error) {}
   }
 
   const loadCache = () => {
