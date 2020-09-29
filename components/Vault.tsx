@@ -13,6 +13,7 @@ import {
   useDisclosure,
 } from '@chakra-ui/core'
 
+import Head from "next/head"
 import { useWeb3React } from '@web3-react/core'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
@@ -346,6 +347,13 @@ export default function Vault() {
 
   return (
     <>
+       <Head>
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:site" content="Emblem.Finance" />
+        <meta name="twitter:title" content={vaultName} />
+        <meta name="twitter:description" content={splitDescription(vaultDesc)} />
+        <meta name="twitter:image" content={vaultImage} />
+      </Head>
       <AddrModal isOpen={isOpenAddrModal} onClose={onCloseAddrModal} addrCoin={currCoin} addrAddr={currAddr} />
 
       <KeysModal
