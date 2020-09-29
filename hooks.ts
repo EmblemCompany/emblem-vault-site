@@ -131,6 +131,8 @@ const chainMappings: { [key: string]: number } = {
   goerli: 5,
   '42': 42,
   kovan: 42,
+  '80001': 80001,
+  mumbai: 80001
 }
 
 export function useQueryParameters(): {
