@@ -28,19 +28,19 @@ export const contractAddresses = {
   vaultHandler: {
     1: '0x26C40CE48EE3fc0B2d3C07eA7a64479F3B34F428',
     4: '0xb03D438771478e22a177df6595b287b2D20f7c52',
-    80001: '0x5434ba8b4A37755Cb3867C9fde39342C0D382857'
+    80001: '0x5434ba8b4A37755Cb3867C9fde39342C0D382857',
   },
   vaultHandlerAbi: HandlerABI,
   emblemVault: {
     1: '0x82c7a8f707110f5fbb16184a5933e9f78a34c6ab',
     4: '0xe70AbBc99D8eB32124BF022196c493DB4fBc50FD',
-    80001: '0x8b8407c6184f1f0Fd1082e83d6A3b8349cAcEd12'
+    80001: '0x8b8407c6184f1f0Fd1082e83d6A3b8349cAcEd12',
   },
   emblemAbi: EmblemABI,
   coval: {
     1: '0x3d658390460295fb963f54dc0899cfb1c30776df',
     4: '0x44c1a9d7d1f932b4c2811a70edffdd6ae2eb60e6',
-    80001: '0x5cCa9D75DF2dFC117855adD4DD45727dee5287EC'
+    80001: '0x5cCa9D75DF2dFC117855adD4DD45727dee5287EC',
   },
   covalAbi: CovalABI,
 }

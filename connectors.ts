@@ -9,7 +9,12 @@ export function getNetwork(defaultChainId = 1): NetworkConnector {
     urls: [1, 3, 4, 5, 42, 80001, 97].reduce(
       (urls, chainId) =>
         Object.assign(urls, {
-          [chainId]: chainId!== 80001 && chainId===97 ? `https://${INFURA_PREFIXES[chainId]}.infura.io/v3/${process.env.INFURA_PROJECT_ID}`: chainId===80001? `https://rpc-mumbai.matic.today` : `https://data-seed-prebsc-1-s1.binance.org:8545/` ,
+          [chainId]:
+            chainId !== 80001 && chainId === 97
+              ? `https://${INFURA_PREFIXES[chainId]}.infura.io/v3/${process.env.INFURA_PROJECT_ID}`
+              : chainId === 80001
+              ? `https://rpc-mumbai.matic.today`
+              : `https://data-seed-prebsc-1-s1.binance.org:8545/`,
         }),
       {}
     ),
