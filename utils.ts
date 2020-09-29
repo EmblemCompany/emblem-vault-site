@@ -19,7 +19,8 @@ export const CHAIN_ID_NAMES: { [key: number]: string } = {
   4: 'Rinkeby',
   5: 'Görli',
   42: 'Kovan',
-  80001: 'Mumbai'
+  80001: 'Mumbai',
+  97: 'bnbsc'
 }
 
 export const INFURA_PREFIXES: { [key: number]: string } = {
@@ -28,7 +29,8 @@ export const INFURA_PREFIXES: { [key: number]: string } = {
   4: 'rinkeby',
   5: 'goerli',
   42: 'kovan',
-  80001: 'mumbai'
+  80001: 'mumbai',
+  97: 'bnbsc'
 }
 
 export enum EtherscanType {
@@ -43,7 +45,8 @@ const ETHERSCAN_PREFIXES: { [key: number]: string } = {
   4: 'rinkeby.',
   5: 'goerli.',
   42: 'kovan.',
-  80001: 'mumbai'
+  80001: 'mumbai',
+  97: 'bnbsc'
 }
 
 interface EtherscanTypeData {
