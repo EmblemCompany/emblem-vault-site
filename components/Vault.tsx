@@ -1,4 +1,4 @@
-import { Box, Flex, Image, Text, Stack, Button, ButtonGroup, Input, Link, useDisclosure } from '@chakra-ui/core'
+import { Box, Flex, Image, Text, Stack, Button, ButtonGroup, Input, Link, Alert, AlertIcon, useDisclosure } from '@chakra-ui/core'
 
 import { useWeb3React } from '@web3-react/core'
 import { useEffect, useState } from 'react'
@@ -501,6 +501,7 @@ export default function Vault() {
                 <Stack direction="column" align="center">
                   {status == 'claimed' ? <Text color="green.500">CLAIMED</Text> : null}
                 </Stack>
+                {hash ? <Alert status="info"><AlertIcon />Claiming your vault ...</Alert> : null }
               </Box>
             </Flex>
           </Tilt>
@@ -519,9 +520,7 @@ export default function Vault() {
           </Stack>
         )}
         {hash ? (
-          <>
-            <Notify color="green" message="Claiming Vault ..." onClose={() => {}} />
-            <br />
+
             <TransactionToast
               hash={hash}
               onComplete={() => {
@@ -533,9 +532,9 @@ export default function Vault() {
                   handleSign()
                 }
               }}
-            />
-          </>
-        ) : null}
+              />
+        ) : null }
+
       </Loader>
     </>
   )
