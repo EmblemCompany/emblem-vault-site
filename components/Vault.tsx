@@ -59,6 +59,7 @@ export default function Vault() {
   const [decryptedEffectRunning, setDecryptedEffectRunning] = useState(false)
   const [decryptPassword, setDecryptPassword] = useState('')
   const [invalidVault, setInvalidVault] = useState(false)
+  const [hasCheckedNft, setHasCheckedNft] = useState(false)
 
   const emblemContract = useContract(contractAddresses.emblemVault[chainId], contractAddresses.emblemAbi, true)
 
@@ -108,13 +109,17 @@ export default function Vault() {
       }).length > 0
     setVaultPrivacy(isPvt)
     setTimeout(() => {
+      !isPvt ?
       getNftBalance(
         jsonData.values,
         jsonData.addresses.filter((item) => {
           return item.coin === 'ETH'
         })[0].address,
-        (_values) => {}
-      )
+        (_values) => {
+          // console.log("Have new values", _values)
+          setVaultValues(_values)
+        }
+      ) : null
     }, 5)
   }
 
@@ -151,8 +156,8 @@ export default function Vault() {
       },
     })
     const jsonData = await responce.json()
-    setVaultValues(values.concat(jsonData.values))
-    return cb(values)
+    // setVaultValues(values.concat(jsonData.values))
+    return cb(values.concat(jsonData.values))
   }
 
   const getNftBalance = async (values, address, cb) => {
@@ -166,7 +171,10 @@ export default function Vault() {
     })
     const jsonData = await responce.json()
     if (jsonData.length > 0) {
-      setVaultValues(values.concat(jsonData))
+      // console.log("Fuckling NFT", jsonData, values.concat(jsonData))
+      return cb(values.concat(jsonData))
+    } else {
+      return cb(values)
     }
   }
 
@@ -316,13 +324,16 @@ export default function Vault() {
             vaultAddresses.filter((item) => {
               return item.coin === 'BTC'
             })[0].address,
-            (values) => {
+            (_values) => {
+              // console.log("Have fucking values", values)
               getNftBalance(
-                vaultValues,
+                _values,
                 vaultAddresses.filter((item) => {
                   return item.coin === 'ETH'
                 })[0].address,
-                () => {}
+                (__values) => {
+                  setVaultValues(__values.concat(vaultValues))
+                }
               )
             }
           )
@@ -439,8 +450,9 @@ export default function Vault() {
                         </>
                       ) : vaultValues.length ? (
                         vaultValues.map((coin) => {
-                          return (
+                          return (                            
                             <Text key={coin.name} isTruncated>
+                              <Image width={10} src={coin.image}/>
                               {coin.name} :{' '}
                               {coin.balance ? (
                                 coin.balance
