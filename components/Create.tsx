@@ -18,7 +18,9 @@ import {
   Button,
   ButtonGroup,
   Text,
-  Divider
+  Divider,
+  Alert,
+  AlertIcon,
 } from '@chakra-ui/core'
 
 import Loader from 'react-loader'
@@ -30,6 +32,9 @@ import { Notify } from './Notify'
 import { Contract } from '@ethersproject/contracts'
 import { useContract } from '../hooks'
 import { isETHAddress } from '../utils'
+
+let tokenId = null
+let mintPassword = null
 
 export default function Create(props: any) {
   const [tabIndex, setTabIndex] = useState(0)
@@ -45,8 +50,8 @@ export default function Create(props: any) {
   const [isCovalApproved, setIsCovalApproved] = useState(false)
   const [state, setState] = useState({ loaded: true, private: false })
   const [hash, setHash] = useState(null)
-  const [tokenId, setTokenId] = useState(null)
-  const [mintPassword, setMintPassword] = useState(null)
+  // const [tokenId, setTokenId] = useState(null)
+  // const [mintPassword, setMintPassword] = useState(null)
   const [showPreVaultMsg, setShowPreVaultMsg] = useState(false)
   const [showMakingVaultMsg, setShowMakingVaultMsg] = useState(false)
   const [decimals, setDecimals] = useState(null)
@@ -71,16 +76,16 @@ export default function Create(props: any) {
     )
     setBalance(await covalContract.balanceOf(account).then((balance: { toString: () => string }) => balance.toString()))
     setPrice(await handlerContract.price().then((balance: { toString: () => string }) => balance.toString()))
-    console.log(
-      'balance',
-      balance,
-      'allowance',
-      allowance,
-      'price',
-      price,
-      Number(allowance) >= Number(price),
-      Number(balance) > Number(price)
-    )
+    // console.log(
+    //   'balance',
+    //   balance,
+    //   'allowance',
+    //   allowance,
+    //   'price',
+    //   price,
+    //   Number(allowance) >= Number(price),
+    //   Number(balance) > Number(price)
+    // )
     if (Number(allowance) >= Number(price)) {
       setIsCovalApproved(true)
     } else {
@@ -101,8 +106,7 @@ export default function Create(props: any) {
       .catch((error: ErrorWithCode) => {
         if (error?.code !== 4001) {
           console.log(`tx failed.`, error)
-        } 
-        else {
+        } else {
           setCreating(false)
           setShowPreVaultMsg(false)
         }
@@ -143,9 +147,9 @@ export default function Create(props: any) {
     }).then(async function (response) {
       setState({ loaded: true, private: state.private })
       let body = await response.json()
+      tokenId = body.data.tokenId
+      mintPassword = body.password
       setHash(body.data.tx)
-      setTokenId(body.data.tokenId)
-      setMintPassword(body.password)
       setShowPreVaultMsg(true)
     })
   }
@@ -234,14 +238,13 @@ export default function Create(props: any) {
                         onChange={(e) => {
                           setVaultPubPriv(e.target.value)
                           setState({ loaded: state.loaded, private: e.target.value === 'Private' })
-                          console.log('Private', e.target.value === 'Private')
                         }}
                       >
                         <Radio value="Public">Public</Radio>
                         <Radio value="Private">Private</Radio>
                       </RadioGroup>
                       <FormHelperText id="email-helper-text">
-                        Do you want people to be able to see the contents?
+                        Do you want the contents and addresses to be password protected?
                       </FormHelperText>
                     </FormControl>
                     {state.private ? (
@@ -254,9 +257,7 @@ export default function Create(props: any) {
                           aria-describedby="password-helper-text"
                           autoComplete="off"
                         />
-                        <FormHelperText id="password-helper-text">
-                          This password will be used to encrypt and decrypt the contents of this vault
-                        </FormHelperText>
+                        <FormHelperText id="password-helper-text">Used to encrypt/decrypt</FormHelperText>
                       </FormControl>
                     ) : (
                       ''
@@ -340,9 +341,9 @@ export default function Create(props: any) {
                       <FormLabel htmlFor="vault-img">Vault Image</FormLabel>
                       <Box p={1} rounded="lg" overflow="hidden">
                         <Stack align="center" p={1}>
-                        <input type="file" onChange={() => previewFile()} />
-                        <Divider />
-                        <img id="preview" src="" width="250" margin-top="6"></img>
+                          <input type="file" onChange={() => previewFile()} />
+                          <Divider />
+                          <img id="preview" src="" width="250" margin-top="6"></img>
                         </Stack>
                       </Box>
                     </FormControl>
@@ -429,47 +430,37 @@ export default function Create(props: any) {
                     </ButtonGroup>
                   </Stack>
                 </Stack>
+                {showPreVaultMsg ? (
+                  <Alert status="info">
+                    <AlertIcon />
+                    Talking to contract ...
+                  </Alert>
+                ) : null}
+                {showMakingVaultMsg ? (
+                  <Alert status="info">
+                    <AlertIcon />
+                    Making vault ... one moment
+                  </Alert>
+                ) : null}
               </TabPanel>
             </TabPanels>
           </Tabs>
         </Box>
       </Flex>
-      {showPreVaultMsg || showMakingVaultMsg || hash ? (
-        <Stack direction="column" align="left" shouldWrapChildren>
-          {showPreVaultMsg ? (
-            <Notify
-              color="green"
-              message="Asking the blockchain if it is willing to create your vault ..."
-              onClose={() => {
-                setShowPreVaultMsg(false)
-              }}
-            />
-          ) : null}
-          {showMakingVaultMsg ? (
-            <Notify
-              color="green"
-              message="Chaining blocks together to create your vault ..."
-              onClose={() => {
-                setShowMakingVaultMsg(false)
-              }}
-            />
-          ) : null}
-          {hash ? (
-            <TransactionToast
-              hash={hash}
-              onComplete={() => {
-                setHash(null)
-                if (!creating) {
-                  fireMetaMask()
-                  setShowPreVaultMsg(false)
-                } else {
-                  setShowMakingVaultMsg(false)
-                  location.href = location.origin + '/vault?id=' + tokenId
-                }
-              }}
-            />
-          ) : null}
-        </Stack>
+      {hash ? (
+        <TransactionToast
+          hash={hash}
+          onComplete={() => {
+            setHash(null)
+            if (!creating) {
+              fireMetaMask()
+              setShowPreVaultMsg(false)
+            } else {
+              setShowMakingVaultMsg(false)
+              location.href = location.origin + '/vault?id=' + tokenId
+            }
+          }}
+        />
       ) : null}
     </Loader>
   )
