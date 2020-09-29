@@ -93,9 +93,15 @@ export default function Vault() {
         return item.address.includes('private:')
       }).length > 0
     setVaultPrivacy(isPvt)
-    setTimeout(()=>{
-      getNftBalance(jsonData.values, jsonData.addresses.filter(item=>{return item.coin === 'ETH'})[0].address, _values=>{ })
-    }, 5)    
+    setTimeout(() => {
+      getNftBalance(
+        jsonData.values,
+        jsonData.addresses.filter((item) => {
+          return item.coin === 'ETH'
+        })[0].address,
+        (_values) => {}
+      )
+    }, 5)
   }
 
   const loadCache = () => {
@@ -285,11 +291,28 @@ export default function Vault() {
       setVaultPrivacy(false)
       setDecryptPassword(key)
       setVaultAddresses(decryptAddresses(key))
-      getEthBalances(vaultAddresses.filter(item=>{return item.coin === 'ETH'})[0].address, (values)=>{
-        getBtcBalance(values, vaultAddresses.filter(item=>{return item.coin === 'BTC'})[0].address, values=>{
-          getNftBalance(vaultValues, vaultAddresses.filter(item=>{return item.coin === 'ETH'})[0].address, ()=>{})
-        })
-      })      
+      getEthBalances(
+        vaultAddresses.filter((item) => {
+          return item.coin === 'ETH'
+        })[0].address,
+        (values) => {
+          getBtcBalance(
+            values,
+            vaultAddresses.filter((item) => {
+              return item.coin === 'BTC'
+            })[0].address,
+            (values) => {
+              getNftBalance(
+                vaultValues,
+                vaultAddresses.filter((item) => {
+                  return item.coin === 'ETH'
+                })[0].address,
+                () => {}
+              )
+            }
+          )
+        }
+      )
     } catch (err) {}
   }
 
@@ -396,7 +419,14 @@ export default function Vault() {
                         vaultValues.map((coin) => {
                           return (
                             <Text key={coin.name} isTruncated>
-                              {coin.name} : {coin.balance ? coin.balance : coin.type == "nft" ? ( <Link href={coin.external_url} isExternal>View NFT</Link> ) : null}
+                              {coin.name} :{' '}
+                              {coin.balance ? (
+                                coin.balance
+                              ) : coin.type == 'nft' ? (
+                                <Link href={coin.external_url} isExternal>
+                                  View NFT
+                                </Link>
+                              ) : null}
                             </Text>
                           )
                         })
