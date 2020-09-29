@@ -23,7 +23,7 @@ export const CovalTest = new Token(
 )
 
 export const CovalTestMatic = new Token(
-  ChainId.MUMBAI,
+  ChainId.RINKEBY,
   '0x5cCa9D75DF2dFC117855adD4DD45727dee5287EC',
   8,
   'Coval',

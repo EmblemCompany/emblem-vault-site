@@ -14,7 +14,7 @@ import TokenBalance from './TokenBalance'
 import { WETH, ChainId, Token } from '@uniswap/sdk'
 import WalletConnect from './WalletConnect'
 import { QueryParameters } from '../constants'
-import { Coval, CovalTest, DEFAULT_TOKENS } from '../tokens'
+import { Coval, CovalTest, CovalTestMatic, DEFAULT_TOKENS } from '../tokens'
 
 const Settings = dynamic(() => import('./Settings'))
 
@@ -92,7 +92,7 @@ export default function Layout({ children }: { children: ReactNode }): JSX.Eleme
           ) : (
             // [DEFAULT_TOKENS.filter((tokenrrr) => tokenrrr.chainId == chainId)[0], firstToken, secondToken]
             [
-              chainId == 1 ? Coval : CovalTest,
+              chainId == 1 ? Coval : chainId == 80001 ? CovalTestMatic : CovalTest,
               firstToken ? (firstToken.symbol != 'Coval' ? firstToken : null) : null,
               secondToken ? (secondToken.symbol != 'Coval' ? secondToken : null) : null,
             ]
