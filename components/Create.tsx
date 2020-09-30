@@ -45,7 +45,7 @@ export default function Create(props: any) {
   const [vaultDesc, setVaultDesc] = useState('')
   const [vaultImage, setVaultImage] = useState('')
   const [password, setPassword] = useState('')
-  const [service, setService] = useState('')
+  // const [service, setService] = useState('')
   const [isCovalApproved, setIsCovalApproved] = useState(false)
   const [state, setState] = useState({ loaded: true, private: false })
   const [hash, setHash] = useState(null)
@@ -130,9 +130,9 @@ export default function Create(props: any) {
 
   const handleSubmit = (evt: { preventDefault: () => void }) => {
     evt.preventDefault()
-    if (service !== 'kms') {
-      return alert('incorrect password')
-    }
+    // if (service !== 'kms') {
+    //   return alert('incorrect password')
+    // }
     setState({ loaded: false, private: state.private })
     fetch(EMBLEM_API + '/mint', {
       method: 'POST',
@@ -356,7 +356,7 @@ export default function Create(props: any) {
                     </FormControl>
                   </Stack>
 
-                  <Stack direction="row" align="flex-start" spacing="0rem" flexWrap="wrap" shouldWrapChildren>
+                  {/* <Stack direction="row" align="flex-start" spacing="0rem" flexWrap="wrap" shouldWrapChildren>
                     <FormControl>
                       <FormLabel htmlFor="service">API password:</FormLabel>
                       <Input
@@ -367,7 +367,7 @@ export default function Create(props: any) {
                         autoComplete="off"
                       />
                     </FormControl>
-                  </Stack>
+                  </Stack> */}
 
                   {isCovalApproved ? (
                     <Stack direction="row" align="flex-start" spacing="0rem" flexWrap="wrap" shouldWrapChildren>
@@ -413,10 +413,10 @@ export default function Create(props: any) {
                         <Button isDisabled type="submit">
                           Check Fields!
                         </Button>
-                      ) : !service ? (
-                        <Button isDisabled type="submit">
-                          Creation Password?
-                        </Button>
+                      // ) : !service ? (
+                      //   <Button isDisabled type="submit">
+                      //     Creation Password?
+                      //   </Button>
                       ) : !isCovalApproved && !approving ? (
                         <Button onClick={approveCovalFlow} type="submit">
                           Approve Coval
