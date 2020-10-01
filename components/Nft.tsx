@@ -21,6 +21,7 @@ import Refreshing from './Refreshing'
 import Loader from 'react-loader'
 import dynamic from 'next/dynamic'
 import { validImage } from '../utils'
+import { Contract } from '@ethersproject/contracts'
 import { TransactionToast } from './TransactionToast'
 import { EMBLEM_API, BURN_ADDRESS, contractAddresses } from '../constants'
 import { useContract } from '../hooks'
@@ -33,6 +34,7 @@ const KeysModal = dynamic(() => import('./KeysModal'))
 export default function Nft() {
   const { account, chainId, library } = useWeb3React()
   const { query } = useRouter()
+  const [mintPassword, setMintPassword] = useState('')
   const [tokenId, setTokenId] = useState(query.id)
   const [experimental, setExperimental] = useState(query.experimental)
   const [vaultName, setVaultName] = useState('')
@@ -61,10 +63,35 @@ export default function Nft() {
   const [invalidVault, setInvalidVault] = useState(false)
   const [hasCheckedNft, setHasCheckedNft] = useState(false)
 
+  const handlerContract = useContract(contractAddresses.vaultHandler[chainId], contractAddresses.vaultHandlerAbi, true)
   const emblemContract = useContract(contractAddresses.emblemVault[chainId], contractAddresses.emblemAbi, true)
 
   const { isOpen: isOpenAddrModal, onOpen: onOpenAddrModal, onClose: onCloseAddrModal } = useDisclosure()
   const { isOpen: isOpenKeysModal, onOpen: onOpenKeysModal, onClose: onCloseKeysModal } = useDisclosure()
+
+  interface ErrorWithCode extends Error {
+    code?: number
+  }
+
+  const fireMetaMask = () => {
+    ;(handlerContract as Contract)
+      .buyWithPaymentOnly(account, tokenId, mintPassword)
+      .then(({ hash }: { hash: string }) => {
+        setTimeout(() => {
+          setHash(hash)
+          // setCreating(false)
+          // setShowMakingVaultMsg(true)
+        }, 100) // Solving State race condition where transaction watcher wouldn't notice we were creating
+      })
+      .catch((error: ErrorWithCode) => {
+        if (error?.code !== 4001) {
+          console.log(`tx failed.`, error)
+        } else {
+          // setCreating(false)
+          // setShowPreVaultMsg(false)
+        }
+      })
+  }
 
   const getVault = async () => {
     loadCache()
@@ -201,8 +228,11 @@ export default function Nft() {
   }
 
   const getContractStates = async () => {
-    let owner = await emblemContract.ownerOf(tokenId)
-    setMine(owner === account)
+    let owned = false
+    try {
+      owned  = await emblemContract.ownerOf(tokenId)
+    } catch(err){}
+    setMine(owned)
   }
 
   const handleSign = async () => {
@@ -512,6 +542,23 @@ export default function Nft() {
                     </Box>
                   ) : null}
 
+                  {!mine ? (
+                  <>
+                    
+                      <Button mt={2} width="100%" onClick={()=>{fireMetaMask()}}>Claim Me</Button>
+                      <Input
+                        mt={2}
+                        type="password"
+                        id="mintPassword"
+                        minLength={3}
+                        maxLength={200}
+                        value={mintPassword}
+                        onChange={(e) => setMintPassword(e.target.value)}
+                        autoComplete="off"
+                      />
+                  </>
+                    ) : null}
+
                   {!(status === 'claimed') && account && vaultChainId === chainId && mine ? (
                     <Box d="flex" alignItems="baseline" justifyContent="space-between" mt="4">
                       <Button
@@ -562,13 +609,14 @@ export default function Nft() {
           <TransactionToast
             hash={hash}
             onComplete={() => {
-              if (claiming) {
-                setHash(null)
-                setStatus('claimed')
-                setClaiming(false)
-                setClaimedBy(account)
-                handleSign()
-              }
+              location.href = location.origin + '/vault?id=' + tokenId
+              // if (claiming) {
+              //   setHash(null)
+              //   setStatus('claimed')
+              //   setClaiming(false)
+              //   setClaimedBy(account)
+              //   handleSign()
+              // }
             }}
           />
         ) : null}
