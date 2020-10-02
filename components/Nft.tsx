@@ -125,7 +125,7 @@ export default function Nft() {
     setVaultValues(vaultValues.concat(jsonData.values))
     setVaultDesc(jsonData.description)
     setVaultAddresses(jsonData.addresses)
-    setVaultChainId(jsonData.network == 'mainnet' ? 1 : 4)
+    setVaultChainId(jsonData.network == 'mainnet' ? 1 : jsonData.network == "rinkeby" ? 4 : 80001)
     setStatus(jsonData.status)
     if (status === 'claimed') {
       setClaimedBy(jsonData.claimedBy)
