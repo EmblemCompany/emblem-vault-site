@@ -31,7 +31,7 @@ import CryptoJS from 'crypto-js'
 const AddrModal = dynamic(() => import('./AddrModal'))
 const KeysModal = dynamic(() => import('./KeysModal'))
 
-export default function Nft() {
+export default function Pre() {
   const { account, chainId, library } = useWeb3React()
   const { query } = useRouter()
   const [mintPassword, setMintPassword] = useState('')
@@ -62,8 +62,6 @@ export default function Nft() {
   const [decryptPassword, setDecryptPassword] = useState('')
   const [invalidVault, setInvalidVault] = useState(false)
   const [hasCheckedNft, setHasCheckedNft] = useState(false)
-  const [accepting, setAccepting] = useState(false)
-  const [acceptable, setAcceptable] = useState(false)
 
   const handlerContract = useContract(contractAddresses.vaultHandler[chainId], contractAddresses.vaultHandlerAbi, true)
   const emblemContract = useContract(contractAddresses.emblemVault[chainId], contractAddresses.emblemAbi, true)
@@ -77,11 +75,11 @@ export default function Nft() {
 
   const fireMetaMask = () => {
     ;(handlerContract as Contract)
-      .transferWithCode(tokenId, mintPassword)
+      .buyWithPaymentOnly(account, tokenId, mintPassword)
       .then(({ hash }: { hash: string }) => {
         setTimeout(() => {
           setHash(hash)
-          setAccepting(true)
+          // setCreating(false)
           // setShowMakingVaultMsg(true)
         }, 100) // Solving State race condition where transaction watcher wouldn't notice we were creating
       })
@@ -89,7 +87,7 @@ export default function Nft() {
         if (error?.code !== 4001) {
           console.log(`tx failed.`, error)
         } else {
-          setAccepting(false)
+          // setCreating(false)
           // setShowPreVaultMsg(false)
         }
       })
@@ -232,20 +230,10 @@ export default function Nft() {
   const getContractStates = async () => {
     let owned = false
     try {
-      let owner  = await emblemContract.ownerOf(tokenId)
-      let acceptable = await handlerContract.getPreTransfer(tokenId)
-      setAcceptable(acceptable._from !== "0x0000000000000000000000000000000000000000")
-      console.log("owned", owner === account)
-      setMine(owner === account)
+      owned  = await emblemContract.ownerOf(tokenId)
     } catch(err){}
-    
+    setMine(owned)
   }
-
-  useEffect(()=>{
-    console.log("mine?", mine)
-    console.log("claiming?", claiming)
-    console.log("accepting?", accepting)
-  })
 
   const handleSign = async () => {
     // library. .personal.sign(library.toHex("Claim:358746"),library.eth.defaultAccount, (err,res) => console.log(err,res))
@@ -554,9 +542,10 @@ export default function Nft() {
                     </Box>
                   ) : null}
 
-                  {!mine && acceptable ? (
-                  <>                    
-                      <Button mt={2} width="100%" onClick={()=>{fireMetaMask()}}>Accept</Button>
+                  {!mine ? (
+                  <>
+                    
+                      <Button mt={2} width="100%" onClick={()=>{fireMetaMask()}}>Claim Me</Button>
                       <Input
                         mt={2}
                         type="password"
@@ -596,7 +585,7 @@ export default function Nft() {
                 {hash ? (
                   <Alert status="info">
                     <AlertIcon />
-                    { accepting ? "Accepting your vault" : "Claiming your vault ..."}
+                    Claiming your vault ...
                   </Alert>
                 ) : null}
               </Box>
@@ -620,14 +609,14 @@ export default function Nft() {
           <TransactionToast
             hash={hash}
             onComplete={() => {
-              // location.href = location.origin + '/vault?id=' + tokenId
-              if (claiming && !accepting) {
-                setHash(null)
-                setStatus('claimed')
-                setClaiming(false)
-                setClaimedBy(account)
-                handleSign()
-              }
+              location.href = location.origin + '/vault?id=' + tokenId
+              // if (claiming) {
+              //   setHash(null)
+              //   setStatus('claimed')
+              //   setClaiming(false)
+              //   setClaimedBy(account)
+              //   handleSign()
+              // }
             }}
           />
         ) : null}

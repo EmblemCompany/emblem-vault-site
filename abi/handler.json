@@ -76,6 +76,24 @@
     {
       "inputs": [
         {
+          "internalType": "uint256",
+          "name": "_tokenId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "preImage",
+          "type": "bytes32"
+        }
+      ],
+      "name": "addPreTransfer",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
           "internalType": "address",
           "name": "_to",
           "type": "address"
@@ -248,6 +266,40 @@
     {
       "inputs": [
         {
+          "internalType": "string",
+          "name": "image",
+          "type": "string"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "preImage",
+          "type": "bytes32"
+        }
+      ],
+      "name": "checkPreTransferImage",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
           "internalType": "uint256",
           "name": "tokenId",
           "type": "uint256"
@@ -285,6 +337,19 @@
         }
       ],
       "name": "deletePreMint",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "deletePreTransfer",
       "outputs": [],
       "stateMutability": "nonpayable",
       "type": "function"
@@ -343,7 +408,43 @@
               "type": "bytes32"
             }
           ],
-          "internalType": "struct VaultHandlerV2.PreMint",
+          "internalType": "struct VaultHandlerV4.PreMint",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_for",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "index",
+          "type": "uint256"
+        }
+      ],
+      "name": "getPreMintByIndex",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "string",
+              "name": "payload",
+              "type": "string"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "preImage",
+              "type": "bytes32"
+            }
+          ],
+          "internalType": "struct VaultHandlerV4.PreMint",
           "name": "",
           "type": "tuple"
         }
@@ -360,6 +461,102 @@
         }
       ],
       "name": "getPreMintCount",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "length",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "getPreTransfer",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "string",
+              "name": "payload",
+              "type": "string"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "preImage",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "address",
+              "name": "_from",
+              "type": "address"
+            }
+          ],
+          "internalType": "struct VaultHandlerV4.PreTransfer",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_tokenId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "index",
+          "type": "uint256"
+        }
+      ],
+      "name": "getPreTransferByIndex",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "string",
+              "name": "payload",
+              "type": "string"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "preImage",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "address",
+              "name": "_from",
+              "type": "address"
+            }
+          ],
+          "internalType": "struct VaultHandlerV4.PreTransfer",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "getPreTransferCount",
       "outputs": [
         {
           "internalType": "uint256",
@@ -519,6 +716,24 @@
       "name": "transferOwnership",
       "outputs": [],
       "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_tokenId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "string",
+          "name": "code",
+          "type": "string"
+        }
+      ],
+      "name": "transferWithCode",
+      "outputs": [],
+      "stateMutability": "payable",
       "type": "function"
     },
     {
