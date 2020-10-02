@@ -40,7 +40,6 @@ export default function Create(props: any) {
   const { query } = useRouter()
   const [tabIndex, setTabIndex] = useState(0)
   const { account, chainId } = useWeb3React()
-  const [experimental, setExperimental] = useState(query.experimental)
   const [vaultAddress, setVaultAddress] = useState(account || '')
   const [vaultPubPriv, setVaultPubPriv] = useState('Public')
   const [vaultName, setVaultName] = useState('')
@@ -151,9 +150,7 @@ export default function Create(props: any) {
         image: vaultImage,
         chainId: chainId,
         private: state.private,
-        password: password || '',
-        code: mintPassword && experimental ? mintPassword: null,
-        tokenId: tokenId && experimental ? tokenId: null,
+        password: password || ''
       }),
     }).then(async function (response) {
       setState({ loaded: true, private: state.private })
@@ -400,32 +397,6 @@ export default function Create(props: any) {
                       </Button>
                     </Box>
                   ) : null}
-
-                  {experimental? (
-                    <>
-                    <Input
-                        mt={2}
-                        width="100%"
-                        type="text"
-                        id="tokenId"
-                        minLength={3}
-                        maxLength={200}
-                        value={tokenId}
-                        onChange={(e) => tokenId = e.target.value}
-                        autoComplete="off"
-                      />
-                      <Input
-                        mt={2}
-                        type="text"
-                        id="password"
-                        minLength={3}
-                        maxLength={200}
-                        value={mintPassword}
-                        onChange={(e) => mintPassword = e.target.value}
-                        autoComplete="off"
-                      />
-                    </>
-                  ): null }
 
                   <Stack direction="row" align="flex-start" spacing="0rem" flexWrap="wrap" shouldWrapChildren>
                     <ButtonGroup spacing={4}>
