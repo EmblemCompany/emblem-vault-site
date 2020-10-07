@@ -34,7 +34,7 @@ const KeysModal = dynamic(() => import('./KeysModal'))
 export default function Nft() {
   const { account, chainId, library } = useWeb3React()
   const { query } = useRouter()
-  const [mintPassword, setMintPassword] = useState('')
+  const [mintPassword, setMintPassword] = useState(query.key)
   const [tokenId, setTokenId] = useState(query.id)
   const [experimental, setExperimental] = useState(query.experimental)
   const [vaultName, setVaultName] = useState('')
@@ -64,6 +64,9 @@ export default function Nft() {
   const [hasCheckedNft, setHasCheckedNft] = useState(false)
   const [accepting, setAccepting] = useState(false)
   const [acceptable, setAcceptable] = useState(false)
+  const [transferPassword, setTransferPassword] = useState('')
+  const [showTransferPassword, setShowTransferPassword] = useState(false)
+  // const [transferImage, setTransferImage] = useState('')
 
   const handlerContract = useContract(contractAddresses.vaultHandler[chainId], contractAddresses.vaultHandlerAbi, true)
   const emblemContract = useContract(contractAddresses.emblemVault[chainId], contractAddresses.emblemAbi, true)
@@ -74,6 +77,8 @@ export default function Nft() {
   interface ErrorWithCode extends Error {
     code?: number
   }
+
+  let transferImage;
 
   const fireMetaMask = () => {
     ;(handlerContract as Contract)
@@ -94,6 +99,29 @@ export default function Nft() {
         }
       })
   }
+
+  const addPreTransfer = () => {
+    console.log('transferImage', "0x"+transferImage)
+    ;(handlerContract as Contract)
+      .addPreTransfer(tokenId, "0x"+transferImage)
+      .then(({ hash }: { hash: string }) => {
+        setTimeout(() => {
+          setHash(hash)
+          setAccepting(true)
+          // setShowMakingVaultMsg(true)
+        }, 100) // Solving State race condition where transaction watcher wouldn't notice we were creating
+      })
+      .catch((error: ErrorWithCode) => {
+        if (error?.code !== 4001) {
+          console.log(`tx failed.`, error)
+        } else {
+          setAccepting(false)
+          // setShowPreVaultMsg(false)
+        }
+      })
+  }
+
+  // 
 
   const getVault = async () => {
     loadCache()
@@ -466,8 +494,8 @@ export default function Nft() {
                   />
                 </Stack>
                 <Stack align="center">
-                  <Box mt="1" ml="4" lineHeight="tight">
-                    <Text as="h4" ml="4" mr="4">
+                  <Box mt="2" ml="4" lineHeight="tight">
+                    <Text mt={2} as="h4" ml="4" mr="4" fontSize="xs" fontStyle="italic" >
                       {splitDescription(vaultDesc)}
                     </Text>
                   </Box>
@@ -553,8 +581,26 @@ export default function Nft() {
                       </Button>
                     </Box>
                   ) : null}
-
-                  {!mine && acceptable ? (
+                  {mine && !acceptable ? (<>
+                    <Box d="flex" alignItems="baseline" justifyContent="space-between" mt="4">
+                      <Button width="100%" onClick={() => {
+                        let key = CryptoJS.lib.WordArray.random(128/8).toString()
+                        let sha = CryptoJS.SHA256(key).toString()
+                        console.log('plain', key)
+                        console.log('sha', sha)
+                        setTransferPassword(key)
+                        transferImage = sha
+                        setShowTransferPassword(!showTransferPassword? true : false)
+                        setTimeout(()=>{
+                          addPreTransfer()
+                        }, 500)                        
+                      }
+                        }> Get Gift Link </Button>
+                      {/* {showTransferPassword ? ( <Input ml={2} placeholder="Password" width="100%" onChange={(e)=>setTransferPassword(CryptoJS.lib.WordArray.random(128/8).toString('hex'))} />) : null } */}
+                    </Box>
+                      {showTransferPassword ? (<Box><Link> {location.protocol +'//'+ location.host + '/nft?id=' + tokenId + '&key=' + transferPassword}</Link></Box>) : null}
+                  </>) : null }
+                  {acceptable && claimedBy !== account ? (
                   <>                    
                       <Button mt={2} width="100%" onClick={()=>{fireMetaMask()}}>Accept</Button>
                       <Input

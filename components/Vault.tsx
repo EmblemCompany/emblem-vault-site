@@ -424,8 +424,8 @@ export default function Vault() {
                   />
                 </Stack>
                 <Stack align="center">
-                  <Box mt="1" ml="4" lineHeight="tight">
-                    <Text as="h4" ml="4" mr="4">
+                  <Box mt="2" ml="4" lineHeight="tight">
+                    <Text mt={2} as="h4" ml="4" mr="4" fontSize="xs" fontStyle="italic" >
                       {splitDescription(vaultDesc)}
                     </Text>
                   </Box>
