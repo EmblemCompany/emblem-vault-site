@@ -66,6 +66,7 @@ export default function Nft() {
   const [acceptable, setAcceptable] = useState(false)
   const [transferPassword, setTransferPassword] = useState('')
   const [showTransferPassword, setShowTransferPassword] = useState(false)
+  const [preTransfering, setPreTransfering] = useState(false)
   // const [transferImage, setTransferImage] = useState('')
 
   const handlerContract = useContract(contractAddresses.vaultHandler[chainId], contractAddresses.vaultHandlerAbi, true)
@@ -107,7 +108,7 @@ export default function Nft() {
       .then(({ hash }: { hash: string }) => {
         setTimeout(() => {
           setHash(hash)
-          setAccepting(true)
+          setPreTransfering(true)
           // setShowMakingVaultMsg(true)
         }, 100) // Solving State race condition where transaction watcher wouldn't notice we were creating
       })
@@ -115,7 +116,7 @@ export default function Nft() {
         if (error?.code !== 4001) {
           console.log(`tx failed.`, error)
         } else {
-          setAccepting(false)
+          setPreTransfering(false)
           // setShowPreVaultMsg(false)
         }
       })
@@ -560,7 +561,7 @@ export default function Nft() {
                     </Box>
                   ) : null}
 
-                  {!(status === 'claimed') ? (
+                  {!(status === 'claimed') && !mintPassword ? (
                     <Box d="flex" alignItems="baseline" justifyContent="space-between" mt="4">
                       <Button
                         width="100%"
@@ -577,7 +578,7 @@ export default function Nft() {
                           rel: 'noopener noreferrer',
                         }}
                       >
-                        {mine ? 'Sell/Gift/Send' : 'Make an Offer'}
+                        {mine ? 'Sell/Gift/Send (Opensea)' : 'Make an Offer (Opensea)'}
                       </Button>
                     </Box>
                   ) : null}
@@ -595,10 +596,9 @@ export default function Nft() {
                           addPreTransfer()
                         }, 500)                        
                       }
-                        }> Get Gift Link </Button>
-                      {/* {showTransferPassword ? ( <Input ml={2} placeholder="Password" width="100%" onChange={(e)=>setTransferPassword(CryptoJS.lib.WordArray.random(128/8).toString('hex'))} />) : null } */}
+                        }> Get Link (Send Vault Via Link) </Button>
                     </Box>
-                      {showTransferPassword ? (<Box><Link> {location.protocol +'//'+ location.host + '/nft?id=' + tokenId + '&key=' + transferPassword}</Link></Box>) : null}
+                      {showTransferPassword ? (<Box><Link href={location.protocol +'//'+ location.host + '/nft?id=' + tokenId + '&key=' + transferPassword}>Copy Me</Link></Box>) : null}
                   </>) : null }
                   {acceptable && claimedBy !== account ? (
                   <>                    
@@ -625,7 +625,7 @@ export default function Nft() {
                         }}
                         isDisabled={claiming}
                       >
-                        {claiming ? 'Claiming ...' : 'Claim'}
+                        {claiming ? 'Claiming ...' : 'Claim (Crack Open Vault)'}
                       </Button>
                     </Box>
                   ) : status === 'claimed' && claimedBy === account && vaultChainId === chainId ? (
@@ -667,12 +667,14 @@ export default function Nft() {
             hash={hash}
             onComplete={() => {
               // location.href = location.origin + '/vault?id=' + tokenId
-              if (claiming && !accepting) {
+              if (claiming && !accepting && !preTransfering) {
                 setHash(null)
                 setStatus('claimed')
                 setClaiming(false)
                 setClaimedBy(account)
                 handleSign()
+              } else if (preTransfering) {
+                setHash(null)
               }
             }}
           />
