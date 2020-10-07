@@ -34,6 +34,7 @@ const KeysModal = dynamic(() => import('./KeysModal'))
 export default function Nft() {
   const { account, chainId, library } = useWeb3React()
   const { query } = useRouter()
+  const [approved, setApproved] = useState(false)
   const [mintPassword, setMintPassword] = useState(query.key)
   const [tokenId, setTokenId] = useState(query.id)
   const [experimental, setExperimental] = useState(query.experimental)
@@ -105,6 +106,26 @@ export default function Nft() {
     console.log('transferImage', "0x"+transferImage)
     ;(handlerContract as Contract)
       .addPreTransfer(tokenId, "0x"+transferImage)
+      .then(({ hash }: { hash: string }) => {
+        setTimeout(() => {
+          setHash(hash)
+          setPreTransfering(true)
+          // setShowMakingVaultMsg(true)
+        }, 100) // Solving State race condition where transaction watcher wouldn't notice we were creating
+      })
+      .catch((error: ErrorWithCode) => {
+        if (error?.code !== 4001) {
+          console.log(`tx failed.`, error)
+        } else {
+          setPreTransfering(false)
+          // setShowPreVaultMsg(false)
+        }
+      })
+  }
+
+  const handleApproveForall = () => {
+    ;(emblemContract as Contract)
+      .setApprovalForAll(contractAddresses.vaultHandler[chainId], true)
       .then(({ hash }: { hash: string }) => {
         setTimeout(() => {
           setHash(hash)
@@ -263,8 +284,12 @@ export default function Nft() {
     try {
       let owner  = await emblemContract.ownerOf(tokenId)
       let acceptable = await handlerContract.getPreTransfer(tokenId)
+      let isApproved = await emblemContract.isApprovedForAll(account, contractAddresses.vaultHandler[chainId])
+      setApproved(isApproved)
       setAcceptable(acceptable._from !== "0x0000000000000000000000000000000000000000")
       console.log("owned", owner === account)
+      console.log("approved", isApproved)
+      // console.log("check approved for all", account, contractAddresses.vaultHandler[chainId])
       setMine(owner === account)
     } catch(err){}
     
@@ -585,18 +610,22 @@ export default function Nft() {
                   {mine && !acceptable ? (<>
                     <Box d="flex" alignItems="baseline" justifyContent="space-between" mt="4">
                       <Button width="100%" onClick={() => {
-                        let key = CryptoJS.lib.WordArray.random(128/8).toString()
-                        let sha = CryptoJS.SHA256(key).toString()
-                        console.log('plain', key)
-                        console.log('sha', sha)
-                        setTransferPassword(key)
-                        transferImage = sha
-                        setShowTransferPassword(!showTransferPassword? true : false)
-                        setTimeout(()=>{
-                          addPreTransfer()
-                        }, 500)                        
+                        if (!approved) {
+                          return handleApproveForall()
+                        } else {
+                          let key = CryptoJS.lib.WordArray.random(128/8).toString()
+                          let sha = CryptoJS.SHA256(key).toString()
+                          console.log('plain', key)
+                          console.log('sha', sha)
+                          setTransferPassword(key)
+                          transferImage = sha
+                          setShowTransferPassword(!showTransferPassword? true : false)
+                          setTimeout(()=>{
+                            addPreTransfer()
+                          }, 500)
+                        }                                             
                       }
-                        }> Get Link (Send Vault Via Link) </Button>
+                    }> {approved ? "Get Link (Send Vault Via Link)" : "Approve Gifting" } </Button>
                     </Box>
                       {showTransferPassword ? (<Box><Link href={location.protocol +'//'+ location.host + '/nft?id=' + tokenId + '&key=' + transferPassword}>Copy Me</Link></Box>) : null}
                   </>) : null }
