@@ -133,6 +133,8 @@ const chainMappings: { [key: string]: number } = {
   kovan: 42,
   '80001': 80001,
   mumbai: 80001,
+  matic: 137,
+  '137': 137,
   '97': 97,
   bnbsc: 97,
 }

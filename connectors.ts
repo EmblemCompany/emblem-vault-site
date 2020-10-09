@@ -6,14 +6,16 @@ import { INFURA_PREFIXES } from './utils'
 
 export function getNetwork(defaultChainId = 1): NetworkConnector {
   return new NetworkConnector({
-    urls: [1, 3, 4, 5, 42, 80001, 97].reduce(
+    urls: [1, 3, 4, 5, 42, 80001, 137, 97].reduce(
       (urls, chainId) =>
         Object.assign(urls, {
           [chainId]:
-            chainId !== 80001 && chainId === 97
+            chainId === 1 || chainId === 4
               ? `https://${INFURA_PREFIXES[chainId]}.infura.io/v3/${process.env.INFURA_PROJECT_ID}`
               : chainId === 80001
               ? `https://rpc-mumbai.matic.today`
+              : chainId === 137
+              ? `https://rpc-mainnet.matic.today`
               : `https://data-seed-prebsc-1-s1.binance.org:8545/`,
         }),
       {}
@@ -22,7 +24,7 @@ export function getNetwork(defaultChainId = 1): NetworkConnector {
   })
 }
 
-export const injected = new InjectedConnector({ supportedChainIds: [1, 3, 4, 5, 42, 80001, 97] })
+export const injected = new InjectedConnector({ supportedChainIds: [1, 3, 4, 5, 42, 80001, 137, 97] })
 
 export const walletconnect = new WalletConnectConnector({
   rpc: {

@@ -20,6 +20,7 @@ export const CHAIN_ID_NAMES: { [key: number]: string } = {
   5: 'Görli',
   42: 'Kovan',
   80001: 'Mumbai',
+  137: 'Matic',
   97: 'bnbsc',
 }
 
@@ -30,6 +31,7 @@ export const INFURA_PREFIXES: { [key: number]: string } = {
   5: 'goerli',
   42: 'kovan',
   80001: 'mumbai',
+  137: 'matic',
   97: 'bnbsc',
 }
 
@@ -46,6 +48,7 @@ const EXPLORER_PREFIXES: { [key: number]: string } = {
   5: 'goerli.',
   42: 'kovan.',
   80001: 'mumbai-explorer.matic.today',
+  137: 'explorer.matic.network',
   97: 'bnbsc',
 }
 

@@ -96,7 +96,7 @@ export default function Vault() {
     setVaultValues(vaultValues.concat(jsonData.values))
     setVaultDesc(jsonData.description)
     setVaultAddresses(jsonData.addresses)
-    setVaultChainId(jsonData.network == 'mainnet' ? 1 : jsonData.network == "rinkeby" ? 4 : 80001)
+    setVaultChainId(jsonData.network == 'mainnet' ? 1 : jsonData.network == "rinkeby" ? 4 : jsonData.network == "mumbai" ? 80001 : jsonData.network == "matic" ? 137: 97)
     setStatus(jsonData.status)
     if (status === 'claimed') {
       setClaimedBy(jsonData.claimedBy)
