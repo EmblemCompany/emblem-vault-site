@@ -9,7 +9,10 @@ export default function TokenLogo({ token, size }: { token: Token; size: string 
   if (token.equals(WETH[token.chainId])) {
     src =
       'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2/logo.png'
-  } else {
+  } else if(token.name === "Circuits of Value") {
+    src = "https://circuitsofvalue.com/public/coval-logo.png"
+  }
+  else {
     src = `https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/${token.address}/logo.png`
   }
 
