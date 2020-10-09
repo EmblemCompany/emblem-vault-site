@@ -1,4 +1,4 @@
-import LeaderBoard from '../components/Leaderboard'
+import LeaderBoard from '../components/LeaderBoard'
 import { Suspense } from 'react'
 import ErrorBoundary from '../components/ErrorBoundary'
 
