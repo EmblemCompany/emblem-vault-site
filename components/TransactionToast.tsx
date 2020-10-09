@@ -3,7 +3,7 @@ import { Button, Spinner, IconButton, ButtonGroup } from '@chakra-ui/core'
 import { useWeb3React } from '@web3-react/core'
 
 import { useTransactions } from '../context'
-import { shortenHex, EtherscanType, formatEtherscanLink } from '../utils'
+import { shortenHex, ExplorerTXType, formatEtherscanLink } from '../utils'
 
 export function TransactionToast({ hash, onComplete }: { hash: string; onComplete?: () => void }): JSX.Element {
   const { library, chainId } = useWeb3React()
@@ -45,7 +45,7 @@ export function TransactionToast({ hash, onComplete }: { hash: string; onComplet
         rightIcon="external-link"
         style={{ borderTopRightRadius: 0, borderBottomRightRadius: 0 }}
         {...{
-          href: formatEtherscanLink(EtherscanType.Transaction, [chainId as number, hash]),
+          href: formatEtherscanLink(ExplorerTXType.Transaction, [chainId as number, hash]),
           target: '_blank',
           rel: 'noopener noreferrer',
         }}

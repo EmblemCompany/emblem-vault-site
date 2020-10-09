@@ -3,7 +3,7 @@ import { Button, Text, IconButton, useColorMode } from '@chakra-ui/core'
 import { useWeb3React } from '@web3-react/core'
 import { Token, TokenAmount } from '@uniswap/sdk'
 
-import { formatEtherscanLink, EtherscanType } from '../utils'
+import { formatEtherscanLink, ExplorerTXType } from '../utils'
 import { BG } from '../constants'
 import { useTokenBalance } from '../data'
 import TokenLogo from './TokenLogo'
@@ -26,7 +26,7 @@ function Balance({ token }: { token: Token }): JSX.Element {
       variant="outline"
       backgroundColor={BG[colorMode]}
       {...{
-        href: formatEtherscanLink(EtherscanType.TokenBalance, [token, account as string]),
+        href: formatEtherscanLink(ExplorerTXType.TokenBalance, [token, account as string]),
         target: '_blank',
         rel: 'noopener noreferrer',
       }}

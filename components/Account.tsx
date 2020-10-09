@@ -6,7 +6,7 @@ import { UserRejectedRequestError } from '@web3-react/injected-connector'
 import MetaMaskOnboarding from '@metamask/onboarding'
 import { TokenAmount } from '@uniswap/sdk'
 
-import { formatEtherscanLink, EtherscanType, shortenHex } from '../utils'
+import { formatEtherscanLink, ExplorerTXType, shortenHex } from '../utils'
 import { injected, getNetwork } from '../connectors'
 import { useETHBalance } from '../data'
 import ErrorBoundary from './ErrorBoundary'
@@ -168,7 +168,7 @@ export default function Account({ triedToEagerConnect }: { triedToEagerConnect: 
         rightIcon="external-link"
         style={{ borderTopLeftRadius: 0, borderBottomLeftRadius: 0 }}
         {...{
-          href: formatEtherscanLink(EtherscanType.Account, [chainId as number, account]),
+          href: formatEtherscanLink(ExplorerTXType.Account, [chainId as number, account]),
           target: '_blank',
           rel: 'noopener noreferrer',
         }}

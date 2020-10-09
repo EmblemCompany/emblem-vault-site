@@ -33,41 +33,41 @@ export const INFURA_PREFIXES: { [key: number]: string } = {
   97: 'bnbsc',
 }
 
-export enum EtherscanType {
+export enum ExplorerTXType {
   Account,
   TokenBalance,
   Transaction,
 }
 
-const ETHERSCAN_PREFIXES: { [key: number]: string } = {
-  1: '',
-  3: 'ropsten.',
-  4: 'rinkeby.',
+const EXPLORER_PREFIXES: { [key: number]: string } = {
+  1: 'etherscan.io',
+  3: 'ropsten.etherscan.io',
+  4: 'rinkeby.etherscan.io',
   5: 'goerli.',
   42: 'kovan.',
-  80001: 'mumbai',
+  80001: 'mumbai-explorer.matic.today',
   97: 'bnbsc',
 }
 
-interface EtherscanTypeData {
-  [EtherscanType.Account]: [number, string]
-  [EtherscanType.TokenBalance]: [Token, string]
-  [EtherscanType.Transaction]: [number, string]
+interface ExplorerTypeData {
+  [ExplorerTXType.Account]: [number, string]
+  [ExplorerTXType.TokenBalance]: [Token, string]
+  [ExplorerTXType.Transaction]: [number, string]
 }
 
-export function formatEtherscanLink(type: EtherscanType, data: EtherscanTypeData[EtherscanType]): string {
+export function formatEtherscanLink(type: ExplorerTXType, data: ExplorerTypeData[ExplorerTXType]): string {
   switch (type) {
-    case EtherscanType.Account: {
-      const [chainId, address] = data as EtherscanTypeData[EtherscanType.Account]
-      return `https://${ETHERSCAN_PREFIXES[chainId]}etherscan.io/address/${address}`
+    case ExplorerTXType.Account: {
+      const [chainId, address] = data as ExplorerTypeData[ExplorerTXType.Account]
+      return `https://${EXPLORER_PREFIXES[chainId]}/address/${address}`
     }
-    case EtherscanType.TokenBalance: {
-      const [token, address] = data as EtherscanTypeData[EtherscanType.TokenBalance]
-      return `https://${ETHERSCAN_PREFIXES[token.chainId]}etherscan.io/token/${token.address}?a=${address}`
+    case ExplorerTXType.TokenBalance: {
+      const [token, address] = data as ExplorerTypeData[ExplorerTXType.TokenBalance]
+      return `https://${EXPLORER_PREFIXES[token.chainId]}/token/${token.address}?a=${address}`
     }
-    case EtherscanType.Transaction: {
-      const [chainId, hash] = data as EtherscanTypeData[EtherscanType.Transaction]
-      return `https://${ETHERSCAN_PREFIXES[chainId]}etherscan.io/tx/${hash}`
+    case ExplorerTXType.Transaction: {
+      const [chainId, hash] = data as ExplorerTypeData[ExplorerTXType.Transaction]
+      return `https://${EXPLORER_PREFIXES[chainId]}/tx/${hash}`
     }
   }
 }
