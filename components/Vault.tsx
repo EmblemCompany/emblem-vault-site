@@ -39,6 +39,7 @@ export default function Vault() {
   const [vaultDesc, setVaultDesc] = useState('')
   const [vaultImage, setVaultImage] = useState('')
   const [vaultValues, setVaultValues] = useState([])
+  const [vaultDataValues, setVaultDataValues] = useState([])
   const [vaultAddresses, setVaultAddresses] = useState([])
   const [vaultPrivacy, setVaultPrivacy] = useState(false)
   const [vaultTotalValue, setVaultTotalValue] = useState(0)
@@ -54,6 +55,7 @@ export default function Vault() {
   const [mnemonic, setMnemonic] = useState('')
   const [privKeyBTC, setPrivKeyBTC] = useState('')
   const [privKeyETH, setPrivKeyETH] = useState('')
+  const [privValues, setKeyValues] = useState()
   const [loadingApi, setLoadingApi] = useState(false)
   const [decryptedEffect, setDecryptedEffect] = useState('')
   const [decryptedEffectRunning, setDecryptedEffectRunning] = useState(false)
@@ -94,6 +96,7 @@ export default function Vault() {
     setVaultDesc(jsonData.description)
     setVaultTotalValue(jsonData.totalValue || 0)
     setVaultValues(vaultValues.concat(jsonData.values))
+    setVaultDataValues(jsonData.attributes.filter(item=>{return item.trait_type === "key"}))
     setVaultDesc(jsonData.description)
     setVaultAddresses(jsonData.addresses)
     setVaultChainId(jsonData.network == 'mainnet' ? 1 : jsonData.network == "rinkeby" ? 4 : jsonData.network == "mumbai" ? 80001 : jsonData.network == "matic" ? 137: 97)
@@ -224,6 +227,7 @@ export default function Vault() {
               return key.coin === 'eth'
             })[0].privkey
           )
+          setKeyValues(result.decrypted.values)
           onOpenKeysModal()
         })
       })
@@ -373,6 +377,7 @@ export default function Vault() {
         mnemonic={mnemonic}
         privKeyBTC={privKeyBTC}
         privKeyETH={privKeyETH}
+        privValues={privValues}
       />
 
       <Loader loaded={state.loaded}>
@@ -463,6 +468,13 @@ export default function Vault() {
                               ) : null}
                             </Text>
                           )
+                        })
+                      ) :  null } 
+                      { vaultDataValues.length ? (
+                        vaultDataValues.map((data) => {
+                          return (
+                            <Text>Data: {data.attribute_key}</Text>
+                          )                        
                         })
                       ) : (
                         <Text>Nothing in here! Fill 'er up!</Text>

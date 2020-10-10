@@ -20,17 +20,19 @@ export default function KeysModal({
   mnemonic,
   privKeyBTC,
   privKeyETH,
+  privValues
 }: {
   isOpen: boolean
   onClose: () => void
   mnemonic: string
   privKeyBTC: string
   privKeyETH: string
+  privValues
 }): JSX.Element {
   const phrase = mnemonic
   const btcKey = privKeyBTC
   const ethKey = privKeyETH
-
+  const values = privValues
   const { colorMode } = useColorMode()
 
   const [phraseCopied, setPhraseCopied] = useState(false)
@@ -125,6 +127,25 @@ export default function KeysModal({
                 {ETHKeyCopied ? <Text>Copied!</Text> : <Text isTruncated>{ethKey}</Text>}
               </Button>
             </Stack>
+            {privValues ? (
+            <>
+              <Stack direction="row" mt={4}>
+                <Text>Your Values (click to copy):</Text>
+              </Stack>
+              {privValues.map((item, index) => {
+                return (
+                  <Stack direction="row" key={index} justify="space-between">
+                    <Text isTruncated>{item.key}</Text>
+                    <Button whiteSpace="unset" height="unset" p={2} onClick={() => copyWithFlag(values, 'values')}>
+                      {ETHKeyCopied ? <Text>Copied!</Text> : <Text isTruncated>{item.value}</Text>}
+                    </Button>
+                  </Stack>
+                )
+              })}
+              
+            </> 
+            ) : null}
+            
           </Stack>
         </ModalBody>
       </ModalContent>

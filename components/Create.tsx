@@ -52,6 +52,7 @@ export default function Create(props: any) {
   const [hash, setHash] = useState(null)
   // const [tokenId, setTokenId] = useState(null)
   // const [mintPassword, setMintPassword] = useState(null)
+  const [experimental, setExperimental] = useState(query.experimental)
   const [showPreVaultMsg, setShowPreVaultMsg] = useState(false)
   const [showMakingVaultMsg, setShowMakingVaultMsg] = useState(false)
   const [decimals, setDecimals] = useState(null)
@@ -60,6 +61,9 @@ export default function Create(props: any) {
   const [price, setPrice] = useState(null)
   const [creating, setCreating] = useState(false)
   const [approving, setApproving] = useState(false)
+  const [vaultKey, setVaultKey] = useState('')  
+  const [vaultValue, setVaultValue] = useState('')
+  
 
   const handlerContract = useContract(contractAddresses.vaultHandler[chainId], contractAddresses.vaultHandlerAbi, true)
   const covalContract = useContract(contractAddresses.coval[chainId], contractAddresses.covalAbi, true)
@@ -135,6 +139,21 @@ export default function Create(props: any) {
     //   return alert('incorrect password')
     // }
     setState({ loaded: false, private: state.private })
+    let body = {
+      fromAddress: account,
+      toAddress: vaultAddress,
+      description: vaultDesc,
+      name: vaultName,
+      image: vaultImage,
+      chainId: chainId,
+      private: state.private,
+      password: password || '',
+      values: []
+    }
+    if (vaultKey && vaultValue) {
+      body.values.push({"key": vaultKey, value: vaultValue})
+    }
+    console.log(JSON.stringify(body))
     fetch(EMBLEM_API + '/mint', {
       method: 'POST',
       headers: {
@@ -142,16 +161,7 @@ export default function Create(props: any) {
         service: 'evmetadata',
       },
       // We convert the React state to JSON and send it as the POST body
-      body: JSON.stringify({
-        fromAddress: account,
-        toAddress: vaultAddress,
-        description: vaultDesc,
-        name: vaultName,
-        image: vaultImage,
-        chainId: chainId,
-        private: state.private,
-        password: password || ''
-      }),
+      body: JSON.stringify(body),
     }).then(async function (response) {
       setState({ loaded: true, private: state.private })
       let body = await response.json()
@@ -324,6 +334,38 @@ export default function Create(props: any) {
                       <FormErrorMessage>Description needs to be at least 3 characters. 1024 is max.</FormErrorMessage>
                     </FormControl>
                   </Stack>
+                  {experimental? (
+                    <Stack direction="row" align="flex-start" spacing="0rem" flexWrap="wrap" shouldWrapChildren>
+                    <FormControl>
+                      <FormLabel htmlFor="vault-key">Key</FormLabel>
+                      <Input
+                        type="text"
+                        id="vault-key"
+                        aria-describedby="vault-key-text"
+                        maxLength={200}
+                        value={vaultKey}
+                        onChange={(e) => setVaultKey(e.target.value)}
+                        autoComplete="off"
+                      />
+                      <FormHelperText id="vault-key-text">Key Name (Public)</FormHelperText>
+                      <FormErrorMessage>---Some Error</FormErrorMessage>
+                    </FormControl>
+                    <FormControl>
+                      <FormLabel htmlFor="vault-value">Value</FormLabel>
+                      <Input
+                        type="text"
+                        id="vault-value"
+                        aria-describedby="vault-value-text"
+                        maxLength={200}
+                        value={vaultValue}
+                        onChange={(e) => setVaultValue(e.target.value)}
+                        autoComplete="off"
+                      />
+                      <FormHelperText id="vault-value-text">Key Value (Encrypted)</FormHelperText>
+                      <FormErrorMessage>---Some Error</FormErrorMessage>
+                    </FormControl>
+                  </Stack>
+                  ) : null}
                   <Stack direction="row" align="flex-start" spacing="0rem" flexWrap="wrap" shouldWrapChildren>
                     <ButtonGroup spacing={4}>
                       <Button onClick={() => setTabIndex(0)}>Back</Button>
