@@ -54,7 +54,7 @@ export default function Layout({ children }: { children: ReactNode }): JSX.Eleme
       <ColorBox
         as={Flex}
         flexDirection="column"
-        borderColor="orange.500"
+        borderColor={Number(chainId) === 137 ? "blue.500" : "orange.500"}
         borderWidth={isTestnet ? '.5rem' : '0'}
         minHeight="100vh"
         maxHeight="100vh"
@@ -115,7 +115,7 @@ export default function Layout({ children }: { children: ReactNode }): JSX.Eleme
             <LightMode>
               <Badge
                 variant="solid"
-                variantColor={isTestnet ? 'orange' : undefined}
+                variantColor={chainId == 137 ? 'blue' : 'orange'/*isTestnet ? 'blue' : undefined*/}
                 fontSize="1rem"
                 style={{ borderTopLeftRadius: 0, borderBottomRightRadius: 0, borderBottomLeftRadius: 0 }}
               >
