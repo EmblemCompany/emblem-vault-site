@@ -13,7 +13,10 @@ import {
 } from '@chakra-ui/core'
 import copy from 'copy-to-clipboard'
 import { COLOR } from '../constants'
-
+interface DataValues {
+  key: string
+  value: string
+}
 export default function KeysModal({
   isOpen,
   onClose,
@@ -27,7 +30,7 @@ export default function KeysModal({
   mnemonic: string
   privKeyBTC: string
   privKeyETH: string
-  privValues
+  privValues: Array<object>
 }): JSX.Element {
   const phrase = mnemonic
   const btcKey = privKeyBTC
@@ -71,6 +74,18 @@ export default function KeysModal({
     }
   }, [ETHKeyCopied])
 
+  const [valueCopied, setValueCopied] = useState(false)
+  useEffect(() => {
+    if (valueCopied) {
+      const timeout = setTimeout(() => {
+        setValueCopied(false)
+      }, 750)
+      return (): void => {
+        clearTimeout(timeout)
+      }
+    }
+  }, [valueCopied])
+
   function copyWithFlag(content: string, whichOne: string): void {
     copy(content)
     whichOne == 'phrase'
@@ -79,6 +94,8 @@ export default function KeysModal({
       ? setBTCKeyCopied(true)
       : whichOne == 'ETHKey'
       ? setETHKeyCopied(true)
+      : whichOne == 'values'
+      ? setValueCopied(true)
       : null
   }
 
@@ -132,12 +149,12 @@ export default function KeysModal({
               <Stack direction="row" mt={4}>
                 <Text>Your Values (click to copy):</Text>
               </Stack>
-              {privValues.map((item, index) => {
+              {privValues.map((item: DataValues, index) => {
                 return (
                   <Stack direction="row" key={index} justify="space-between">
                     <Text isTruncated>{item.key}</Text>
-                    <Button whiteSpace="unset" height="unset" p={2} onClick={() => copyWithFlag(values, 'values')}>
-                      {ETHKeyCopied ? <Text>Copied!</Text> : <Text isTruncated>{item.value}</Text>}
+                    <Button whiteSpace="unset" height="unset" p={2} onClick={() => copyWithFlag(item.value, 'values')}>
+                      {valueCopied ? <Text>Copied!</Text> : <Text isTruncated>{item.value}</Text>}
                     </Button>
                   </Stack>
                 )

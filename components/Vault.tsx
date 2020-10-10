@@ -55,7 +55,7 @@ export default function Vault() {
   const [mnemonic, setMnemonic] = useState('')
   const [privKeyBTC, setPrivKeyBTC] = useState('')
   const [privKeyETH, setPrivKeyETH] = useState('')
-  const [privValues, setKeyValues] = useState()
+  const [privValues, setKeyValues] = useState([])
   const [loadingApi, setLoadingApi] = useState(false)
   const [decryptedEffect, setDecryptedEffect] = useState('')
   const [decryptedEffectRunning, setDecryptedEffectRunning] = useState(false)
