@@ -70,7 +70,7 @@ export default function Vault() {
 
   const getVault = async () => {
     loadCache()
-    const responce = await fetch(EMBLEM_API + '/meta/' + tokenId, {
+    const responce = await fetch(EMBLEM_API + '/meta/' + tokenId + (experimental ? '?experimental=true' : ''), {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -383,7 +383,7 @@ export default function Vault() {
       <Loader loaded={state.loaded}>
         {loadingApi ? <Refreshing /> : ''}
         {!invalidVault ? (
-          <Tilt className="Tilt" options={{ max: experimental ? 19 : 0, scale: 1 }}>
+          <Tilt className="Tilt" options={{ max: experimental ? 0 : 0, scale: 1 }}>
             <Flex width="full" align="center" justifyContent="center">
               <Box
                 maxW="sm"

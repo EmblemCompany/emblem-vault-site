@@ -14,11 +14,12 @@ export default function VaultList() {
   const [state, setState] = useState({ loaded: false })
   const [loadingApi, setLoadingApi] = useState(false)
   const [address, setAddress] = useState(query.address)
+  const [experimental, setExperimental] = useState(query.experimental)
 
   const getVaults = async () => {
     loadCache()
     try {
-      const response = await fetch(EMBLEM_API + '/vaults/' + (address ? address : account), {
+      const response = await fetch(EMBLEM_API + '/vaults/' + (address ? address : account) + (experimental? '?experimental=true' : ''), {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
