@@ -16,6 +16,9 @@ export default function Vaults() {
   const [address, setAddress] = useState(query.address)
 
   const getVaults = async () => {
+    if (chainId == 137 || chainId == 80001) {
+      return
+    }
     loadCache()
     try {
       const response = await fetch(EMBLEM_API + '/opensea/assets', {

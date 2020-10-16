@@ -476,9 +476,9 @@ export default function Vault() {
                             <Text>Data: {data.attribute_key}</Text>
                           )                        
                         })
-                      ) : (
+                      ) : !vaultDataValues.length && !vaultValues.length ? (
                         <Text>Nothing in here! Fill 'er up!</Text>
-                      )}
+                      ): null }
                     </Box>
                   </Box>
                   {!vaultPrivacy ? (
