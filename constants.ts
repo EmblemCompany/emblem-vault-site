@@ -26,7 +26,7 @@ export const MAX_UINT256 = JSBI.BigInt('0xffffffffffffffffffffffffffffffffffffff
 
 export const contractAddresses = {
   vaultHandler: {
-    1: '0x527b7bab27215b4b3957d682faa647c9790896e6',
+    1: '0x6b565bd2a77c1b51b37c85ffe5cc533fadc95ee3',
     4: '0x63B1EB00de17Faf64b33649A5b7592543B010127',
     80001: '0x5434ba8b4A37755Cb3867C9fde39342C0D382857',
     137: '0x5434ba8b4A37755Cb3867C9fde39342C0D382857'
