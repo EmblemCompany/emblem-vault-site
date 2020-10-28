@@ -29,7 +29,7 @@ export const contractAddresses = {
     1: '0x6b565bd2a77c1b51b37c85ffe5cc533fadc95ee3',
     4: '0x63B1EB00de17Faf64b33649A5b7592543B010127',
     80001: '0x5434ba8b4A37755Cb3867C9fde39342C0D382857',
-    137: '0x5434ba8b4A37755Cb3867C9fde39342C0D382857'
+    137: '0x8F874455D374e0EF61a5a1A345bCD696B114b2dd'
   },
   vaultHandlerAbi: HandlerABI,
   emblemVault: {
@@ -43,7 +43,7 @@ export const contractAddresses = {
     1: '0x3d658390460295fb963f54dc0899cfb1c30776df',
     4: '0x44c1a9d7d1f932b4c2811a70edffdd6ae2eb60e6',
     80001: '0x5cCa9D75DF2dFC117855adD4DD45727dee5287EC',
-    137: '0x5cCa9D75DF2dFC117855adD4DD45727dee5287EC'
+    137: '0xdB3379899011E997b1B82864F5Bd759beD27c38A'
   },
   covalAbi: CovalABI,
 }
