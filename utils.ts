@@ -1,6 +1,6 @@
 import { JSBI, Fraction, Percent, Price, Token, WETH, ChainId } from '@uniswap/sdk'
 import { UrlObject } from 'url'
-import { isAddress } from 'web3-utils'
+import { isAddress, toWei } from 'web3-utils'
 
 import { isIPFS } from './constants'
 
@@ -127,4 +127,8 @@ export function validImage(data) {
 
 export function isETHAddress(address) {
   return isAddress(address)
+}
+
+export function toContractValue(amount, decimal) {
+  return toWei(amount, decimal)
 }
