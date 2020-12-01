@@ -11,7 +11,10 @@ import {
   Alert,
   AlertIcon,
   useDisclosure,
-  Tooltip
+  Tooltip,
+  Collapse,
+  FormControl,
+  FormLabel
 } from '@chakra-ui/core'
 
 import Head from "next/head"
@@ -21,7 +24,7 @@ import { useRouter } from 'next/router'
 import Refreshing from './Refreshing'
 import Loader from 'react-loader'
 import dynamic from 'next/dynamic'
-import { validImage } from '../utils'
+import { isETHAddress, validImage } from '../utils'
 import { Contract } from '@ethersproject/contracts'
 import { TransactionToast } from './TransactionToast'
 import { EMBLEM_API, BURN_ADDRESS, contractAddresses } from '../constants'
@@ -74,6 +77,8 @@ export default function Nft() {
   const [transferPassword, setTransferPassword] = useState('')
   const [showTransferPassword, setShowTransferPassword] = useState(false)
   const [preTransfering, setPreTransfering] = useState(false)
+  const [transferToAddress, setTransferToAddress] = useState(null)
+  const [transfering, setTransfering] = useState(false)
   // const [transferImage, setTransferImage] = useState('')
 
   const handlerContract = useContract(contractAddresses.vaultHandler[chainId], contractAddresses.vaultHandlerAbi, true)
@@ -81,12 +86,22 @@ export default function Nft() {
 
   const { isOpen: isOpenAddrModal, onOpen: onOpenAddrModal, onClose: onCloseAddrModal } = useDisclosure()
   const { isOpen: isOpenKeysModal, onOpen: onOpenKeysModal, onClose: onCloseKeysModal } = useDisclosure()
+  const { isOpen, onToggle } = useDisclosure()
 
   interface ErrorWithCode extends Error {
     code?: number
   }
 
   let transferImage;
+
+  const transferVault = () => {
+    setTransfering(true)
+    ;(emblemContract as Contract).transferFrom(account, transferToAddress, tokenId)
+    .then(({ hash }: { hash: string }) => {
+      setHash(hash)
+    })
+    .catch((error: ErrorWithCode) => {})
+  }
 
   const fireMetaMask = () => {
     console.log(mintPassword)
@@ -651,7 +666,7 @@ export default function Nft() {
                     </Box>
                   ) : null}
 
-                  {!(status === 'claimed') ? (
+                  {!(status === 'claimed') && (vaultChainId === 1 || vaultChainId === 4 )? (
                     <Box d="flex" alignItems="baseline" justifyContent="space-between" mt="4">
                       <Button
                         width="100%"
@@ -668,10 +683,41 @@ export default function Nft() {
                           rel: 'noopener noreferrer',
                         }}
                       >
-                        {mine ? 'Sell/Gift/Send (Opensea)' : 'Make an Offer (Opensea)'}
+                        {mine ? 'Sell (Opensea)' : 'Make an Offer (Opensea)'}
                       </Button>
                     </Box>
                   ) : null}
+                  {!(status === 'claimed') && mine? (
+                    <>
+                     <Box d="flex" alignItems="baseline" justifyContent="space-between" mt="4" width="100%">
+                        <Stack direction="column" align="center" width="100%">
+                          <Button width="100%" onClick={onToggle}>Transfer Vault</Button>
+                          <Collapse isOpen={isOpen}>
+                            <Box d="flex" alignItems="baseline" justifyContent="space-between" mt="2" width="100%">
+                            <FormLabel htmlFor="owner-address">Address</FormLabel>
+                              <Input
+                                mt={1}
+                                type="text"
+                                id="transferAddress"
+                                value={transferToAddress || ''}
+                                onChange={(e) => {                              
+                                  console.log("Transfer to", e.target.value)
+                                  setTransferToAddress(e.target.value)
+                                }}
+                                autoComplete="off"
+                              />
+                            </Box>
+                            <Box d="flex" alignItems="baseline" justifyContent="space-between" mt="2" width="100%">
+                              <Button isDisabled={!isETHAddress(transferToAddress)} onClick={()=>{
+                                onToggle()
+                                transferVault()
+                              }}>Transfer Now</Button> 
+                            </Box>
+                          </Collapse>
+                        </Stack>
+                      </Box>
+                    </>
+                  ):null }
                   {mine && !acceptable ? (<>
                     <Box d="flex" alignItems="baseline" justifyContent="space-between" mt="4">
                       <Button width="100%" onClick={() => {
@@ -743,7 +789,7 @@ export default function Nft() {
                 {hash ? (
                   <Alert status="info">
                     <AlertIcon />
-                    { accepting ? "Accepting Your Gift Vault" : claiming ? "Claiming your Vault ..." : approving? "Handling Approval Flow ..." : "Generating Gift Link ..."}
+                    { accepting ? "Accepting Your Gift Vault" : claiming ? "Claiming your Vault ..." : approving? "Handling Approval Flow ..." : transfering? "Transfering Vault ...":  "Generating Gift Link ..."}
                   </Alert>
                 ) : null}
               </Box>
@@ -785,7 +831,11 @@ export default function Nft() {
                 getVault()
                 setHash(null)
               } else if(approving) {
-                setApproving(false)                
+                setApproving(false)
+                getVault()
+                setHash(null)
+              } else if(transfering) {
+                setTransfering(false)
                 getVault()
                 setHash(null)
               } else {
