@@ -687,7 +687,7 @@ export default function Nft() {
                       </Button>
                     </Box>
                   ) : null}
-                  {!(status === 'claimed') && mine? (
+                  {!(status === 'claimed') && mine && !acceptable?  (
                     <>
                      <Box d="flex" alignItems="baseline" justifyContent="space-between" mt="4" width="100%">
                         <Stack direction="column" align="center" width="100%">
