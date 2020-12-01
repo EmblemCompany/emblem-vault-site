@@ -21,6 +21,8 @@ import {
   Divider,
   Alert,
   AlertIcon,
+  Collapse,
+  useDisclosure
 } from '@chakra-ui/core'
 
 import Loader from 'react-loader'
@@ -37,6 +39,7 @@ let tokenId = null
 let mintPassword = null
 
 export default function Create(props: any) {
+  const { isOpen, onToggle } = useDisclosure()
   const { query } = useRouter()
   const [tabIndex, setTabIndex] = useState(0)
   const { account, chainId } = useWeb3React()
@@ -52,7 +55,7 @@ export default function Create(props: any) {
   const [hash, setHash] = useState(null)
   // const [tokenId, setTokenId] = useState(null)
   // const [mintPassword, setMintPassword] = useState(null)
-  const [experimental, setExperimental] = useState(query.experimental)
+  const [experimental, setExperimental] = useState(true)
   const [showPreVaultMsg, setShowPreVaultMsg] = useState(false)
   const [showMakingVaultMsg, setShowMakingVaultMsg] = useState(false)
   const [decimals, setDecimals] = useState(null)
@@ -334,38 +337,41 @@ export default function Create(props: any) {
                       <FormErrorMessage>Description needs to be at least 3 characters. 1024 is max.</FormErrorMessage>
                     </FormControl>
                   </Stack>
-                  {experimental? (
-                    <Stack direction="row" align="flex-start" spacing="0rem" flexWrap="wrap" shouldWrapChildren>
-                    <FormControl>
-                      <FormLabel htmlFor="vault-key">Key</FormLabel>
-                      <Input
-                        type="text"
-                        id="vault-key"
-                        aria-describedby="vault-key-text"
-                        maxLength={200}
-                        value={vaultKey}
-                        onChange={(e) => setVaultKey(e.target.value)}
-                        autoComplete="off"
-                      />
-                      <FormHelperText id="vault-key-text">Key Name (Public)</FormHelperText>
-                      <FormErrorMessage>---Some Error</FormErrorMessage>
-                    </FormControl>
-                    <FormControl>
-                      <FormLabel htmlFor="vault-value">Value</FormLabel>
-                      <Input
-                        type="text"
-                        id="vault-value"
-                        aria-describedby="vault-value-text"
-                        maxLength={200}
-                        value={vaultValue}
-                        onChange={(e) => setVaultValue(e.target.value)}
-                        autoComplete="off"
-                      />
-                      <FormHelperText id="vault-value-text">Key Value (Encrypted)</FormHelperText>
-                      <FormErrorMessage>---Some Error</FormErrorMessage>
-                    </FormControl>
-                  </Stack>
-                  ) : null}
+                  <Button onClick={onToggle}>Include Encrypted Text In Vault</Button>
+                  <Collapse isOpen={isOpen}>
+                    {experimental? (
+                      <Stack direction="row" align="flex-start" spacing="0rem" flexWrap="wrap" shouldWrapChildren>
+                      <FormControl>
+                        <FormLabel htmlFor="vault-key">Key</FormLabel>
+                        <Input
+                          type="text"
+                          id="vault-key"
+                          aria-describedby="vault-key-text"
+                          maxLength={200}
+                          value={vaultKey}
+                          onChange={(e) => setVaultKey(e.target.value)}
+                          autoComplete="off"
+                        />
+                        <FormHelperText id="vault-key-text">Key Name (Public)</FormHelperText>
+                        <FormErrorMessage>---Some Error</FormErrorMessage>
+                      </FormControl>
+                      <FormControl>
+                        <FormLabel htmlFor="vault-value">Value</FormLabel>
+                        <Input
+                          type="password"
+                          id="vault-value"
+                          aria-describedby="vault-value-text"
+                          maxLength={200}
+                          value={vaultValue}
+                          onChange={(e) => setVaultValue(e.target.value)}
+                          autoComplete="off"
+                        />
+                        <FormHelperText id="vault-value-text">Key Value (Encrypted)</FormHelperText>
+                        <FormErrorMessage>---Some Error</FormErrorMessage>
+                      </FormControl>
+                    </Stack>
+                    ) : null}
+                  </Collapse>
                   <Stack direction="row" align="flex-start" spacing="0rem" flexWrap="wrap" shouldWrapChildren>
                     <ButtonGroup spacing={4}>
                       <Button onClick={() => setTabIndex(0)}>Back</Button>
@@ -522,7 +528,7 @@ export default function Create(props: any) {
             } else {
               setTimeout(() => {
                 setShowMakingVaultMsg(false)
-                location.href = location.origin + '/vault?id=' + tokenId
+                location.href = location.origin + '/nft?id=' + tokenId
               }, 500)
             }
           }}

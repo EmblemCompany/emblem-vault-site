@@ -11,6 +11,7 @@ import {
   Alert,
   AlertIcon,
   useDisclosure,
+  Tooltip
 } from '@chakra-ui/core'
 
 import Head from "next/head"
@@ -26,7 +27,9 @@ import { EMBLEM_API, BURN_ADDRESS, contractAddresses } from '../constants'
 import { useContract } from '../hooks'
 import Tilt from 'react-tilt'
 import CryptoJS from 'crypto-js'
-
+import { addTokenToWallet, addMany } from '../public/web3'
+import ReactMarkdown from 'react-markdown'
+import gfm from 'remark-gfm'
 const AddrModal = dynamic(() => import('./AddrModal'))
 const KeysModal = dynamic(() => import('./KeysModal'))
 
@@ -174,7 +177,6 @@ export default function Vault() {
     })
     const jsonData = await responce.json()
     if (jsonData.length > 0) {
-      // console.log("Fuckling NFT", jsonData, values.concat(jsonData))
       return cb(values.concat(jsonData))
     } else {
       return cb(values)
@@ -430,8 +432,8 @@ export default function Vault() {
                 </Stack>
                 <Stack align="center">
                   <Box mt="2" ml="4" lineHeight="tight">
-                    <Text mt={2} as="h4" ml="4" mr="4" fontSize="xs" fontStyle="italic" >
-                      {splitDescription(vaultDesc)}
+                    <Text mt={2}  ml="4" mr="4" fontSize="xs" fontStyle="italic" >
+                    <ReactMarkdown plugins={[gfm]} children={splitDescription(vaultDesc)} />
                     </Text>
                   </Box>
                 </Stack>
@@ -439,7 +441,13 @@ export default function Vault() {
                   <Box d="flex" alignItems="baseline">
                     <Box color="gray.500" letterSpacing="wide" fontSize="sm" ml="2">
                       <Text as="h4" fontWeight="semibold">
-                        Current Contents:
+                        {/* <Tooltip aria-label='All' hasArrow label={"Add all tokens to wallet"} placement="top" >
+                          <Link onClick={()=>{addMany(vaultValues)}}>
+                            + 
+                          </Link> 
+                        </Tooltip>
+                        {' '}  */}
+                        Current Contents: 
                       </Text>
                       {vaultPrivacy ? (
                         <>
@@ -457,8 +465,17 @@ export default function Vault() {
                         vaultValues.map((coin) => {
                           return (                            
                             <Text key={coin.name} isTruncated>
-                              <Image width={10} src={coin.image}/>
-                              {coin.name} :{' '}
+                              
+                              {/* <Image width={3} src={coin.image} /> */}
+                              {coin.address && coin.type !== 'nft' ? (
+                                <Tooltip aria-label={coin.name} hasArrow label={"Add " + coin.symbol + " to wallet"} placement="top" >
+                                  <Link onClick={()=>{addTokenToWallet({address:coin.address, symbol:coin.symbol, decimals:coin.decimals, image: coin.image? coin.image : null })}}>
+                                    + 
+                                  </Link>
+                                </Tooltip>
+                                
+                              ) : null}
+                              {'('}{coin.coin.toLowerCase()}{')'} {coin.name} :{' '}
                               {coin.balance ? (
                                 coin.balance
                               ) : coin.type == 'nft' ? (
@@ -469,7 +486,7 @@ export default function Vault() {
                             </Text>
                           )
                         })
-                      ) :  null } 
+                      ) :  null }
                       { vaultDataValues.length ? (
                         vaultDataValues.map((data) => {
                           return (

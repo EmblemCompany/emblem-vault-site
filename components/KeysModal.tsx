@@ -144,10 +144,12 @@ export default function KeysModal({
                 {ETHKeyCopied ? <Text>Copied!</Text> : <Text isTruncated>{ethKey}</Text>}
               </Button>
             </Stack>
-            {privValues ? (
+            
+            {privValues.length > 0 ? (
             <>
               <Stack direction="row" mt={4}>
-                <Text>Your Values (click to copy):</Text>
+              
+                <Text>Your Values (click to copy): </Text>
               </Stack>
               {privValues.map((item: DataValues, index) => {
                 return (

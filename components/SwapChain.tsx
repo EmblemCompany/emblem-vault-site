@@ -184,7 +184,7 @@ export default function SwapChain() {
                   <SwapText>$Coval</SwapText>                  
               </Stack>
               <Stack direction="row" align="flex-start" spacing="1rem" flexWrap="wrap" shouldWrapChildren>
-                <SwapText> from {chainId == 137 ? "Matic" : "Ethereum"} Network to {chainId == 137 ? "Etherum" : "Matic"} Network </SwapText>
+                <SwapText> <Text  float={'left'}>from {chainId == 137 ? "Matic" : "Ethereum"} Network to</Text> <Image float={'left'} margin={2} w={3} src="./next.png" />{chainId == 137 ? "Etherum" : "Matic"} Network </SwapText>
                 { swapAmount > 0 ? (
                   <Button isDisabled={isInvalid} onClick={transferToChain}>
                     { isInvalid ? "Invalid Transfer Amount" : "Transfer Now"}

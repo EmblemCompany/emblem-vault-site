@@ -24,7 +24,11 @@ function Balance({ token }: { token: Token }): JSX.Element {
       rightIcon="external-link"
       variant="outline"
       backgroundColor={BG[colorMode]}
-      onClick={() => addTokenToWallet(token)}
+      onClick={() => {
+        let tokenInfo = JSON.parse(JSON.stringify(token))
+        tokenInfo.image = "https://circuitsofvalue.com/public/coval-logo.png"
+        addTokenToWallet(tokenInfo)
+      }}
       {...{
         //href: formatEtherscanLink(ExplorerTXType.TokenBalance, [token, account as string]),
         target: '_blank',

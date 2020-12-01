@@ -80,7 +80,7 @@ export default function VaultList() {
           vaults.map((vault, index) => {
             let pieces = location.pathname.split('/')
             pieces.pop()
-            let url = location.origin + pieces.join('/') + '/vault?id=' + vault.tokenId
+            let url = location.origin + pieces.join('/') + '/nft?id=' + vault.tokenId
             const flexSettings = {
               flex: '1',
               minW: '300px',

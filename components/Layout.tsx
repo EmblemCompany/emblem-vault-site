@@ -1,6 +1,6 @@
 import { ReactNode } from 'react'
 import BackgroundVideo from './BackgroundVideo'
-import { Flex, IconButton, useDisclosure, Badge, LightMode, Stack, Box, Button, Popover, PopoverTrigger, PopoverContent, PopoverArrow, PopoverCloseButton, PopoverBody, Text } from '@chakra-ui/core'
+import { Flex, IconButton, useDisclosure, Badge, LightMode, Stack, Box, Button, Popover, PopoverTrigger, PopoverContent, PopoverArrow, PopoverCloseButton, PopoverBody, Text, Link} from '@chakra-ui/core'
 import { useWeb3React } from '@web3-react/core'
 import dynamic from 'next/dynamic'
 
@@ -113,14 +113,15 @@ export default function Layout({ children }: { children: ReactNode }): JSX.Eleme
         <Flex minHeight="1.5rem">
           {typeof chainId === 'number' && (
             <LightMode>
-              <Badge
-                variant="solid"
-                variantColor={chainId == 137 ? 'blue' : 'orange'/*isTestnet ? 'blue' : undefined*/}
-                fontSize="1rem"
-                style={{ borderTopLeftRadius: 0, borderBottomRightRadius: 0, borderBottomLeftRadius: 0 }}
-              >
-                {CHAIN_ID_NAMES[chainId]}
-              </Badge>
+              <Link href="/swap">
+                <Badge
+                  variant="solid"
+                  variantColor={chainId == 137 ? 'blue' : 'orange'/*isTestnet ? 'blue' : undefined*/}
+                  fontSize="1rem"
+                  style={{ borderTopLeftRadius: 0, borderBottomRightRadius: 0, borderBottomLeftRadius: 0 }} >
+                  On {CHAIN_ID_NAMES[chainId].toLowerCase()} (Swap to {chainId == 1 ? 'Matic' : 'Ethereum'})
+                </Badge>
+              </Link>
             </LightMode>
           )}
         </Flex>
@@ -151,7 +152,7 @@ export default function Layout({ children }: { children: ReactNode }): JSX.Eleme
           alignItems="center"
           align="center"
         >
-          <Popover usePortal>
+          {/* <Popover usePortal>
             <PopoverTrigger>
             <IconButton size="sm" icon="warning-2" aria-label=''/>
             </PopoverTrigger>
@@ -160,7 +161,7 @@ export default function Layout({ children }: { children: ReactNode }): JSX.Eleme
               <PopoverCloseButton />
               <PopoverBody><Text fontSize="xs">Emblem Vault is experimental. Before purchasing $COVAL or $FUEL tokens, you must ensure that the nature, complexity and risks inherent in the trading of cryptocurrency are suitable for your objectives in light of your circumstances and financial position. Emblem, Emblem Vault, $COVAL, and/or $FUEL shall be under no obligation to purchase or to broker the purchase back from you of your cryptocurrency in circumstances where there is no viable market for the purchase of the same. The products and services presented on this website may only be purchased in jurisdictions in which their marketing and distribution are authorized. Using or Creating Vaults is done at your own risk.</Text></PopoverBody>
             </PopoverContent>
-          </Popover>
+          </Popover> */}
         </Stack>
 
         <Stack

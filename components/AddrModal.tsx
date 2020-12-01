@@ -60,7 +60,7 @@ export default function AddrModal({
         <ModalBody>
           <Stack direction="column">
             <Stack direction="row" align="center" justify="center">
-              <QRCode value={address} onClick={() => copyWithFlag(address)} />
+              <QRCode value={coin=="BTC" ? "bitcoin:"+address: address} onClick={() => copyWithFlag(address)} />
             </Stack>
 
             <Stack direction="row" justify="center" mt="6">

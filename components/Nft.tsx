@@ -11,6 +11,7 @@ import {
   Alert,
   AlertIcon,
   useDisclosure,
+  Tooltip
 } from '@chakra-ui/core'
 
 import Head from "next/head"
@@ -27,7 +28,9 @@ import { EMBLEM_API, BURN_ADDRESS, contractAddresses } from '../constants'
 import { useContract } from '../hooks'
 import Tilt from 'react-tilt'
 import CryptoJS from 'crypto-js'
-
+import { addTokenToWallet, addMany } from '../public/web3'
+import ReactMarkdown from 'react-markdown'
+import gfm from 'remark-gfm'
 const AddrModal = dynamic(() => import('./AddrModal'))
 const KeysModal = dynamic(() => import('./KeysModal'))
 
@@ -66,6 +69,7 @@ export default function Nft() {
   const [invalidVault, setInvalidVault] = useState(false)
   const [hasCheckedNft, setHasCheckedNft] = useState(false)
   const [accepting, setAccepting] = useState(false)
+  const [approving, setApproving] = useState(false)
   const [acceptable, setAcceptable] = useState(false)
   const [transferPassword, setTransferPassword] = useState('')
   const [showTransferPassword, setShowTransferPassword] = useState(false)
@@ -85,53 +89,64 @@ export default function Nft() {
   let transferImage;
 
   const fireMetaMask = () => {
-    ;(handlerContract as Contract)
-      .transferWithCode(tokenId, mintPassword)
+    console.log(mintPassword)
+    setAccepting(true)
+    getWitness(witness=>{
+      // console.log(tokenId, mintPassword, witness.nonce, witness.signature, account)
+      ;(handlerContract as Contract)
+      .transferWithCode(tokenId, mintPassword, account, witness.nonce, witness.signature)
       .then(({ hash }: { hash: string }) => {
         setTimeout(() => {
-          setHash(hash)
-          setAccepting(true)
+          setHash(hash)          
           // setShowMakingVaultMsg(true)
         }, 100) // Solving State race condition where transaction watcher wouldn't notice we were creating
       })
       .catch((error: ErrorWithCode) => {
+        setAccepting(false)
         if (error?.code !== 4001) {
           console.log(`tx failed.`, error)
         } else {
-          setAccepting(false)
+          // setAccepting(false)
           // setShowPreVaultMsg(false)
         }
       })
+    })
+    
   }
 
   const addPreTransfer = () => {
     console.log('transferImage', "0x"+transferImage)
+    setPreTransfering(true)
     ;(handlerContract as Contract)
       .addPreTransfer(tokenId, "0x"+transferImage)
       .then(({ hash }: { hash: string }) => {
-        setTimeout(() => {
+        // setTimeout(() => {
           setHash(hash)
-          setPreTransfering(true)
+          console.log("Set Pre Transfering True", preTransfering)
           // setShowMakingVaultMsg(true)
-        }, 100) // Solving State race condition where transaction watcher wouldn't notice we were creating
+        // }, 100) // Solving State race condition where transaction watcher wouldn't notice we were creating
       })
       .catch((error: ErrorWithCode) => {
-        if (error?.code !== 4001) {
-          console.log(`tx failed.`, error)
+        if (error?.code){   
+            console.log("Error?")       
+            setPreTransfering(false)
+            setShowTransferPassword(false)
+            setTransferPassword('')
         } else {
-          setPreTransfering(false)
+          // setShowTransferPassword(!showTransferPassword? true : false)
+          // setPreTransfering(false)
           // setShowPreVaultMsg(false)
         }
       })
   }
 
   const handleApproveForall = () => {
+    setApproving(true)
     ;(emblemContract as Contract)
       .setApprovalForAll(contractAddresses.vaultHandler[chainId], true)
       .then(({ hash }: { hash: string }) => {
         setTimeout(() => {
-          setHash(hash)
-          setPreTransfering(true)
+          setHash(hash)          
           // setShowMakingVaultMsg(true)
         }, 100) // Solving State race condition where transaction watcher wouldn't notice we were creating
       })
@@ -139,7 +154,7 @@ export default function Nft() {
         if (error?.code !== 4001) {
           console.log(`tx failed.`, error)
         } else {
-          setPreTransfering(false)
+          setApproving(false)
           // setShowPreVaultMsg(false)
         }
       })
@@ -166,6 +181,26 @@ export default function Nft() {
       saveCache(jsonData)
       setLoadingApi(false)
       setInvalidVault(false)
+    }
+  }
+
+  const getWitness = async (cb) => {
+    
+    const responce = await fetch(EMBLEM_API + '/witness/' + tokenId, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        service: 'evmetadata',
+        chainid: chainId.toString()
+      },
+    })
+    const jsonData = await responce.json()
+    // console.log('vault response was ', jsonData)
+    if (jsonData.signature) {
+      console.log('witness', jsonData)
+      return cb(jsonData)
+    } else {
+      return cb(false)
     }
   }
 
@@ -205,14 +240,7 @@ export default function Nft() {
     }, 5)
   }
 
-  const loadCache = () => {
-    let vault = JSON.parse(localStorage.getItem(account + '_' + chainId + '_' + tokenId + '_vault')) // Load vaults from storage before updating from server!
-    if (vault) {
-      setState({ loaded: true })
-      setStates(vault)
-      setLoadingApi(true)
-    }
-  }
+  
 
   const getEthBalances = async (address, cb) => {
     const responce = await fetch(EMBLEM_API + '/eth/balance/' + address, {
@@ -264,6 +292,24 @@ export default function Nft() {
     localStorage.setItem(account + '_' + chainId + '_' + tokenId + '_vault', JSON.stringify(vault)) // Save new state for later
   }
 
+  const loadCache = () => {
+    let vault = JSON.parse(localStorage.getItem(account + '_' + chainId + '_' + tokenId + '_vault')) // Load vaults from storage before updating from server!
+    if (vault) {
+      setState({ loaded: true })
+      setStates(vault)
+      setLoadingApi(true)
+    }
+  }
+
+  const savePasswordToLocalStorage = () => {
+    localStorage.setItem(account + '_' + chainId + '_' + tokenId + '_mintPassword', transferPassword) // Save new state for later
+  }
+
+  const loadPasswordFromLocalStorage = () => {
+    let storedPw = localStorage.getItem(account + '_' + chainId + '_' + tokenId + '_mintPassword')
+    storedPw && acceptable ? setMintPassword(storedPw) : null //setMintPassword(null)
+  }
+
   const getKeys = async (signature, tokenId, cb) => {
     var myHeaders = new Headers()
     myHeaders.append('chainId', chainId.toString())
@@ -290,19 +336,17 @@ export default function Nft() {
       let isApproved = await emblemContract.isApprovedForAll(account, contractAddresses.vaultHandler[chainId])
       setApproved(isApproved)
       setAcceptable(acceptable._from !== "0x0000000000000000000000000000000000000000")
-      console.log("owned", owner === account)
-      console.log(owner, account)
-      console.log("approved", isApproved)
-      // console.log("check approved for all", account, contractAddresses.vaultHandler[chainId])
       setMine(owner === account)
+      loadPasswordFromLocalStorage()
     } catch(err){}
     
   }
 
   useEffect(()=>{
-    console.log("mine?", mine)
-    console.log("claiming?", claiming)
-    console.log("accepting?", accepting)
+    // console.log("mine?", mine)
+    // console.log("claiming?", claiming)
+    // console.log("accepting?", accepting)
+    // console.log("acceptable", acceptable)
   })
 
   const handleSign = async () => {
@@ -528,7 +572,7 @@ export default function Nft() {
                 <Stack align="center">
                   <Box mt="2" ml="4" lineHeight="tight">
                     <Text mt={2} as="h4" ml="4" mr="4" fontSize="xs" fontStyle="italic" >
-                      {splitDescription(vaultDesc)}
+                    <ReactMarkdown plugins={[gfm]} children={splitDescription(vaultDesc)} />
                     </Text>
                   </Box>
                 </Stack>
@@ -554,8 +598,16 @@ export default function Nft() {
                         vaultValues.map((coin) => {
                           return (                            
                             <Text key={coin.name} isTruncated>
-                              <Image width={10} src={coin.image}/>
-                              {coin.name} :{' '}
+                              {/* <Image width={3} src={coin.image} /> */}
+                              {coin.address && coin.type !== 'nft' ? (
+                                <Tooltip aria-label={coin.name} hasArrow label={"Add " + coin.symbol + " to wallet"} placement="top" >
+                                  <Link onClick={()=>{addTokenToWallet({address:coin.address, symbol:coin.symbol, decimals:coin.decimals, image: coin.image? coin.image : null })}}>
+                                    + 
+                                  </Link>
+                                </Tooltip>
+                                
+                              ) : null}
+                              {'('}{coin.coin.toLowerCase()}{')'} {coin.name} :{' '}
                               {coin.balance ? (
                                 coin.balance
                               ) : coin.type == 'nft' ? (
@@ -599,7 +651,7 @@ export default function Nft() {
                     </Box>
                   ) : null}
 
-                  {!(status === 'claimed') && !mintPassword ? (
+                  {!(status === 'claimed') ? (
                     <Box d="flex" alignItems="baseline" justifyContent="space-between" mt="4">
                       <Button
                         width="100%"
@@ -631,8 +683,7 @@ export default function Nft() {
                           console.log('plain', key)
                           console.log('sha', sha)
                           setTransferPassword(key)
-                          transferImage = sha
-                          setShowTransferPassword(!showTransferPassword? true : false)
+                          transferImage = sha                          
                           setTimeout(()=>{
                             addPreTransfer()
                           }, 500)
@@ -640,10 +691,15 @@ export default function Nft() {
                       }
                     }> {approved ? "Get Link (Send Vault Via Link)" : "Approve Gifting" } </Button>
                     </Box>
-                      {showTransferPassword ? (<Box><Link href={location.protocol +'//'+ location.host + '/nft?id=' + tokenId + '&key=' + transferPassword}>Copy Me</Link></Box>) : null}
                   </>) : null }
+                  {(showTransferPassword || mintPassword) && acceptable ? (
+                      <Box>
+                        <Link href={location.protocol +'//'+ location.host + '/nft?id=' + tokenId + '&key=' + (transferPassword || mintPassword)}>Copy Gift Link</Link>
+                        <Text>Password: {(transferPassword || mintPassword)}</Text>
+                      </Box>
+                      ) : null}
                   {acceptable && claimedBy !== account ? (
-                  <>                    
+                  <>
                       <Button mt={2} width="100%" onClick={()=>{fireMetaMask()}}>Accept</Button>
                       <Input
                         mt={2}
@@ -651,8 +707,11 @@ export default function Nft() {
                         id="mintPassword"
                         minLength={3}
                         maxLength={200}
-                        value={mintPassword}
-                        onChange={(e) => setMintPassword(e.target.value)}
+                        value={mintPassword || ''}
+                        onChange={(e) => {
+                          console.log('grrr', e.target.value, mintPassword)
+                          setMintPassword(e.target.value)}
+                        }
                         autoComplete="off"
                       />
                   </>
@@ -684,7 +743,7 @@ export default function Nft() {
                 {hash ? (
                   <Alert status="info">
                     <AlertIcon />
-                    { accepting ? "Accepting your vault" : "Claiming your vault ..."}
+                    { accepting ? "Accepting Your Gift Vault" : claiming ? "Claiming your Vault ..." : approving? "Handling Approval Flow ..." : "Generating Gift Link ..."}
                   </Alert>
                 ) : null}
               </Box>
@@ -710,13 +769,31 @@ export default function Nft() {
             onComplete={() => {
               // location.href = location.origin + '/vault?id=' + tokenId
               if (claiming && !accepting && !preTransfering) {
+                console.log(111111)
                 setHash(null)
                 setStatus('claimed')
                 setClaiming(false)
                 setClaimedBy(account)
                 handleSign()
               } else if (preTransfering) {
+                savePasswordToLocalStorage()
+                setShowTransferPassword(true)
+                setPreTransfering(false)
+                setHash(null)                
+              } else if(accepting) {
+                setAccepting(false)                
+                getVault()
                 setHash(null)
+              } else if(approving) {
+                setApproving(false)                
+                getVault()
+                setHash(null)
+              } else {
+                console.log('claiming', claiming) 
+                console.log('accepting', accepting) 
+                console.log('preTransfering', preTransfering)
+                console.log('approving', approving)
+                console.log("Unknown state")
               }
             }}
           />
