@@ -32,7 +32,7 @@ export const CovalTestMatic = new Token(
 
 export const CovalMatic = new Token(
   ChainId.RINKEBY,
-  '0xdB3379899011E997b1B82864F5Bd759beD27c38A',
+  '0x4597c8A59Ab28B36840B82B3A674994A279593D0',
   8,
   'Coval',
   'Circuits of Value'

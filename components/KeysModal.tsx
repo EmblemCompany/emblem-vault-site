@@ -145,7 +145,7 @@ export default function KeysModal({
               </Button>
             </Stack>
             
-            {privValues.length > 0 ? (
+            {privValues && privValues.length > 0 ? (
             <>
               <Stack direction="row" mt={4}>
               
