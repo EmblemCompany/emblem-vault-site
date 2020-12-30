@@ -6,6 +6,7 @@ import { useWeb3React } from '@web3-react/core'
 import { useEffect, useState } from 'react'
 import { validImage } from '../utils'
 import { EMBLEM_API } from '../constants'
+import { Embed } from './Embed'
 
 export default function Vaults() {
   const { query } = useRouter()
@@ -16,12 +17,13 @@ export default function Vaults() {
   const [address, setAddress] = useState(query.address)
 
   const getVaults = async () => {
-    if (chainId == 137 || chainId == 80001) {
-      return
-    }
+    // if (chainId == 137 || chainId == 80001) {
+    //   return
+    // }
     loadCache()
     try {
-      const response = await fetch(EMBLEM_API + '/opensea/assets', {
+      let network = chainId == 137 ? "matic" : chainId == 80001? "mumbai": chainId == 4? "rinkeby" : "mainnet"
+      const response = await fetch(EMBLEM_API + '/'+network, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -39,7 +41,7 @@ export default function Vaults() {
   }
 
   const loadCache = () => {
-    let vaults = JSON.parse(localStorage.getItem((address ? address : account) + '_' + chainId + '_vaults')) // Load vaults from storage before updating from server!
+    let vaults = JSON.parse(localStorage.getItem((address ? address : account) + '_' + chainId + '_allvaults')) // Load vaults from storage before updating from server!
     if (vaults) {
       setState({ loaded: true })
       setVaults(vaults)
@@ -48,7 +50,7 @@ export default function Vaults() {
   }
 
   const saveCache = (vaults) => {
-    localStorage.setItem((address ? address : account) + '_' + chainId + '_vaults', JSON.stringify(vaults)) // Save new state for later
+    localStorage.setItem((address ? address : account) + '_' + chainId + '_allvaults', JSON.stringify(vaults)) // Save new state for later
   }
 
   const [acct, setAcct] = useState('')
@@ -106,11 +108,7 @@ export default function Vaults() {
                   {/* {!vault.private ? ': ~$' + vault.totalValue : null} */}
                 </Text>
                 <Stack align="center">
-                  <Image
-                    src={validImage(vault.image_url) ? vault.image_url : 'https://circuitsofvalue.com/public/coval-logo.png'}
-                    p={2}
-                    width="250px"
-                  />
+                  <Embed url={vault.image}/>
                 </Stack>
                 <Box d="flex" alignItems="baseline">
                   <Box color="gray.500" fontWeight="semibold" letterSpacing="wide" fontSize="sm" ml="2">

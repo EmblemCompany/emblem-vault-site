@@ -399,6 +399,18 @@ export default function Create(props: any) {
                         <Stack align="center" p={1}>
                           <input type="file" onChange={() => previewFile()} />
                           <Divider />
+                          <FormLabel htmlFor="vault-image-url">Or Image URL</FormLabel>
+                          <Input
+                            type="text"
+                            id="vault-image-url"
+                            aria-describedby="vault-image-url-text"
+                            minLength={3}
+                            maxLength={200}
+                            value={vaultImage}
+                            defaultValue="http://"
+                            onChange={(e) => setVaultImage(e.target.value)}
+                            autoComplete="off"
+                          />
                           <img id="preview" src="" width="250" margin-top="6"></img>
                         </Stack>
                       </Box>

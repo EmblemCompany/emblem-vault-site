@@ -34,6 +34,7 @@ import CryptoJS from 'crypto-js'
 import { addTokenToWallet, addMany } from '../public/web3'
 import ReactMarkdown from 'react-markdown'
 import gfm from 'remark-gfm'
+import Embed from './Embed'
 const AddrModal = dynamic(() => import('./AddrModal'))
 const KeysModal = dynamic(() => import('./KeysModal'))
 
@@ -42,6 +43,7 @@ export default function Nft() {
   const { query } = useRouter()
   const [approved, setApproved] = useState(false)
   const [mintPassword, setMintPassword] = useState(query.key)
+  const [framed, setFramed] = useState(query.framed || true)
   const [tokenId, setTokenId] = useState(query.id)
   const [experimental, setExperimental] = useState(query.experimental)
   const [vaultName, setVaultName] = useState('')
@@ -79,6 +81,7 @@ export default function Nft() {
   const [preTransfering, setPreTransfering] = useState(false)
   const [transferToAddress, setTransferToAddress] = useState(null)
   const [transfering, setTransfering] = useState(false)
+  const [owner, setOwner] = useState(null)
   // const [transferImage, setTransferImage] = useState('')
 
   const handlerContract = useContract(contractAddresses.vaultHandler[chainId], contractAddresses.vaultHandlerAbi, true)
@@ -220,6 +223,7 @@ export default function Nft() {
   }
 
   const setStates = (jsonData) => {
+    framed && !jsonData.image.includes('framed=') && !jsonData.image.includes('http') ? jsonData.image = jsonData.image + "&framed="+framed : null
     setVaultName(jsonData.name)
     setVaultImage(jsonData.image)
     setVaultDesc(jsonData.description)
@@ -332,7 +336,7 @@ export default function Nft() {
     myHeaders.append('Content-Type', 'application/json')
 
     var raw = JSON.stringify({ signature: signature })
-    const responce = await fetch(EMBLEM_API + '/verify/' + tokenId, {
+    const responce = await fetch(EMBLEM_API + '/claim/' + tokenId, {
       method: 'POST',
       headers: myHeaders,
       body: raw,
@@ -346,12 +350,13 @@ export default function Nft() {
   const getContractStates = async () => {
     let owned = false
     try {
-      let owner  = await emblemContract.ownerOf(tokenId)
+      let _owner  = await emblemContract.ownerOf(tokenId)
       let acceptable = await handlerContract.getPreTransfer(tokenId)
       let isApproved = await emblemContract.isApprovedForAll(account, contractAddresses.vaultHandler[chainId])
       setApproved(isApproved)
       setAcceptable(acceptable._from !== "0x0000000000000000000000000000000000000000")
-      setMine(owner === account)
+      setOwner(_owner)
+      setMine(_owner === account)
       loadPasswordFromLocalStorage()
     } catch(err){}
     
@@ -579,16 +584,22 @@ export default function Nft() {
                   {!vaultPrivacy ? ': ~$' + vaultTotalValue : null}
                 </Box>
                 <Stack align="center">
-                  <Image
-                    src={validImage(vaultImage) ? vaultImage : 'https://circuitsofvalue.com/public/coval-logo.png'}
-                    width="250px"
-                  />
+                  <Embed url={vaultImage}/>                  
                 </Stack>
                 <Stack align="center">
                   <Box mt="2" ml="4" lineHeight="tight">
-                    <Text mt={2} as="h4" ml="4" mr="4" fontSize="xs" fontStyle="italic" >
-                    <ReactMarkdown plugins={[gfm]} children={splitDescription(vaultDesc)} />
-                    </Text>
+                    <Stack>
+                      <Text fontSize="xs">
+                      { vaultChainId == chainId ? (
+                        <Link href={"./vaultlist?address="+owner}>
+                          Owner: {owner}
+                        </Link>
+                      ) : null }
+                      </Text>
+                      <Text mt={2} as="h4" ml="4" mr="4" fontSize="xs" fontStyle="italic" >
+                        <ReactMarkdown plugins={[gfm]} children={splitDescription(vaultDesc)} />
+                      </Text>
+                    </Stack>
                   </Box>
                 </Stack>
                 <Box p="6">
@@ -781,7 +792,7 @@ export default function Nft() {
                         Get Keys
                       </Button>
                     </Box>
-                  ) : null}
+                  ) : null}                  
                 </Box>
                 <Stack direction="column" align="center">
                   {status == 'claimed' ? <Text color="green.500">CLAIMED</Text> : null}

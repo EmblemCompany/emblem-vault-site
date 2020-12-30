@@ -7,9 +7,11 @@ export default function Redirect(): null {
   const { replace } = useRouter()
 
   const debug = process.env.NODE_ENV !== 'production'
-  const { href, as } = modifyUrlObjectForIPFS(!debug ? '/create' : '/create')
+  const maintenance = !debug && process.env.MAINTENANCE
+  const { href, as } = modifyUrlObjectForIPFS( maintenance ? '/maintenance': !debug ? '/create' : '/create' )
 
   useEffect(() => {
+    console.log("ENV", debug, maintenance)
     replace(href, as)
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 

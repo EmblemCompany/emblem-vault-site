@@ -30,6 +30,7 @@ import CryptoJS from 'crypto-js'
 import { addTokenToWallet, addMany } from '../public/web3'
 import ReactMarkdown from 'react-markdown'
 import gfm from 'remark-gfm'
+import Embed from './Embed'
 const AddrModal = dynamic(() => import('./AddrModal'))
 const KeysModal = dynamic(() => import('./KeysModal'))
 
@@ -37,6 +38,7 @@ export default function Vault() {
   const { account, chainId, library } = useWeb3React()
   const { query } = useRouter()
   const [tokenId, setTokenId] = useState(query.id)
+  const [framed, setFramed] = useState(query.framed || true)
   const [experimental, setExperimental] = useState(query.experimental)
   const [vaultName, setVaultName] = useState('')
   const [vaultDesc, setVaultDesc] = useState('')
@@ -65,6 +67,7 @@ export default function Vault() {
   const [decryptPassword, setDecryptPassword] = useState('')
   const [invalidVault, setInvalidVault] = useState(false)
   const [hasCheckedNft, setHasCheckedNft] = useState(false)
+  const [owner, setOwner] = useState(null)
 
   const emblemContract = useContract(contractAddresses.emblemVault[chainId], contractAddresses.emblemAbi, true)
 
@@ -94,6 +97,7 @@ export default function Vault() {
   }
 
   const setStates = (jsonData) => {
+    framed && !jsonData.image.includes('framed=') ? jsonData.image = jsonData.image + "&framed="+framed : null
     setVaultName(jsonData.name)
     setVaultImage(jsonData.image)
     setVaultDesc(jsonData.description)
@@ -194,7 +198,7 @@ export default function Vault() {
     myHeaders.append('Content-Type', 'application/json')
 
     var raw = JSON.stringify({ signature: signature })
-    const responce = await fetch(EMBLEM_API + '/verify/' + tokenId, {
+    const responce = await fetch(EMBLEM_API + '/claim/' + tokenId, {
       method: 'POST',
       headers: myHeaders,
       body: raw,
@@ -206,8 +210,9 @@ export default function Vault() {
   }
 
   const getContractStates = async () => {
-    let owner = await emblemContract.ownerOf(tokenId)
-    setMine(owner === account)
+    let _owner = await emblemContract.ownerOf(tokenId)
+    setMine(_owner === account)
+    setOwner(_owner)
   }
 
   const handleSign = async () => {
@@ -425,16 +430,22 @@ export default function Vault() {
                   {!vaultPrivacy ? ': ~$' + vaultTotalValue : null}
                 </Box>
                 <Stack align="center">
-                  <Image
-                    src={validImage(vaultImage) ? vaultImage : 'https://circuitsofvalue.com/public/coval-logo.png'}
-                    width="250px"
-                  />
+                  <Embed url={vaultImage}/>
                 </Stack>
                 <Stack align="center">
                   <Box mt="2" ml="4" lineHeight="tight">
-                    <Text mt={2}  ml="4" mr="4" fontSize="xs" fontStyle="italic" >
-                    <ReactMarkdown plugins={[gfm]} children={splitDescription(vaultDesc)} />
-                    </Text>
+                  <Stack>
+                      <Text fontSize="xs">
+                      { vaultChainId == chainId ? (
+                        <Link href={"./vaultlist?address="+owner}>
+                          Owner: {owner}
+                        </Link>
+                      ) : null }
+                      </Text>
+                      <Text mt={2}  ml="4" mr="4" fontSize="xs" fontStyle="italic" >
+                        <ReactMarkdown plugins={[gfm]} children={splitDescription(vaultDesc)} />
+                      </Text>
+                    </Stack>
                   </Box>
                 </Stack>
                 <Box p="6">

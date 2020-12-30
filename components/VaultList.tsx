@@ -6,6 +6,7 @@ import { useWeb3React } from '@web3-react/core'
 import { useEffect, useState } from 'react'
 import { validImage } from '../utils'
 import { EMBLEM_API } from '../constants'
+import Embed from './Embed'
 
 export default function VaultList() {
   const { query } = useRouter()
@@ -104,11 +105,7 @@ export default function VaultList() {
                   {!vault.private ? ': ~$' + vault.totalValue : null}
                 </Text>
                 <Stack align="center">
-                  <Image
-                    src={validImage(vault.image) ? vault.image : 'https://circuitsofvalue.com/public/coval-logo.png'}
-                    p={2}
-                    width="250px"
-                  />
+                  <Embed url={vault.image}/>
                 </Stack>
                 <Box d="flex" alignItems="baseline">
                   <Box color="gray.500" fontWeight="semibold" letterSpacing="wide" fontSize="sm" ml="2">
