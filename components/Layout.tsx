@@ -3,7 +3,6 @@ import BackgroundVideo from './BackgroundVideo'
 import { Flex, IconButton, useDisclosure, Badge, LightMode, Stack, Box, Button, Popover, PopoverTrigger, PopoverContent, PopoverArrow, PopoverCloseButton, PopoverBody, Text, Link} from '@chakra-ui/core'
 import { useWeb3React } from '@web3-react/core'
 import dynamic from 'next/dynamic'
-
 import { CHAIN_ID_NAMES } from '../utils'
 import { useEagerConnect, useQueryParameters, useUSDETHPrice } from '../hooks'
 import { useTransactions, useFirstToken, useSecondToken, useShowUSD } from '../context'
@@ -14,7 +13,7 @@ import TokenBalance from './TokenBalance'
 import { WETH, ChainId, Token } from '@uniswap/sdk'
 import WalletConnect from './WalletConnect'
 import { QueryParameters } from '../constants'
-import { Coval, CovalTest, CovalTestMatic, CovalMatic, DEFAULT_TOKENS } from '../tokens'
+import { Coval, CovalTest, CovalTestMatic, CovalMatic, CovalxDai, DEFAULT_TOKENS } from '../tokens'
 
 const Settings = dynamic(() => import('./Settings'))
 
@@ -37,6 +36,11 @@ export default function Layout({ children }: { children: ReactNode }): JSX.Eleme
   const requiredChainId = queryParameters[QueryParameters.CHAIN]
 
   const USDETHPrice = useUSDETHPrice()
+  const handleSearchClick = ()=>{
+    let pieces = location.pathname.split('/')
+    pieces.pop()
+    location.href = location.origin + pieces.join('/') + '/search'
+  }
   const handleNavigationclick = () => {
     console.log(location.pathname)
     let pieces = location.pathname.split('/')
@@ -54,14 +58,15 @@ export default function Layout({ children }: { children: ReactNode }): JSX.Eleme
       <ColorBox
         as={Flex}
         flexDirection="column"
-        borderColor={Number(chainId) === 137 ? "blue.500" : "orange.500"}
-        borderWidth={isTestnet ? '.5rem' : '0'}
+        borderColor={Number(chainId) === 137 ? "blue.500" : Number(chainId) === 1? "blue.500" : "orange.500"}
+        borderWidth={isTestnet ? '.5rem' : '.5rem'}
         minHeight="100vh"
         maxHeight="100vh"
       >
         <Flex justifyContent="space-between" flexShrink={0} overflowX="auto" p="1rem">
           <Stack spacing={0} direction="row">
             <IconButton m={2} icon="settings" variant="ghost" onClick={onOpenSettings} aria-label="Settings" />
+            <IconButton m={2} icon="search" variant="ghost" onClick={handleSearchClick} aria-label="Search" />
             <Button m={2} variant="ghost" onClick={handleNavigationclick}>
               {' '}
               {location.pathname.includes('vaultlist') ? 'Create Vault' : 'My Vaults'}
@@ -92,7 +97,7 @@ export default function Layout({ children }: { children: ReactNode }): JSX.Eleme
           ) : (
             // [DEFAULT_TOKENS.filter((tokenrrr) => tokenrrr.chainId == chainId)[0], firstToken, secondToken]
             [
-              chainId == 1 ? Coval : chainId == 80001 ? CovalTestMatic : chainId == 137 ? CovalMatic : CovalTest,
+              chainId == 1 ? Coval : chainId == 80001 ? CovalTestMatic : chainId == 137 ? CovalMatic : chainId == 100? CovalxDai: CovalTest,
               firstToken ? (firstToken.symbol != 'Coval' ? firstToken : null) : null,
               secondToken ? (secondToken.symbol != 'Coval' ? secondToken : null) : null,
             ]
@@ -111,19 +116,20 @@ export default function Layout({ children }: { children: ReactNode }): JSX.Eleme
         </Flex>
 
         <Flex minHeight="1.5rem">
-          {typeof chainId === 'number' && (
+          {typeof chainId === 'number' /*&& chainId !== 1*/ ? (
             <LightMode>
               <Link href="/swap">
                 <Badge
                   variant="solid"
-                  variantColor={chainId == 137 ? 'blue' : 'orange'/*isTestnet ? 'blue' : undefined*/}
+                  variantColor={chainId == 137 || chainId == 1 ? 'blue' : 'orange'/*isTestnet ? 'blue' : undefined*/}
                   fontSize="1rem"
                   style={{ borderTopLeftRadius: 0, borderBottomRightRadius: 0, borderBottomLeftRadius: 0 }} >
-                  On {CHAIN_ID_NAMES[chainId].toLowerCase()} (Swap to {chainId == 1 ? 'Matic' : 'Ethereum'})
+                  On {CHAIN_ID_NAMES[chainId].toLowerCase()} (click to swap networks)
+                  {/* (Swap to {chainId == 1 ? 'Matic' : 'Ethereum'}) */}
                 </Badge>
               </Link>
             </LightMode>
-          )}
+          ):null}
         </Flex>
 
         {transactions.length > 0 && (

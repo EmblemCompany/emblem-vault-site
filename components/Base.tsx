@@ -25,7 +25,7 @@ export default function Base(): JSX.Element | null {
   }
 
   return (
-    <Head>
+    <Head>      
       <base key="base" href={href} />
     </Head>
   )

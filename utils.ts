@@ -22,6 +22,7 @@ export const CHAIN_ID_NAMES: { [key: number]: string } = {
   80001: 'Mumbai',
   137: 'Matic',
   97: 'bnbsc',
+  100: 'xdai'
 }
 
 export const INFURA_PREFIXES: { [key: number]: string } = {
@@ -33,6 +34,7 @@ export const INFURA_PREFIXES: { [key: number]: string } = {
   80001: 'mumbai',
   137: 'matic',
   97: 'bnbsc',
+  100: 'xdai'
 }
 
 export enum ExplorerTXType {
@@ -50,6 +52,7 @@ const EXPLORER_PREFIXES: { [key: number]: string } = {
   80001: 'mumbai-explorer.matic.today',
   137: 'explorer.matic.network',
   97: 'bnbsc',
+  100: 'blockscout.com/xdai/mainnet'
 }
 
 interface ExplorerTypeData {

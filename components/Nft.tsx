@@ -35,6 +35,7 @@ import { addTokenToWallet, addMany } from '../public/web3'
 import ReactMarkdown from 'react-markdown'
 import gfm from 'remark-gfm'
 import Embed from './Embed'
+import NFTSlideshow from './embed/NFTSlideshow'
 const AddrModal = dynamic(() => import('./AddrModal'))
 const KeysModal = dynamic(() => import('./KeysModal'))
 
@@ -232,7 +233,7 @@ export default function Nft() {
     setVaultDataValues(jsonData.attributes.filter(item=>{return item.trait_type === "key"}))
     setVaultDesc(jsonData.description)
     setVaultAddresses(jsonData.addresses)
-    setVaultChainId(jsonData.network == 'mainnet' ? 1 : jsonData.network == "rinkeby" ? 4 : jsonData.network == "mumbai" ? 80001 : jsonData.network == "matic" ? 137: 97)
+    setVaultChainId(jsonData.network == 'mainnet' ? 1 : jsonData.network == "rinkeby" ? 4 : jsonData.network == "mumbai" ? 80001 : jsonData.network == "matic" ? 137: jsonData.network == "xdai" ? 100 : 97)
     setStatus(jsonData.status)
     if (status === 'claimed') {
       setClaimedBy(jsonData.claimedBy)
@@ -246,16 +247,20 @@ export default function Nft() {
     setVaultPrivacy(isPvt)
     setTimeout(() => {
       !isPvt ?
-      getNftBalance(
-        jsonData.values,
-        jsonData.addresses.filter((item) => {
-          return item.coin === 'ETH'
-        })[0].address,
-        (_values) => {
-          // console.log("Have new values", _values)
-          setVaultValues(_values)
-        }
-      ) : null
+      // getNftBalance(
+      //   jsonData.values,
+      //   jsonData.addresses.filter((item) => {
+      //     return item.coin === 'ETH'
+      //   })[0].address,
+      //   (_values) => {
+      //     // console.log("Have new values", _values)
+      //     setVaultValues(_values)
+      getAllBalances([], tokenId, (v)=>{
+        setVaultValues(v)
+      }) : null
+        // }
+      // ) : null
+
     }, 5)
   }
 
@@ -302,6 +307,25 @@ export default function Nft() {
     if (jsonData.length > 0) {
       // console.log("Fuckling NFT", jsonData, values.concat(jsonData))
       return cb(values.concat(jsonData))
+    } else {
+      return cb(values)
+    }
+  }
+
+  const getAllBalances = async (values, tokenId, cb) => {
+    // console.log(address)
+    const responce = await fetch(EMBLEM_API + '/vault/balance/' + tokenId, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        service: 'evmetadata',
+      },
+    })
+    
+    const jsonData = await responce.json()
+    console.log('responce', responce, jsonData)
+    if (jsonData.balances.length > 0) {      
+      return cb(values.concat(jsonData.balances))
     } else {
       return cb(values)
     }
@@ -479,31 +503,34 @@ export default function Nft() {
       setVaultPrivacy(false)
       setDecryptPassword(key)
       setVaultAddresses(decryptAddresses(key))
-      getEthBalances(
-        vaultAddresses.filter((item) => {
-          return item.coin === 'ETH'
-        })[0].address,
-        (values) => {
-          getBtcBalance(
-            values,
-            vaultAddresses.filter((item) => {
-              return item.coin === 'BTC'
-            })[0].address,
-            (_values) => {
-              // console.log("Have fucking values", values)
-              getNftBalance(
-                _values,
-                vaultAddresses.filter((item) => {
-                  return item.coin === 'ETH'
-                })[0].address,
-                (__values) => {
-                  setVaultValues(__values.concat(vaultValues))
-                }
-              )
-            }
-          )
-        }
-      )
+      getAllBalances([], tokenId, (values)=>{
+        setVaultValues(values)
+      })
+      // getEthBalances(
+      //   vaultAddresses.filter((item) => {
+      //     return item.coin === 'ETH'
+      //   })[0].address,
+      //   (values) => {
+      //     getBtcBalance(
+      //       values,
+      //       vaultAddresses.filter((item) => {
+      //         return item.coin === 'BTC'
+      //       })[0].address,
+      //       (_values) => {
+      //         // console.log("Have fucking values", values)
+      //         getNftBalance(
+      //           _values,
+      //           vaultAddresses.filter((item) => {
+      //             return item.coin === 'ETH'
+      //           })[0].address,
+      //           (__values) => {
+      //             setVaultValues(__values.concat(vaultValues))
+      //           }
+      //         )
+      //       }
+      //     )
+      //   }
+      // )
     } catch (err) {}
   }
 
@@ -584,7 +611,12 @@ export default function Nft() {
                   {!vaultPrivacy ? ': ~$' + vaultTotalValue : null}
                 </Box>
                 <Stack align="center">
-                  <Embed url={vaultImage}/>                  
+                  { vaultValues.length && vaultValues.filter(item=> {return item.type == "nft"}).length > 0 ? (
+                      <NFTSlideshow name={vaultName} image={vaultImage} items={vaultValues.map(value=>{return {image: value.image, description: value.description, name: value.name}})} properties = {{'duration': 3000, canSwipe: false}}/>
+                    ) : (
+                      <Embed url={vaultImage}/>
+                    )
+                  }                                    
                 </Stack>
                 <Stack align="center">
                   <Box mt="2" ml="4" lineHeight="tight">
@@ -599,8 +631,8 @@ export default function Nft() {
                       <Text mt={2} as="h4" ml="4" mr="4" fontSize="xs" fontStyle="italic" >
                         <ReactMarkdown plugins={[gfm]} children={splitDescription(vaultDesc)} />
                       </Text>
-                    </Stack>
-                  </Box>
+                    </Stack>                    
+                  </Box>                    
                 </Stack>
                 <Box p="6">
                   <Box d="flex" alignItems="baseline">
@@ -623,7 +655,7 @@ export default function Nft() {
                       ) : vaultValues.length ? (
                         vaultValues.map((coin) => {
                           return (                            
-                            <Text key={coin.name} isTruncated>
+                            <Text key={coin.name} >
                               {/* <Image width={3} src={coin.image} /> */}
                               {coin.address && coin.type !== 'nft' ? (
                                 <Tooltip aria-label={coin.name} hasArrow label={"Add " + coin.symbol + " to wallet"} placement="top" >
@@ -636,7 +668,7 @@ export default function Nft() {
                               {'('}{coin.coin.toLowerCase()}{')'} {coin.name} :{' '}
                               {coin.balance ? (
                                 coin.balance
-                              ) : coin.type == 'nft' ? (
+                              ) : coin.type == 'nft' && coin.external_url ? (
                                 <Link href={coin.external_url} isExternal>
                                   View NFT
                                 </Link>

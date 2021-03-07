@@ -1,4 +1,4 @@
-import { Box, Flex, Text, Link, Image, Stack, Spinner } from '@chakra-ui/core'
+import { Box, Flex, Text, Link, Image, Stack, Button, FormControl, FormLabel, Input, FormHelperText, Select } from '@chakra-ui/core'
 import Loader from 'react-loader'
 import Refreshing from './Refreshing'
 import { useRouter } from 'next/router'
@@ -7,75 +7,109 @@ import { useEffect, useState } from 'react'
 import { validImage } from '../utils'
 import { EMBLEM_API } from '../constants'
 import { Embed } from './Embed'
+import { setTimeout } from 'timers'
 
-export default function Vaults() {
+export default function Search() {
   const { query } = useRouter()
-  const { account, chainId } = useWeb3React()
   const [vaults, setVaults] = useState([])
   const [state, setState] = useState({ loaded: false })
   const [loadingApi, setLoadingApi] = useState(false)
-  const [address, setAddress] = useState(query.address)
-
+  const [q, setQ] = useState(query.q)
+  const [temp_q, setTempQ] = useState(q || '')
+  const [network, setNetwork] = useState(query.network || null)
   const getVaults = async () => {
-    loadCache()
-    try {
-      let network = chainId == 137 ? "matic" : chainId == 100? "xdai" : chainId == 80001? "mumbai": chainId == 4? "rinkeby" : "mainnet"
-      const response = await fetch(EMBLEM_API + '/'+network, {
-        method: 'GET',
+    // loadCache()
+    setLoadingApi(true)
+    try {      
+      const response = await fetch(EMBLEM_API + '/search', {
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          service: 'evmetadata',
-          chainId: chainId.toString(),
+          service: 'evmetadata'
         },
+        body: JSON.stringify({q: q, network: network})
       })
       const jsonData = await response.json()
       setState({ loaded: true })
-      setVaults(jsonData)
-      saveCache(jsonData)
+      setVaults(jsonData.records)
+      // saveCache(jsonData)
       setLoadingApi(false)
       // console.log(jsonData)
     } catch (error) {}
   }
 
-  const loadCache = () => {
-    let vaults = JSON.parse(localStorage.getItem((address ? address : account) + '_' + chainId + '_allvaults')) // Load vaults from storage before updating from server!
-    if (vaults) {
-      setState({ loaded: true })
-      setVaults(vaults)
-      setLoadingApi(true)
-    }
-  }
+  // const loadCache = () => {
+  //   let vaults = JSON.parse(localStorage.getItem((address ? address : account) + '_' + chainId + '_allvaults')) // Load vaults from storage before updating from server!
+  //   if (vaults) {
+  //     setState({ loaded: true })
+  //     setVaults(vaults)
+  //     setLoadingApi(true)
+  //   }
+  // }
 
-  const saveCache = (vaults) => {
-    localStorage.setItem((address ? address : account) + '_' + chainId + '_allvaults', JSON.stringify(vaults)) // Save new state for later
-  }
+  // const saveCache = (vaults) => {
+  //   localStorage.setItem((address ? address : account) + '_' + chainId + '_allvaults', JSON.stringify(vaults)) // Save new state for later
+  // }
 
-  const [acct, setAcct] = useState('')
+
   useEffect(() => {
-    if (account && acct != account) {
-      setAcct(account)
-      setState({ loaded: false })
+    console.log(q, state, loadingApi)
+    if (q && !state.loaded && !loadingApi) {
+      console.log("Load Search")
       getVaults()
     }
-  }, [account, acct])
-
-  const [chain, setChain] = useState(chainId)
-  useEffect(() => {
-    if (chainId && chain != chainId) {
-      setChain(chainId)
-      setState({ loaded: false })
-      getVaults()
-    }
-  }, [chainId, chain])
-
-  useEffect(() => {
-    account && chainId ? getVaults() : setState({ loaded: true })
-  }, [])
+    // if (q && !state.loaded && !loadingApi) {
+    //   setState({ loaded: false })
+    //   getVaults()
+    // }
+  })
 
   return (
-    <Loader loaded={state.loaded}>
+    <Loader loaded={state.loaded || !q}>
       {loadingApi ? <Refreshing /> : ''}
-
+      <Flex width="full" align="center" justifyContent="center" >
+        <FormControl isRequired>
+          <Flex width="full" align="center" justifyContent="center" flexWrap="wrap">
+            <Input
+              type="text"
+              id="search-query"
+              width='45%'
+              aria-describedby="search-query-helper-text"
+              placeholder="0xdeadbeef"
+              maxLength={42}
+              value={temp_q}
+              onChange={(e) =>
+                setTempQ(e.target.value)
+              }
+            />
+            <Button
+              m={2}
+              onClick={() => {
+                setState({ loaded: false })
+                setQ(temp_q)
+                let loc = location.href.split('?')[0]+"?q="+temp_q +  "&network=" + network
+                window.history.pushState(temp_q, 'Title', loc);
+              }}
+            >Search
+            </Button>
+            <Select w="45%" placeholder="All Networks" value={network}
+              onChange={(e)=>{
+                setNetwork(e.target.value)
+                console.log(e.target.value)
+              }}
+            >
+              <option value="matic">Matic</option>
+              <option value="xdai">xDai</option>
+              <option value="mainnet">Ethereum Mainnet</option>
+              <option value="rinkeby">Ethereum Rinkeby</option>
+            </Select>
+          </Flex>
+          
+          <FormHelperText id="search-query-helper-text">
+            Search for Emblem Vaults by: Name, Description, Type, Contents
+        </FormHelperText>
+        </FormControl>
+      </Flex>
       <Flex w="100%" justify="center" flexWrap="wrap" mt={10}>
         {vaults.length ? (
           vaults.map((vault, index) => {
@@ -102,14 +136,14 @@ export default function Vaults() {
               <Box key={index} {...flexSettings} onClick={redirect}>
                 <Text fontWeight="semibold" textAlign="center" mt={2}>
                   {vault.name}
-                  {/* {!vault.private ? ': ~$' + vault.totalValue : null} */}
+                  {!vault.private ? ': ~$' + vault.totalValue : null}
                 </Text>
                 <Stack align="center">
                   <Embed url={vault.image}/>
                 </Stack>
                 <Box d="flex" alignItems="baseline">
                   <Box color="gray.500" fontWeight="semibold" letterSpacing="wide" fontSize="sm" ml="2">
-                    {/* {vault.private ? (
+                    {vault.private ? (
                       <>
                         <Text>Contents hidden. Click to view the vault and unlock values.</Text>
                       </>
@@ -129,20 +163,13 @@ export default function Vaults() {
                           )
                       })
                     ) : (
-                      <Text>
-                        Nothing in here! <br />
+                          <Text>
+                            Nothing in here! <br />
                         Click to fill 'er up!
-                      </Text>
-                    )} */}
+                          </Text>
+                        )}
                   </Box>
                 </Box>
-                {/* <Box d="flex" alignItems="baseline">
-                  <Box color="gray.500" fontWeight="semibold" letterSpacing="wide" fontSize="sm" ml="2">
-                    <Text>
-                      Total Computable Value: {vault.totalValue}
-                    </Text>
-                  </Box>
-                  </Box> */}
                 <Stack align="center" mt={3}>
                   {vault.status == 'claimed' ? <Text color="green.500">CLAIMED</Text> : null}
                 </Stack>
@@ -151,7 +178,7 @@ export default function Vaults() {
           })
         ) : (
           <Text>
-            YOU DON'T SEEM TO HAVE ANY VAULTS.{' '}
+            Search Resulted in 0 Vaults.{' '}
             <Link color="#638cd8" href="../create">
               CREATE ONE HERE!
             </Link>

@@ -137,6 +137,8 @@ const chainMappings: { [key: string]: number } = {
   '137': 137,
   '97': 97,
   bnbsc: 97,
+  xdai: 100,
+  '100': 100
 }
 
 export function useQueryParameters(): {

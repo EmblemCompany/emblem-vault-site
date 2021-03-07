@@ -2,6 +2,7 @@ import { JSBI } from '@uniswap/sdk'
 import { abi as HandlerABI } from './abi/handler.json'
 import { abi as CovalABI } from './abi/coval.json'
 import { abi as EmblemABI } from './abi/emblem.json'
+import { abi as NftradeABI } from './abi/nftrade.json'
 
 export const BG = { light: 'gray.50', dark: 'gray.900' }
 export const COLOR = { light: 'black', dark: 'white' }
@@ -29,23 +30,30 @@ export const contractAddresses = {
     1: '0x6b565bd2a77c1b51b37c85ffe5cc533fadc95ee3',
     4: '0x63B1EB00de17Faf64b33649A5b7592543B010127',
     80001: '0x5434ba8b4A37755Cb3867C9fde39342C0D382857',
-    137: '0x8F874455D374e0EF61a5a1A345bCD696B114b2dd'
+    137: '0x8F874455D374e0EF61a5a1A345bCD696B114b2dd',
+    100: '0x34Fa02b4Ea68727c954C2962c2361B6Ddc2BF5C2'
   },
   vaultHandlerAbi: HandlerABI,
   emblemVault: {
     1: '0x82c7a8f707110f5fbb16184a5933e9f78a34c6ab',
     4: '0xe70AbBc99D8eB32124BF022196c493DB4fBc50FD',
     80001: '0x8b8407c6184f1f0Fd1082e83d6A3b8349cAcEd12',
-    137: '0x8b8407c6184f1f0Fd1082e83d6A3b8349cAcEd12'
+    137: '0x8b8407c6184f1f0Fd1082e83d6A3b8349cAcEd12',
+    100: '0x9058d1A5Fdba852403D5b080abAF31D1379EF653'
   },
   emblemAbi: EmblemABI,
   coval: {
     1: '0x3d658390460295fb963f54dc0899cfb1c30776df',
     4: '0x44c1a9d7d1f932b4c2811a70edffdd6ae2eb60e6',
     80001: '0x5cCa9D75DF2dFC117855adD4DD45727dee5287EC',
-    137: '0x4597c8A59Ab28B36840B82B3A674994A279593D0'
+    137: '0x4597c8A59Ab28B36840B82B3A674994A279593D0',
+    100: '0x8b8407c6184f1f0Fd1082e83d6A3b8349cAcEd12'
   },
   covalAbi: CovalABI,
+  nftrade: {
+    137: '0x40f3eeDf0033DC3e00d7DfE42EB0969f90a4B699'
+  },
+  nftradeAbi: NftradeABI
 }
 
 export const BURN_ADDRESS = '0x5D152dd902CC9198B97E5b6Cf5fc23a8e4330180'

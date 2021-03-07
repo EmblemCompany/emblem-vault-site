@@ -14,11 +14,11 @@ import Provider from '../context'
 import Layout from '../components/Layout'
 import Error from '../components/Error'
 import SwitchToChain from '../components/SwitchToChain'
-
 import '../styles.css'
 import '@reach/combobox/styles.css'
 import { QueryParameters } from '../constants'
 import Loading from '../components/Loading'
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect
 
