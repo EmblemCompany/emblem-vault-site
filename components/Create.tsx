@@ -22,7 +22,8 @@ import {
   Alert,
   AlertIcon,
   Collapse,
-  useDisclosure
+  useDisclosure,
+  Select
 } from '@chakra-ui/core'
 
 import Loader from 'react-loader'
@@ -34,6 +35,7 @@ import { EMBLEM_API, contractAddresses } from '../constants'
 import { Contract } from '@ethersproject/contracts'
 import { useContract } from '../hooks'
 import { isETHAddress } from '../utils'
+import Embed from './Embed'
 
 let tokenId = null
 let mintPassword = null
@@ -66,6 +68,8 @@ export default function Create(props: any) {
   const [approving, setApproving] = useState(false)
   const [vaultKey, setVaultKey] = useState('')  
   const [vaultValue, setVaultValue] = useState('')
+  const [vaultType, setVaultType] = useState("image")
+  const [showEmbed, setShowEmbed] = useState(false)
   
 
   const handlerContract = useContract(contractAddresses.vaultHandler[chainId], contractAddresses.vaultHandlerAbi, true)
@@ -394,24 +398,61 @@ export default function Create(props: any) {
                 >
                   <Stack direction="row" align="flex-start" spacing="0rem" flexWrap="wrap" shouldWrapChildren>
                     <FormControl>
-                      <FormLabel htmlFor="vault-img">Vault Image</FormLabel>
+                      
                       <Box p={1} rounded="lg" overflow="hidden">
-                        <Stack align="center" p={1}>
-                          <input type="file" onChange={() => previewFile()} />
+                        <Stack align="center" p={1}>                          
+                          {
+                            vaultType !== "upload" ? (
+                              <>
+                                <FormLabel htmlFor="vault-image-url">{vaultType.toUpperCase()} URL</FormLabel>
+                                <Input
+                                  type="text"
+                                  id="vault-image-url"
+                                  aria-describedby="vault-image-url-text"
+                                  minLength={3}
+                                  maxLength={200}
+                                  value={vaultImage}
+                                  defaultValue="http://"
+                                  onChange={(e) => {
+                                    setVaultImage(e.target.value)
+                                    setShowEmbed(true)
+                                    console.log("showEmbed", showEmbed)
+                                  }}
+                                  autoComplete="off"
+                                  w={300}
+                                />
+                              </>
+                            ) : (
+                              <>
+                              <FormLabel htmlFor="vault-img">Vault Image</FormLabel>
+                              <input type="file" onChange={() => previewFile()} />
+                              <Divider />
+                              </>
+                            )
+                          }
                           <Divider />
-                          <FormLabel htmlFor="vault-image-url">Or Image URL</FormLabel>
-                          <Input
-                            type="text"
-                            id="vault-image-url"
-                            aria-describedby="vault-image-url-text"
-                            minLength={3}
-                            maxLength={200}
-                            value={vaultImage}
-                            defaultValue="http://"
-                            onChange={(e) => setVaultImage(e.target.value)}
-                            autoComplete="off"
-                          />
-                          <img id="preview" src="" width="250" margin-top="6"></img>
+                          <FormLabel htmlFor="type-selector">Display Type</FormLabel>
+                          <Select id="type-selector" w="45%" value={vaultType}
+                            onChange={(e)=>{
+                              setVaultType(e.target.value)
+                              console.log("type", vaultType)
+                            }}
+                          >
+                            <option value="image" >Image (url)</option>
+                            <option value="upload" >Image (upload)</option>
+                            <option value="embed" >Embed (url)</option>
+                            <option value="video" >Video (url)</option>
+                          </Select>
+                          {
+                            vaultType == "upload" ? (
+                              <img id="preview" src="" width="250" margin-top="6"></img>
+                            ) : showEmbed == true ? (
+                              <>                                
+                                <Embed url={vaultImage}/>
+                              </>
+                            ) : null
+                          }
+                          
                         </Stack>
                       </Box>
                     </FormControl>

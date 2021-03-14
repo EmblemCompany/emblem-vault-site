@@ -14,8 +14,11 @@ import {
   Tooltip,
   Collapse,
   FormControl,
-  FormLabel
+  FormLabel,
+  useColorMode
 } from '@chakra-ui/core'
+
+import {HStack, VStack, Circle } from '@chakra-ui/react'
 
 import Head from "next/head"
 import { useWeb3React } from '@web3-react/core'
@@ -36,6 +39,8 @@ import ReactMarkdown from 'react-markdown'
 import gfm from 'remark-gfm'
 import Embed from './Embed'
 import NFTSlideshow from './embed/NFTSlideshow'
+import CoinBalance from './partials/CoinBalance'
+import { chakra } from '@chakra-ui/system'
 const AddrModal = dynamic(() => import('./AddrModal'))
 const KeysModal = dynamic(() => import('./KeysModal'))
 
@@ -91,6 +96,8 @@ export default function Nft() {
   const { isOpen: isOpenAddrModal, onOpen: onOpenAddrModal, onClose: onCloseAddrModal } = useDisclosure()
   const { isOpen: isOpenKeysModal, onOpen: onOpenKeysModal, onClose: onCloseKeysModal } = useDisclosure()
   const { isOpen, onToggle } = useDisclosure()
+
+  const { colorMode } = useColorMode()
 
   interface ErrorWithCode extends Error {
     code?: number
@@ -233,7 +240,16 @@ export default function Nft() {
     setVaultDataValues(jsonData.attributes.filter(item=>{return item.trait_type === "key"}))
     setVaultDesc(jsonData.description)
     setVaultAddresses(jsonData.addresses)
-    setVaultChainId(jsonData.network == 'mainnet' ? 1 : jsonData.network == "rinkeby" ? 4 : jsonData.network == "mumbai" ? 80001 : jsonData.network == "matic" ? 137: jsonData.network == "xdai" ? 100 : 97)
+    setVaultChainId(
+      jsonData.network == 'mainnet' ? 1 : 
+      jsonData.network == "rinkeby" ? 4 : 
+      jsonData.network == "mumbai" ? 80001 : 
+      jsonData.network == "matic" ? 137 : 
+      jsonData.network == "xdai" ? 100 : 
+      jsonData.network == "bsc" ? 56 : 
+      jsonData.network == "fantom" ? 250 : 
+      97
+    )
     setStatus(jsonData.status)
     if (status === 'claimed') {
       setClaimedBy(jsonData.claimedBy)
@@ -556,6 +572,17 @@ export default function Nft() {
         <meta name="twitter:title" content={vaultName} />
         <meta name="twitter:description" content={splitDescription(vaultDesc)} />
         <meta name="twitter:image" content={vaultImage} />
+        <script
+            dangerouslySetInnerHTML={{
+              __html: `
+              // $(".NFT").tilt({    
+              //     maxTilt: 3
+              // });
+              $(".NFT").trigger('mouseenter');
+              $(".NFT").trigger('mouseclick'), '.NFT';
+              `,
+            }}
+          />
       </Head>
       <AddrModal isOpen={isOpenAddrModal} onClose={onCloseAddrModal} addrCoin={currCoin} addrAddr={currAddr} />
 
@@ -569,11 +596,12 @@ export default function Nft() {
       />
 
       <Loader loaded={state.loaded}>
+        <Box height="40px"></Box>
         {loadingApi ? <Refreshing /> : ''}
-        {!invalidVault ? (
-          <Tilt className="Tilt" options={{ max: experimental ? 0 : 0, scale: 1 }}>
+        {!invalidVault ? (          
             <Flex width="full" align="center" justifyContent="center">
               <Box
+                className="NFT" 
                 maxW="sm"
                 borderWidth="1px"
                 borderColor={vaultChainId != chainId ? 'orange.500' : status == 'claimed' ? 'green.500' : null}
@@ -610,9 +638,9 @@ export default function Nft() {
                   {vaultName}
                   {!vaultPrivacy ? ': ~$' + vaultTotalValue : null}
                 </Box>
-                <Stack align="center">
+                <Stack className="NFT-content" align="center">
                   { vaultValues.length && vaultValues.filter(item=> {return item.type == "nft"}).length > 0 ? (
-                      <NFTSlideshow name={vaultName} image={vaultImage} items={vaultValues.map(value=>{return {image: value.image, description: value.description, name: value.name}})} properties = {{'duration': 3000, canSwipe: false}}/>
+                      <NFTSlideshow name={vaultName} image={vaultImage} items={vaultValues.map(value=>{return {image: value.image, description: value.description, name: value.name, type: value.type}})} properties = {{'duration': 3000, canSwipe: false}}/>
                     ) : (
                       <Embed url={vaultImage}/>
                     )
@@ -635,11 +663,12 @@ export default function Nft() {
                   </Box>                    
                 </Stack>
                 <Box p="6">
-                  <Box d="flex" alignItems="baseline">
+                  <Box d="flex" backgroundColor={colorMode == "light"? "gray.100": "gray.700"} alignItems="baseline" className="coin-balance-content">
                     <Box color="gray.500" letterSpacing="wide" fontSize="sm" ml="2">
-                      <Text as="h4" fontWeight="semibold">
-                        Current Contents:
+                      <Text as="h4" mt={2} fontWeight="semibold">
+                        Current Contents: 
                       </Text>
+                      <Text as="p" color={colorMode=="dark"? "lightgreen": "forestgreen"}>${vaultTotalValue.toFixed(4).toLocaleString()}</Text>
                       {vaultPrivacy ? (
                         <>
                           <Text pb={2} color={decryptedEffect ? 'green.500' : null}>
@@ -654,9 +683,43 @@ export default function Nft() {
                         </>
                       ) : vaultValues.length ? (
                         vaultValues.map((coin) => {
-                          return (                            
-                            <Text key={coin.name} >
-                              {/* <Image width={3} src={coin.image} /> */}
+                          // let coinName = '(' + coin.coin.toLowerCase() + ')' + coin.name +': '
+                          
+                          return (  
+                            <Stack> 
+                              <CoinBalance colorMode={colorMode} coin={coin}/>                           
+                            {/* <HStack w="300px" p={2}>
+                              <Box className="coin-image-container" w="100%" min-width="40px">                                
+                                {coin.address && validImage("https://token-icons.s3.amazonaws.com/"+coin.address+".png") ? (
+                                  <Image width="40px" src={"https://token-icons.s3.amazonaws.com/"+coin.address+".png"}></Image>
+                                ) : coin.coin && validImage("https://s3.amazonaws.com/token-icons/"+coin.coin.toLowerCase()+".png")? (
+                                  <Image width="40px" src={"https://s3.amazonaws.com/token-icons/"+coin.coin.toLowerCase()+".png"}></Image>
+                                ) : (
+                                  <Circle size="40px" bg="gray" color="white" isTruncated>
+                                    {coin.symbol? coin.symbol.toLowerCase(): coin.name}
+                                  </Circle>
+                                )}
+                              </Box>
+                              
+                              <VStack p="10px" w="100%">
+                                <HStack w="300px">
+                                  <Text float="left" fontWeight="bold" color="white">{coin.name}</Text>
+                                  <Text float="right" position="absolute" right="20px" fontWeight="bold"  color="green" >${coin && coin.price? coin.price.toFixed(2): 0  }</Text>
+                                </HStack>
+                                <HStack w="100%" mt={0} spacing="4px" className = "coin-display-row">
+                                  <Text position="relative" fontSize="xs" left="-10px">
+                                    {coin && coin.balance ? coin.balance.toFixed(3): null} {coin.symbol + " "} 
+                                    {coin.type == 'nft' && coin.external_url ? (
+                                      <Link href={coin.external_url} isExternal>
+                                        View NFT
+                                      </Link>
+                                    ) : null}
+                                  </Text>
+                                  <Text position="absolute" fontSize="xs" right="20px">{coin.coin.toLowerCase()}</Text>
+                                </HStack>
+                              </VStack>
+                            </HStack>                        */}
+                            {/* <Text key={coin.name} >
                               {coin.address && coin.type !== 'nft' ? (
                                 <Tooltip aria-label={coin.name} hasArrow label={"Add " + coin.symbol + " to wallet"} placement="top" >
                                   <Link onClick={()=>{addTokenToWallet({address:coin.address, symbol:coin.symbol, decimals:coin.decimals, image: coin.image? coin.image : null })}}>
@@ -673,7 +736,8 @@ export default function Nft() {
                                   View NFT
                                 </Link>
                               ) : null}
-                            </Text>
+                            </Text> */}
+                            </Stack>
                           )
                         })
                       ) : null } 
@@ -691,20 +755,23 @@ export default function Nft() {
                   {!vaultPrivacy ? (
                     <Box d="flex" alignItems="baseline" justifyContent="space-between" mt="4">
                       <ButtonGroup justifyContent="space-between" spacing={6}>
-                        {vaultAddresses.map((addr) => {
-                          return (
-                            <Button
-                              key={addr.address}
-                              onClick={() => {
-                                setCurrCoin(addr.coin)
-                                setCurrAddr(addr.address)
-                                onOpenAddrModal()
-                              }}
-                            >
-                              Put {addr.coin == 'ETH' ? addr.coin + '/ERC20' : addr.coin} In
-                            </Button>
-                          )
-                        })}
+                        <HStack>
+                          {vaultAddresses.map((addr) => {
+                            return (
+                              <Button
+                                width="165px"
+                                key={addr.address}
+                                onClick={() => {
+                                  setCurrCoin(addr.coin)
+                                  setCurrAddr(addr.address)
+                                  onOpenAddrModal()
+                                }}
+                              >
+                                Put {addr.coin == 'ETH' ? addr.coin + '/ERC20' : addr.coin} In
+                              </Button>
+                            )
+                          })}
+                        </HStack>
                       </ButtonGroup>
                     </Box>
                   ) : null}
@@ -837,7 +904,6 @@ export default function Nft() {
                 ) : null}
               </Box>
             </Flex>
-          </Tilt>
         ) : (
           <Stack align="center">
             <Image
@@ -891,6 +957,7 @@ export default function Nft() {
             }}
           />
         ) : null}
+        <Box height="40px"></Box>
       </Loader>
     </>
   )

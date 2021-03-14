@@ -1,4 +1,4 @@
-import { Box, Flex, Text, Link, Image, Stack, Button, BoxProps, Input } from '@chakra-ui/core'
+import { Box, Flex, Text, Link, Image, Stack, Button, BoxProps, Input, Select } from '@chakra-ui/core'
 import Loader from 'react-loader'
 import Refreshing from './Refreshing'
 import { useRouter } from 'next/router'
@@ -24,6 +24,7 @@ export default function SwapChain() {
   const [experimental, setExperimental] = useState(query.experimental)
   const [decimals, setDecimals] = useState(null)
   const [allowance, setAllowance] = useState(null)
+  const [transferChain, setTransferChain] = useState(137)
   const [covalApprovedFor, setIsCovalApproved] = useState(0)
   const [hash, setHash] = useState(null)
   const [swapAmount, setSwapAmount] = useState(0)
@@ -40,7 +41,7 @@ export default function SwapChain() {
   const transferToChain = async () => {
     setTransfering(true)
     ;(handlerContract as Contract)
-    .transferToChain(chainId == 137 ? 1: 137, swapAmount.toString())
+    .transferToChain(transferChain, swapAmount.toString())
     .then(({ hash }: { hash: string }) => {
       setHash(hash)
     })
@@ -184,7 +185,32 @@ export default function SwapChain() {
                   <SwapText>$Coval</SwapText>                  
               </Stack>
               <Stack direction="row" align="flex-start" spacing="1rem" flexWrap="wrap" shouldWrapChildren>
-                <SwapText> <Text  float={'left'}>from {chainId == 137 ? "Matic" : chainId == 100? "xDai": "Ethereum"} Network to</Text> <Image float={'left'} margin={2} w={3} src="./next.png" />{chainId == 137 ? "Etherum" : "Matic"} Network </SwapText>
+                <SwapText>
+                  <Flex width="full" align="center" justifyContent="center" flexWrap="wrap">
+                    <Text  float={'left'}>
+                      from {
+                        chainId == 137 ? "Matic" : 
+                        chainId == 100 ? "xDai" : 
+                        chainId == 56 ? "Binance Smart Chain" : 
+                        chainId == 250 ? "Fantom" : 
+                        "Ethereum"
+                      } to
+                    </Text> 
+                    <Image float={'left'} margin={2} w={3} src="./next.png" />
+                    <Select w="45%" value={transferChain}
+                      onChange={(e)=>{
+                        setTransferChain(Number(e.target.value))
+                        console.log(Number(e.target.value))
+                      }}
+                    >
+                      <option value="137" disabled={chainId === 137 ? true : false} >Polygon (Matic)</option>
+                      <option value="100" disabled={chainId === 100 ? true : false}>xDai</option>
+                      <option value="56" disabled={chainId === 56 ? true : false}>Binance Smart Chain</option>
+                      <option value="1" disabled={chainId === 1 ? true : false}>Ethereum Mainnet</option>
+                      <option value="250" disabled={chainId === 250 ? true : false}>Fantom</option>
+                    </Select> 
+                  </Flex>
+                </SwapText>
                 { swapAmount > 0 ? (
                   <Button isDisabled={isInvalid} onClick={transferToChain}>
                     { isInvalid ? "Invalid Transfer Amount" : "Transfer Now"}

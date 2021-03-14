@@ -14,15 +14,17 @@ export function shortenHex(hex: string, length = 4): string {
 }
 
 export const CHAIN_ID_NAMES: { [key: number]: string } = {
-  1: 'Mainnet',
+  1: 'Ethereum Mainnet',
   3: 'Ropsten',
   4: 'Rinkeby',
   5: 'Görli',
   42: 'Kovan',
   80001: 'Mumbai',
-  137: 'Matic',
+  137: 'Polygon',
   97: 'bnbsc',
-  100: 'xdai'
+  100: 'xDai',
+  56: 'Binance Smart Chain',
+  250: 'Fantom'
 }
 
 export const INFURA_PREFIXES: { [key: number]: string } = {
@@ -34,7 +36,9 @@ export const INFURA_PREFIXES: { [key: number]: string } = {
   80001: 'mumbai',
   137: 'matic',
   97: 'bnbsc',
-  100: 'xdai'
+  100: 'xdai',
+  56: 'bsc',
+  250: 'fantom'
 }
 
 export enum ExplorerTXType {
@@ -52,7 +56,9 @@ const EXPLORER_PREFIXES: { [key: number]: string } = {
   80001: 'mumbai-explorer.matic.today',
   137: 'explorer.matic.network',
   97: 'bnbsc',
-  100: 'blockscout.com/xdai/mainnet'
+  100: 'blockscout.com/xdai/mainnet',
+  56: 'bscscan.com',
+  250: 'ftmscan.com'
 }
 
 interface ExplorerTypeData {

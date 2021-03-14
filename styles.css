@@ -12,3 +12,24 @@ body {
   max-width: 100% !important;
   overflow-x: hidden !important;
 }
+
+.NFT {
+  transform-style: preserve-3d;
+}
+
+.NFT-content {
+  transform: translateZ(20px)
+}
+
+.coin-display-row {
+  margin-top: 0px !important;
+}
+
+.coin-image-container {
+  min-width: 40px;
+}
+
+.coin-balance-content {
+  border-radius: 0.5rem;
+  border-width: 0px;
+}

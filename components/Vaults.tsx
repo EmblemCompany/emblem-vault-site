@@ -19,7 +19,14 @@ export default function Vaults() {
   const getVaults = async () => {
     loadCache()
     try {
-      let network = chainId == 137 ? "matic" : chainId == 100? "xdai" : chainId == 80001? "mumbai": chainId == 4? "rinkeby" : "mainnet"
+      let network = 
+        chainId == 137 ? "matic" : 
+        chainId == 100? "xdai" : 
+        chainId == 80001? "mumbai" : 
+        chainId == 4? "rinkeby" : 
+        chainId == 56? "bsc" : 
+        chainId == 250? "fantom" : 
+        "mainnet"
       const response = await fetch(EMBLEM_API + '/'+network, {
         method: 'GET',
         headers: {

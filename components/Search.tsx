@@ -100,6 +100,7 @@ export default function Search() {
             >
               <option value="matic">Matic</option>
               <option value="xdai">xDai</option>
+              <option value="bsc">Binance Smart Chain</option>
               <option value="mainnet">Ethereum Mainnet</option>
               <option value="rinkeby">Ethereum Rinkeby</option>
             </Select>

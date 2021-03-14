@@ -6,7 +6,8 @@ import Embed from '../Embed'
 type ImageProp = {
   image: string,
   description: string,
-  name: string
+  name: string,
+  type: string
 }
 
 type NFTSlideshowProps = {
@@ -20,9 +21,10 @@ type NFTSlideshowProps = {
 export class NFTSlideshow extends Component<NFTSlideshowProps> {
   
   render() {
-    let items = [{image: this.props.image, name: this.props.name}]
+    let items = [{image: this.props.image, name: this.props.name, type: "nft"}]
     items = items.concat(this.props.items)
-    items = items.filter(item=>{return item.image !== ""})
+    items = items.filter(item=>{return item.image !== "" && item.type == "nft"})
+    console.log("items", items)
     return (
         <Container className="p-3">
           <Carousel>

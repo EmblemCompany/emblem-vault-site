@@ -13,7 +13,7 @@ import TokenBalance from './TokenBalance'
 import { WETH, ChainId, Token } from '@uniswap/sdk'
 import WalletConnect from './WalletConnect'
 import { QueryParameters } from '../constants'
-import { Coval, CovalTest, CovalTestMatic, CovalMatic, CovalxDai, DEFAULT_TOKENS } from '../tokens'
+import { Coval, CovalTest, CovalTestMatic, CovalMatic, CovalxDai, CovalBSC, CovalFantom, DEFAULT_TOKENS } from '../tokens'
 
 const Settings = dynamic(() => import('./Settings'))
 
@@ -58,7 +58,11 @@ export default function Layout({ children }: { children: ReactNode }): JSX.Eleme
       <ColorBox
         as={Flex}
         flexDirection="column"
-        borderColor={Number(chainId) === 137 ? "blue.500" : Number(chainId) === 1? "blue.500" : "orange.500"}
+        borderColor={
+          Number(chainId) === 137 ? "blue.500" : 
+          Number(chainId) === 1? "blue.500" : 
+          Number(chainId) === 56? "orange" : 
+          "orange.500"}
         borderWidth={isTestnet ? '.5rem' : '.5rem'}
         minHeight="100vh"
         maxHeight="100vh"
@@ -97,7 +101,13 @@ export default function Layout({ children }: { children: ReactNode }): JSX.Eleme
           ) : (
             // [DEFAULT_TOKENS.filter((tokenrrr) => tokenrrr.chainId == chainId)[0], firstToken, secondToken]
             [
-              chainId == 1 ? Coval : chainId == 80001 ? CovalTestMatic : chainId == 137 ? CovalMatic : chainId == 100? CovalxDai: CovalTest,
+              chainId == 1 ? Coval : 
+              chainId == 80001 ? CovalTestMatic : 
+              chainId == 137 ? CovalMatic : 
+              chainId == 100? CovalxDai : 
+              chainId == 56 ? CovalBSC :
+              chainId == 250 ? CovalFantom :
+              CovalTest,
               firstToken ? (firstToken.symbol != 'Coval' ? firstToken : null) : null,
               secondToken ? (secondToken.symbol != 'Coval' ? secondToken : null) : null,
             ]
@@ -121,7 +131,10 @@ export default function Layout({ children }: { children: ReactNode }): JSX.Eleme
               <Link href="/swap">
                 <Badge
                   variant="solid"
-                  variantColor={chainId == 137 || chainId == 1 ? 'blue' : 'orange'/*isTestnet ? 'blue' : undefined*/}
+                  variantColor={
+                    chainId == 137 || chainId == 1 ? 'blue' : 
+                    chainId == Number(56) ? 'orange':
+                    'orange'/*isTestnet ? 'blue' : undefined*/}
                   fontSize="1rem"
                   style={{ borderTopLeftRadius: 0, borderBottomRightRadius: 0, borderBottomLeftRadius: 0 }} >
                   On {CHAIN_ID_NAMES[chainId].toLowerCase()} (click to swap networks)

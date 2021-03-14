@@ -10,6 +10,9 @@ import Sketchup from './embed/Sketchup'
 import Clara from './embed/Clara'
 import MyMiniFactory from './embed/MyMiniFactory'
 import { Audius } from './embed/Audius'
+import { Generic } from './embed/Generic'
+import Youtube from './embed/Youtube'
+import Vimeo from './embed/Vimeo'
 
 type EmbedProps = {
   url: string
@@ -56,13 +59,26 @@ export class Embed extends Component<EmbedProps> {
           <Audius
             url={url}
           />
-        ) : (
+        ) : url.includes('youtube.com') ? (
+          <Youtube
+            url={url}
+          />
+        ) : url.includes('vimeo.com') ? (
+          <Vimeo
+            url={url}
+          />
+        ) : url.includes('.png') || url.includes('.jpg') || url.includes('.jpeg') || url.includes('.gif') || url.includes('.svg') ? (
               <Image
                 className="d-block w-100"
                 src={validImage(url) ? url : 'https://circuitsofvalue.com/public/coval-logo.png'}
                 width="250px"
               />
-            )}
+        ) : (
+          <Generic
+            url={url}
+          />
+        )
+          }
       </>
     )
   }

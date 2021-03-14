@@ -46,6 +46,22 @@ export const CovalxDai = new Token(
   'Circuits of Value'
 )
 
+export const CovalBSC = new Token(
+  ChainId.RINKEBY,
+  '0xd15CeE1DEaFBad6C0B3Fd7489677Cc102B141464',
+  8,
+  'Coval',
+  'Circuits of Value'
+)
+
+export const CovalFantom = new Token(
+  ChainId.RINKEBY,
+  '0x8b8407c6184f1f0fd1082e83d6a3b8349caced12',
+  8,
+  'Coval',
+  'Circuits of Value'
+)
+
 export const DEFAULT_TOKENS = [
   ...Object.values(WETH),
 
@@ -57,6 +73,8 @@ export const DEFAULT_TOKENS = [
   CovalTestMatic,
   CovalMatic,
   CovalxDai,
+  CovalBSC,
+  CovalFantom,
   // new Token(ChainId.RINKEBY, '0x44c1a9d7d1f932b4c2811a70edffdd6ae2eb60e6', 8, 'Coval', 'Circuits of Value'),
   new Token(ChainId.MAINNET, '0xdAC17F958D2ee523a2206206994597C13D831ec7', 6, 'USDT', 'Tether USD'),
   // stablecoin derivatives

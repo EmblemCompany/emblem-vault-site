@@ -67,6 +67,8 @@ export default class App extends NextApp {
           <title key="title">Emblem Vault</title>
           <meta key="description" name="Description" content="An entire wallet inside a token" />
           <script src="https://cdn.trackjs.com/agent/v3/latest/t.js"></script>
+          <script src="./jquery.js"></script>
+          <script src="./tilt.jquery.js"></script>
           <script
             dangerouslySetInnerHTML={{
               __html: `
