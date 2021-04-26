@@ -15,6 +15,11 @@ body {
 
 .NFT {
   transform-style: preserve-3d;
+  -moz-box-shadow: 0 5px 35px #100b0b !important;
+  -webkit-box-shadow: 0 5px 35px #100b0b !important;
+  box-shadow: 0 5px 35px #100b0b !important;
+  background-color: rgb(0 0 0 / 39%);
+  border-color: #e2e8f029 !important;
 }
 
 .NFT-content {
@@ -32,4 +37,23 @@ body {
 .coin-balance-content {
   border-radius: 0.5rem;
   border-width: 0px;
+}
+
+.MuiTableRow-root {
+  background-color: lightslategrey;
+  font-size: xx-small;
+  border-radius: 0.5rem;
+}
+.MyRow {
+  background-color: lightgreen
+}
+.Tab {
+  border-bottom: 0px !important;
+}
+.TabList {
+  border-bottom: 0px !important;
+}
+
+.ytembed {
+  padding: 10px;
 }

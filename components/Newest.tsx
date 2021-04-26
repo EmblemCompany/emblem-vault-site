@@ -9,7 +9,7 @@ import { EMBLEM_API } from '../constants'
 import CoinBalance from './partials/CoinBalance'
 import Embed from './Embed'
 
-export default function VaultList() {
+export default function Featured() {
   const { query } = useRouter()
   const { account, chainId } = useWeb3React()
   const [vaults, setVaults] = useState([])
@@ -22,7 +22,7 @@ export default function VaultList() {
   const getVaults = async () => {
     loadCache()
     try {
-      const response = await fetch(EMBLEM_API + '/vaults/' + (address ? address : account) + (experimental? '?experimental=true' : ''), {
+      const response = await fetch(EMBLEM_API + '/featured/', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -40,7 +40,7 @@ export default function VaultList() {
   }
 
   const loadCache = () => {
-    let vaults = JSON.parse(localStorage.getItem((address ? address : account) + '_' + chainId + '_vaults')) // Load vaults from storage before updating from server!
+    let vaults = JSON.parse(localStorage.getItem((address ? address : account) + '_' + chainId + '_featured')) // Load vaults from storage before updating from server!
     if (vaults) {
       setState({ loaded: true })
       setVaults(vaults)
@@ -49,7 +49,7 @@ export default function VaultList() {
   }
 
   const saveCache = (vaults) => {
-    localStorage.setItem((address ? address : account) + '_' + chainId + '_vaults', JSON.stringify(vaults)) // Save new state for later
+    localStorage.setItem((address ? address : account) + '_' + chainId + '_featured', JSON.stringify(vaults)) // Save new state for later
   }
 
   const [acct, setAcct] = useState('')
@@ -71,7 +71,8 @@ export default function VaultList() {
   }, [chainId, chain])
 
   useEffect(() => {
-    account && chainId ? getVaults() : setState({ loaded: true })
+
+    vaults.length < 1 ? getVaults() : setState({ loaded: true })
   }, [])
 
   return (
@@ -151,16 +152,12 @@ export default function VaultList() {
               </Box>
             )
           })
-        ) : account ? (
+        ) : (
           <Text>
             YOU DON'T SEEM TO HAVE ANY VAULTS.{' '}
             <Link color="#638cd8" href="../create">
               CREATE ONE HERE!
             </Link>
-          </Text>
-        ) : (
-          <Text>
-            You don't seem to have a wallet connected.{' '}
           </Text>
         )}
       </Flex>

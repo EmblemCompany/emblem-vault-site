@@ -8,7 +8,7 @@ export class Youtube extends Component<YoutubeProps> {
   render() {
     return (
       <>
-        <iframe src={this.props.url.split(' ')[0].trim().replace('"', '')} width="560" height="315" frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen></iframe>
+        <iframe className="ytembed" src={this.props.url.split(' ')[0].trim().replace('"', '')} width="100%" height="315" frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen></iframe>
       </>
     )
   }

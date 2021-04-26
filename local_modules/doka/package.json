@@ -1,0 +1,9 @@
+{
+  "private": true,
+  "version": "7.8.0",
+  "name": "doka",
+  "browser": "doka.js",
+  "main": "doka.js",
+  "license": "https://pqina.nl/doka/license",
+  "types": "doka.d.ts"
+}

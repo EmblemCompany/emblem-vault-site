@@ -42,6 +42,7 @@ export default function Settings({ isOpen, onClose }: { isOpen: boolean; onClose
   const [secondToken] = useSecondToken()
 
   let permalink: string | null = null
+  
   if (typeof chainId === 'number' && (firstToken || secondToken) && (pathname === '/buy' || pathname === '/sell')) {
     const permalinkParameters = {
       [QueryParameters.CHAIN]: chainId,

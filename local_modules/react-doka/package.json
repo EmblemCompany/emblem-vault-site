@@ -1,0 +1,9 @@
+{
+  "private": true,
+  "version": "7.8.0",
+  "name": "react-doka",
+  "browser": "index.js",
+  "main": "index.js",
+  "license": "https://pqina.nl/doka/license",
+  "types": "react-doka.d.ts"
+}

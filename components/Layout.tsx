@@ -36,11 +36,21 @@ export default function Layout({ children }: { children: ReactNode }): JSX.Eleme
   const requiredChainId = queryParameters[QueryParameters.CHAIN]
 
   const USDETHPrice = useUSDETHPrice()
+
+  const showOrHideNavLink = (path: string)=> {
+    return location.pathname.includes(path) ? 'none': 'block'
+  }
+
+  const handleNewNavigationClick = (path)=>{
+    location.href = location.origin + '/'+path
+  }
+  
   const handleSearchClick = ()=>{
     let pieces = location.pathname.split('/')
     pieces.pop()
     location.href = location.origin + pieces.join('/') + '/search'
   }
+  
   const handleNavigationclick = () => {
     console.log(location.pathname)
     let pieces = location.pathname.split('/')
@@ -49,6 +59,16 @@ export default function Layout({ children }: { children: ReactNode }): JSX.Eleme
       location.href = location.origin + pieces.join('/') + '/create'
     } else {
       location.href = location.origin + pieces.join('/') + '/vaultlist'
+    }
+  }
+
+  const handleNavigationFeaturedclick = ()=>{
+    let pieces = location.pathname.split('/')
+    pieces.pop()
+    if (location.pathname.includes('featured')) {
+      location.href = location.origin + pieces.join('/') + '/create'
+    } else {
+      location.href = location.origin + pieces.join('/') + '/featured'
     }
   }
   return (
@@ -71,10 +91,30 @@ export default function Layout({ children }: { children: ReactNode }): JSX.Eleme
           <Stack spacing={0} direction="row">
             <IconButton m={2} icon="settings" variant="ghost" onClick={onOpenSettings} aria-label="Settings" />
             <IconButton m={2} icon="search" variant="ghost" onClick={handleSearchClick} aria-label="Search" />
-            <Button m={2} variant="ghost" onClick={handleNavigationclick}>
-              {' '}
-              {location.pathname.includes('vaultlist') ? 'Create Vault' : 'My Vaults'}
+            <Button display={showOrHideNavLink('create')} m={2} variant="ghost" onClick={()=>{handleNewNavigationClick('create')}}>
+              Create
             </Button>
+            <Button display={showOrHideNavLink('vaultlist')} m={2} variant="ghost" onClick={()=>{handleNewNavigationClick('vaultlist')}}>
+              My Vaults
+            </Button>
+            <Button display={showOrHideNavLink('featured')} m={2} variant="ghost" onClick={()=>{handleNewNavigationClick('featured')}}>
+              Featured
+            </Button>
+            <Button display={showOrHideNavLink('newest')} m={2} variant="ghost" onClick={()=>{handleNewNavigationClick('newest')}}>
+              Newest
+            </Button>
+            {/* <Button m={2} variant="ghost" onClick={handleNavigationclick}>
+              {' '}
+              {location.pathname.includes('vaultlist') ? 'Create' : 'Wallet (Vaults)'}
+            </Button>
+            <Button m={2} variant="ghost" onClick={handleNavigationFeaturedclick}>
+              {' '}
+              {location.pathname.includes('featured') ? 'Create' : 'Featured Vaults'}
+            </Button>
+            <Button m={2} variant="ghost" onClick={handleNavigationFeaturedclick}>
+              {' '}
+              {location.pathname.includes('featured') ? 'Create' : 'Featured Vaults'}
+            </Button> */}
           </Stack>
           <Account triedToEagerConnect={triedToEagerConnect} />
         </Flex>

@@ -67,8 +67,9 @@ export class Embed extends Component<EmbedProps> {
           <Vimeo
             url={url}
           />
-        ) : url.includes('.png') || url.includes('.jpg') || url.includes('.jpeg') || url.includes('.gif') || url.includes('.svg') ? (
+        ) : url.includes('googleusercontent.com') || url.includes('framed/') ||  url.includes('.png') || url.includes('.jpg') || url.includes('.jpeg') || url.includes('.gif') || url.includes('.svg') ? (
               <Image
+                p={"20px"}
                 className="d-block w-100"
                 src={validImage(url) ? url : 'https://circuitsofvalue.com/public/coval-logo.png'}
                 width="250px"

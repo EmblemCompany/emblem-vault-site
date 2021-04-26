@@ -15,7 +15,8 @@ import {
   Collapse,
   FormControl,
   FormLabel,
-  useColorMode
+  useColorMode,
+  IconButton
 } from '@chakra-ui/core'
 
 import {HStack, VStack, Circle } from '@chakra-ui/react'
@@ -41,6 +42,8 @@ import Embed from './Embed'
 import NFTSlideshow from './embed/NFTSlideshow'
 import CoinBalance from './partials/CoinBalance'
 import { chakra } from '@chakra-ui/system'
+import transakSDK from '@transak/transak-sdk'
+
 const AddrModal = dynamic(() => import('./AddrModal'))
 const KeysModal = dynamic(() => import('./KeysModal'))
 
@@ -53,6 +56,8 @@ export default function Nft() {
   const [tokenId, setTokenId] = useState(query.id)
   const [experimental, setExperimental] = useState(query.experimental)
   const [vaultName, setVaultName] = useState('')
+  const [vaultIPFS, setVaultIPFS] = useState('')
+  const [vaultImageIPFS, setVaultImageIPFS] = useState('')
   const [vaultDesc, setVaultDesc] = useState('')
   const [vaultImage, setVaultImage] = useState('')
   const [vaultValues, setVaultValues] = useState([])
@@ -99,11 +104,44 @@ export default function Nft() {
 
   const { colorMode } = useColorMode()
 
+  let transak
+
   interface ErrorWithCode extends Error {
     code?: number
   }
 
   let transferImage;
+
+  const initializeTransak = (address?: string, coin? : string)=>{
+    transak = new transakSDK({
+      apiKey: 'e8bed1bd-6844-4eb1-973a-7a11a48fafab',  // Your API Key
+      environment: 'PRODUCTION', // STAGING/PRODUCTION
+      defaultCryptoCurrency: coin || 'ETH',
+      walletAddress: address || '', // Your customer's wallet address
+      themeColor: '000000', // App theme color
+      fiatCurrency: 'USD', // INR/GBP
+      // fiatAmount: 350,
+      email: '', // Your customer's email address
+      redirectURL: '',
+      // paymentMethod: 'neft_bank_transfer',
+      hostURL: window.location.origin,
+      widgetHeight: '550px',
+      widgetWidth: '450px'
+    });
+  
+    // To get all the events
+    transak.on(transak.ALL_EVENTS, (data) => {
+      console.log(data)
+    });
+  
+    // This will trigger when the user marks payment is made.
+    transak.on(transak.EVENTS.TRANSAK_ORDER_SUCCESSFUL, (orderData) => {
+      console.log(orderData);
+      transak.close();
+    });
+  
+    transak.init()
+  }
 
   const transferVault = () => {
     setTransfering(true)
@@ -199,6 +237,9 @@ export default function Nft() {
     })
     const jsonData = await responce.json()
     // console.log('vault response was ', jsonData)
+    if (jsonData.image_ipfs) {
+      getIPFSImage(jsonData.image_ipfs)
+    }
     if (!jsonData.name) {
       setState({ loaded: true })
       setInvalidVault(true)
@@ -208,6 +249,21 @@ export default function Nft() {
       setLoadingApi(false)
       setInvalidVault(false)
     }
+  }
+
+  const getIPFSImage = async function(hash){
+    // alert(0)
+    const responce = await fetch('https://gateway.ipfs.io/ipfs/'+hash, {
+      method: 'GET',
+      headers: {
+        // redirect:'follow'
+      },
+    })
+    let jsonData = await responce.text()
+    // setVaultImage(jsonData) 
+    const preview = document.querySelector('img.d-block') as HTMLImageElement 
+    preview.src = jsonData
+    console.log(jsonData)  
   }
 
   const getWitness = async (cb) => {
@@ -240,6 +296,8 @@ export default function Nft() {
     setVaultDataValues(jsonData.attributes.filter(item=>{return item.trait_type === "key"}))
     setVaultDesc(jsonData.description)
     setVaultAddresses(jsonData.addresses)
+    setVaultIPFS(jsonData.ipfs || null)
+    setVaultImageIPFS(jsonData.image_ipfs || null)
     setVaultChainId(
       jsonData.network == 'mainnet' ? 1 : 
       jsonData.network == "rinkeby" ? 4 : 
@@ -271,7 +329,7 @@ export default function Nft() {
       //   (_values) => {
       //     // console.log("Have new values", _values)
       //     setVaultValues(_values)
-      getAllBalances([], tokenId, (v)=>{
+      getAllBalancesLive([], tokenId, (v)=>{
         setVaultValues(v)
       }) : null
         // }
@@ -279,8 +337,6 @@ export default function Nft() {
 
     }, 5)
   }
-
-  
 
   const getEthBalances = async (address, cb) => {
     const responce = await fetch(EMBLEM_API + '/eth/balance/' + address, {
@@ -330,7 +386,46 @@ export default function Nft() {
 
   const getAllBalances = async (values, tokenId, cb) => {
     // console.log(address)
-    const responce = await fetch(EMBLEM_API + '/vault/balance/' + tokenId, {
+    const responce = await fetch(EMBLEM_API + '/vault/balance/' + tokenId , {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        service: 'evmetadata',
+      },
+    })
+    
+    const jsonData = await responce.json()
+    console.log('responce', responce, jsonData)
+    if (jsonData.balances.length > 0) {      
+      return cb(values.concat(jsonData.balances))
+    } else {
+      return cb(values)
+    }
+  }
+
+  const getAllBalancesLive = async (values, tokenId, cb) => {
+    // setVaultValues([])
+    // console.log(address)
+    const responce = await fetch(EMBLEM_API + '/vault/balance/' + tokenId + '?live=true' , {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        service: 'evmetadata',
+      },
+    })
+    
+    const jsonData = await responce.json()
+    console.log('responce', responce, jsonData)
+    if (jsonData.balances.length > 0) {      
+      return cb(values.concat(jsonData.balances))
+    } else {
+      return cb(values)
+    }
+  }
+
+  const getAllBalancesByAddress = async (values, ethAddress, btcAddress, cb) => {
+    // console.log(address)
+    const responce = await fetch(EMBLEM_API + '/vault/balance/' + ethAddress + '/' + btcAddress, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -519,7 +614,9 @@ export default function Nft() {
       setVaultPrivacy(false)
       setDecryptPassword(key)
       setVaultAddresses(decryptAddresses(key))
-      getAllBalances([], tokenId, (values)=>{
+      let ethAddress = vaultAddresses.filter((item) => {return item.coin === 'ETH'})[0].address
+      let btcAddress = vaultAddresses.filter((item) => {return item.coin === 'BTC'})[0].address
+      getAllBalancesByAddress([], ethAddress, btcAddress, (values)=>{
         setVaultValues(values)
       })
       // getEthBalances(
@@ -632,11 +729,11 @@ export default function Nft() {
                   lineHeight="tight"
                   p={2}
                   textAlign="center"
-                  textTransform="uppercase"
+                  // textTransform="uppercase"
                   alignItems="center"
                 >
                   {vaultName}
-                  {!vaultPrivacy ? ': ~$' + vaultTotalValue : null}
+                  {!vaultPrivacy ? ': ~$' + vaultTotalValue.toLocaleString() : null}
                 </Box>
                 <Stack className="NFT-content" align="center">
                   { vaultValues.length && vaultValues.filter(item=> {return item.type == "nft"}).length > 0 ? (
@@ -663,98 +760,59 @@ export default function Nft() {
                   </Box>                    
                 </Stack>
                 <Box p="6">
-                  <Box d="flex" backgroundColor={colorMode == "light"? "gray.100": "gray.700"} alignItems="baseline" className="coin-balance-content">
-                    <Box color="gray.500" letterSpacing="wide" fontSize="sm" ml="2">
-                      <Text as="h4" mt={2} fontWeight="semibold">
-                        Current Contents: 
+                  {vaultPrivacy ? (
+                    <Box mb={5}>
+                      <Text pb={2} color={decryptedEffect ? 'green.500' : null}>
+                        {decryptedEffect ? decryptedEffect : 'Contents hidden. Enter password to unlock.'}
                       </Text>
-                      <Text as="p" color={colorMode=="dark"? "lightgreen": "forestgreen"}>${vaultTotalValue.toFixed(4).toLocaleString()}</Text>
-                      {vaultPrivacy ? (
-                        <>
-                          <Text pb={2} color={decryptedEffect ? 'green.500' : null}>
-                            {decryptedEffect ? decryptedEffect : 'Contents hidden. Enter password to unlock.'}
-                          </Text>
-                          <Input
-                            type="password"
-                            id="vault-password"
-                            onChange={(e) => tryDecrypt(e.target.value)}
-                            aria-describedby="password-helper-text"
-                          />
-                        </>
-                      ) : vaultValues.length ? (
-                        vaultValues.map((coin) => {
-                          // let coinName = '(' + coin.coin.toLowerCase() + ')' + coin.name +': '
-                          
-                          return (  
-                            <Stack> 
-                              <CoinBalance colorMode={colorMode} coin={coin}/>                           
-                            {/* <HStack w="300px" p={2}>
-                              <Box className="coin-image-container" w="100%" min-width="40px">                                
-                                {coin.address && validImage("https://token-icons.s3.amazonaws.com/"+coin.address+".png") ? (
-                                  <Image width="40px" src={"https://token-icons.s3.amazonaws.com/"+coin.address+".png"}></Image>
-                                ) : coin.coin && validImage("https://s3.amazonaws.com/token-icons/"+coin.coin.toLowerCase()+".png")? (
-                                  <Image width="40px" src={"https://s3.amazonaws.com/token-icons/"+coin.coin.toLowerCase()+".png"}></Image>
-                                ) : (
-                                  <Circle size="40px" bg="gray" color="white" isTruncated>
-                                    {coin.symbol? coin.symbol.toLowerCase(): coin.name}
-                                  </Circle>
-                                )}
-                              </Box>
-                              
-                              <VStack p="10px" w="100%">
-                                <HStack w="300px">
-                                  <Text float="left" fontWeight="bold" color="white">{coin.name}</Text>
-                                  <Text float="right" position="absolute" right="20px" fontWeight="bold"  color="green" >${coin && coin.price? coin.price.toFixed(2): 0  }</Text>
-                                </HStack>
-                                <HStack w="100%" mt={0} spacing="4px" className = "coin-display-row">
-                                  <Text position="relative" fontSize="xs" left="-10px">
-                                    {coin && coin.balance ? coin.balance.toFixed(3): null} {coin.symbol + " "} 
-                                    {coin.type == 'nft' && coin.external_url ? (
-                                      <Link href={coin.external_url} isExternal>
-                                        View NFT
-                                      </Link>
-                                    ) : null}
-                                  </Text>
-                                  <Text position="absolute" fontSize="xs" right="20px">{coin.coin.toLowerCase()}</Text>
-                                </HStack>
-                              </VStack>
-                            </HStack>                        */}
-                            {/* <Text key={coin.name} >
-                              {coin.address && coin.type !== 'nft' ? (
-                                <Tooltip aria-label={coin.name} hasArrow label={"Add " + coin.symbol + " to wallet"} placement="top" >
-                                  <Link onClick={()=>{addTokenToWallet({address:coin.address, symbol:coin.symbol, decimals:coin.decimals, image: coin.image? coin.image : null })}}>
-                                    + 
-                                  </Link>
-                                </Tooltip>
-                                
-                              ) : null}
-                              {'('}{coin.coin.toLowerCase()}{')'} {coin.name} :{' '}
-                              {coin.balance ? (
-                                coin.balance
-                              ) : coin.type == 'nft' && coin.external_url ? (
-                                <Link href={coin.external_url} isExternal>
-                                  View NFT
-                                </Link>
-                              ) : null}
-                            </Text> */}
-                            </Stack>
-                          )
-                        })
-                      ) : null } 
-                      { vaultDataValues.length ? (
-                        vaultDataValues.map((data) => {
-                          return (
-                            <Text>Data: {data.attribute_key}</Text>
-                          )                        
-                        })
-                      ) : !vaultDataValues.length && !vaultValues.length ? (
-                        <Text>Nothing in here! Fill 'er up!</Text>
-                      ) : null}
+                      <Input
+                        type="password"
+                        id="vault-password"
+                        onChange={(e) => tryDecrypt(e.target.value)}
+                        aria-describedby="password-helper-text"
+                      />
                     </Box>
-                  </Box>
+                  ) : (
+                    <Box d="flex" backgroundColor={colorMode == "light"? "gray.100": "gray.700"} alignItems="baseline" className="coin-balance-content">
+                      <Box color="gray.500" letterSpacing="wide" fontSize="sm" ml="2">
+                        <Text as="h4" mt={2} fontWeight="semibold">
+                        
+                          Current Contents:  <button
+                          onClick={() =>{
+                            getAllBalancesLive([], tokenId, (v)=>{
+                              setVaultValues(v)
+                            })
+                          }}
+                        > [Refresh Balances]</button>
+                        </Text>
+                        <Text as="p" color={colorMode=="dark"? "lightgreen": "forestgreen"}>${Number(vaultTotalValue.toFixed(4)).toLocaleString()}</Text>
+                        { vaultValues.length ? (
+                          vaultValues.map((coin) => {
+                            return (  
+                              <Stack> 
+                                <CoinBalance colorMode={colorMode} coin={coin}/>  
+                              </Stack>
+                            )
+                          })
+                        ) : null } 
+                        { vaultDataValues.length ? (
+                          vaultDataValues.map((data) => {
+                            return (
+                              <Text>Data: {data.attribute_key}</Text>
+                            )                        
+                          })
+                        ) : !vaultDataValues.length && !vaultValues.length ? (
+                          <Text>Nothing in here! Fill 'er up!</Text>
+                        ) : null}
+                      </Box>
+                    </Box>
+                  )}                  
+                  
                   {!vaultPrivacy ? (
                     <Box d="flex" alignItems="baseline" justifyContent="space-between" mt="4">
                       <ButtonGroup justifyContent="space-between" spacing={6}>
+                        <Stack>
+                          <Text>Addresses Within Vault</Text>
                         <HStack>
                           {vaultAddresses.map((addr) => {
                             return (
@@ -772,6 +830,26 @@ export default function Nft() {
                             )
                           })}
                         </HStack>
+                        <Text>Load Vault with Credit Card</Text>
+                        <HStack>
+                          {vaultAddresses.map((addr) => {
+                            return (
+                              <Button
+                                width="165px"
+                                key={addr.address}
+                                onClick={() => {
+                                  initializeTransak(addr.address, addr.coin)
+                                }}
+                              >
+                                Buy {addr.coin == 'ETH' ? addr.coin + '/ERC20' : addr.coin}
+                              </Button>
+                            )
+                          })}
+                        </HStack>
+                        {/* <Button onClick={() => {
+                          initializeTransak()
+                        }}>Add Crypto with Credit Card</Button> */}
+                        </Stack>
                       </ButtonGroup>
                     </Box>
                   ) : null}
@@ -893,6 +971,14 @@ export default function Nft() {
                     </Box>
                   ) : null}                  
                 </Box>
+                {vaultIPFS ? (
+                  <Stack>
+                    <HStack align="center">
+                      <Link target='new' ml={35} href={'https://gateway.ipfs.io/ipfs/'+vaultIPFS} isExternal>View Metadata on IPFS </Link>
+                      <Link href={'https://gateway.ipfs.io/ipfs/'+vaultImageIPFS} isExternal>View Image on IPFS </Link>
+                    </HStack> 
+                  </Stack>
+                ) : null }
                 <Stack direction="column" align="center">
                   {status == 'claimed' ? <Text color="green.500">CLAIMED</Text> : null}
                 </Stack>

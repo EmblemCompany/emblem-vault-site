@@ -1,15 +1,17 @@
-import { Box, Flex, Text, Link, Image, Stack, Button, BoxProps, Input, Select } from '@chakra-ui/core'
+import { Box, Flex, Text, Link, Image, Stack, Button, BoxProps, Input, Select, Tabs, Tab, TabList, TabPanels, TabPanel } from '@chakra-ui/core'
 import Loader from 'react-loader'
 import Refreshing from './Refreshing'
 import { useRouter } from 'next/router'
 import { useWeb3React } from '@web3-react/core'
 import { useEffect, useState } from 'react'
-import { validImage, toContractValue } from '../utils'
+import { validImage, toContractValue, CHAIN_ID_NAMES } from '../utils'
 import { useContract } from '../hooks'
 import { Contract } from '@ethersproject/contracts'
 import { EMBLEM_API, contractAddresses } from '../constants'
 import { TransactionToast } from './TransactionToast'
 import { parseUnits } from '@ethersproject/units'
+import BridgeDeposits from './partials/BridgeDeposits'
+
 
 export default function SwapChain() {
   const { query } = useRouter()
@@ -24,15 +26,14 @@ export default function SwapChain() {
   const [experimental, setExperimental] = useState(query.experimental)
   const [decimals, setDecimals] = useState(null)
   const [allowance, setAllowance] = useState(null)
-  const [transferChain, setTransferChain] = useState(137)
+  const [transferChain, setTransferChain] = useState(0)
   const [covalApprovedFor, setIsCovalApproved] = useState(0)
   const [hash, setHash] = useState(null)
   const [swapAmount, setSwapAmount] = useState(0)
   const [isInvalid, setIsInvalid] = useState(false)
-
+  const [transferChainChanged, setTransferChainChanged] = useState(true)
   const handlerContract = useContract(contractAddresses.vaultHandler[chainId], contractAddresses.vaultHandlerAbi, true)
   const covalContract = useContract(contractAddresses.coval[chainId], contractAddresses.covalAbi, true)
-
 
   interface ErrorWithCode extends Error {
     code?: number
@@ -135,6 +136,8 @@ export default function SwapChain() {
     account && chainId ? setState({ loaded: true }) : null
   }, [])
 
+
+
   return (
     <Loader loaded={state.loaded}>
       {loadingApi ? <Refreshing /> : ''}
@@ -189,7 +192,7 @@ export default function SwapChain() {
                   <Flex width="full" align="center" justifyContent="center" flexWrap="wrap">
                     <Text  float={'left'}>
                       from {
-                        chainId == 137 ? "Matic" : 
+                        chainId == 137 ? "Polygon (Matic)" : 
                         chainId == 100 ? "xDai" : 
                         chainId == 56 ? "Binance Smart Chain" : 
                         chainId == 250 ? "Fantom" : 
@@ -200,14 +203,16 @@ export default function SwapChain() {
                     <Select w="45%" value={transferChain}
                       onChange={(e)=>{
                         setTransferChain(Number(e.target.value))
+                        setTransferChainChanged(true)
                         console.log(Number(e.target.value))
                       }}
                     >
-                      <option value="137" disabled={chainId === 137 ? true : false} >Polygon (Matic)</option>
-                      <option value="100" disabled={chainId === 100 ? true : false}>xDai</option>
-                      <option value="56" disabled={chainId === 56 ? true : false}>Binance Smart Chain</option>
-                      <option value="1" disabled={chainId === 1 ? true : false}>Ethereum Mainnet</option>
-                      <option value="250" disabled={chainId === 250 ? true : false}>Fantom</option>
+                      <option value="0" >Temporarily under maintenance</option>
+                      {/* { chainId !==137 ? (<option value="137">Polygon (Matic)</option>): null }
+                      { chainId !==100 ? (<option value="100">xDai</option>): null }
+                      { chainId !==56 ? (<option value="56">Binance Smart Chain</option>): null }
+                      { chainId !==1 ? (<option value="1">Ethereum Mainnet</option>): null }
+                      { chainId !==250 ? (<option value="250">Fantom</option>): null } */}
                     </Select> 
                   </Flex>
                 </SwapText>
@@ -250,6 +255,23 @@ export default function SwapChain() {
               </Text>
             </Box>
           ) : null } */}
+          <Tabs>
+            <TabList className="TabList">
+                <Tab className="Tab">From {CHAIN_ID_NAMES[chainId]}</Tab>
+                {transferChain > 0 ? (<Tab className="Tab">From {CHAIN_ID_NAMES[transferChain]}</Tab>) : null}                
+            </TabList>
+            <TabPanels>
+                <TabPanel>
+                  <BridgeDeposits chainId={chainId}/>
+                </TabPanel>
+                <TabPanel>
+                  {transferChain && transferChainChanged? (
+                    <BridgeDeposits chainId={transferChain}/>
+                  ) : null}                  
+                </TabPanel>
+            </TabPanels>
+          </Tabs>
+          
         </Stack>
       </Flex>
       {hash ? (

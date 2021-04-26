@@ -36,11 +36,61 @@ import { Contract } from '@ethersproject/contracts'
 import { useContract } from '../hooks'
 import { isETHAddress } from '../utils'
 import Embed from './Embed'
+// react-doka
+import { DokaImageEditor, DokaImageEditorModal, DokaImageEditorOverlay } from 'react-doka';
+
+// doka
+import {
+    // editor
+    locale_en_gb,
+    createDefaultImageReader,
+    createDefaultImageWriter,
+
+    // plugins
+    setPlugins,
+    plugin_crop,
+    plugin_crop_locale_en_gb,
+    plugin_crop_defaults,
+    plugin_finetune,
+    plugin_finetune_locale_en_gb,
+    plugin_finetune_defaults,
+    plugin_filter,
+    plugin_filter_locale_en_gb,
+    plugin_filter_defaults,
+    plugin_annotate,
+    plugin_annotate_locale_en_gb,
+    markup_editor_defaults,
+    markup_editor_locale_en_gb,
+} from 'doka';
+
+setPlugins(plugin_crop, plugin_finetune, plugin_filter, plugin_annotate);
+
+const editorDefaults = {
+    imageReader: createDefaultImageReader(),
+    imageWriter: createDefaultImageWriter(),
+    ...plugin_crop_defaults,
+    ...plugin_finetune_defaults,
+    ...plugin_filter_defaults,
+    ...markup_editor_defaults,
+    locale: {
+        ...locale_en_gb,
+        ...plugin_crop_locale_en_gb,
+        ...plugin_finetune_locale_en_gb,
+        ...plugin_filter_locale_en_gb,
+        ...plugin_annotate_locale_en_gb,
+        ...markup_editor_locale_en_gb,
+    },
+};
 
 let tokenId = null
 let mintPassword = null
 
 export default function Create(props: any) {
+  // modal
+  const [modalVisible, setModalVisible] = useState(false);
+  const [modalResult, setModalResult] = useState('');
+  const [showEditorButton, setShowEditorButton] = useState(true);
+
   const { isOpen, onToggle } = useDisclosure()
   const { query } = useRouter()
   const [tabIndex, setTabIndex] = useState(0)
@@ -183,18 +233,27 @@ export default function Create(props: any) {
     const preview = document.querySelector('#preview') as HTMLImageElement
     const inputelement = document.querySelector('input[type=file]') as HTMLInputElement //.files[0];
     const reader = new FileReader()
-
+    if (inputelement.files[0].size > 5000000) {
+      delete inputelement.files
+      return alert('File too large')
+    } else {
+      // alert('under')
+    }
     reader.addEventListener(
       'load',
       function () {
         // convert image file to base64 string
         if (preview) preview.src = reader.result?.toString() || ''
         if (preview) setVaultImage(preview.src)
+        setShowEditorButton(true)
+        setModalResult('')
       },
       false
     )
 
     if (inputelement.files) {
+
+      
       reader.readAsDataURL(inputelement.files[0])
     }
   }
@@ -220,6 +279,7 @@ export default function Create(props: any) {
               <Tab>Make</Tab>
               <Tab>My</Tab>
               <Tab>Vault</Tab>
+              {/* <Tab>EDIT</Tab> */}
             </TabList>
 
             <TabPanels>
@@ -445,7 +505,40 @@ export default function Create(props: any) {
                           </Select>
                           {
                             vaultType == "upload" ? (
-                              <img id="preview" src="" width="250" margin-top="6"></img>
+                              <>
+                                
+                                  <img id="preview" src={modalResult} width="250" margin-top="6"></img>
+                                
+                                
+                                {modalVisible && (
+                                    <DokaImageEditorModal
+                                        {...editorDefaults}
+                                        className='doka'
+                                        src={vaultImage}
+                                        onLoad={(res) => console.log('load modal image', res)}
+                                        onHide={() => setModalVisible(false)}
+                                        onProcess={({ dest }) => {
+                                          var reader = new FileReader();
+                                            reader.readAsDataURL(dest); 
+                                            reader.onloadend = function() {
+                                                var base64data = reader.result?.toString();                
+                                                setVaultImage(base64data)
+                                                setModalResult(URL.createObjectURL(dest))
+                                                setShowEditorButton(false)
+                                            }
+                                          }
+                                        }
+                                    />
+                                )}
+                                {/* {!!modalResult.length && (
+                                    <p>
+                                        <img src={modalResult} alt="" />
+                                    </p>
+                                )} */}
+                                {showEditorButton && vaultImage? (
+                                  <Button mt={2} onClick={() => setModalVisible(true)}>Edit Image</Button>
+                                ):null}
+                              </>
                             ) : showEmbed == true ? (
                               <>                                
                                 <Embed url={vaultImage}/>
@@ -511,7 +604,8 @@ export default function Create(props: any) {
                         !vaultName ||
                         vaultName.length < 3 ||
                         !vaultDesc ||
-                        vaultDesc.length < 3 ? (
+                        vaultDesc.length < 3 || 
+                        !vaultImage ? (
                         <Button isDisabled type="submit">
                           Check Fields!
                         </Button>
@@ -562,6 +656,19 @@ export default function Create(props: any) {
                   </Alert>
                 ) : null}
               </TabPanel>
+              {/* <TabPanel>
+                <Stack>
+                <div style={{ height: '70vh', backgroundColor: 'white' }}>
+                  <DokaImageEditor
+                      {...editorDefaults}
+                      className='doka'
+                      src={'./image.jpeg'}
+                      onLoad={(res: any) => console.log('load inline image', res)}
+                      onProcess={({ dest }) => setInlineResult(URL.createObjectURL(dest))}
+                  />
+                </div>
+                </Stack>
+              </TabPanel> */}
             </TabPanels>
           </Tabs>
         </Box>
