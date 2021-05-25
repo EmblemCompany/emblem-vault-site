@@ -9,8 +9,9 @@ import { EMBLEM_API } from '../constants'
 import CoinBalance from './partials/CoinBalance'
 import Embed from './Embed'
 
-export default function Featured() {
+export default function Newest() {
   const { query } = useRouter()
+  const [pagePosition, setPagePosition] = useState(Number(query.start) || 0)
   const { account, chainId } = useWeb3React()
   const [vaults, setVaults] = useState([])
   const [state, setState] = useState({ loaded: false })
@@ -22,7 +23,7 @@ export default function Featured() {
   const getVaults = async () => {
     loadCache()
     try {
-      const response = await fetch(EMBLEM_API + '/featured/', {
+      const response = await fetch(EMBLEM_API + '/newest/?start='+pagePosition+'&size=3', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -39,8 +40,31 @@ export default function Featured() {
     } catch (error) {}
   }
 
+  const more = ()=>{
+    if (location.href.includes('start')) {
+      location.href = location.href.replace('start='+pagePosition, 'start='+(pagePosition + 3))
+    } else {
+      location.href = location.href + '?start='+(pagePosition + 3)
+    }
+    // setPagePosition(pagePosition + 3)
+    // getVaults()
+  }
+
+  const less = ()=>{
+    if (pagePosition - 3 < 0) {
+      setPagePosition(3)
+    }
+    if (location.href.includes('start')) {
+      location.href = location.href.replace('start='+pagePosition, 'start='+(pagePosition - 3))
+    } else {
+      location.href = location.href + '?start='+(pagePosition - 3)
+    }
+    // setPagePosition(pagePosition + 3)
+    // getVaults()
+  }
+
   const loadCache = () => {
-    let vaults = JSON.parse(localStorage.getItem((address ? address : account) + '_' + chainId + '_featured')) // Load vaults from storage before updating from server!
+    let vaults = JSON.parse(localStorage.getItem((address ? address : account) + '_' + chainId + '_newest')) // Load vaults from storage before updating from server!
     if (vaults) {
       setState({ loaded: true })
       setVaults(vaults)
@@ -49,7 +73,7 @@ export default function Featured() {
   }
 
   const saveCache = (vaults) => {
-    localStorage.setItem((address ? address : account) + '_' + chainId + '_featured', JSON.stringify(vaults)) // Save new state for later
+    localStorage.setItem((address ? address : account) + '_' + chainId + '_newest', JSON.stringify(vaults)) // Save new state for later
   }
 
   const [acct, setAcct] = useState('')
@@ -78,8 +102,15 @@ export default function Featured() {
   return (
     <Loader loaded={state.loaded}>
       {loadingApi ? <Refreshing /> : ''}
-
+        <Stack float="left" align="left">
+          {pagePosition > 0 ? <Link onClick={()=>{less()}} mt={10} ml={5}>Previous</Link> : null }
+        </Stack>
+        <Stack float="right" align="right">
+          <Link onClick={()=>{more()}} mt={10} mr={5}>Next</Link>
+        </Stack>
       <Flex w="100%" justify="center" flexWrap="wrap" mt={10}>
+        
+      
         {vaults.length ? (
           vaults.map((vault, index) => {
             let pieces = location.pathname.split('/')
@@ -159,7 +190,7 @@ export default function Featured() {
               CREATE ONE HERE!
             </Link>
           </Text>
-        )}
+        )}        
       </Flex>
     </Loader>
   )

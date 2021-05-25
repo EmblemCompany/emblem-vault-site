@@ -2,7 +2,7 @@ const debug = process.env.NODE_ENV !== 'production'
 const withTM = require('next-transpile-modules')(['doka', 'react-doka']);
 module.exports = withTM({
   reactStrictMode: false,
-  assetPrefix: !debug ? '.' : '.',
+  assetPrefix: '/',
   env: {
     IPFS: process.env.IPFS === 'true' ? 'true' : 'false',
     COMMIT_SHA: process.env.VERCEL_GITHUB_COMMIT_SHA || process.env.GITHUB_SHA || 'master',

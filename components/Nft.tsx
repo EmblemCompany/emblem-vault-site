@@ -34,6 +34,7 @@ import { TransactionToast } from './TransactionToast'
 import { EMBLEM_API, BURN_ADDRESS, contractAddresses } from '../constants'
 import { useContract } from '../hooks'
 import Tilt from 'react-tilt'
+import { CHAIN_ID_NAMES } from '../utils'
 import CryptoJS from 'crypto-js'
 import { addTokenToWallet, addMany } from '../public/web3'
 import ReactMarkdown from 'react-markdown'
@@ -61,6 +62,7 @@ export default function Nft() {
   const [vaultDesc, setVaultDesc] = useState('')
   const [vaultImage, setVaultImage] = useState('')
   const [vaultValues, setVaultValues] = useState([])
+  const [loadedValues, setLoadedValues] = useState(false)
   const [vaultDataValues, setVaultDataValues] = useState([])
   const [vaultAddresses, setVaultAddresses] = useState([])
   const [vaultPrivacy, setVaultPrivacy] = useState(false)
@@ -101,6 +103,7 @@ export default function Nft() {
   const { isOpen: isOpenAddrModal, onOpen: onOpenAddrModal, onClose: onCloseAddrModal } = useDisclosure()
   const { isOpen: isOpenKeysModal, onOpen: onOpenKeysModal, onClose: onCloseKeysModal } = useDisclosure()
   const { isOpen, onToggle } = useDisclosure()
+  const { isOpen: isManageAddressOpen, onToggle: onManageAddressToggle } = useDisclosure()
 
   const { colorMode } = useColorMode()
 
@@ -249,6 +252,14 @@ export default function Nft() {
       setLoadingApi(false)
       setInvalidVault(false)
     }
+    {
+      !vaultPrivacy && !loadedValues ?    
+      getAllBalancesLive([], tokenId, (v)=>{
+        if (v) {
+          setVaultValues(v)
+        }        
+      }) : null
+    }
   }
 
   const getIPFSImage = async function(hash){
@@ -267,7 +278,6 @@ export default function Nft() {
   }
 
   const getWitness = async (cb) => {
-    
     const responce = await fetch(EMBLEM_API + '/witness/' + tokenId, {
       method: 'GET',
       headers: {
@@ -319,23 +329,6 @@ export default function Nft() {
         return item.address.includes('private:')
       }).length > 0
     setVaultPrivacy(isPvt)
-    setTimeout(() => {
-      !isPvt ?
-      // getNftBalance(
-      //   jsonData.values,
-      //   jsonData.addresses.filter((item) => {
-      //     return item.coin === 'ETH'
-      //   })[0].address,
-      //   (_values) => {
-      //     // console.log("Have new values", _values)
-      //     setVaultValues(_values)
-      getAllBalancesLive([], tokenId, (v)=>{
-        setVaultValues(v)
-      }) : null
-        // }
-      // ) : null
-
-    }, 5)
   }
 
   const getEthBalances = async (address, cb) => {
@@ -406,6 +399,10 @@ export default function Nft() {
   const getAllBalancesLive = async (values, tokenId, cb) => {
     // setVaultValues([])
     // console.log(address)
+    if (loadedValues) {
+      return cb(false)
+    }
+    setLoadedValues(true)
     const responce = await fetch(EMBLEM_API + '/vault/balance/' + tokenId + '?live=true' , {
       method: 'GET',
       headers: {
@@ -482,6 +479,24 @@ export default function Nft() {
     return cb(jsonData)
   }
 
+  const addAddress = async (signature, tokenId, coin, cb) => {
+    var myHeaders = new Headers()
+    myHeaders.append('chainId', chainId.toString())
+    myHeaders.append('service', 'evmetadata')
+    myHeaders.append('Content-Type', 'application/json')
+
+    var raw = JSON.stringify({ signature: signature, coin: coin })
+    const responce = await fetch(EMBLEM_API + '/address/' + tokenId, {
+      method: 'POST',
+      headers: myHeaders,
+      body: raw,
+      redirect: 'follow',
+    })
+    const jsonData = await responce.json()
+    // console.log('getKeys response is ', jsonData)
+    return cb(jsonData)
+  }
+
   const getContractStates = async () => {
     let owned = false
     try {
@@ -504,6 +519,11 @@ export default function Nft() {
     // console.log("acceptable", acceptable)
   })
 
+  const hasAddress = (coin)=>{
+    console.log(coin, vaultAddresses.filter(address=>{ return address.coin == coin}).length > 0)
+    return vaultAddresses.filter(address=>{ return address.coin == coin}).length > 0
+  }
+
   const handleSign = async () => {
     // library. .personal.sign(library.toHex("Claim:358746"),library.eth.defaultAccount, (err,res) => console.log(err,res))
     library
@@ -525,6 +545,17 @@ export default function Nft() {
           )
           setKeyValues(result.decrypted.values)
           onOpenKeysModal()
+        })
+      })
+  }
+
+  const handleAddressSign = async (coin: string) => {
+    library
+      .getSigner(account)
+      .signMessage('Address: ' + tokenId)
+      .then((signature) => {
+        addAddress(signature, tokenId, coin, (result) => {
+          getVault()
         })
       })
   }
@@ -661,6 +692,18 @@ export default function Nft() {
     return decryptedData
   }
 
+  function visitOpenSeaLink() {
+    location.href = (
+      'https://' +
+      (vaultChainId == 4 ? 'rinkeby.' : '') +
+      'opensea.io/assets/' + 
+      (vaultChainId == 137 ? 'matic/' : '') +
+      contractAddresses.emblemVault[vaultChainId] +
+      '/' +
+      tokenId 
+    )
+  }
+
   return (
     <>
        <Head>
@@ -717,9 +760,9 @@ export default function Nft() {
                     textAlign="center"
                     textTransform="uppercase"
                     alignItems="center"
-                    color="orange.500"
+                    color="blue.500"
                   >
-                    BEWARE: Vault is on a different network than you are.
+                    Vault Network: {CHAIN_ID_NAMES[vaultChainId]}
                   </Box>
                 ) : null}
                 <Box
@@ -780,6 +823,7 @@ export default function Nft() {
                           Current Contents:  <button
                           onClick={() =>{
                             getAllBalancesLive([], tokenId, (v)=>{
+                              setLoadedValues(false)
                               setVaultValues(v)
                             })
                           }}
@@ -812,29 +856,50 @@ export default function Nft() {
                     <Box d="flex" alignItems="baseline" justifyContent="space-between" mt="4">
                       <ButtonGroup justifyContent="space-between" spacing={6}>
                         <Stack>
-                          <Text>Addresses Within Vault</Text>
-                        <HStack>
-                          {vaultAddresses.map((addr) => {
-                            return (
-                              <Button
-                                width="165px"
-                                key={addr.address}
-                                onClick={() => {
-                                  setCurrCoin(addr.coin)
-                                  setCurrAddr(addr.address)
-                                  onOpenAddrModal()
-                                }}
-                              >
-                                Put {addr.coin == 'ETH' ? addr.coin + '/ERC20' : addr.coin} In
-                              </Button>
-                            )
-                          })}
-                        </HStack>
+                          <Text>Deposit Addresses</Text>
+                          <Flex w="340px" justify="center" flexWrap="wrap">
+                            {vaultAddresses.map((addr) => {
+                              return (
+                                <Button
+                                  className="nft_button"
+                                  
+                                  ml={2}
+                                  mt={2}
+                                  font-weight="100 !important"
+                                  key={addr.address}
+                                  onClick={() => {
+                                    setCurrCoin(addr.coin)
+                                    setCurrAddr(addr.address)
+                                    onOpenAddrModal()
+                                  }}
+                                >
+                                  {addr.coin == 'ETH' ? addr.coin + '' : addr.coin == 'BTC' ? addr.coin + '/XCP/OMNI' : addr.coin == 'BCH' ? addr.coin + '/SLP': addr.coin}
+                                </Button>
+                              )
+                            })}
+                        </Flex>
+                        {mine && vaultAddresses.length < 5 ? (
+                          <>
+                            <button className="nft_button" onClick={onManageAddressToggle}>Manage Addresses</button>
+                            <Flex w="340px" justify="center" flexWrap="wrap">
+                              <Collapse isOpen={isManageAddressOpen}>
+                                { !hasAddress('DOGE') ? (
+                                  <Button mr={2} onClick={()=>{ handleAddressSign('DOGE') }}>Add DOGE</Button>
+                                ) : null }
+                                { !hasAddress('DGB') ? (
+                                  <Button mr={2} onClick={()=>{ handleAddressSign('DGB') }}>Add Digibyte</Button>
+                                ) : null }
+                              </Collapse>
+                            </Flex>
+                          </>
+                        ) : null}                        
                         <Text>Load Vault with Credit Card</Text>
                         <HStack>
                           {vaultAddresses.map((addr) => {
+                            if (addr.coin == 'ETH' || addr.coin == 'BTC')
                             return (
                               <Button
+                                className = 'nft_button'
                                 width="165px"
                                 key={addr.address}
                                 onClick={() => {
@@ -854,22 +919,24 @@ export default function Nft() {
                     </Box>
                   ) : null}
 
-                  {!(status === 'claimed') && (vaultChainId === 1 || vaultChainId === 4 )? (
+                  {!(status === 'claimed') && (vaultChainId === 1 || vaultChainId === 4 || vaultChainId === 137 )? (
                     <Box d="flex" alignItems="baseline" justifyContent="space-between" mt="4">
                       <Button
+                        className="nft_button"
                         width="100%"
-                        as="a"
-                        {...{
-                          href:
-                            'https://' +
-                            (vaultChainId == 4 ? 'rinkeby.' : '') +
-                            'opensea.io/assets/' +
-                            contractAddresses.emblemVault[vaultChainId] +
-                            '/' +
-                            tokenId,
-                          target: '_blank',
-                          rel: 'noopener noreferrer',
-                        }}
+                        // as="a"
+                        // {...{
+                        //   url:
+                        //     'https://' +
+                        //     (vaultChainId == 4 ? 'rinkeby.' : '') +
+                        //     'opensea.io/assets/' + (vaultChainId == 137 ? 'matic/' : '') +
+                        //     contractAddresses.emblemVault[vaultChainId] +
+                        //     '/' +
+                        //     tokenId,
+                        //   target: '_blank',
+                        //   rel: 'noopener noreferrer',
+                        // }}
+                        onClick={() => {visitOpenSeaLink()}}
                       >
                         {mine ? 'Sell (Opensea)' : 'Make an Offer (Opensea)'}
                       </Button>
@@ -879,7 +946,7 @@ export default function Nft() {
                     <>
                      <Box d="flex" alignItems="baseline" justifyContent="space-between" mt="4" width="100%">
                         <Stack direction="column" align="center" width="100%">
-                          <Button width="100%" onClick={onToggle}>Transfer Vault</Button>
+                          <Button className="nft_button" width="100%" onClick={onToggle}>Transfer Vault</Button>
                           <Collapse isOpen={isOpen}>
                             <Box d="flex" alignItems="baseline" justifyContent="space-between" mt="2" width="100%">
                             <FormLabel htmlFor="owner-address">Address</FormLabel>
@@ -908,7 +975,9 @@ export default function Nft() {
                   ):null }
                   {mine && !acceptable ? (<>
                     <Box d="flex" alignItems="baseline" justifyContent="space-between" mt="4">
-                      <Button width="100%" onClick={() => {
+                      <Button 
+                        className="nft_button"
+                        width="100%" onClick={() => {
                         if (!approved) {
                           return handleApproveForall()
                         } else {
@@ -974,8 +1043,10 @@ export default function Nft() {
                 {vaultIPFS ? (
                   <Stack>
                     <HStack align="center">
-                      <Link target='new' ml={35} href={'https://gateway.ipfs.io/ipfs/'+vaultIPFS} isExternal>View Metadata on IPFS </Link>
-                      <Link href={'https://gateway.ipfs.io/ipfs/'+vaultImageIPFS} isExternal>View Image on IPFS </Link>
+                      <Link target='new' mb={2} ml={35} href={'https://gateway.ipfs.io/ipfs/'+vaultIPFS} isExternal>View Metadata on IPFS </Link>
+                      {vaultImageIPFS? (
+                        <Link mb={2} href={'https://gateway.ipfs.io/ipfs/'+vaultImageIPFS} isExternal>View Image on IPFS </Link>
+                      ) : null}                      
                     </HStack> 
                   </Stack>
                 ) : null }

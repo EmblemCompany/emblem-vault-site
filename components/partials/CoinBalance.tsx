@@ -18,7 +18,8 @@ type CoinDetails = {
   type: string,
   external_url: string,
   balance: number,
-  price: number
+  price: number,
+  image?: string
 }
 
 type CoinBalanceProps = {
@@ -32,7 +33,11 @@ export class CoinBalance extends Component<CoinBalanceProps> {
     return (
       <HStack key={coin.name} w="300px" p={2} >
           <Box className="coin-image-container" w="100%" min-width="40px">                                
-            {coin.address && validImage("https://token-icons.s3.amazonaws.com/"+coin.address+".png") ? (
+            {
+            coin.image ? (
+              <Image width="40px" src={coin.image}></Image>
+            ) :
+            coin.address && validImage("https://token-icons.s3.amazonaws.com/"+coin.address+".png") ? (
               <Image width="40px" src={"https://token-icons.s3.amazonaws.com/"+coin.address+".png"}></Image>
             ) : coin.coin && validImage("https://s3.amazonaws.com/token-icons/"+coin.coin.toLowerCase()+".png")? (
               <Image width="40px" src={"https://s3.amazonaws.com/token-icons/"+coin.coin.toLowerCase()+".png"}></Image>

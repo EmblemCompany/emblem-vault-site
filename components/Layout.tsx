@@ -14,10 +14,11 @@ import { WETH, ChainId, Token } from '@uniswap/sdk'
 import WalletConnect from './WalletConnect'
 import { QueryParameters } from '../constants'
 import { Coval, CovalTest, CovalTestMatic, CovalMatic, CovalxDai, CovalBSC, CovalFantom, DEFAULT_TOKENS } from '../tokens'
+import Head from 'next/head'
 
 const Settings = dynamic(() => import('./Settings'))
 
-export default function Layout({ children }: { children: ReactNode }): JSX.Element {
+export default function Layout({ children }: { children: ReactNode}): JSX.Element {
   const { chainId, account } = useWeb3React()
   const isTestnet = typeof chainId === 'number' && chainId !== 1
 

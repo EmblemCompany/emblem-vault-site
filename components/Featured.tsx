@@ -9,7 +9,7 @@ import { EMBLEM_API } from '../constants'
 import CoinBalance from './partials/CoinBalance'
 import Embed from './Embed'
 
-export default function Newest() {
+export default function Featured() {
   const { query } = useRouter()
   const { account, chainId } = useWeb3React()
   const [vaults, setVaults] = useState([])
@@ -22,7 +22,7 @@ export default function Newest() {
   const getVaults = async () => {
     loadCache()
     try {
-      const response = await fetch(EMBLEM_API + '/newest/', {
+      const response = await fetch(EMBLEM_API + '/featured/', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -40,7 +40,7 @@ export default function Newest() {
   }
 
   const loadCache = () => {
-    let vaults = JSON.parse(localStorage.getItem((address ? address : account) + '_' + chainId + '_newest')) // Load vaults from storage before updating from server!
+    let vaults = JSON.parse(localStorage.getItem((address ? address : account) + '_' + chainId + '_featured')) // Load vaults from storage before updating from server!
     if (vaults) {
       setState({ loaded: true })
       setVaults(vaults)
@@ -49,7 +49,7 @@ export default function Newest() {
   }
 
   const saveCache = (vaults) => {
-    localStorage.setItem((address ? address : account) + '_' + chainId + '_newest', JSON.stringify(vaults)) // Save new state for later
+    localStorage.setItem((address ? address : account) + '_' + chainId + '_featured', JSON.stringify(vaults)) // Save new state for later
   }
 
   const [acct, setAcct] = useState('')

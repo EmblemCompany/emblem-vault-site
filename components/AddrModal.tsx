@@ -54,7 +54,7 @@ export default function AddrModal({
       <ModalOverlay />
       <ModalContent color={COLOR[colorMode]}>
         <ModalHeader>
-          <Text>Send Stuff Here</Text>
+          <Text>{coin} Deposit Address</Text>
         </ModalHeader>
         <ModalCloseButton />
         <ModalBody>
