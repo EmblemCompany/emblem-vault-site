@@ -1,4 +1,4 @@
-(window["webpackJsonp_N_E"] = window["webpackJsonp_N_E"] || []).push([[7],{
+webpackHotUpdate_N_E(7,{
 
 /***/ "./components/OfferModal.tsx":
 /*!***********************************!*\
@@ -12,4 +12,4 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* WEBPACK VAR INJECTION */(f
 
 /***/ })
 
-}]);
+})
