@@ -54,7 +54,7 @@ export class CoinBalance extends Component<CoinBalanceProps> {
                 {coin.name}
               </Text>
               <Text float="right" width="40%" textAlign="right" fontWeight="bold" color={this.props.colorMode=="dark"? "lightgreen": "forestgreen"} >
-                ${coin && coin.price? Number(coin.price.toFixed(2)).toLocaleString(): 0  }
+                ${coin && coin.price && coin.price > 0 ? Number(coin.price.toFixed(2)).toLocaleString(): 0  }
               </Text>
             </HStack>
             <HStack w="100%" mt={0} spacing="4px" className = "coin-display-row">

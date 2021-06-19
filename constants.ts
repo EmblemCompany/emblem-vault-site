@@ -57,7 +57,7 @@ export const contractAddresses = {
   },
   covalAbi: CovalABI,
   nftrade: {
-    137: '0x40f3eeDf0033DC3e00d7DfE42EB0969f90a4B699'
+    137: '0x88f5Cc3624247477bE5f691648A7D1B2631965B9'
   },
   nftradeAbi: NftradeABI
 }

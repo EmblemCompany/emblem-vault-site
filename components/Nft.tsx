@@ -47,12 +47,14 @@ import transakSDK from '@transak/transak-sdk'
 
 const AddrModal = dynamic(() => import('./AddrModal'))
 const KeysModal = dynamic(() => import('./KeysModal'))
+const OfferModal = dynamic(() => import('./OfferModal'))
 
 export default function Nft() {
   const { account, chainId, library } = useWeb3React()
   const { query } = useRouter()
   const [approved, setApproved] = useState(false)
   const [mintPassword, setMintPassword] = useState(query.key)
+  const [showOffer, setShowOffer] = useState(query.offer || false)
   const [framed, setFramed] = useState(query.framed || true)
   const [tokenId, setTokenId] = useState(query.id)
   const [experimental, setExperimental] = useState(query.experimental)
@@ -61,6 +63,7 @@ export default function Nft() {
   const [vaultImageIPFS, setVaultImageIPFS] = useState('')
   const [vaultDesc, setVaultDesc] = useState('')
   const [vaultImage, setVaultImage] = useState('')
+  const [ownedImage, setOwnedImage] = useState('')
   const [vaultValues, setVaultValues] = useState([])
   const [loadedValues, setLoadedValues] = useState(false)
   const [vaultDataValues, setVaultDataValues] = useState([])
@@ -102,6 +105,7 @@ export default function Nft() {
 
   const { isOpen: isOpenAddrModal, onOpen: onOpenAddrModal, onClose: onCloseAddrModal } = useDisclosure()
   const { isOpen: isOpenKeysModal, onOpen: onOpenKeysModal, onClose: onCloseKeysModal } = useDisclosure()
+  const { isOpen: isOpenOfferModal, onOpen: onOpenOfferModal, onClose: onCloseOfferModal } = useDisclosure()
   const { isOpen, onToggle } = useDisclosure()
   const { isOpen: isManageAddressOpen, onToggle: onManageAddressToggle } = useDisclosure()
 
@@ -300,6 +304,7 @@ export default function Nft() {
     framed && !jsonData.image.includes('framed=') && !jsonData.image.includes('http') ? jsonData.image = jsonData.image + "&framed="+framed : null
     setVaultName(jsonData.name)
     setVaultImage(jsonData.image)
+    setOwnedImage(jsonData.ownedImage || null)
     setVaultDesc(jsonData.description)
     setVaultTotalValue(jsonData.totalValue || 0)
     setVaultValues(vaultValues.concat(jsonData.values))
@@ -497,6 +502,24 @@ export default function Nft() {
     return cb(jsonData)
   }
 
+  const decryptEmbed = async (signature, tokenId, cb) => {
+    var myHeaders = new Headers()
+    myHeaders.append('chainId', chainId.toString())
+    myHeaders.append('service', 'evmetadata')
+    myHeaders.append('Content-Type', 'application/json')
+
+    var raw = JSON.stringify({ signature: signature })
+    const responce = await fetch(EMBLEM_API + '/embed/' + tokenId, {
+      method: 'POST',
+      headers: myHeaders,
+      body: raw,
+      redirect: 'follow',
+    })
+    const jsonData = await responce.json()
+    // console.log('getKeys response is ', jsonData)
+    return cb(jsonData)
+  }
+
   const getContractStates = async () => {
     let owned = false
     try {
@@ -557,6 +580,17 @@ export default function Nft() {
         addAddress(signature, tokenId, coin, (result) => {
           getVault()
         })
+      })
+  }
+
+  const handleOwnedEmbed = async () => {
+    library
+      .getSigner(account)
+      .signMessage('Embed: ' + tokenId)
+      .then((signature) => {
+        decryptEmbed(signature, tokenId, (result) => {
+          setVaultImage(result.ownedImage)
+        })        
       })
   }
 
@@ -638,6 +672,7 @@ export default function Nft() {
       key = decryptPassword
     }
     startDecryptEffect()
+    console.log(vaultAddresses)
     let ciphertext = vaultAddresses[0].address.replace('private:', '')
     try {
       var bytes = CryptoJS.AES.decrypt(ciphertext, key)
@@ -647,6 +682,7 @@ export default function Nft() {
       setVaultAddresses(decryptAddresses(key))
       let ethAddress = vaultAddresses.filter((item) => {return item.coin === 'ETH'})[0].address
       let btcAddress = vaultAddresses.filter((item) => {return item.coin === 'BTC'})[0].address
+      console.log("SUCCESS", vaultAddresses)
       getAllBalancesByAddress([], ethAddress, btcAddress, (values)=>{
         setVaultValues(values)
       })
@@ -675,13 +711,15 @@ export default function Nft() {
       //     )
       //   }
       // )
-    } catch (err) {}
+    } catch (err) {console.log('WTF', err)}
   }
 
   function decryptAddresses(key) {
     vaultAddresses.forEach((item) => {
-      let cipherText = item.address.replace('private:', '')
-      item.address = decrypt(cipherText, key)
+      if (item.address.includes('private')) {
+        let cipherText = item.address.replace('private:', '')
+        item.address = decrypt(cipherText, key)
+      }      
     })
     return vaultAddresses
   }
@@ -734,6 +772,15 @@ export default function Nft() {
         privKeyETH={privKeyETH}
         privValues={privValues}
       />
+      {showOffer ? (
+        <OfferModal
+          isOpen={isOpenOfferModal}
+          onClose={onCloseOfferModal}
+          tokenId={tokenId}
+          mine={mine}
+        />
+      ) : null}
+      
 
       <Loader loaded={state.loaded}>
         <Box height="40px"></Box>
@@ -750,21 +797,20 @@ export default function Nft() {
                 alignItems="center"
                 minW={390}
               >
-                {vaultChainId != chainId ? (
-                  <Box
-                    mt="1"
-                    fontWeight="semibold"
-                    as="h3"
-                    lineHeight="tight"
-                    p={2}
-                    textAlign="center"
-                    textTransform="uppercase"
-                    alignItems="center"
-                    color="blue.500"
-                  >
-                    Vault Network: {CHAIN_ID_NAMES[vaultChainId]}
-                  </Box>
-                ) : null}
+                
+                <Box
+                  mt="1"
+                  fontWeight="semibold"
+                  as="h3"
+                  lineHeight="tight"
+                  p={2}
+                  textAlign="center"
+                  textTransform="uppercase"
+                  alignItems="center"
+                  color="blue.500"
+                >
+                  Vault Network: {CHAIN_ID_NAMES[vaultChainId]}
+                </Box>
                 <Box
                   mt="1"
                   fontWeight="semibold"
@@ -776,7 +822,7 @@ export default function Nft() {
                   alignItems="center"
                 >
                   {vaultName}
-                  {!vaultPrivacy ? ': ~$' + vaultTotalValue.toLocaleString() : null}
+                  {!vaultPrivacy && vaultTotalValue > 0 ? ': ~$' + vaultTotalValue.toLocaleString() : null}
                 </Box>
                 <Stack className="NFT-content" align="center">
                   { vaultValues.length && vaultValues.filter(item=> {return item.type == "nft"}).length > 0 ? (
@@ -784,7 +830,10 @@ export default function Nft() {
                     ) : (
                       <Embed url={vaultImage}/>
                     )
-                  }                                    
+                  }
+                  {mine && ownedImage ? (
+                    <Button onClick={() => {handleOwnedEmbed()}}>(OWNED) Show Full Embed</Button>
+                  ): null}
                 </Stack>
                 <Stack align="center">
                   <Box mt="2" ml="4" lineHeight="tight">
@@ -921,25 +970,19 @@ export default function Nft() {
 
                   {!(status === 'claimed') && (vaultChainId === 1 || vaultChainId === 4 || vaultChainId === 137 )? (
                     <Box d="flex" alignItems="baseline" justifyContent="space-between" mt="4">
-                      <Button
-                        className="nft_button"
-                        width="100%"
-                        // as="a"
-                        // {...{
-                        //   url:
-                        //     'https://' +
-                        //     (vaultChainId == 4 ? 'rinkeby.' : '') +
-                        //     'opensea.io/assets/' + (vaultChainId == 137 ? 'matic/' : '') +
-                        //     contractAddresses.emblemVault[vaultChainId] +
-                        //     '/' +
-                        //     tokenId,
-                        //   target: '_blank',
-                        //   rel: 'noopener noreferrer',
-                        // }}
-                        onClick={() => {visitOpenSeaLink()}}
-                      >
-                        {mine ? 'Sell (Opensea)' : 'Make an Offer (Opensea)'}
-                      </Button>
+                      <Stack d="flex" width="100%">
+                        <Button
+                          className="nft_button"
+                          width="100%"
+                          onClick={() => {visitOpenSeaLink()}}
+                        >
+                          {mine ? 'Sell (Opensea)' : 'Make an Offer (Opensea)'}
+                        </Button>
+                        {showOffer? (
+                          <Button className="" onClick={() => { onOpenOfferModal() }}>{mine? ('My Offers') : ('Make an Offer')} (NFT²NFT)</Button>
+                        ) : null}
+                        
+                      </Stack>
                     </Box>
                   ) : null}
                   {!(status === 'claimed') && mine && !acceptable?  (

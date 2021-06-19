@@ -136,7 +136,7 @@ export default function Newest() {
               <Box className="NFT" key={index} {...flexSettings} onClick={redirect}>
                 <Text fontWeight="semibold" textAlign="center" mt={2}>
                   {vault.name}
-                  {!vault.private ? ': ~$' + vault.totalValue : null}
+                  {!vault.private && vault.totalValue > 0 ? ': ~$' + vault.totalValue : null}
                 </Text>
                 <Stack align="center">
                   <Embed url={vault.image}/>

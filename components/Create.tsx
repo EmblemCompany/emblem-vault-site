@@ -38,6 +38,7 @@ import { isETHAddress } from '../utils'
 import Embed from './Embed'
 // react-doka
 import { DokaImageEditor, DokaImageEditorModal, DokaImageEditorOverlay } from 'react-doka';
+import transakSDK from '@transak/transak-sdk'
 
 // doka
 import {
@@ -100,6 +101,7 @@ export default function Create(props: any) {
   const [vaultName, setVaultName] = useState('')
   const [vaultDesc, setVaultDesc] = useState('')
   const [vaultImage, setVaultImage] = useState('')
+  const [ownedImage, setOwnedImage] = useState('')
   const [password, setPassword] = useState('')
   // const [service, setService] = useState('')
   const [isCovalApproved, setIsCovalApproved] = useState(false)
@@ -127,6 +129,38 @@ export default function Create(props: any) {
 
   interface ErrorWithCode extends Error {
     code?: number
+  }
+
+  let transak
+  const initializeTransak = (address?: string, coin? : string)=>{
+    transak = new transakSDK({
+      apiKey: 'e8bed1bd-6844-4eb1-973a-7a11a48fafab',  // Your API Key
+      environment: 'PRODUCTION', // STAGING/PRODUCTION
+      defaultCryptoCurrency: coin || 'ETH',
+      walletAddress: address || '', // Your customer's wallet address
+      themeColor: '000000', // App theme color
+      fiatCurrency: 'USD', // INR/GBP
+      // fiatAmount: 350,
+      email: '', // Your customer's email address
+      redirectURL: '',
+      // paymentMethod: 'neft_bank_transfer',
+      hostURL: window.location.origin,
+      widgetHeight: '550px',
+      widgetWidth: '450px'
+    });
+  
+    // To get all the events
+    transak.on(transak.ALL_EVENTS, (data) => {
+      console.log(data)
+    });
+  
+    // This will trigger when the user marks payment is made.
+    transak.on(transak.EVENTS.TRANSAK_ORDER_SUCCESSFUL, (orderData) => {
+      console.log(orderData);
+      transak.close();
+    });
+  
+    transak.init()
   }
 
   const getContractStates = async () => {
@@ -201,6 +235,7 @@ export default function Create(props: any) {
       toAddress: vaultAddress,
       description: vaultDesc,
       name: vaultName,
+      ownedImage: ownedImage,
       image: vaultImage,
       chainId: chainId,
       private: state.private,
@@ -464,7 +499,7 @@ export default function Create(props: any) {
                           {
                             vaultType !== "upload" ? (
                               <>
-                                <FormLabel htmlFor="vault-image-url">{vaultType.toUpperCase()} URL</FormLabel>
+                                <FormLabel htmlFor="vault-image-url">Embed Display URL</FormLabel>
                                 <Input
                                   type="text"
                                   id="vault-image-url"
@@ -477,6 +512,22 @@ export default function Create(props: any) {
                                     setVaultImage(e.target.value)
                                     setShowEmbed(true)
                                     console.log("showEmbed", showEmbed)
+                                  }}
+                                  autoComplete="off"
+                                  w={300}
+                                />
+                                <hr/>
+                                <FormLabel mt={3} htmlFor="owned-url">Optional URL For Vault Owner *</FormLabel>
+                                <Input
+                                  type="text"
+                                  id="owned-url"
+                                  aria-describedby="owned-url-text"
+                                  minLength={3}
+                                  maxLength={200}
+                                  value={ownedImage}
+                                  defaultValue="http://"
+                                  onChange={(e) => {
+                                    setOwnedImage(e.target.value)
                                   }}
                                   autoComplete="off"
                                   w={300}
@@ -498,10 +549,10 @@ export default function Create(props: any) {
                               console.log("type", vaultType)
                             }}
                           >
-                            <option value="image" >Image (url)</option>
-                            <option value="upload" >Image (upload)</option>
                             <option value="embed" >Embed (url)</option>
-                            <option value="video" >Video (url)</option>
+                            <option value="upload" >Image (upload)</option>
+                            {/* <option value="embed" >Embed (url)</option>
+                            <option value="video" >Video (url)</option> */}
                           </Select>
                           {
                             vaultType == "upload" ? (
@@ -576,18 +627,19 @@ export default function Create(props: any) {
                     <Box d="flex" alignItems="baseline" justifyContent="space-between" mt="2">
                       <Button
                         width="100%"
-                        as="a"
-                        {...{
-                          href:
-                            location.origin +
-                            '/buy?chain=' +
-                            chainId +
-                            '&output=0x3D658390460295FB963f54dC0899cfb1c30776Df&input=0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
-                          target: '_blank',
-                          rel: 'noopener noreferrer',
-                        }}
+                        // as="a"
+                        // {...{
+                        //   href:
+                        //     location.origin +
+                        //     '/buy?chain=' +
+                        //     chainId +
+                        //     '&output=0x3D658390460295FB963f54dC0899cfb1c30776Df&input=0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
+                        //   target: '_blank',
+                        //   rel: 'noopener noreferrer',
+                        // }}
+                        onClick={()=>{initializeTransak(vaultAddress, 'COVAL')}}
                       >
-                        Buy coval
+                        Buy $Coval
                       </Button>
                     </Box>
                   ) : null}

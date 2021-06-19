@@ -84,7 +84,7 @@ export default function SwapChain() {
 
   const getTransferLogs = async () =>{
     console.log("getting logs")
-    fetch(EMBLEM_API + '/transfersOut', {
+    fetch(EMBLEM_API + '/web3/transfersOut', {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -200,23 +200,23 @@ export default function SwapChain() {
                       } to
                     </Text> 
                     <Image float={'left'} margin={2} w={3} src="./next.png" />
-                    <Select w="45%" value={transferChain}
+                    <Select w="40%" value={transferChain}
                       onChange={(e)=>{
                         setTransferChain(Number(e.target.value))
                         setTransferChainChanged(true)
                         console.log(Number(e.target.value))
                       }}
                     >
-                      <option value="0" >Temporarily under maintenance</option>
-                      {/* { chainId !==137 ? (<option value="137">Polygon (Matic)</option>): null }
+                      <option value="0" >Choose a chain</option>
+                      { chainId !==137 ? (<option value="137">Polygon (Matic)</option>): null }
                       { chainId !==100 ? (<option value="100">xDai</option>): null }
                       { chainId !==56 ? (<option value="56">Binance Smart Chain</option>): null }
                       { chainId !==1 ? (<option value="1">Ethereum Mainnet</option>): null }
-                      { chainId !==250 ? (<option value="250">Fantom</option>): null } */}
+                      { chainId !==250 ? (<option value="250">Fantom</option>): null }
                     </Select> 
                   </Flex>
                 </SwapText>
-                { swapAmount > 0 ? (
+                { transferChain!= 0 && swapAmount > 0 ? (
                   <Button isDisabled={isInvalid} onClick={transferToChain}>
                     { isInvalid ? "Invalid Transfer Amount" : "Transfer Now"}
                   </Button>

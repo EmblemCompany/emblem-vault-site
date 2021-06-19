@@ -15,6 +15,7 @@ import WalletConnect from './WalletConnect'
 import { QueryParameters } from '../constants'
 import { Coval, CovalTest, CovalTestMatic, CovalMatic, CovalxDai, CovalBSC, CovalFantom, DEFAULT_TOKENS } from '../tokens'
 import Head from 'next/head'
+import transakSDK from '@transak/transak-sdk'
 
 const Settings = dynamic(() => import('./Settings'))
 
@@ -37,6 +38,40 @@ export default function Layout({ children }: { children: ReactNode}): JSX.Elemen
   const requiredChainId = queryParameters[QueryParameters.CHAIN]
 
   const USDETHPrice = useUSDETHPrice()
+
+  let transak
+  const initializeTransak = (address?: string, coin? : string)=>{
+    transak = new transakSDK({
+      apiKey: 'e8bed1bd-6844-4eb1-973a-7a11a48fafab',  // Your API Key
+      environment: 'PRODUCTION', // STAGING/PRODUCTION
+      defaultCryptoCurrency: coin || 'ETH',
+      walletAddress: address || '', // Your customer's wallet address
+      themeColor: '000000', // App theme color
+      fiatCurrency: 'USD', // INR/GBP
+      // fiatAmount: 350,
+      email: '', // Your customer's email address
+      redirectURL: '',
+      // paymentMethod: 'neft_bank_transfer',
+      hostURL: window.location.origin,
+      widgetHeight: '550px',
+      widgetWidth: '450px',
+      // networks: 'matic,bsc,eth,mainnet'
+
+    });
+  
+    // To get all the events
+    transak.on(transak.ALL_EVENTS, (data) => {
+      console.log(data)
+    });
+  
+    // This will trigger when the user marks payment is made.
+    transak.on(transak.EVENTS.TRANSAK_ORDER_SUCCESSFUL, (orderData) => {
+      console.log(orderData);
+      transak.close();
+    });
+  
+    transak.init()
+  }
 
   const showOrHideNavLink = (path: string)=> {
     return location.pathname.includes(path) ? 'none': 'block'
@@ -233,18 +268,19 @@ export default function Layout({ children }: { children: ReactNode}): JSX.Elemen
           spacing="1rem"
         >
           <Button
-            as="a"
-            {...{
-              href:
-                location.origin +
-                '/buy?chain=' +
-                chainId +
-                '&output=0x3D658390460295FB963f54dC0899cfb1c30776Df&input=0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
-              target: '_blank',
-              rel: 'noopener noreferrer',
-            }}
+            // as="a"
+            // {...{
+            //   href:
+            //     location.origin +
+            //     '/buy?chain=' +
+            //     chainId +
+            //     '&output=0x3D658390460295FB963f54dC0899cfb1c30776Df&input=0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
+            //   target: '_blank',
+            //   rel: 'noopener noreferrer',
+            // }}
+            onClick={()=>{initializeTransak(account, 'COVAL')}}
           >
-            Buy Coval
+            Buy $Coval
           </Button>
         </Stack>
       </ColorBox>

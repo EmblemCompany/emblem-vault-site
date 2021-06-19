@@ -89,7 +89,7 @@ export default function BridgeDeposits(props: DepositProps) {
                                     <TableCell align="right">{row.returnValues.sender}</TableCell>
                                     <TableCell align="left">{row.transactionHash}</TableCell>
                                     <TableCell align="right">{CHAIN_ID_NAMES[row.returnValues.chainId]}</TableCell>
-                                    <TableCell align="right">{row.transferred? "Complete": "Pending"}</TableCell>
+                                    <TableCell align="right">{row.transferred == 'true' ? "Complete": "Pending"}</TableCell>
                                 </TableRow>
                             ) : null
                         ))}
@@ -101,7 +101,7 @@ export default function BridgeDeposits(props: DepositProps) {
 
     async function getDeposits(cb) {
 
-        const responce = await fetch(EMBLEM_API + '/transfersOutDb?pending='+showPending, {
+        const responce = await fetch(EMBLEM_API + '/web3/transfersOutDb?pending='+showPending, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',

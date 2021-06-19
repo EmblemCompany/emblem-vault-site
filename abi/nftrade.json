@@ -4,83 +4,6 @@
             "inputs": [
                 {
                     "internalType": "address",
-                    "name": "_nft",
-                    "type": "address"
-                },
-                {
-                    "internalType": "uint256",
-                    "name": "_tokenId",
-                    "type": "uint256"
-                },
-                {
-                    "internalType": "uint256",
-                    "name": "index",
-                    "type": "uint256"
-                }
-            ],
-            "name": "acceptOffer",
-            "outputs": [],
-            "stateMutability": "nonpayable",
-            "type": "function"
-        },
-        {
-            "inputs": [
-                {
-                    "internalType": "address",
-                    "name": "_nft",
-                    "type": "address"
-                },
-                {
-                    "internalType": "uint256",
-                    "name": "_tokenId",
-                    "type": "uint256"
-                },
-                {
-                    "internalType": "address",
-                    "name": "_forNft",
-                    "type": "address"
-                },
-                {
-                    "internalType": "uint256",
-                    "name": "_for",
-                    "type": "uint256"
-                }
-            ],
-            "name": "addOffer",
-            "outputs": [],
-            "stateMutability": "nonpayable",
-            "type": "function"
-        },
-        {
-            "inputs": [
-                {
-                    "internalType": "uint256",
-                    "name": "_price",
-                    "type": "uint256"
-                }
-            ],
-            "name": "changeOfferPrice",
-            "outputs": [],
-            "stateMutability": "nonpayable",
-            "type": "function"
-        },
-        {
-            "inputs": [
-                {
-                    "internalType": "address",
-                    "name": "_recipientAddress",
-                    "type": "address"
-                }
-            ],
-            "name": "changeRecipientAddress",
-            "outputs": [],
-            "stateMutability": "nonpayable",
-            "type": "function"
-        },
-        {
-            "inputs": [
-                {
-                    "internalType": "address",
                     "name": "_paymentAddress",
                     "type": "address"
                 },
@@ -90,45 +13,82 @@
                     "type": "address"
                 }
             ],
-            "name": "init",
-            "outputs": [],
             "stateMutability": "nonpayable",
-            "type": "function"
+            "type": "constructor"
         },
         {
+            "anonymous": false,
             "inputs": [
                 {
+                    "indexed": false,
                     "internalType": "address",
-                    "name": "_nft",
+                    "name": "token",
                     "type": "address"
                 },
                 {
+                    "indexed": false,
                     "internalType": "uint256",
                     "name": "_tokenId",
                     "type": "uint256"
                 },
                 {
+                    "indexed": false,
+                    "internalType": "address",
+                    "name": "_forNft",
+                    "type": "address"
+                },
+                {
+                    "indexed": false,
                     "internalType": "uint256",
-                    "name": "index",
+                    "name": "_for",
+                    "type": "uint256"
+                },
+                {
+                    "indexed": false,
+                    "internalType": "uint256",
+                    "name": "_amount",
                     "type": "uint256"
                 }
             ],
-            "name": "rejectOffer",
-            "outputs": [],
-            "stateMutability": "nonpayable",
-            "type": "function"
+            "name": "OfferAccepted",
+            "type": "event"
         },
         {
-            "inputs": [],
-            "name": "togglePayToMakeOffer",
-            "outputs": [],
-            "stateMutability": "nonpayable",
-            "type": "function"
-        },
-        {
-            "inputs": [],
-            "stateMutability": "nonpayable",
-            "type": "constructor"
+            "anonymous": false,
+            "inputs": [
+                {
+                    "indexed": false,
+                    "internalType": "address",
+                    "name": "token",
+                    "type": "address"
+                },
+                {
+                    "indexed": false,
+                    "internalType": "uint256",
+                    "name": "_tokenId",
+                    "type": "uint256"
+                },
+                {
+                    "indexed": false,
+                    "internalType": "address",
+                    "name": "_forNft",
+                    "type": "address"
+                },
+                {
+                    "indexed": false,
+                    "internalType": "uint256",
+                    "name": "_for",
+                    "type": "uint256"
+                },
+                {
+                    "indexed": false,
+                    "internalType": "uint256",
+                    "name": "amount",
+                    "type": "uint256"
+                }
+            ],
+            "name": "OfferAdded",
+            "type": "event"
         },
         {
             "anonymous": false,
@@ -150,37 +110,10 @@
             "type": "event"
         },
         {
-            "inputs": [],
-            "name": "toggleLocked",
-            "outputs": [],
-            "stateMutability": "nonpayable",
-            "type": "function"
-        },
-        {
-            "inputs": [],
-            "name": "togglePayToAcceptOffer",
-            "outputs": [],
-            "stateMutability": "nonpayable",
-            "type": "function"
-        },
-        {
-            "inputs": [
-                {
-                    "internalType": "address payable",
-                    "name": "newOwner",
-                    "type": "address"
-                }
-            ],
-            "name": "transferOwnership",
-            "outputs": [],
-            "stateMutability": "nonpayable",
-            "type": "function"
-        },
-        {
             "inputs": [
                 {
                     "internalType": "address",
-                    "name": "_nft",
+                    "name": "token",
                     "type": "address"
                 },
                 {
@@ -194,7 +127,89 @@
                     "type": "uint256"
                 }
             ],
-            "name": "withdrawOffer",
+            "name": "acceptOffer",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+        },
+        {
+            "inputs": [],
+            "name": "acceptOfferPrice",
+            "outputs": [
+                {
+                    "internalType": "uint256",
+                    "name": "",
+                    "type": "uint256"
+                }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "inputs": [
+                {
+                    "internalType": "address",
+                    "name": "token",
+                    "type": "address"
+                },
+                {
+                    "internalType": "uint256",
+                    "name": "_tokenId",
+                    "type": "uint256"
+                },
+                {
+                    "internalType": "address",
+                    "name": "_forNft",
+                    "type": "address"
+                },
+                {
+                    "internalType": "uint256",
+                    "name": "_for",
+                    "type": "uint256"
+                },
+                {
+                    "internalType": "uint256",
+                    "name": "amount",
+                    "type": "uint256"
+                }
+            ],
+            "name": "addOffer",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+        },
+        {
+            "inputs": [],
+            "name": "canOfferERC20",
+            "outputs": [
+                {
+                    "internalType": "bool",
+                    "name": "",
+                    "type": "bool"
+                }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "inputs": [
+                {
+                    "internalType": "uint256",
+                    "name": "_makeOfferPrice",
+                    "type": "uint256"
+                },
+                {
+                    "internalType": "uint256",
+                    "name": "_acceptOfferPrice",
+                    "type": "uint256"
+                },
+                {
+                    "internalType": "uint256",
+                    "name": "_percentageFee",
+                    "type": "uint256"
+                }
+            ],
+            "name": "changeOfferPrices",
             "outputs": [],
             "stateMutability": "nonpayable",
             "type": "function"
@@ -203,7 +218,68 @@
             "inputs": [
                 {
                     "internalType": "address",
-                    "name": "_nft",
+                    "name": "_recipientAddress",
+                    "type": "address"
+                }
+            ],
+            "name": "changeRecipientAddress",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+        },
+        {
+            "inputs": [
+                {
+                    "internalType": "address",
+                    "name": "token",
+                    "type": "address"
+                },
+                {
+                    "internalType": "bytes4",
+                    "name": "_interface",
+                    "type": "bytes4"
+                }
+            ],
+            "name": "checkInterface",
+            "outputs": [
+                {
+                    "internalType": "bool",
+                    "name": "",
+                    "type": "bool"
+                }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "inputs": [
+                {
+                    "internalType": "uint256",
+                    "name": "total",
+                    "type": "uint256"
+                },
+                {
+                    "internalType": "uint256",
+                    "name": "percent",
+                    "type": "uint256"
+                }
+            ],
+            "name": "fromPercent",
+            "outputs": [
+                {
+                    "internalType": "uint256",
+                    "name": "",
+                    "type": "uint256"
+                }
+            ],
+            "stateMutability": "pure",
+            "type": "function"
+        },
+        {
+            "inputs": [
+                {
+                    "internalType": "address",
+                    "name": "token",
                     "type": "address"
                 },
                 {
@@ -228,8 +304,13 @@
                         },
                         {
                             "internalType": "address",
-                            "name": "nft",
+                            "name": "token",
                             "type": "address"
+                        },
+                        {
+                            "internalType": "uint256",
+                            "name": "amount",
+                            "type": "uint256"
                         }
                     ],
                     "internalType": "struct NFTrade_v2.Offer[]",
@@ -244,7 +325,7 @@
             "inputs": [
                 {
                     "internalType": "address",
-                    "name": "_nft",
+                    "name": "token",
                     "type": "address"
                 },
                 {
@@ -274,8 +355,13 @@
                         },
                         {
                             "internalType": "address",
-                            "name": "nft",
+                            "name": "token",
                             "type": "address"
+                        },
+                        {
+                            "internalType": "uint256",
+                            "name": "amount",
+                            "type": "uint256"
                         }
                     ],
                     "internalType": "struct NFTrade_v2.Offer",
@@ -290,7 +376,7 @@
             "inputs": [
                 {
                     "internalType": "address",
-                    "name": "_nft",
+                    "name": "token",
                     "type": "address"
                 },
                 {
@@ -314,7 +400,7 @@
             "inputs": [
                 {
                     "internalType": "address",
-                    "name": "_nft",
+                    "name": "token",
                     "type": "address"
                 },
                 {
@@ -339,8 +425,13 @@
                         },
                         {
                             "internalType": "address",
-                            "name": "nft",
+                            "name": "token",
                             "type": "address"
+                        },
+                        {
+                            "internalType": "uint256",
+                            "name": "amount",
+                            "type": "uint256"
                         }
                     ],
                     "internalType": "struct NFTrade_v2.Offer[]",
@@ -368,7 +459,7 @@
             "inputs": [
                 {
                     "internalType": "address",
-                    "name": "_nft",
+                    "name": "token",
                     "type": "address"
                 },
                 {
@@ -393,8 +484,13 @@
                         },
                         {
                             "internalType": "address",
-                            "name": "nft",
+                            "name": "token",
                             "type": "address"
+                        },
+                        {
+                            "internalType": "uint256",
+                            "name": "amount",
+                            "type": "uint256"
                         }
                     ],
                     "internalType": "struct NFTrade_v2.Offer[]",
@@ -419,6 +515,24 @@
             "type": "function"
         },
         {
+            "inputs": [
+                {
+                    "internalType": "address",
+                    "name": "_paymentAddress",
+                    "type": "address"
+                },
+                {
+                    "internalType": "address",
+                    "name": "_recipientAddress",
+                    "type": "address"
+                }
+            ],
+            "name": "init",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+        },
+        {
             "inputs": [],
             "name": "initialized",
             "outputs": [
@@ -429,6 +543,19 @@
                 }
             ],
             "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "inputs": [],
+            "name": "kill",
+            "outputs": [
+                {
+                    "internalType": "bool",
+                    "name": "",
+                    "type": "bool"
+                }
+            ],
+            "stateMutability": "nonpayable",
             "type": "function"
         },
         {
@@ -446,25 +573,12 @@
         },
         {
             "inputs": [],
-            "name": "offerPrice",
+            "name": "makeOfferPrice",
             "outputs": [
                 {
                     "internalType": "uint256",
                     "name": "",
                     "type": "uint256"
-                }
-            ],
-            "stateMutability": "view",
-            "type": "function"
-        },
-        {
-            "inputs": [],
-            "name": "paymentAddress",
-            "outputs": [
-                {
-                    "internalType": "address",
-                    "name": "",
-                    "type": "address"
                 }
             ],
             "stateMutability": "view",
@@ -498,6 +612,32 @@
         },
         {
             "inputs": [],
+            "name": "paymentAddress",
+            "outputs": [
+                {
+                    "internalType": "address",
+                    "name": "",
+                    "type": "address"
+                }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "inputs": [],
+            "name": "percentageFee",
+            "outputs": [
+                {
+                    "internalType": "uint256",
+                    "name": "",
+                    "type": "uint256"
+                }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "inputs": [],
             "name": "recipientAddress",
             "outputs": [
                 {
@@ -507,6 +647,137 @@
                 }
             ],
             "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "inputs": [
+                {
+                    "internalType": "address",
+                    "name": "token",
+                    "type": "address"
+                },
+                {
+                    "internalType": "uint256",
+                    "name": "_tokenId",
+                    "type": "uint256"
+                },
+                {
+                    "internalType": "uint256",
+                    "name": "index",
+                    "type": "uint256"
+                }
+            ],
+            "name": "rejectOffer",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+        },
+        {
+            "inputs": [],
+            "name": "takePercentageOfERC20",
+            "outputs": [
+                {
+                    "internalType": "bool",
+                    "name": "",
+                    "type": "bool"
+                }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "inputs": [
+                {
+                    "internalType": "uint256",
+                    "name": "amount",
+                    "type": "uint256"
+                },
+                {
+                    "internalType": "uint256",
+                    "name": "total",
+                    "type": "uint256"
+                }
+            ],
+            "name": "toPercent",
+            "outputs": [
+                {
+                    "internalType": "uint256",
+                    "name": "",
+                    "type": "uint256"
+                }
+            ],
+            "stateMutability": "pure",
+            "type": "function"
+        },
+        {
+            "inputs": [],
+            "name": "toggleCanOfferERC20",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+        },
+        {
+            "inputs": [],
+            "name": "toggleLocked",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+        },
+        {
+            "inputs": [],
+            "name": "togglePayToAcceptOffer",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+        },
+        {
+            "inputs": [],
+            "name": "togglePayToMakeOffer",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+        },
+        {
+            "inputs": [],
+            "name": "toggleTakePercentageOfERC20",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+        },
+        {
+            "inputs": [
+                {
+                    "internalType": "address payable",
+                    "name": "newOwner",
+                    "type": "address"
+                }
+            ],
+            "name": "transferOwnership",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+        },
+        {
+            "inputs": [
+                {
+                    "internalType": "address",
+                    "name": "token",
+                    "type": "address"
+                },
+                {
+                    "internalType": "uint256",
+                    "name": "_tokenId",
+                    "type": "uint256"
+                },
+                {
+                    "internalType": "uint256",
+                    "name": "index",
+                    "type": "uint256"
+                }
+            ],
+            "name": "withdrawOffer",
+            "outputs": [],
+            "stateMutability": "nonpayable",
             "type": "function"
         }
     ]

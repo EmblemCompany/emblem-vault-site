@@ -45,26 +45,42 @@ export enum ExplorerTXType {
   Account,
   TokenBalance,
   Transaction,
+  Token
 }
 
-const EXPLORER_PREFIXES: { [key: number]: string } = {
+export const EXPLORER_PREFIXES: { [key: number]: string } = {
   1: 'etherscan.io',
   3: 'ropsten.etherscan.io',
   4: 'rinkeby.etherscan.io',
   5: 'goerli.',
   42: 'kovan.',
   80001: 'mumbai-explorer.matic.today',
-  137: 'explorer.matic.network',
+  137: 'polygonscan.com',
   97: 'bnbsc',
   100: 'blockscout.com/xdai/mainnet',
   56: 'bscscan.com',
   250: 'ftmscan.com'
 }
 
+export const NETWORK_SHORTNAMES: { [key: number]: string } = {
+  1: 'eth',
+  3: 'ropsten',
+  4: 'rinkeby',
+  5: 'goerli',
+  42: 'kovan',
+  80001: 'mumbai',
+  137: 'matic',
+  97: 'bsctest',
+  100: 'xdai',
+  56: 'bsc',
+  250: 'fantom'
+}
+
 interface ExplorerTypeData {
   [ExplorerTXType.Account]: [number, string]
   [ExplorerTXType.TokenBalance]: [Token, string]
   [ExplorerTXType.Transaction]: [number, string]
+  [ExplorerTXType.Token]: [number, string]
 }
 
 export function formatEtherscanLink(type: ExplorerTXType, data: ExplorerTypeData[ExplorerTXType]): string {
@@ -80,6 +96,10 @@ export function formatEtherscanLink(type: ExplorerTXType, data: ExplorerTypeData
     case ExplorerTXType.Transaction: {
       const [chainId, hash] = data as ExplorerTypeData[ExplorerTXType.Transaction]
       return `https://${EXPLORER_PREFIXES[chainId]}/tx/${hash}`
+    }
+    case ExplorerTXType.Token: {
+      const [chainId, hash] = data as ExplorerTypeData[ExplorerTXType.Transaction]
+      return `https://${EXPLORER_PREFIXES[chainId]}/token/${hash}`
     }
   }
 }
