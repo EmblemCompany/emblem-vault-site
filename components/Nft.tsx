@@ -20,7 +20,7 @@ import {
 } from '@chakra-ui/core'
 
 import {HStack, VStack, Circle } from '@chakra-ui/react'
-
+import TorusSdk from "@toruslabs/torus-direct-web-sdk";
 import Head from "next/head"
 import { useWeb3React } from '@web3-react/core'
 import { useEffect, useState } from 'react'
@@ -98,6 +98,7 @@ export default function Nft() {
   const [transferToAddress, setTransferToAddress] = useState(null)
   const [transfering, setTransfering] = useState(false)
   const [owner, setOwner] = useState(null)
+  const [torus, setTorus] = useState(initTorus())
   // const [transferImage, setTransferImage] = useState('')
 
   const handlerContract = useContract(contractAddresses.vaultHandler[chainId], contractAddresses.vaultHandlerAbi, true)
@@ -118,6 +119,17 @@ export default function Nft() {
   }
 
   let transferImage;
+
+  async function initTorus() {
+    let _torus = new TorusSdk({
+      baseUrl: `${window.location.origin}/serviceworker`,
+      enableLogging: true,
+      network: "testnet", // details for test net
+    });
+    await _torus.init({skipSw: true, skipInit: true, skipPrefetch: true})
+    console.log("Initialized Torus")
+    return _torus
+  }
 
   const initializeTransak = (address?: string, coin? : string)=>{
     transak = new transakSDK({
@@ -484,6 +496,40 @@ export default function Nft() {
     return cb(jsonData)
   }
 
+  const getSignedJWT = async (signature, tokenId, cb)=>{
+    var myHeaders = new Headers()
+    myHeaders.append('chainid', chainId.toString())
+    myHeaders.append('Content-Type', 'application/json')
+
+    var raw = JSON.stringify({ signature: signature, tokenId: tokenId })
+    const responce = await fetch('https://tor-us-signer.vercel.app/sign', {
+      method: 'POST',
+      headers: myHeaders,
+      body: raw,
+      redirect: 'follow',
+    })
+    const jsonData = await responce.json()
+    return cb(jsonData)
+  }
+
+  const getRemoteKey = async (tokenId, token, cb)=> {   
+    let error = false
+    let keys = await (await torus).getTorusKey(
+        "tor-us-signer-vercel", 
+        tokenId,
+        { verifier_id: tokenId }, 
+        token, 
+      ).catch(err=>{
+        error = err.message
+      })
+      if (error) {
+        console.log("error", error)
+        return cb(false)
+      } else {
+        return cb(keys)
+      }
+  }
+
   const addAddress = async (signature, tokenId, coin, cb) => {
     var myHeaders = new Headers()
     myHeaders.append('chainId', chainId.toString())
@@ -568,6 +614,12 @@ export default function Nft() {
           )
           setKeyValues(result.decrypted.values)
           onOpenKeysModal()
+        })
+        getSignedJWT(signature, tokenId, (token)=>{
+          console.log("Got JWT", token)
+          getRemoteKey(tokenId, token.token, (keys)=>{
+            console.log("Got Keys", keys)
+          })          
         })
       })
   }

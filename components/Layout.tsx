@@ -1,4 +1,4 @@
-import { ReactNode } from 'react'
+import { ReactNode, useState } from 'react'
 import BackgroundVideo from './BackgroundVideo'
 import { Flex, IconButton, useDisclosure, Badge, LightMode, Stack, Box, Button, Popover, PopoverTrigger, PopoverContent, PopoverArrow, PopoverCloseButton, PopoverBody, Text, Link} from '@chakra-ui/core'
 import { useWeb3React } from '@web3-react/core'
@@ -17,6 +17,10 @@ import { Coval, CovalTest, CovalTestMatic, CovalMatic, CovalxDai, CovalBSC, Cova
 import Head from 'next/head'
 import transakSDK from '@transak/transak-sdk'
 
+import Gun from 'gun';
+import 'gun/sea'
+import { GunProvider } from 'react-gun';
+
 const Settings = dynamic(() => import('./Settings'))
 
 export default function Layout({ children }: { children: ReactNode}): JSX.Element {
@@ -28,6 +32,8 @@ export default function Layout({ children }: { children: ReactNode}): JSX.Elemen
   const [firstToken] = useFirstToken()
   const [secondToken] = useSecondToken()
   const [showUSD, setShowUSD] = useShowUSD()
+
+  const [gun, setGun] = useState(Gun(['https://emblem-gun.herokuapp.com/gun']))
 
   const [transactions] = useTransactions()
 

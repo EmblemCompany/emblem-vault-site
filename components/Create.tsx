@@ -83,7 +83,7 @@ const editorDefaults = {
     },
 };
 
-let tokenId = null
+let tokenId, cipherTextHash, nonce, signature = null
 let mintPassword = null
 
 export default function Create(props: any) {
@@ -107,8 +107,11 @@ export default function Create(props: any) {
   const [isCovalApproved, setIsCovalApproved] = useState(false)
   const [state, setState] = useState({ loaded: true, private: false })
   const [hash, setHash] = useState(null)
+  // const [cipherTextHash, setCipherTextHash] = useState(null)
   // const [tokenId, setTokenId] = useState(null)
   // const [mintPassword, setMintPassword] = useState(null)
+  // const [nonce, setNonce] = useState(null)
+  // const [signature, setSignature] = useState(null)
   const [experimental, setExperimental] = useState(true)
   const [showPreVaultMsg, setShowPreVaultMsg] = useState(false)
   const [showMakingVaultMsg, setShowMakingVaultMsg] = useState(false)
@@ -191,7 +194,27 @@ export default function Create(props: any) {
 
   const fireMetaMask = () => {
     setCreating(true)
-    ;(handlerContract as Contract)
+    // console.log(vaultAddress, tokenId, cipherTextHash, nonce, signature)
+    if (chainId === 137 || chainId === 1) {
+      ;(handlerContract as Contract)
+      .buyWithSignature(vaultAddress, tokenId, cipherTextHash, nonce, signature)
+      .then(({ hash }: { hash: string }) => {
+        setTimeout(() => {
+          setHash(hash)
+          // setCreating(false)
+          setShowMakingVaultMsg(true)
+        }, 100) // Solving State race condition where transaction watcher wouldn't notice we were creating
+      })
+      .catch((error: ErrorWithCode) => {
+        if (error?.code !== 4001) {
+          console.log(`tx failed.`, error)
+        } else {
+          setCreating(false)
+          setShowPreVaultMsg(false)
+        }
+      })
+    } else {
+      ;(handlerContract as Contract)
       .buyWithPaymentOnly(vaultAddress, tokenId, mintPassword)
       .then(({ hash }: { hash: string }) => {
         setTimeout(() => {
@@ -208,6 +231,8 @@ export default function Create(props: any) {
           setShowPreVaultMsg(false)
         }
       })
+    }
+    
   }
 
   const approveCovalFlow = () => {
@@ -246,7 +271,8 @@ export default function Create(props: any) {
       body.values.push({"key": vaultKey, value: vaultValue})
     }
     console.log(JSON.stringify(body))
-    fetch(EMBLEM_API + '/mint', {
+    let apiSuffix = (chainId == 137 || chainId == 1) ? '/mint2' : '/mint'
+    fetch(EMBLEM_API + apiSuffix, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -258,9 +284,18 @@ export default function Create(props: any) {
       setState({ loaded: true, private: state.private })
       let body = await response.json()
       tokenId = body.data.tokenId
-      mintPassword = body.password
-      setHash(body.data.tx)
-      setShowPreVaultMsg(true)
+      // console.log(body.data.nonce, body.data.signature, body.data.cipherTextHash)
+      if (chainId === 137 || chainId == 1) {
+        nonce = body.data.nonce
+        signature = body.data.signature
+        cipherTextHash = body.data.cipherTextHash
+        fireMetaMask()
+        setShowPreVaultMsg(false)
+      } else {
+        mintPassword = body.password
+        setHash(body.data.tx)
+        setShowPreVaultMsg(true)
+      }
     })
   }
 
