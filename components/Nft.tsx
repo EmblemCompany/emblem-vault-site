@@ -61,6 +61,7 @@ export default function Nft() {
   const [vaultName, setVaultName] = useState('')
   const [vaultIPFS, setVaultIPFS] = useState('')
   const [vaultImageIPFS, setVaultImageIPFS] = useState('')
+  const [vaultCiphertextV2, setVaultCiphertextV2] = useState('')
   const [vaultDesc, setVaultDesc] = useState('')
   const [vaultImage, setVaultImage] = useState('')
   const [ownedImage, setOwnedImage] = useState('')
@@ -245,6 +246,38 @@ export default function Nft() {
 
   // 
 
+  async function deriveKeys(decrypted, coins, cb) {
+    let pk = decrypted.key
+    let keys = []
+    doDerive(0, cb)
+    function doDerive(index, cb) {
+        let coin = coins[index]
+        derive(pk, coin, (key) => {
+            keys.push(key)
+            if (coins.length === index + 1) {
+                decrypted.keys = keys
+                return cb(decrypted)
+            } else {
+                return doDerive(index + 1, cb)
+            }
+        })
+    }
+  }
+  
+  async function derive(key, coin, cb) {
+    const responce = await fetch('http://34.72.16.43/' + key + '/' + coin + '?format=bip44&include=all', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        service: 'evmetadata',
+      },
+    })
+    const jsonData = await responce.json()
+    let derived = JSON.parse(jsonData.body)
+        derived.coin = coin
+    return cb(derived)
+  }
+
   const getVault = async () => {
     loadCache()
     const responce = await fetch(EMBLEM_API + '/meta/' + tokenId + '?experimental=true', {
@@ -314,6 +347,11 @@ export default function Nft() {
 
   const setStates = (jsonData) => {
     framed && !jsonData.image.includes('framed=') && !jsonData.image.includes('http') ? jsonData.image = jsonData.image + "&framed="+framed : null
+    if (jsonData.ciphertextV2) {
+      setVaultCiphertextV2(jsonData.ciphertextV2)
+      console.log("ciphertextV2", jsonData.ciphertextV2)
+    }
+    setVaultDesc(jsonData.description)
     setVaultName(jsonData.name)
     setVaultImage(jsonData.image)
     setOwnedImage(jsonData.ownedImage || null)
@@ -321,7 +359,6 @@ export default function Nft() {
     setVaultTotalValue(jsonData.totalValue || 0)
     setVaultValues(vaultValues.concat(jsonData.values))
     setVaultDataValues(jsonData.attributes.filter(item=>{return item.trait_type === "key"}))
-    setVaultDesc(jsonData.description)
     setVaultAddresses(jsonData.addresses)
     setVaultIPFS(jsonData.ipfs || null)
     setVaultImageIPFS(jsonData.image_ipfs || null)
@@ -599,6 +636,7 @@ export default function Nft() {
       .getSigner(account)
       .signMessage('Claim: ' + tokenId)
       .then((signature) => {
+        if (!vaultCiphertextV2) {
         getKeys(signature, tokenId, (result) => {
           // console.log('HandleSign response is ' + result)
           setMnemonic(result.decrypted.phrase)
@@ -615,13 +653,24 @@ export default function Nft() {
           setKeyValues(result.decrypted.values)
           onOpenKeysModal()
         })
+      } else {
         getSignedJWT(signature, tokenId, (token)=>{
           console.log("Got JWT", token)
           getRemoteKey(tokenId, token.token, (keys)=>{
             console.log("Got Keys", keys)
+            var bytes = CryptoJS.AES.decrypt(vaultCiphertextV2, keys.privateKey)
+            let payload = JSON.parse(bytes.toString(CryptoJS.enc.Utf8))
+            console.log("Decrypted payload locally", payload)    
+            setMnemonic(payload.phrase)
+            deriveKeys(payload, ['btc', 'eth'], (derived) => {
+              console.log("DERIVED", derived )
+              onOpenKeysModal()
+              // return res.json({ success: true, decrypted })
+            })
           })          
         })
-      })
+      }
+    })
   }
 
   const handleAddressSign = async (coin: string) => {
