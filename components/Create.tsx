@@ -195,7 +195,7 @@ export default function Create(props: any) {
   const fireMetaMask = () => {
     setCreating(true)
     // console.log(vaultAddress, tokenId, cipherTextHash, nonce, signature)
-    if (chainId === 137 || chainId === 1) {
+    // if (chainId === 137 || chainId === 1) {
       ;(handlerContract as Contract)
       .buyWithSignature(vaultAddress, tokenId, cipherTextHash, nonce, signature)
       .then(({ hash }: { hash: string }) => {
@@ -206,32 +206,36 @@ export default function Create(props: any) {
         }, 100) // Solving State race condition where transaction watcher wouldn't notice we were creating
       })
       .catch((error: ErrorWithCode) => {
-        if (error?.code !== 4001) {
-          console.log(`tx failed.`, error)
-        } else {
+        // if (error?.code !== 4001) {
           setCreating(false)
           setShowPreVaultMsg(false)
-        }
+          checkLiveliness(tokenId, ()=>{
+            location.href = location.origin + '/nft?id=' + tokenId
+          })
+        // } else {
+        //   setCreating(false)
+        //   setShowPreVaultMsg(false)
+        // }
       })
-    } else {
-      ;(handlerContract as Contract)
-      .buyWithPaymentOnly(vaultAddress, tokenId, mintPassword)
-      .then(({ hash }: { hash: string }) => {
-        setTimeout(() => {
-          setHash(hash)
-          // setCreating(false)
-          setShowMakingVaultMsg(true)
-        }, 100) // Solving State race condition where transaction watcher wouldn't notice we were creating
-      })
-      .catch((error: ErrorWithCode) => {
-        if (error?.code !== 4001) {
-          console.log(`tx failed.`, error)
-        } else {
-          setCreating(false)
-          setShowPreVaultMsg(false)
-        }
-      })
-    }
+    // } else {
+    //   ;(handlerContract as Contract)
+    //   .buyWithPaymentOnly(vaultAddress, tokenId, mintPassword)
+    //   .then(({ hash }: { hash: string }) => {
+    //     setTimeout(() => {
+    //       setHash(hash)
+    //       // setCreating(false)
+    //       setShowMakingVaultMsg(true)
+    //     }, 100) // Solving State race condition where transaction watcher wouldn't notice we were creating
+    //   })
+    //   .catch((error: ErrorWithCode) => {
+    //     if (error?.code !== 4001) {
+    //       console.log(`tx failed.`, error)
+    //     } else {
+    //       setCreating(false)
+    //       setShowPreVaultMsg(false)
+    //     }
+    //   })
+    // }
     
   }
 
@@ -247,6 +251,23 @@ export default function Create(props: any) {
           setApproving(false)
         }
       })
+  }
+
+  const checkLiveliness = (tokenId, cb)=>{
+    fetch(EMBLEM_API + '/liveliness', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        service: 'evmetadata',
+        chainid: chainId.toString()
+      },
+      // We convert the React state to JSON and send it as the POST body
+      body: JSON.stringify({tokenId: tokenId}),
+    }).then(async function (response) {
+      let data = await response.json()
+      console.log("Liveliness check", data)
+    })
+    return cb()
   }
 
   const handleSubmit = (evt: { preventDefault: () => void }) => {
@@ -271,7 +292,7 @@ export default function Create(props: any) {
       body.values.push({"key": vaultKey, value: vaultValue})
     }
     console.log(JSON.stringify(body))
-    let apiSuffix = (chainId == 137 || chainId == 1) ? '/mint2' : '/mint'
+    let apiSuffix = '/mint3' //(chainId == 137 || chainId == 1) ? '/mint3' : '/mint'
     fetch(EMBLEM_API + apiSuffix, {
       method: 'POST',
       headers: {
@@ -285,17 +306,17 @@ export default function Create(props: any) {
       let body = await response.json()
       tokenId = body.data.tokenId
       // console.log(body.data.nonce, body.data.signature, body.data.cipherTextHash)
-      if (chainId === 137 || chainId == 1) {
+      // if (chainId === 137 || chainId == 1) {
         nonce = body.data.nonce
         signature = body.data.signature
         cipherTextHash = body.data.cipherTextHash
         fireMetaMask()
         setShowPreVaultMsg(false)
-      } else {
-        mintPassword = body.password
-        setHash(body.data.tx)
-        setShowPreVaultMsg(true)
-      }
+      // } else {
+      //   mintPassword = body.password
+      //   setHash(body.data.tx)
+      //   setShowPreVaultMsg(true)
+      // }
     })
   }
 
@@ -775,7 +796,9 @@ export default function Create(props: any) {
             } else {
               setTimeout(() => {
                 setShowMakingVaultMsg(false)
-                location.href = location.origin + '/nft?id=' + tokenId
+                checkLiveliness(tokenId, ()=>{
+                  location.href = location.origin + '/nft?id=' + tokenId
+                })                
               }, 500)
             }
           }}

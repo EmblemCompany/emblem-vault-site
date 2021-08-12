@@ -61,3 +61,7 @@ body {
 .nft_button {
   font-weight: 100 !important;
 }
+
+.infinite-scroll-component__outerdiv {
+  width: 95%;
+}

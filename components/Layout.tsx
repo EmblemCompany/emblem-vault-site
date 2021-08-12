@@ -203,7 +203,7 @@ export default function Layout({ children }: { children: ReactNode}): JSX.Elemen
           )}
         </Stack>
 
-        <Flex flexGrow={1} direction="column" overflow="auto">
+        <Flex id="shannon-container" flexGrow={1} direction="column" overflow="auto">
           {children}
         </Flex>
 

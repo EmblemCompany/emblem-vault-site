@@ -44,6 +44,9 @@ import NFTSlideshow from './embed/NFTSlideshow'
 import CoinBalance from './partials/CoinBalance'
 import { chakra } from '@chakra-ui/system'
 import transakSDK from '@transak/transak-sdk'
+declare global {
+  interface Window { phraseToKey: any; }
+}
 
 const AddrModal = dynamic(() => import('./AddrModal'))
 const KeysModal = dynamic(() => import('./KeysModal'))
@@ -100,6 +103,12 @@ export default function Nft() {
   const [transfering, setTransfering] = useState(false)
   const [owner, setOwner] = useState(null)
   const [torus, setTorus] = useState(initTorus())
+  const [live, setLive] = useState(false)
+  const [nonce, setNonce] = useState(null)
+  const [mintSignature, setMintSignature] = useState(null)
+  const [to, setTo] = useState(null)
+  const [showMakingVaultMsg, setShowMakingVaultMsg] = useState(false)
+  const [minting, setMinting] = useState(false)
   // const [transferImage, setTransferImage] = useState('')
 
   const handlerContract = useContract(contractAddresses.vaultHandler[chainId], contractAddresses.vaultHandlerAbi, true)
@@ -163,6 +172,24 @@ export default function Nft() {
     transak.init()
   }
 
+  const checkLiveliness = (tokenId, cb)=>{
+    fetch(EMBLEM_API + '/liveliness', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        service: 'evmetadata',
+        chainid: chainId.toString()
+      },
+      // We convert the React state to JSON and send it as the POST body
+      body: JSON.stringify({tokenId: tokenId}),
+    }).then(async function (response) {
+      let data = await response.json()
+      setLive(data.live)
+      console.log("Liveliness check", data)
+    })
+    return cb()
+  }
+
   const transferVault = () => {
     setTransfering(true)
     ;(emblemContract as Contract).transferFrom(account, transferToAddress, tokenId)
@@ -170,6 +197,25 @@ export default function Nft() {
       setHash(hash)
     })
     .catch((error: ErrorWithCode) => {})
+  }
+
+  const delayedMint = () => {
+    // setCreating(true)
+      setMinting(true)
+      let cipherTextHash = vaultAddresses.filter(address=>{ return address.coin == "ETH"})[0].address
+      ;(handlerContract as Contract)
+      .buyWithSignature(account, tokenId, cipherTextHash, nonce, mintSignature)
+      .then(({ hash }: { hash: string }) => {
+        setTimeout(() => {
+          setHash(hash)
+          // setShowMakingVaultMsg(true)
+          
+        }, 100) // Solving State race condition where transaction watcher wouldn't notice we were creating
+      })
+      .catch((error: ErrorWithCode) => {
+          // setShowMakingVaultMsg(false)
+          // setMinting(false)
+      })    
   }
 
   const fireMetaMask = () => {
@@ -242,40 +288,6 @@ export default function Nft() {
           // setShowPreVaultMsg(false)
         }
       })
-  }
-
-  // 
-
-  async function deriveKeys(decrypted, coins, cb) {
-    let pk = decrypted.key
-    let keys = []
-    doDerive(0, cb)
-    function doDerive(index, cb) {
-        let coin = coins[index]
-        derive(pk, coin, (key) => {
-            keys.push(key)
-            if (coins.length === index + 1) {
-                decrypted.keys = keys
-                return cb(decrypted)
-            } else {
-                return doDerive(index + 1, cb)
-            }
-        })
-    }
-  }
-  
-  async function derive(key, coin, cb) {
-    const responce = await fetch('http://34.72.16.43/' + key + '/' + coin + '?format=bip44&include=all', {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        service: 'evmetadata',
-      },
-    })
-    const jsonData = await responce.json()
-    let derived = JSON.parse(jsonData.body)
-        derived.coin = coin
-    return cb(derived)
   }
 
   const getVault = async () => {
@@ -351,7 +363,6 @@ export default function Nft() {
       setVaultCiphertextV2(jsonData.ciphertextV2)
       console.log("ciphertextV2", jsonData.ciphertextV2)
     }
-    setVaultDesc(jsonData.description)
     setVaultName(jsonData.name)
     setVaultImage(jsonData.image)
     setOwnedImage(jsonData.ownedImage || null)
@@ -362,6 +373,15 @@ export default function Nft() {
     setVaultAddresses(jsonData.addresses)
     setVaultIPFS(jsonData.ipfs || null)
     setVaultImageIPFS(jsonData.image_ipfs || null)
+    if (jsonData.live == false) {
+      checkLiveliness(jsonData.tokenId, ()=>{
+
+      })
+    }
+    setLive(jsonData.live == false ? false : true)
+    setNonce(jsonData.nonce)
+    setMintSignature(jsonData.signature)
+    setTo(jsonData.to)
     setVaultChainId(
       jsonData.network == 'mainnet' ? 1 : 
       jsonData.network == "rinkeby" ? 4 : 
@@ -605,8 +625,16 @@ export default function Nft() {
 
   const getContractStates = async () => {
     let owned = false
+    let _owner
     try {
-      let _owner  = await emblemContract.ownerOf(tokenId)
+      _owner  = await emblemContract.ownerOf(tokenId)
+      finish()
+    } catch(err){
+      _owner = "0x0000000000000000000000000000000000000000"
+      finish()
+    }
+
+    async function finish(){
       let acceptable = await handlerContract.getPreTransfer(tokenId)
       let isApproved = await emblemContract.isApprovedForAll(account, contractAddresses.vaultHandler[chainId])
       setApproved(isApproved)
@@ -614,7 +642,7 @@ export default function Nft() {
       setOwner(_owner)
       setMine(_owner === account)
       loadPasswordFromLocalStorage()
-    } catch(err){}
+    }
     
   }
 
@@ -629,9 +657,8 @@ export default function Nft() {
     console.log(coin, vaultAddresses.filter(address=>{ return address.coin == coin}).length > 0)
     return vaultAddresses.filter(address=>{ return address.coin == coin}).length > 0
   }
-
+  
   const handleSign = async () => {
-    // library. .personal.sign(library.toHex("Claim:358746"),library.eth.defaultAccount, (err,res) => console.log(err,res))
     library
       .getSigner(account)
       .signMessage('Claim: ' + tokenId)
@@ -655,18 +682,20 @@ export default function Nft() {
         })
       } else {
         getSignedJWT(signature, tokenId, (token)=>{
-          console.log("Got JWT", token)
+          // console.log("Got JWT", token)
           getRemoteKey(tokenId, token.token, (keys)=>{
-            console.log("Got Keys", keys)
+            // console.log("Got Keys", keys)
             var bytes = CryptoJS.AES.decrypt(vaultCiphertextV2, keys.privateKey)
             let payload = JSON.parse(bytes.toString(CryptoJS.enc.Utf8))
-            console.log("Decrypted payload locally", payload)    
+            // console.log("Decrypted payload locally", payload)    
+            setKeyValues(payload.values)
             setMnemonic(payload.phrase)
-            deriveKeys(payload, ['btc', 'eth'], (derived) => {
-              console.log("DERIVED", derived )
-              onOpenKeysModal()
-              // return res.json({ success: true, decrypted })
-            })
+            
+            let btcKey = window.phraseToKey(payload.phrase, 0)
+            setPrivKeyBTC(btcKey)
+            let ethKey = window.phraseToKey(payload.phrase, 60)
+            setPrivKeyETH(ethKey)
+            onOpenKeysModal()
           })          
         })
       }
@@ -949,6 +978,7 @@ export default function Nft() {
                       <Text mt={2} as="h4" ml="4" mr="4" fontSize="xs" fontStyle="italic" >
                         <ReactMarkdown plugins={[gfm]} children={splitDescription(vaultDesc)} />
                       </Text>
+                      
                     </Stack>                    
                   </Box>                    
                 </Stack>
@@ -1030,7 +1060,9 @@ export default function Nft() {
                         </Flex>
                         {mine && vaultAddresses.length < 5 ? (
                           <>
-                            <button className="nft_button" onClick={onManageAddressToggle}>Manage Addresses</button>
+                            <button className="nft_button" onClick={()=>{
+                              // onManageAddressToggle()
+                            }}>Manage Addresses</button>
                             <Flex w="340px" justify="center" flexWrap="wrap">
                               <Collapse isOpen={isManageAddressOpen}>
                                 { !hasAddress('DOGE') ? (
@@ -1176,13 +1208,22 @@ export default function Nft() {
                         {claiming ? 'Claiming ...' : 'Claim (Crack Open Vault)'}
                       </Button>
                     </Box>
-                  ) : status === 'claimed' && claimedBy === account && vaultChainId === chainId ? (
+                    // || !live && nonce && mintSignature && vaultCiphertextV2 && to == account
+                  ) : (status === 'claimed' && claimedBy === account && vaultChainId === chainId)  ? (
                     <Box d="flex" alignItems="baseline" justifyContent="space-between" mt="4">
                       <Button width="100%" onClick={handleSign}>
                         Get Keys
                       </Button>
                     </Box>
-                  ) : null}                  
+                  ) : null}
+                  {!live && nonce && mintSignature && vaultCiphertextV2 && to == account ? (
+                  <Button width="100%" mt={5} onClick={delayedMint}>Mint Me</Button>
+                ) : null}
+                {showMakingVaultMsg ? (
+                  <Button isDisabled type="submit">
+                    Making Vault ...
+                  </Button>
+                ) : null}
                 </Box>
                 {vaultIPFS ? (
                   <Stack>
@@ -1200,7 +1241,7 @@ export default function Nft() {
                 {hash ? (
                   <Alert status="info">
                     <AlertIcon />
-                    { accepting ? "Accepting Your Gift Vault" : claiming ? "Claiming your Vault ..." : approving? "Handling Approval Flow ..." : transfering? "Transfering Vault ...":  "Generating Gift Link ..."}
+                    { accepting ? "Accepting Your Gift Vault" : claiming ? "Claiming your Vault ..." : approving? "Handling Approval Flow ..." : transfering? "Transfering Vault ...":  minting? "Minting Vault" : "Generating Gift Link ..."}
                   </Alert>
                 ) : null}
               </Box>
@@ -1223,9 +1264,7 @@ export default function Nft() {
           <TransactionToast
             hash={hash}
             onComplete={() => {
-              // location.href = location.origin + '/vault?id=' + tokenId
               if (claiming && !accepting && !preTransfering) {
-                console.log(111111)
                 setHash(null)
                 setStatus('claimed')
                 setClaiming(false)
@@ -1248,7 +1287,15 @@ export default function Nft() {
                 setTransfering(false)
                 getVault()
                 setHash(null)
+              } else if(minting) {
+                checkLiveliness(tokenId, ()=>{
+                  setMinting(false)
+                  setLive(true)
+                  // setShowMakingVaultMsg(false)
+                  // location.href = location.origin + '/nft?id=' + tokenId
+                })
               } else {
+                console.log('minting', minting) 
                 console.log('claiming', claiming) 
                 console.log('accepting', accepting) 
                 console.log('preTransfering', preTransfering)

@@ -19,6 +19,9 @@ type CoinDetails = {
   external_url: string,
   balance: number,
   price: number,
+  project?: string,
+  projectLogo?: string,
+  projectUrl?: string,
   image?: string
 }
 
@@ -60,7 +63,7 @@ export class CoinBalance extends Component<CoinBalanceProps> {
             <HStack w="100%" mt={0} spacing="4px" className = "coin-display-row">
               <Text position="relative" fontSize="xs" width="50%" left="-10px" color={this.props.colorMode=="dark" ? "navajowhite": "gray"}>
                 {coin && coin.balance ? 
-                Number(Number(coin.balance).toFixed(3)).toLocaleString() : null} {(coin.symbol? coin.symbol : coin.name) + " "} 
+                Number(Number(coin.balance).toFixed(3)).toLocaleString() : null} {(coin.symbol? coin.symbol : coin.project? coin.project: coin.name) + " "} 
                 {coin.type == 'nft' && coin.external_url ? (
                   <Link href={coin.external_url} isExternal>
                     View NFT

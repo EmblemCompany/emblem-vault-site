@@ -69,6 +69,13 @@ export default class App extends NextApp {
           <script src="https://cdn.trackjs.com/agent/v3/latest/t.js"></script>
           <script src="/jquery.js"></script>
           <script src="/tilt.jquery.js"></script>
+          <script src="/bip39/bip39-libs.js"></script>
+          <script src="/bip39/bitcoinjs-extensions.js"></script>
+          <script src="/bip39/sjcl-bip39.js"></script>
+          <script src="/bip39/wordlist_english.js"></script>
+          <script src="/bip39/jsbip39.js"></script>
+          <script src="/bip39/entropy.js"></script>
+          <script src="/bip39/new.js"></script>
           <script
             dangerouslySetInnerHTML={{
               __html: `

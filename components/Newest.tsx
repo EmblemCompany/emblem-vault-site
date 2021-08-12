@@ -19,11 +19,12 @@ export default function Newest() {
   const [address, setAddress] = useState(query.address)
   const [experimental, setExperimental] = useState(query.experimental)
   const { colorMode } = useColorMode()
+  const PAGE_SIZE = 10
 
   const getVaults = async () => {
     loadCache()
     try {
-      const response = await fetch(EMBLEM_API + '/newest/?start='+pagePosition+'&size=3', {
+      const response = await fetch(EMBLEM_API + '/newest/?start='+pagePosition+'&size='+PAGE_SIZE, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -42,22 +43,22 @@ export default function Newest() {
 
   const more = ()=>{
     if (location.href.includes('start')) {
-      location.href = location.href.replace('start='+pagePosition, 'start='+(pagePosition + 3))
+      location.href = location.href.replace('start='+pagePosition, 'start='+(pagePosition + PAGE_SIZE))
     } else {
-      location.href = location.href + '?start='+(pagePosition + 3)
+      location.href = location.href + '?start='+(pagePosition + PAGE_SIZE)
     }
-    // setPagePosition(pagePosition + 3)
+    // setPagePosition(pagePosition + PAGE_SIZE)
     // getVaults()
   }
 
   const less = ()=>{
-    if (pagePosition - 3 < 0) {
-      setPagePosition(3)
+    if (pagePosition - PAGE_SIZE < 0) {
+      setPagePosition(PAGE_SIZE)
     }
     if (location.href.includes('start')) {
-      location.href = location.href.replace('start='+pagePosition, 'start='+(pagePosition - 3))
+      location.href = location.href.replace('start='+pagePosition, 'start='+(pagePosition - PAGE_SIZE))
     } else {
-      location.href = location.href + '?start='+(pagePosition - 3)
+      location.href = location.href + '?start='+(pagePosition - PAGE_SIZE)
     }
     // setPagePosition(pagePosition + 3)
     // getVaults()
