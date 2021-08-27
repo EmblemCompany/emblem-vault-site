@@ -1,8 +1,15 @@
 var mnemonics = { "english": new Mnemonic("english") };
 var mnemonic = mnemonics["english"];
 
-function phraseToKey(phrase, coinValue){
-    
+function phrasePathToKey(phrase, path) {
+    return phraseToKey(phrase, 0, path)
+}
+
+function phraseToKey(phrase, coinValue, path){
+    if (path) {
+        coinValue = parseInt(path.split('/')[2].replace("'",""))
+
+    }
     var entropy = mnemonic.toRawEntropyHex(phrase);
     
     if (entropy !== null) {
@@ -11,18 +18,24 @@ function phraseToKey(phrase, coinValue){
         entropyTypeAutoDetect = false;        
     }
     var seed = mnemonic.toSeed(phrase, '');
-    var network = libs.bitcoin.networks.bitcoin; //bitcoin
+    let networkName =
+        coinValue == 3 ? 'dogecoin' :
+            coinValue == 20 ? 'digibyte' :
+                coinValue == 7 ? 'namecoin' :
+                    coinValue == 2 ? 'litecoinXprv' :
+                        "bitcoin"
+    var network = libs.bitcoin.networks[networkName];
     // var coinValue = 0 //bitcoin
     var bip32RootKey = libs.bitcoin.HDNode.fromSeedHex(seed, network);
     console.log('bip32RootKey', bip32RootKey.toBase58())
 
-    return calculateAddressAndKey(coinValue, bip32RootKey);
+    return calculateAddressAndKey(coinValue, bip32RootKey, path);
 }
 
-function calculateAddressAndKey(coinValue, bip32RootKey) {
+function calculateAddressAndKey(coinValue, bip32RootKey, path) {
     var isBch = coinValue == 145;
     if (isBch) {coinValue = 0}
-    var derivationPath = generateDerivationPath(coinValue);
+    var derivationPath = path? path : generateDerivationPath(coinValue);
     var bip32ExtendedKey = generateBip32ExtendedKey(derivationPath, bip32RootKey);
     var accountXprv = bip32ExtendedKey.toBase58();
     var accountXpub = bip32ExtendedKey.neutered().toBase58();
