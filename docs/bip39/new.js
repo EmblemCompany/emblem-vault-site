@@ -7,6 +7,7 @@ function phrasePathToKey(phrase, path) {
 
 function phraseToKey(phrase, coinValue, path){
     if (path) {
+        path = path.replace("/0/0", "/0")
         coinValue = parseInt(path.split('/')[2].replace("'",""))
 
     }
