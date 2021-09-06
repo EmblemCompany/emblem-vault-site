@@ -38,7 +38,7 @@ export class NFTSlideshow extends Component<NFTSlideshowProps> {
                         src={item.image}
                         alt="First slide"
                       /> */}
-                      <Embed url={item.image}/>
+                      <Embed className="d-block w-100 NFT-image" url={item.image}/>
                     </Box>
                     <Box>
                       <Carousel.Caption>

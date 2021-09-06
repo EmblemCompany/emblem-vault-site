@@ -7,6 +7,7 @@ import { useEffect, useState } from 'react'
 import { validImage } from '../utils'
 import { EMBLEM_API } from '../constants'
 import CoinBalance from './partials/CoinBalance'
+import InfiniteScroll from 'react-infinite-scroll-component';
 import Embed from './Embed'
 
 export default function Newest() {
@@ -19,12 +20,14 @@ export default function Newest() {
   const [address, setAddress] = useState(query.address)
   const [experimental, setExperimental] = useState(query.experimental)
   const { colorMode } = useColorMode()
-  const PAGE_SIZE = 10
+  const [shouldFetchData, setShouldFetchData] = useState(false)
+  const [hasMore, setHasMore] = useState(true)
+  const [offset, setOffset] = useState(0)
+  const PAGE_SIZE = 20
 
-  const getVaults = async () => {
-    loadCache()
+  const getVaults = async () => {    
     try {
-      const response = await fetch(EMBLEM_API + '/newest/?start='+pagePosition+'&size='+PAGE_SIZE, {
+      const response = await fetch(EMBLEM_API + '/newest/?start='+offset+'&size='+PAGE_SIZE, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -32,13 +35,20 @@ export default function Newest() {
           chainId: chainId.toString(),
         },
       })
-      const jsonData = await response.json()
+      let jsonData = await response.json()
+      if (jsonData) {
+        jsonData = jsonData.filter(item=>{return item.live && !item.claimedBy})
+      }      
+      setVaults(vaults.concat(jsonData))
       setState({ loaded: true })
-      setVaults(jsonData)
-      saveCache(jsonData)
       setLoadingApi(false)
-      // console.log(jsonData)
     } catch (error) {}
+  }
+
+  const fetchData = async() =>{
+    console.log(offset, PAGE_SIZE, offset+PAGE_SIZE)
+    setOffset(offset+PAGE_SIZE)
+    setShouldFetchData(true)
   }
 
   const more = ()=>{
@@ -95,23 +105,40 @@ export default function Newest() {
     }
   }, [chainId, chain])
 
-  useEffect(() => {
+  // useEffect(() => {
+  //   if (!state.loaded) {
+  //     console.log("load fires how many times")
+  //     vaults.length < 1 ? getVaults() : setState({ loaded: true })
+  //   }
+  // }, [])
 
-    vaults.length < 1 ? getVaults() : setState({ loaded: true })
-  }, [])
+  useEffect(() => {
+    if (shouldFetchData) {
+      setShouldFetchData(false)
+      getVaults()
+    } else {
+    }
+  }, [shouldFetchData])
 
   return (
     <Loader loaded={state.loaded}>
       {loadingApi ? <Refreshing /> : ''}
-        <Stack float="left" align="left">
-          {pagePosition > 0 ? <Link onClick={()=>{less()}} mt={10} ml={5}>Previous</Link> : null }
-        </Stack>
-        <Stack float="right" align="right">
-          <Link onClick={()=>{more()}} mt={10} mr={5}>Next</Link>
-        </Stack>
-      <Flex w="100%" justify="center" flexWrap="wrap" mt={10}>
-        
-      
+       
+        <InfiniteScroll                
+          className="infinite-scroll"
+          scrollableTarget="shannon-container"
+          // height={200}
+          dataLength={vaults.length} //This is important field to render the next data
+          next={fetchData}
+          hasMore={hasMore}
+          loader={<Refreshing />}
+          endMessage={
+            <p style={{ textAlign: 'center' }}>
+              <b>Yay! You have seen it all</b> 
+            </p>
+          }
+        >
+      <Flex w="100%" justify="center" flexWrap="wrap" mt={10}>        
         {vaults.length ? (
           vaults.map((vault, index) => {
             let pieces = location.pathname.split('/')
@@ -119,10 +146,10 @@ export default function Newest() {
             let url = location.origin + pieces.join('/') + '/nft?id=' + vault.tokenId
             const flexSettings = {
               flex: '1',
-              minW: '390px',
-              maxW: '390px',
+              minW: '200px',
+              maxW: '200px',
               borderWidth: '1px',
-              color: 'white',
+              // color: 'white',
               mx: '6',
               mb: '6',
               rounded: 'lg',
@@ -131,19 +158,20 @@ export default function Newest() {
               cursor: 'pointer',
             }
             const redirect = function () {
+              setLoadingApi(true)
               location.href = url
             }
             return (
-              <Box className="NFT" key={index} {...flexSettings} onClick={redirect}>
-                <Text fontWeight="semibold" textAlign="center" mt={2}>
+              <Box className="NFT newest" key={index} {...flexSettings} onClick={redirect}>
+                <Text fontWeight="semibold" textAlign="center" mt={2} pl={2} isTruncated={true}>
                   {vault.name}
                   {!vault.private && vault.totalValue > 0 ? ': ~$' + vault.totalValue : null}
                 </Text>
                 <Stack align="center">
-                  <Embed url={vault.image}/>
+                  <Embed className="d-block w-100 NFT-newest-image" url={vault.image}/>
                 </Stack>
                 <Box d="flex" alignItems="baseline">
-                  <Box color="gray.500" fontWeight="semibold" letterSpacing="wide" fontSize="sm" ml="2">
+                  {/* <Box color="gray.500" fontWeight="semibold" letterSpacing="wide" fontSize="sm" ml="2">
                     {vault.private ? (
                       <>
                         <Text>Contents hidden. Click to view the vault and unlock values.</Text>
@@ -169,7 +197,7 @@ export default function Newest() {
                         Click to fill 'er up!
                       </Text>
                     )}
-                  </Box>
+                  </Box> */}
                 </Box>
                 {/* <Box d="flex" alignItems="baseline">
                   <Box color="gray.500" fontWeight="semibold" letterSpacing="wide" fontSize="sm" ml="2">
@@ -184,6 +212,7 @@ export default function Newest() {
               </Box>
             )
           })
+          
         ) : (
           <Text>
             YOU DON'T SEEM TO HAVE ANY VAULTS.{' '}
@@ -191,8 +220,10 @@ export default function Newest() {
               CREATE ONE HERE!
             </Link>
           </Text>
-        )}        
+        )}
+        
       </Flex>
+      </InfiniteScroll>
     </Loader>
   )
 }

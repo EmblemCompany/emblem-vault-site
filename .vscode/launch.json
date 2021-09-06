@@ -12,6 +12,15 @@
               "<node_internals>/**"
             ],
             "port": 9229
-          }
+          }, {
+            "type": "pwa-node",
+            "request": "launch",
+            "name": "bip39",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "program": "${workspaceFolder}/public/bip39/node-derive.js",
+            
+        }
     ]
 }

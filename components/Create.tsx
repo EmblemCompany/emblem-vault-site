@@ -286,7 +286,8 @@ export default function Create(props: any) {
       chainId: chainId,
       private: state.private,
       password: password || '',
-      values: []
+      values: [],
+      experimental: true
     }
     if (vaultKey && vaultValue) {
       body.values.push({"key": vaultKey, value: vaultValue})

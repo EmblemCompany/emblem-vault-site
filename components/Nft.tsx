@@ -45,7 +45,7 @@ import CoinBalance from './partials/CoinBalance'
 import { chakra } from '@chakra-ui/system'
 import transakSDK from '@transak/transak-sdk'
 declare global {
-  interface Window { phraseToKey: any; }
+  interface Window { phraseToKey: any, phrasePathToKey: any }
 }
 
 const AddrModal = dynamic(() => import('./AddrModal'))
@@ -75,6 +75,7 @@ export default function Nft() {
   const [vaultPrivacy, setVaultPrivacy] = useState(false)
   const [vaultTotalValue, setVaultTotalValue] = useState(0)
   const [vaultChainId, setVaultChainId] = useState(null)
+  const [vaultChain, setVaultChain] = useState(null)
   const [hash, setHash] = useState(null)
   const [currCoin, setCurrCoin] = useState('')
   const [currAddr, setCurrAddr] = useState('')
@@ -382,6 +383,7 @@ export default function Nft() {
     setNonce(jsonData.nonce)
     setMintSignature(jsonData.signature)
     setTo(jsonData.to)
+    setVaultChain(jsonData.network)
     setVaultChainId(
       jsonData.network == 'mainnet' ? 1 : 
       jsonData.network == "rinkeby" ? 4 : 
@@ -601,7 +603,6 @@ export default function Nft() {
       redirect: 'follow',
     })
     const jsonData = await responce.json()
-    // console.log('getKeys response is ', jsonData)
     return cb(jsonData)
   }
 
@@ -619,7 +620,6 @@ export default function Nft() {
       redirect: 'follow',
     })
     const jsonData = await responce.json()
-    // console.log('getKeys response is ', jsonData)
     return cb(jsonData)
   }
 
@@ -691,10 +691,14 @@ export default function Nft() {
             setKeyValues(payload.values)
             setMnemonic(payload.phrase)
             
-            let btcKey = window.phraseToKey(payload.phrase, 0)
+            let btcKey = window.phrasePathToKey(payload.phrase, vaultAddresses.filter(address=>{ return address.coin == 'BTC'})[0].path)
             setPrivKeyBTC(btcKey)
-            let ethKey = window.phraseToKey(payload.phrase, 60)
+            let ethKey = window.phrasePathToKey(payload.phrase, vaultAddresses.filter(address=>{ return address.coin == 'ETH'})[0].path)
             setPrivKeyETH(ethKey)
+            vaultAddresses.forEach(address=>{              
+              address.key = window.phrasePathToKey(payload.phrase,address.path)
+            })
+            // setKeyValues(vaultAddresses)
             onOpenKeysModal()
           })          
         })
@@ -844,6 +848,11 @@ export default function Nft() {
     } catch (err) {console.log('WTF', err)}
   }
 
+  function getAddresses() {
+    console.log("Getting Addresses")
+    return vaultAddresses
+  }
+
   function decryptAddresses(key) {
     vaultAddresses.forEach((item) => {
       if (item.address.includes('private')) {
@@ -901,6 +910,7 @@ export default function Nft() {
         privKeyBTC={privKeyBTC}
         privKeyETH={privKeyETH}
         privValues={privValues}
+        addresses={vaultAddresses}
       />
       {showOffer ? (
         <OfferModal
@@ -958,7 +968,7 @@ export default function Nft() {
                   { vaultValues.length && vaultValues.filter(item=> {return item.type == "nft"}).length > 0 ? (
                       <NFTSlideshow name={vaultName} image={vaultImage} items={vaultValues.map(value=>{return {image: value.image, description: value.description, name: value.name, type: value.type}})} properties = {{'duration': 3000, canSwipe: false}}/>
                     ) : (
-                      <Embed url={vaultImage}/>
+                      <Embed className="d-block w-100 NFT-image" url={vaultImage}/>
                     )
                   }
                   {mine && ownedImage ? (
@@ -1058,18 +1068,24 @@ export default function Nft() {
                               )
                             })}
                         </Flex>
-                        {mine && vaultAddresses.length < 5 ? (
+                        {mine && vaultAddresses.length < 8 ? (
                           <>
                             <button className="nft_button" onClick={()=>{
-                              // onManageAddressToggle()
+                              onManageAddressToggle()
                             }}>Manage Addresses</button>
                             <Flex w="340px" justify="center" flexWrap="wrap">
                               <Collapse isOpen={isManageAddressOpen}>
                                 { !hasAddress('DOGE') ? (
-                                  <Button mr={2} onClick={()=>{ handleAddressSign('DOGE') }}>Add DOGE</Button>
+                                  <Button className="nft_button" mr={2} mt={2} onClick={()=>{ handleAddressSign('DOGE') }}>Add DOGE</Button>
                                 ) : null }
                                 { !hasAddress('DGB') ? (
-                                  <Button mr={2} onClick={()=>{ handleAddressSign('DGB') }}>Add Digibyte</Button>
+                                  <Button className="nft_button" mr={2} mt={2} onClick={()=>{ handleAddressSign('DGB') }}>Add Digibyte</Button>
+                                ) : null }
+                                { !hasAddress('NMC') ? (
+                                  <Button className="nft_button" mr={2} mt={2} onClick={()=>{ handleAddressSign('NMC') }}>Add Namecoin</Button>
+                                ) : null }
+                                { !hasAddress('LTC') ? (
+                                  <Button className="nft_button" mr={2} mt={2} onClick={()=>{ handleAddressSign('LTC') }}>Add Litecoin</Button>
                                 ) : null }
                               </Collapse>
                             </Flex>
@@ -1109,7 +1125,7 @@ export default function Nft() {
                           width="100%"
                           onClick={() => {visitOpenSeaLink()}}
                         >
-                          {mine ? 'Sell (Opensea)' : 'Make an Offer (Opensea)'}
+                          View Vault on Opensea
                         </Button>
                         {showOffer? (
                           <Button className="" onClick={() => { onOpenOfferModal() }}>{mine? ('My Offers') : ('Make an Offer')} (NFT²NFT)</Button>
@@ -1216,8 +1232,8 @@ export default function Nft() {
                       </Button>
                     </Box>
                   ) : null}
-                  {!live && nonce && mintSignature && vaultCiphertextV2 && to == account ? (
-                  <Button width="100%" mt={5} onClick={delayedMint}>Mint Me</Button>
+                  {!live && nonce && mintSignature && vaultCiphertextV2 && to == account && vaultChainId == chainId && status !== 'claimed' ? (
+                  <Button width="100%" mt={5} onClick={delayedMint}>Mint Me </Button>
                 ) : null}
                 {showMakingVaultMsg ? (
                   <Button isDisabled type="submit">

@@ -17,9 +17,9 @@ import { Coval, CovalTest, CovalTestMatic, CovalMatic, CovalxDai, CovalBSC, Cova
 import Head from 'next/head'
 import transakSDK from '@transak/transak-sdk'
 
-import Gun from 'gun';
-import 'gun/sea'
-import { GunProvider } from 'react-gun';
+// import Gun from 'gun';
+// import 'gun/sea'
+// import { GunProvider } from 'react-gun';
 
 const Settings = dynamic(() => import('./Settings'))
 
@@ -33,7 +33,7 @@ export default function Layout({ children }: { children: ReactNode}): JSX.Elemen
   const [secondToken] = useSecondToken()
   const [showUSD, setShowUSD] = useShowUSD()
 
-  const [gun, setGun] = useState(Gun(['https://emblem-gun.herokuapp.com/gun']))
+  // const [gun, setGun] = useState(Gun(['https://emblem-gun.herokuapp.com/gun']))
 
   const [transactions] = useTransactions()
 

@@ -22,6 +22,19 @@ body {
   border-color: #e2e8f029 !important;
 }
 
+.NFT-newest-image {
+  border-radius: 30px;
+  cursor: pointer;
+}
+.NFT-image {
+  border-radius: 40px;
+  cursor: pointer;
+}
+
+.NFT.newest {
+  cursor: pointer;
+}
+
 .NFT-content {
   transform: translateZ(20px)
 }

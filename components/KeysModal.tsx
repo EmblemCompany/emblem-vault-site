@@ -13,6 +13,7 @@ import {
 } from '@chakra-ui/core'
 import copy from 'copy-to-clipboard'
 import { COLOR } from '../constants'
+import { address } from 'bitcoinjs-lib'
 interface DataValues {
   key: string
   value: string
@@ -23,7 +24,8 @@ export default function KeysModal({
   mnemonic,
   privKeyBTC,
   privKeyETH,
-  privValues
+  privValues,
+  addresses
 }: {
   isOpen: boolean
   onClose: () => void
@@ -31,6 +33,7 @@ export default function KeysModal({
   privKeyBTC: string
   privKeyETH: string
   privValues: Array<object>
+  addresses: any
 }): JSX.Element {
   const phrase = mnemonic
   const btcKey = privKeyBTC
@@ -39,6 +42,7 @@ export default function KeysModal({
   const { colorMode } = useColorMode()
 
   const [phraseCopied, setPhraseCopied] = useState(false)
+
   useEffect(() => {
     if (phraseCopied) {
       const timeout = setTimeout(() => {
@@ -74,6 +78,18 @@ export default function KeysModal({
     }
   }, [ETHKeyCopied])
 
+  const [BCHKeyCopied, setBCHKeyCopied] = useState(false)
+  useEffect(() => {
+    if (BCHKeyCopied) {
+      const timeout = setTimeout(() => {
+        setBCHKeyCopied(false)
+      }, 750)
+      return (): void => {
+        clearTimeout(timeout)
+      }
+    }
+  }, [BCHKeyCopied])
+
   const [valueCopied, setValueCopied] = useState(false)
   useEffect(() => {
     if (valueCopied) {
@@ -94,17 +110,19 @@ export default function KeysModal({
       ? setBTCKeyCopied(true)
       : whichOne == 'ETHKey'
       ? setETHKeyCopied(true)
+      : whichOne == 'BCHKey'
+      ? setBCHKeyCopied(true)
       : whichOne == 'values'
       ? setValueCopied(true)
       : null
   }
-
+  
   return (
     <Modal isOpen={isOpen} onClose={onClose} isCentered>
       <ModalOverlay />
       <ModalContent color={COLOR[colorMode]}>
         <ModalHeader>
-          <Text>Your Vault Keys</Text>
+          <Text>Your Vault Keys {addresses? addresses.length : 0}</Text>
         </ModalHeader>
         <ModalCloseButton />
         <ModalBody>
@@ -164,6 +182,24 @@ export default function KeysModal({
               
             </> 
             ) : null}
+
+            
+            {addresses.length > 0 ? addresses.map((item: any, index) => {
+              if (item.coin == "BCH")
+              return (
+                <>
+                  <Stack direction="row" mt={4}>
+                    <Text>Your BCH private key (click to copy):</Text>
+                  </Stack>
+
+                  <Stack direction="row" justify="space-between">
+                    <Button whiteSpace="unset" height="unset" p={2} onClick={() => copyWithFlag(item.key, 'BCHKey')}>
+                      {BCHKeyCopied ? <Text>Copied!</Text> : <Text isTruncated>{item.key}</Text>}
+                    </Button>
+                  </Stack>
+                </>
+              )
+            }): null}
             
           </Stack>
         </ModalBody>
