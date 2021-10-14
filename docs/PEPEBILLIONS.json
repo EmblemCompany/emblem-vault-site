@@ -8,5 +8,6 @@
     "asset_locked":true,
     "image":"https://raw.githubusercontent.com/genecyber/PEPEBILLIONS/main/mini.jpg",
     "image_large":"https://raw.githubusercontent.com/genecyber/PEPEBILLIONS/main/PEPEBILLIONS.jpg",
-    "image_title":"PEPEBILLIONS"
+    "image_title":"PEPEBILLIONS",
+    "forensics": "https://aperisolve.fr/ef3b9508ef2f95ff220373309710ca4e"
 }
