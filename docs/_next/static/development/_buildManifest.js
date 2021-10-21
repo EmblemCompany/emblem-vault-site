@@ -1,1 +1,1 @@
-self.__BUILD_MANIFEST = {"/_error":["static\u002Fchunks\u002Fpages\u002F_error.js"],"/myvaults":["static\u002Fchunks\u002Fpages\u002Fmyvaults.js"]};self.__BUILD_MANIFEST_CB && self.__BUILD_MANIFEST_CB()
+self.__BUILD_MANIFEST = {"/_error":["static\u002Fchunks\u002Fpages\u002F_error.js"],"/nfts":["static\u002Fchunks\u002Fpages\u002Fnfts.js"],"/vaults":["static\u002Fchunks\u002Fpages\u002Fvaults.js"]};self.__BUILD_MANIFEST_CB && self.__BUILD_MANIFEST_CB()
