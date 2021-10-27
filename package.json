@@ -4,7 +4,8 @@
   "license": "GPL-3.0-or-later",
   "scripts": {
     "dev-old": "next dev",
-    "dev": "NODE_OPTIONS='--inspect' next",
+    "dev-debug": "NODE_OPTIONS='--inspect' next",
+    "dev":"next",
     "build": "next build && next export",
     "build-ipfs": "IPFS=true next build && next export",
     "prettier": "prettier --write .",

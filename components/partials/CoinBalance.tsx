@@ -4,7 +4,8 @@ import {
   Image,
   Text,
   Link,
-  useColorMode
+  useColorMode,
+  Button
 } from '@chakra-ui/core'
 
 import {HStack, VStack, Circle } from '@chakra-ui/react'
@@ -27,18 +28,22 @@ type CoinDetails = {
 
 type CoinBalanceProps = {
   coin: CoinDetails,
-  colorMode: string
+  colorMode: string,
+  mine: boolean,
+  onRenew: Function
 }
 
 export class CoinBalance extends Component<CoinBalanceProps> {
   render() {
     let coin = this.props.coin
+    let mine = this.props.mine
+    let onRenew = this.props.onRenew
     return (
       <HStack key={coin.name} w="300px" p={2} >
           <Box className="coin-image-container" w="100%" min-width="40px">                                
             {
             coin.image ? (
-              <Image width="40px" src={coin.image}></Image>
+              <Image className="NFT-image-small" width="40px" src={coin.image}></Image>
             ) :
             coin.address && validImage("https://token-icons.s3.amazonaws.com/"+coin.address+".png") ? (
               <Image width="40px" src={"https://token-icons.s3.amazonaws.com/"+coin.address+".png"}></Image>
@@ -64,24 +69,20 @@ export class CoinBalance extends Component<CoinBalanceProps> {
               <Text position="relative" fontSize="xs" width="50%" left="-10px" color={this.props.colorMode=="dark" ? "navajowhite": "gray"}>
                 {coin && coin.balance ? 
                 Number(Number(coin.balance).toFixed(3)).toLocaleString() : null} {(coin.symbol? coin.symbol : coin.project? coin.project: coin.name) + " "} 
-                {coin.type == 'nft' && coin.external_url ? (
-                  <Link href={coin.external_url} isExternal>
-                    View NFT
-                  </Link>
-                ) : null}
-              </Text>
-              {/* <Text position="relative" fontSize="xs" left="-10px" color={this.props.colorMode=="dark" ? "navajowhite": "gray"}>
-                {coin && coin.balance ? 
-                Number(coin.balance).toFixed(3) : '------'} {(coin.symbol? coin.symbol : coin.name) + " "} 
-                {coin.type == 'nft' && coin.external_url ? (
-                  <Link href={coin.external_url} isExternal>
-                    View NFT
-                  </Link>
-                ) : null}
-              </Text> */}
+              </Text>              
               <Text width="45%" textAlign="right" fontSize="xs" right="40px">
                 {coin.coin.toLowerCase()} chain
               </Text>
+            </HStack>
+            <HStack width="100%">
+              {coin.type == 'nft' && coin.external_url ? (
+                  <Link className="view-nft-link" color={this.props.colorMode=="dark" ? "navajowhite": "gray"} href={coin.external_url} isExternal>
+                    View NFT
+                  </Link>
+                ) : null}
+              {coin.coin.toLowerCase() == 'nmc' && mine && coin.type == 'nft' ? (
+                <Link className="view-nft-link" color={this.props.colorMode=="dark" ? "navajowhite": "gray"} onClick={()=>{onRenew(coin.name)}}>Renew</Link>
+              ) : null}
             </HStack>
           </VStack>
         </HStack>

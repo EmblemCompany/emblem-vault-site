@@ -85,7 +85,7 @@ export default function Settings({ isOpen, onClose }: { isOpen: boolean; onClose
       <ModalOverlay />
       <ModalContent color={COLOR[colorMode]}>
         <ModalHeader>
-          <Text>Settings</Text>
+          <Text>Settings (Build #2021)</Text>
         </ModalHeader>
         <ModalCloseButton />
         <ModalBody>
@@ -174,7 +174,7 @@ export default function Settings({ isOpen, onClose }: { isOpen: boolean; onClose
             rel="noopener noreferrer"
             color="blue.500"
           >
-            Based on Hypertext
+            Based on Hypertext.
           </Link>
 
           <Link

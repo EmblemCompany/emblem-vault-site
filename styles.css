@@ -31,6 +31,10 @@ body {
   cursor: pointer;
 }
 
+.NFT-image-small {
+  border-radius: 5px;
+}
+
 .NFT.newest {
   cursor: pointer;
 }
@@ -77,4 +81,25 @@ body {
 
 .infinite-scroll-component__outerdiv {
   width: 95%;
+}
+
+.view-nft-link {
+  width: 100%;
+  font-size: x-small;
+  margin-top: unset;
+}
+
+.md p {
+  margin-top: 10px !important;
+}
+
+.address_nft_button {
+  font-size: .7rem !important;
+  line-height: unset !important;
+  height: unset !important;
+  font-weight: 100 !important;
+}
+
+.NFT.myNft {
+  height: 250px;
 }

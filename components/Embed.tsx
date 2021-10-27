@@ -68,7 +68,7 @@ export class Embed extends Component<EmbedProps> {
           <Vimeo
             url={url}
           />
-        ) : url.includes('googleusercontent.com') || url.includes('ipfs.io') || url.includes('framed/') ||  url.includes('.png') || url.includes('.jpg') || url.includes('.jpeg') || url.includes('.gif') || url.includes('.svg') ? (
+        ) : url.includes('/dynamic/') || url.includes('https://s3.amazonaws.com/') ||  url.includes('googleusercontent.com') || url.includes('ipfs.io') || url.includes('framed/') ||  url.includes('.png') || url.includes('.jpg') || url.includes('.jpeg') || url.includes('.gif') || url.includes('.svg') ? (
               <Image
                 p={"20px"}
                 h={"100%"}

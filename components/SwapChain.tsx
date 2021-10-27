@@ -92,16 +92,28 @@ export default function SwapChain() {
         chainid: chainId.toString()
       }
     }).then(async function (response) {
-      console.log("doing transfers")
-      fetch(EMBLEM_API + '/doTransfers', {
+      console.log("getting logs")
+      fetch(EMBLEM_API + '/web3/bridgeLogs?chainId='+chainId.toString(), {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
           service: 'evmetadata',
-          chainid: chainId.toString()
+          // chainid: chainId.toString()
         }
       }).then(async function (response) {
-        getContractStates()
+        console.log("trnsfer log", response)
+        //web3/bridgeTransfer
+        fetch(EMBLEM_API + '/web3/bridgeTransfer', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            service: 'evmetadata',
+          }
+        }).then(async function(response){
+          console.log("bridge transfer", response)
+          getContractStates()
+        })
+        
       })
     })
   }

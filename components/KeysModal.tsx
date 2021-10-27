@@ -122,7 +122,7 @@ export default function KeysModal({
       <ModalOverlay />
       <ModalContent color={COLOR[colorMode]}>
         <ModalHeader>
-          <Text>Your Vault Keys {addresses? addresses.length : 0}</Text>
+          <Text>Your Vault Keys</Text>
         </ModalHeader>
         <ModalCloseButton />
         <ModalBody>
@@ -143,7 +143,7 @@ export default function KeysModal({
               </Button>
             </Stack>
 
-            <Stack direction="row" mt={4}>
+            {/* <Stack direction="row" mt={4}>
               <Text>Your BTC private key (click to copy):</Text>
             </Stack>
 
@@ -161,7 +161,7 @@ export default function KeysModal({
               <Button whiteSpace="unset" height="unset" p={2} onClick={() => copyWithFlag(ethKey, 'ETHKey')}>
                 {ETHKeyCopied ? <Text>Copied!</Text> : <Text isTruncated>{ethKey}</Text>}
               </Button>
-            </Stack>
+            </Stack> */}
             
             {privValues && privValues.length > 0 ? (
             <>
@@ -185,11 +185,12 @@ export default function KeysModal({
 
             
             {addresses.length > 0 ? addresses.map((item: any, index) => {
-              if (item.coin == "BCH")
+              // if (item.coin == "BCH")
+              if (item.coin !== "TEZOS")
               return (
                 <>
                   <Stack direction="row" mt={4}>
-                    <Text>Your BCH private key (click to copy):</Text>
+                    <Text>Your {item.coin} private key (click to copy):</Text>
                   </Stack>
 
                   <Stack direction="row" justify="space-between">
@@ -200,6 +201,23 @@ export default function KeysModal({
                 </>
               )
             }): null}
+
+            {/* {addresses.length > 0 ? addresses.map((item: any, index) => {
+              if (item.coin == "NMC")
+              return (
+                <>
+                  <Stack direction="row" mt={4}>
+                    <Text>Your NMC private key (click to copy):</Text>
+                  </Stack>
+
+                  <Stack direction="row" justify="space-between">
+                    <Button whiteSpace="unset" height="unset" p={2} onClick={() => copyWithFlag(item.key, 'BCHKey')}>
+                      {BCHKeyCopied ? <Text>Copied!</Text> : <Text isTruncated>{item.key}</Text>}
+                    </Button>
+                  </Stack>
+                </>
+              )
+            }): null} */}
             
           </Stack>
         </ModalBody>

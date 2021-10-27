@@ -136,7 +136,7 @@ export default function Layout({ children }: { children: ReactNode}): JSX.Elemen
             <Button display={showOrHideNavLink('create')} m={2} variant="ghost" onClick={()=>{handleNewNavigationClick('create')}}>
               Create
             </Button>
-            <Button display={showOrHideNavLink('vaultlist')} m={2} variant="ghost" onClick={()=>{handleNewNavigationClick('vaultlist')}}>
+            <Button display={showOrHideNavLink('vaults')} m={2} variant="ghost" onClick={()=>{handleNewNavigationClick('vaults')}}>
               My Vaults
             </Button>
             <Button display={showOrHideNavLink('featured')} m={2} variant="ghost" onClick={()=>{handleNewNavigationClick('featured')}}>

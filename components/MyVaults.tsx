@@ -1,4 +1,4 @@
-import { Box, Flex, Text, Link, Image, Stack, Spinner, useColorMode } from '@chakra-ui/core'
+import { Box, Flex, Text, Link, Image, Stack, Spinner, useColorMode, Button } from '@chakra-ui/core'
 import Loader from 'react-loader'
 import Refreshing from './Refreshing'
 import { useRouter } from 'next/router'
@@ -8,7 +8,7 @@ import { EMBLEM_API } from '../constants'
 import InfiniteScroll from 'react-infinite-scroll-component';
 import Embed from './Embed'
 
-export default function Newest() {
+export default function MyVaults() {
   const { query } = useRouter()
   const [pagePosition, setPagePosition] = useState(Number(query.start) || 0)
   const { account, chainId } = useWeb3React()
@@ -16,6 +16,7 @@ export default function Newest() {
   const [state, setState] = useState({ loaded: false })
   const [loadingApi, setLoadingApi] = useState(false)
   const [address, setAddress] = useState(query.address)
+  const [vaultType, setVaultType] = useState(query.type || "unclaimed")
   const [experimental, setExperimental] = useState(query.experimental)
   const { colorMode } = useColorMode()
   const [shouldFetchData, setShouldFetchData] = useState(false)
@@ -23,23 +24,25 @@ export default function Newest() {
   const [offset, setOffset] = useState(0)
   const PAGE_SIZE = 20
 
-  const getVaults = async () => {    
+  const getVaults = async () => {
     try {
-      const response = await fetch(EMBLEM_API + '/newest/?start='+offset+'&size='+PAGE_SIZE, {
+      const response = await fetch(EMBLEM_API + '/myvaults/'+(address ? address : account)+'?start='+offset+'&size='+PAGE_SIZE, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
           service: 'evmetadata',
           chainId: chainId.toString(),
+          vaultType: vaultType.toString()
         },
       })
-      let jsonData = await response.json()
-      if (jsonData) {
-        jsonData = jsonData.filter(item=>{return item.live && !item.claimedBy})
-      }      
+      let jsonData = await response.json()    
       setVaults(vaults.concat(jsonData))
       setState({ loaded: true })
       setLoadingApi(false)
+      console.log("Records received", jsonData.length)
+      if (jsonData.length < PAGE_SIZE) {
+        setHasMore(false)
+      }
     } catch (error) {}
   }
 
@@ -103,12 +106,25 @@ export default function Newest() {
     }
   }, [chainId, chain])
 
-  // useEffect(() => {
-  //   if (!state.loaded) {
-  //     console.log("load fires how many times")
-  //     vaults.length < 1 ? getVaults() : setState({ loaded: true })
-  //   }
-  // }, [])
+  const showOrHideNavLink = (path: string)=> {
+    return vaultType == path ? true: false
+  }
+
+  const handleNewNavigationClick = (path)=>{
+    if (!address) {
+      location.href = location.origin + location.pathname + "?type=" + path
+    } else {
+      location.href = location.origin + location.pathname + "?address=" + address + "&type=" + path
+    }
+  }
+
+  const handleNftsNavigationClick = ()=>{
+    if (!address) {
+      location.href = location.origin + '/nfts'
+    } else {
+      location.href = location.origin + '/nfts' + "?address=" + address
+    }
+  }
 
   useEffect(() => {
     if (shouldFetchData) {
@@ -119,9 +135,27 @@ export default function Newest() {
   }, [shouldFetchData])
 
   return (
+    <>
+    <Stack pl="10" spacing={0} direction="row">
+      <Button isDisabled={showOrHideNavLink('unclaimed')} m={2} variant="ghost" onClick={()=>{handleNewNavigationClick('unclaimed')}}>
+          Unclaimed
+      </Button>
+      <Button isDisabled={showOrHideNavLink('claimed')} m={2} variant="ghost" onClick={()=>{handleNewNavigationClick('claimed')}}>
+          Claimed
+      </Button>
+      <Button isDisabled={showOrHideNavLink('unminted')} m={2} variant="ghost" onClick={()=>{handleNewNavigationClick('unminted')}}>
+          Not Minted
+      </Button>
+      <Button isDisabled={showOrHideNavLink('created')} m={2} variant="ghost" onClick={()=>{handleNewNavigationClick('created')}}>
+          Created by me
+      </Button>
+      <Button isDisabled={false} m={2} variant="ghost" onClick={()=>{handleNftsNavigationClick()}}>
+          Other NFT's
+      </Button>
+    </Stack>
     <Loader loaded={state.loaded}>
       {loadingApi ? <Refreshing /> : ''}
-       
+        
         <InfiniteScroll                
           className="infinite-scroll"
           scrollableTarget="shannon-container"
@@ -132,7 +166,7 @@ export default function Newest() {
           loader={<Refreshing />}
           endMessage={
             <p style={{ textAlign: 'center' }}>
-              <b>Yay! You have seen it all</b> 
+              <b>No more vaults to load.</b> 
             </p>
           }
         >
@@ -223,5 +257,6 @@ export default function Newest() {
       </Flex>
       </InfiniteScroll>
     </Loader>
+    </>
   )
 }

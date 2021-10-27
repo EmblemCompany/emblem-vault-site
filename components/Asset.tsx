@@ -52,7 +52,7 @@ const AddrModal = dynamic(() => import('./AddrModal'))
 const KeysModal = dynamic(() => import('./KeysModal'))
 const OfferModal = dynamic(() => import('./OfferModal'))
 
-export default function Nft() {
+export default function Asset() {
   const { account, chainId, library } = useWeb3React()
   const { query } = useRouter()
   const [approved, setApproved] = useState(false)
@@ -110,7 +110,7 @@ export default function Nft() {
   const [to, setTo] = useState(null)
   const [showMakingVaultMsg, setShowMakingVaultMsg] = useState(false)
   const [minting, setMinting] = useState(false)
-  // const [transferImage, setTransferImage] = useState('')
+  const [contract, setContract] = useState(query.contract)
 
   const handlerContract = useContract(contractAddresses.vaultHandler[chainId], contractAddresses.vaultHandlerAbi, true)
   const emblemContract = useContract(contractAddresses.emblemVault[chainId], contractAddresses.emblemAbi, true)
@@ -375,9 +375,9 @@ export default function Nft() {
     setVaultIPFS(jsonData.ipfs || null)
     setVaultImageIPFS(jsonData.image_ipfs || null)
     if (jsonData.live == false) {
-      checkLiveliness(jsonData.tokenId, ()=>{
+      // checkLiveliness(jsonData.tokenId, ()=>{
 
-      })
+      // })
     }
     setLive(jsonData.live == false ? false : true)
     setNonce(jsonData.nonce)
@@ -738,7 +738,7 @@ export default function Nft() {
       .signMessage('Address: ' + tokenId)
       .then((signature) => {
         addAddress(signature, tokenId, coin, (result) => {
-          getVault()
+          // getVault()
         })
       })
   }
@@ -827,7 +827,7 @@ export default function Nft() {
   }
 
   useEffect(() => {
-    getVault()
+    // getVault()
   }, [])
 
   useEffect(() => {
@@ -1020,7 +1020,7 @@ export default function Nft() {
                     <Stack>
                       <Text fontSize="xs">
                       { vaultChainId == chainId ? (
-                        <Link href={"./vaults?address="+owner}>
+                        <Link href={"./myvaults?address="+owner}>
                           Owner: {owner}
                         </Link>
                       ) : null }
@@ -1108,7 +1108,7 @@ export default function Nft() {
                               )
                             })}
                         </Flex>
-                        {(mine || status === 'claimed') && vaultAddresses.length < 9 ? (
+                        {(mine || status === 'claimed') && vaultAddresses.length < 8 ? (
                           <>
                             <button className="nft_button" onClick={()=>{
                               onManageAddressToggle()
@@ -1129,9 +1129,6 @@ export default function Nft() {
                                 ) : null }
                                 { !hasAddress('MONA') ? (
                                   <Button className="nft_button" mr={2} mt={2} onClick={()=>{ handleAddressSign('MONA') }}>Add Mona</Button>
-                                ) : null }
-                                { !hasAddress('TEZOS') ? (
-                                  <Button className="nft_button" mr={2} mt={2} onClick={()=>{ handleAddressSign('TEZOS') }}>Add Tezos</Button>
                                 ) : null }
                               </Collapse>
                             </Flex>
@@ -1341,15 +1338,15 @@ export default function Nft() {
                 setHash(null)                
               } else if(accepting) {
                 setAccepting(false)                
-                getVault()
+                // getVault()
                 setHash(null)
               } else if(approving) {
                 setApproving(false)
-                getVault()
+                // getVault()
                 setHash(null)
               } else if(transfering) {
                 setTransfering(false)
-                getVault()
+                // getVault()
                 setHash(null)
               } else if(minting) {
                 checkLiveliness(tokenId, ()=>{

@@ -3,6 +3,7 @@ import { abi as HandlerABI } from './abi/handler.json'
 import { abi as CovalABI } from './abi/coval.json'
 import { abi as EmblemABI } from './abi/emblem.json'
 import { abi as NftradeABI } from './abi/nftrade.json'
+import { abi as ClaimedABI } from './abi/claimed.json'
 
 export const BG = { light: 'gray.50', dark: 'gray.900' }
 export const COLOR = { light: 'black', dark: 'white' }
@@ -59,12 +60,17 @@ export const contractAddresses = {
   nftrade: {
     137: '0x88f5Cc3624247477bE5f691648A7D1B2631965B9'
   },
-  nftradeAbi: NftradeABI
+  nftradeAbi: NftradeABI,
+  claimed: {
+    1: '0xFd2E9C4F9820F475aE9d3C26B612e1be69FEC8F9'
+  },
+  claimedAbi: ClaimedABI
+
 }
 
 export const BURN_ADDRESS = '0x5D152dd902CC9198B97E5b6Cf5fc23a8e4330180'
-
-export const EMBLEM_API = 'https://api.emblemvault.io'
+export const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000"
+export const EMBLEM_API = 'https://api.emblemvault.io' //'http://localhost:3001'//
 
 export enum QueryParameters {
   INPUT = 'input',

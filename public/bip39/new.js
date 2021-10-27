@@ -37,9 +37,12 @@ function calculateAddressAndKey(coinValue, bip32RootKey, path) {
     var isBch = coinValue == 145;
     if (isBch) {coinValue = 0}
     var derivationPath = path? path : generateDerivationPath(coinValue);
+    let accountPath = generateAccountDerivationPath(coinValue);
     var bip32ExtendedKey = generateBip32ExtendedKey(derivationPath, bip32RootKey);
     var accountXprv = bip32ExtendedKey.toBase58();
     var accountXpub = bip32ExtendedKey.neutered().toBase58();
+    var bip32AccountExtendedKey = generateBip32ExtendedKey(accountPath, bip32RootKey);
+    let accountExtendedXprv = bip32AccountExtendedKey.toBase58();
     var key = bip32ExtendedKey.derive(0);
     var keyPair = key.keyPair;
     var address = keyPair.getAddress().toString();
@@ -65,7 +68,11 @@ function calculateAddressAndKey(coinValue, bip32RootKey, path) {
     console.log('privkey', privkey);
     console.log('pubkey', pubkey);
     console.log('coinName', coinValue == 60 ? "ETH": coinValue == 0? "BTC": coinValue == 3? "DOGE": coinValue==20? "DGB": "BCH");
-    return privkey
+    if (coinValue != 7) {
+        return privkey
+    } else {
+        return accountExtendedXprv
+    }
 }
 
 function generateDerivationPath(coin){
@@ -77,6 +84,16 @@ function generateDerivationPath(coin){
     path += coin + "'/";
     path += account + "'/";
     path += change;
+    return path
+}
+
+function generateAccountDerivationPath(coin){
+    var purpose =  44
+    var account = 0
+    var path = "m/";
+    path += purpose + "'/";
+    path += coin + "'/";
+    path += account + "'/";
     return path
 }
 
