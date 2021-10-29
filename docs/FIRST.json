@@ -8,7 +8,7 @@
     "asset_locked": true,
     "image": "https://api.emblemvault.io/s:evmetadata/unframed/ipfs/709923891251641011",
     "description": "<iframe src=\"https://emblem.finance/nft?id=709923891251641011&noLayout=true\" style=\"width:496px;height:880px;border:none;\" frameborder=\"0\" scrolling=\"no\"></iframe>",
-    "website": "",
+    "website": "https://emblem.finance/nft?id=709923891251641011",
     "pgpsig": "",
     "category": "Emblem Vault",
     "subcategory": "Ethereum",
