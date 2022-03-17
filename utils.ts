@@ -14,6 +14,7 @@ export function shortenHex(hex: string, length = 4): string {
 }
 
 export const CHAIN_ID_NAMES: { [key: number]: string } = {
+  0: 'Bitcoin',
   1: 'Ethereum Mainnet',
   3: 'Ropsten',
   4: 'Rinkeby',
@@ -28,6 +29,7 @@ export const CHAIN_ID_NAMES: { [key: number]: string } = {
 }
 
 export const INFURA_PREFIXES: { [key: number]: string } = {
+  0: 'bitcoin',
   1: 'mainnet',
   3: 'ropsten',
   4: 'rinkeby',

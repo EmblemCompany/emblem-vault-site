@@ -200,20 +200,22 @@ export default function MyNfts() {
               location.href = url
             }
             return (
-              <Box className="NFT myNft" key={index} {...flexSettings} onClick={redirect}>
-                <Text fontWeight="semibold" textAlign="center" mt={2} pl={2} isTruncated={true}>
-                  {vault.name}
-                  {!vault.private && vault.totalValue > 0 ? ': ~$' + vault.totalValue : null}
-                </Text>
-                <Stack align="center">
-                  <Embed className="d-block w-100 NFT-newest-image" url={vault.image}/>
-                </Stack>
-                <Box d="flex" alignItems="baseline">
-                </Box>                
-                <Stack align="center" mt={3}>
-                  {vault.status == 'claimed' ? <Text color="green.500">CLAIMED</Text> : null}
-                </Stack>
-              </Box>
+              <Link href={url} className="vaultLink">
+                <Box className="NFT myNft" key={index} {...flexSettings} onClick={redirect}>
+                  <Text fontWeight="semibold" textAlign="center" mt={2} pl={2} isTruncated={true}>
+                    {vault.name}
+                    {!vault.private && vault.totalValue > 0 ? ': ~$' + vault.totalValue : null}
+                  </Text>
+                  <Stack align="center">
+                    <Embed className="d-block w-100 NFT-newest-image" url={vault.image}/>
+                  </Stack>
+                  <Box d="flex" alignItems="baseline">
+                  </Box>                
+                  <Stack align="center" mt={3}>
+                    {vault.status == 'claimed' ? <Text color="green.500">CLAIMED</Text> : null}
+                  </Stack>
+                </Box>
+              </Link>
             )
           })
           

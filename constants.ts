@@ -1,5 +1,6 @@
 import { JSBI } from '@uniswap/sdk'
 import { abi as HandlerABI } from './abi/handler.json'
+import { abi as SalesABI } from './abi/sales.json'
 import { abi as CovalABI } from './abi/coval.json'
 import { abi as EmblemABI } from './abi/emblem.json'
 import { abi as NftradeABI } from './abi/nftrade.json'
@@ -10,6 +11,7 @@ export const COLOR = { light: 'black', dark: 'white' }
 
 export const isIPFS = process.env.IPFS === 'true'
 export const isServerSide = typeof window === 'undefined'
+const { API_OVERLOAD } = process.env;
 
 export const ADDRESS_ZERO = '0x0000000000000000000000000000000000000000'
 
@@ -27,6 +29,10 @@ export const ZERO = JSBI.BigInt(0)
 export const MAX_UINT256 = JSBI.BigInt('0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff')
 
 export const contractAddresses = {
+  salesFactory: {
+    1: '0xfb51bcd2644c20d87e17106c27355732fd485e4e'
+  },
+  salesAbi: SalesABI,
   vaultHandler: {
     1: '0x1ec6b294902d42fee964d29fa962e5976e71e67d',
     4: '0x63B1EB00de17Faf64b33649A5b7592543B010127',
@@ -70,7 +76,7 @@ export const contractAddresses = {
 
 export const BURN_ADDRESS = '0x5D152dd902CC9198B97E5b6Cf5fc23a8e4330180'
 export const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000"
-export const EMBLEM_API = 'https://api.emblemvault.io' //'http://localhost:3001'//
+export const EMBLEM_API = API_OVERLOAD? API_OVERLOAD :'https://api.emblemvault.io' //'http://localhost:3001'//
 
 export enum QueryParameters {
   INPUT = 'input',

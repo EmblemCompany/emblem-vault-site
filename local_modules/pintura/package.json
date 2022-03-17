@@ -1,0 +1,9 @@
+{
+  "private": true,
+  "version": "8.16.1",
+  "name": "pintura",
+  "browser": "pintura.js",
+  "main": "pintura.js",
+  "types": "pintura.d.ts",
+  "license": "https://pqina.nl/pintura/license"
+}

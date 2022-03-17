@@ -53,6 +53,7 @@ const KeysModal = dynamic(() => import('./KeysModal'))
 const OfferModal = dynamic(() => import('./OfferModal'))
 
 export default function Nft() {
+  
   const { account, chainId, library } = useWeb3React()
   const { query } = useRouter()
   const [approved, setApproved] = useState(false)
@@ -61,6 +62,8 @@ export default function Nft() {
   const [framed, setFramed] = useState(query.framed || true)
   const [tokenId, setTokenId] = useState(query.id)
   const [experimental, setExperimental] = useState(query.experimental)
+  const [noLayout, setNoLayout] = useState(query.noLayout)
+  const [slideshowOnly, setSlideshowOnly] = useState(query.slideshowOnly || false)
   const [vaultName, setVaultName] = useState('')
   const [vaultIPFS, setVaultIPFS] = useState('')
   const [vaultImageIPFS, setVaultImageIPFS] = useState('')
@@ -83,6 +86,7 @@ export default function Nft() {
   const [mine, setMine] = useState(false)
   const [claiming, setClaiming] = useState(false)
   const [status, setStatus] = useState('claimed')
+  const [sealed, setSealed] = useState(false)
   const [claimedBy, setClaimedBy] = useState(null)
   const [mnemonic, setMnemonic] = useState('')
   const [privKeyBTC, setPrivKeyBTC] = useState('')
@@ -110,10 +114,12 @@ export default function Nft() {
   const [to, setTo] = useState(null)
   const [showMakingVaultMsg, setShowMakingVaultMsg] = useState(false)
   const [minting, setMinting] = useState(false)
+  const [isCrowdSale, setIsCrowdSale] = useState(false)
+  const [alternateContractAddress, setAlternateContractAddress] = useState(null)
   // const [transferImage, setTransferImage] = useState('')
-
+  
   const handlerContract = useContract(contractAddresses.vaultHandler[chainId], contractAddresses.vaultHandlerAbi, true)
-  const emblemContract = useContract(contractAddresses.emblemVault[chainId], contractAddresses.emblemAbi, true)
+  let emblemContract = useContract(contractAddresses.emblemVault[chainId], contractAddresses.emblemAbi, true)
 
   const { isOpen: isOpenAddrModal, onOpen: onOpenAddrModal, onClose: onCloseAddrModal } = useDisclosure()
   const { isOpen: isOpenKeysModal, onOpen: onOpenKeysModal, onClose: onCloseKeysModal } = useDisclosure()
@@ -140,6 +146,11 @@ export default function Nft() {
     await _torus.init({skipSw: true, skipInit: true, skipPrefetch: true})
     console.log("Initialized Torus")
     return _torus
+  }
+
+  const getVaultContract = (address = null) =>{
+    //return useContract(address || contractAddresses.emblemVault[chainId], contractAddresses.emblemAbi, true)
+    return new Contract(address || contractAddresses.emblemVault[chainId], contractAddresses.emblemAbi, library.getSigner(account).connectUnchecked())
   }
 
   const initializeTransak = (address?: string, coin? : string)=>{
@@ -292,7 +303,8 @@ export default function Nft() {
   }
 
   const getVault = async () => {
-    loadCache()
+    console.log('getvault')
+    !slideshowOnly ? loadCache() : null
     const responce = await fetch(EMBLEM_API + '/meta/' + tokenId + '?experimental=true', {
       method: 'GET',
       headers: {
@@ -305,12 +317,16 @@ export default function Nft() {
     if (jsonData.image_ipfs) {
       getIPFSImage(jsonData.image_ipfs)
     }
+    if (jsonData.collectionAddress){
+      setIsCrowdSale(true)
+      setAlternateContractAddress(jsonData.collectionAddress)
+    }
     if (!jsonData.name) {
       setState({ loaded: true })
       setInvalidVault(true)
     } else {
       setStates(jsonData)
-      saveCache(jsonData)
+      !slideshowOnly? saveCache(jsonData) : null
       setLoadingApi(false)
       setInvalidVault(false)
     }
@@ -392,6 +408,7 @@ export default function Nft() {
       jsonData.network == "xdai" ? 100 : 
       jsonData.network == "bsc" ? 56 : 
       jsonData.network == "fantom" ? 250 : 
+      jsonData.network == "bitcoin" ? 0 : 
       97
     )
     setStatus(jsonData.status)
@@ -404,7 +421,12 @@ export default function Nft() {
       jsonData.addresses.filter((item) => {
         return item.address.includes('private:')
       }).length > 0
-    setVaultPrivacy(isPvt)
+    setVaultPrivacy(isPvt)    
+    if (jsonData.sealed) {
+      setSealed(true)
+    } else {
+      setSealed(false)
+    }
   }
 
   const getEthBalances = async (address, cb) => {
@@ -520,6 +542,7 @@ export default function Nft() {
   }
 
   const loadCache = () => {
+    console.log('cache')
     let vault = JSON.parse(localStorage.getItem(account + '_' + chainId + '_' + tokenId + '_vault')) // Load vaults from storage before updating from server!
     if (vault) {
       setState({ loaded: true })
@@ -624,6 +647,7 @@ export default function Nft() {
   }
 
   const getContractStates = async () => {
+    console.log("Contract states")
     let owned = false
     let _owner
     try {
@@ -647,10 +671,10 @@ export default function Nft() {
   }
 
   useEffect(()=>{
-    // console.log("mine?", mine)
-    // console.log("claiming?", claiming)
-    // console.log("accepting?", accepting)
-    // console.log("acceptable", acceptable)
+    console.log("mine?", mine)
+    console.log("claiming?", claiming)
+    console.log("accepting?", accepting)
+    console.log("acceptable", acceptable)
   })
 
   const hasAddress = (coin)=>{
@@ -827,12 +851,14 @@ export default function Nft() {
   }
 
   useEffect(() => {
+    console.log('----')
     getVault()
   }, [])
 
   useEffect(() => {
     // console.log('Account chainid = ' + chainId + ' and vaultchainid = ' + vaultChainId)
-    account && chainId && vaultChainId && chainId == vaultChainId ? getContractStates() : null
+    
+    (account && chainId && vaultChainId && chainId == vaultChainId) || ((query.noLayout && query.noLayout == 'true') || (query.slideshowOnly && query.slideshowOnly == 'true')) ? getContractStates() : null
     // console.log('in the usefeect that clls getcontractstates')
   })
 
@@ -915,12 +941,14 @@ export default function Nft() {
       (vaultChainId == 4 ? 'rinkeby.' : '') +
       'opensea.io/assets/' + 
       (vaultChainId == 137 ? 'matic/' : '') +
-      contractAddresses.emblemVault[vaultChainId] +
+      (alternateContractAddress? alternateContractAddress : contractAddresses.emblemVault[vaultChainId]) +
       '/' +
       tokenId 
     )
   }
-
+  { alternateContractAddress?
+    emblemContract = getVaultContract(alternateContractAddress? alternateContractAddress: null)
+  : null}
   return (
     <>
        <Head>
@@ -962,10 +990,10 @@ export default function Nft() {
       ) : null}
       
 
-      <Loader loaded={state.loaded}>
+      {/* <Loader loaded={state.loaded}> */}
         <Box height="40px"></Box>
         {loadingApi ? <Refreshing /> : ''}
-        {!invalidVault ? (          
+        {!invalidVault && !slideshowOnly ? (          
             <Flex width="full" align="center" justifyContent="center">
               <Box
                 className="NFT" 
@@ -991,6 +1019,22 @@ export default function Nft() {
                 >
                   Vault Network: {CHAIN_ID_NAMES[vaultChainId]}
                 </Box>
+                {/* {isCrowdSale ? (
+                  <Box
+                  mt="1"
+                  fontWeight="semibold"
+                  as="h3"
+                  lineHeight="tight"
+                  p={2}
+                  textAlign="center"
+                  textTransform="uppercase"
+                  alignItems="center"
+                  color="red.500"
+                >
+                  Part of a crowdsale, sealed for 1 week.
+                </Box>
+                ) : null} */}
+                
                 <Box
                   mt="1"
                   fontWeight="semibold"
@@ -1108,7 +1152,7 @@ export default function Nft() {
                               )
                             })}
                         </Flex>
-                        {(mine || status === 'claimed') && vaultAddresses.length < 9 ? (
+                        {(mine || status === 'claimed') && vaultAddresses.length < 10 ? (
                           <>
                             <button className="nft_button" onClick={()=>{
                               onManageAddressToggle()
@@ -1132,6 +1176,9 @@ export default function Nft() {
                                 ) : null }
                                 { !hasAddress('TEZOS') ? (
                                   <Button className="nft_button" mr={2} mt={2} onClick={()=>{ handleAddressSign('TEZOS') }}>Add Tezos</Button>
+                                ) : null }
+                                { !hasAddress('SOLANA') ? (
+                                  <Button className="nft_button" mr={2} mt={2} onClick={()=>{ handleAddressSign('SOLANA') }}>Add Solana</Button>
                                 ) : null }
                               </Collapse>
                             </Flex>
@@ -1257,8 +1304,7 @@ export default function Nft() {
                       />
                   </>
                     ) : null}
-
-                  {!(status === 'claimed') && account && vaultChainId === chainId && mine ? (
+                  {!(status === 'claimed') && account && vaultChainId === chainId && mine && !sealed ? (
                     <Box d="flex" alignItems="baseline" justifyContent="space-between" mt="4">
                       <Button
                         width="100%"
@@ -1277,8 +1323,8 @@ export default function Nft() {
                         Get Keys
                       </Button>
                     </Box>
-                  ) : null}
-                  {!live && nonce && mintSignature && vaultCiphertextV2 && to == account && vaultChainId == chainId && status !== 'claimed' ? (
+                  ) : null}                  
+                  {!live && nonce && mintSignature && to == account && vaultChainId == chainId && status !== 'claimed' ? (
                   <Button width="100%" mt={5} onClick={delayedMint}>Mint Me </Button>
                 ) : null}
                 {showMakingVaultMsg ? (
@@ -1297,6 +1343,11 @@ export default function Nft() {
                     </HStack> 
                   </Stack>
                 ) : null }
+                {sealed ? (
+                    <Box d="flex" mb={2} ml={35} alignItems="baseline" justifyContent="space-between" mt="4">
+                      <Text>*This vault is sealed forever.</Text>
+                    </Box>
+                  ) : null}
                 <Stack direction="column" align="center">
                   {status == 'claimed' ? <Text color="green.500">CLAIMED</Text> : null}
                 </Stack>
@@ -1308,7 +1359,16 @@ export default function Nft() {
                 ) : null}
               </Box>
             </Flex>
-        ) : (
+        ) : vaultValues.length > 0 && slideshowOnly? (
+          <Stack className="NFT-content" align="center">
+            { vaultValues.length && vaultValues.filter(item=> {return item.type == "nft"}).length > 0 ? (
+                <NFTSlideshow name={vaultName} image={vaultValues[0].image} items={vaultValues.filter(value=>{return value.image !== vaultValues[0].image}).map(value=>{return {image: value.image, description: value.description, name: value.name, type: value.type}})} properties = {{'duration': 3000, canSwipe: false}}/>
+              ) : (
+                <Embed className="d-block w-100 NFT-image" url={vaultImage}/>
+              )
+            }
+          </Stack>
+        ) : invalidVault ? (
           <Stack align="center">
             <Image
               width="md"
@@ -1321,7 +1381,7 @@ export default function Nft() {
               </Link>
             </Text>
           </Stack>
-        )}
+        ): null}
         {hash ? (
           <TransactionToast
             hash={hash}
@@ -1370,7 +1430,7 @@ export default function Nft() {
           />
         ) : null}
         <Box height="40px"></Box>
-      </Loader>
+      {/* </Loader> */}
     </>
   )
 }

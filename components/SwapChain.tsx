@@ -172,7 +172,7 @@ export default function SwapChain() {
               ) : null } */}
               <Stack direction="row" align="flex-start" spacing="1rem" flexWrap="wrap" shouldWrapChildren>
                 <SwapText>I want to transfer </SwapText>
-                <Input variant="flushed"
+                {/* <Input variant="flushed"
                   fontSize="1xl"
                   textAlign="center"
                   // universal input options
@@ -196,7 +196,7 @@ export default function SwapChain() {
                     }
                     setSwapAmount(Number(calculatedAmount))
                   }}
-                  spellCheck="false"/>
+                  spellCheck="false"/> */}
                   <SwapText>$Coval</SwapText>                  
               </Stack>
               <Stack direction="row" align="flex-start" spacing="1rem" flexWrap="wrap" shouldWrapChildren>
@@ -212,7 +212,7 @@ export default function SwapChain() {
                       } to
                     </Text> 
                     <Image float={'left'} margin={2} w={3} src="./next.png" />
-                    <Select w="40%" value={transferChain}
+                    {/* <Select w="40%" value={transferChain}
                       onChange={(e)=>{
                         setTransferChain(Number(e.target.value))
                         setTransferChainChanged(true)
@@ -225,10 +225,11 @@ export default function SwapChain() {
                       { chainId !==56 ? (<option value="56">Binance Smart Chain</option>): null }
                       { chainId !==1 ? (<option value="1">Ethereum Mainnet</option>): null }
                       { chainId !==250 ? (<option value="250">Fantom</option>): null }
-                    </Select> 
+                    </Select>  */}
                   </Flex>
                 </SwapText>
                 { transferChain!= 0 && swapAmount > 0 ? (
+                  // <Button isDisabled={true}>Bridge down for service</Button>
                   <Button isDisabled={isInvalid} onClick={transferToChain}>
                     { isInvalid ? "Invalid Transfer Amount" : "Transfer Now"}
                   </Button>

@@ -1,0 +1,9 @@
+{
+  "private": true,
+  "version": "8.16.1",
+  "name": "react-pintura",
+  "browser": "index.js",
+  "main": "index.js",
+  "license": "https://pqina.nl/pintura/license",
+  "types": "react-pintura.d.ts"
+}

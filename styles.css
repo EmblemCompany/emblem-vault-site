@@ -80,7 +80,7 @@ body {
 }
 
 .infinite-scroll-component__outerdiv {
-  width: 95%;
+  width: 100%;
 }
 
 .view-nft-link {
@@ -102,4 +102,27 @@ body {
 
 .NFT.myNft {
   height: 250px;
+}
+
+a:hover, a:visited, a:link, a:active
+{
+    text-decoration: none !important;
+}
+.custom-option {
+  transition: background 60ms;
+}
+.custom-option:hover {
+  transition-delay: 60ms;
+  background: #deebff;
+}
+.custom-option.custom-select__option--is-focused {
+  background: none;
+}
+.custom-option.custom-select__option--is-selected {
+  background: #2684FF;
+}
+
+.custom-select__menu {
+  background: #2D3748 !important;
+  width: 400px !important;
 }

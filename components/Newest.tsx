@@ -24,6 +24,7 @@ export default function Newest() {
   const PAGE_SIZE = 20
 
   const getVaults = async () => {    
+    console.log('getting vaults')
     try {
       const response = await fetch(EMBLEM_API + '/newest/?start='+offset+'&size='+PAGE_SIZE, {
         method: 'GET',
@@ -103,6 +104,14 @@ export default function Newest() {
     }
   }, [chainId, chain])
 
+  useEffect(() => {
+    // console.log('here', chainId, chain, account, state)
+    if (!account && !state.loaded) {      
+      setState({ loaded: false })
+      getVaults()
+    }
+  }, [chainId, chain])
+
   // useEffect(() => {
   //   if (!state.loaded) {
   //     console.log("load fires how many times")
@@ -160,54 +169,56 @@ export default function Newest() {
               location.href = url
             }
             return (
-              <Box className="NFT newest" key={index} {...flexSettings} onClick={redirect}>
-                <Text fontWeight="semibold" textAlign="center" mt={2} pl={2} isTruncated={true}>
-                  {vault.name}
-                  {!vault.private && vault.totalValue > 0 ? ': ~$' + vault.totalValue : null}
-                </Text>
-                <Stack align="center">
-                  <Embed className="d-block w-100 NFT-newest-image" url={vault.image}/>
-                </Stack>
-                <Box d="flex" alignItems="baseline">
-                  {/* <Box color="gray.500" fontWeight="semibold" letterSpacing="wide" fontSize="sm" ml="2">
-                    {vault.private ? (
-                      <>
-                        <Text>Contents hidden. Click to view the vault and unlock values.</Text>
-                      </>
-                    ) : vault.values.length ? (
-                      vault.values.map((coin, index) => {
-                        if (index < 4)
-                          return (
-                            <Stack> 
-                              <CoinBalance colorMode={colorMode} coin={coin}/>  
-                            </Stack>
-                          )
-                        else if (index == 4)
-                          return (
-                            <Text fontWeight="bold" mt={2}>
-                              ... Click to see the rest ...
-                            </Text>
-                          )
-                      })
-                    ) : (
-                      <Text>
-                        Nothing in here! <br />
-                        Click to fill 'er up!
-                      </Text>
-                    )}
-                  </Box> */}
-                </Box>
-                {/* <Box d="flex" alignItems="baseline">
-                  <Box color="gray.500" fontWeight="semibold" letterSpacing="wide" fontSize="sm" ml="2">
-                    <Text>
-                      Total Computable Value: {vault.totalValue}
-                    </Text>
+              <Link href={url} className="vaultLink">
+                <Box className="NFT newest" key={index} {...flexSettings} onClick={redirect}>
+                  <Text fontWeight="semibold" textAlign="center" mt={2} pl={2} isTruncated={true}>
+                    {vault.name}
+                    {!vault.private && vault.totalValue > 0 ? ': ~$' + vault.totalValue : null}
+                  </Text>
+                  <Stack align="center">
+                    <Embed className="d-block w-100 NFT-newest-image" url={vault.image}/>
+                  </Stack>
+                  <Box d="flex" alignItems="baseline">
+                    {/* <Box color="gray.500" fontWeight="semibold" letterSpacing="wide" fontSize="sm" ml="2">
+                      {vault.private ? (
+                        <>
+                          <Text>Contents hidden. Click to view the vault and unlock values.</Text>
+                        </>
+                      ) : vault.values.length ? (
+                        vault.values.map((coin, index) => {
+                          if (index < 4)
+                            return (
+                              <Stack> 
+                                <CoinBalance colorMode={colorMode} coin={coin}/>  
+                              </Stack>
+                            )
+                          else if (index == 4)
+                            return (
+                              <Text fontWeight="bold" mt={2}>
+                                ... Click to see the rest ...
+                              </Text>
+                            )
+                        })
+                      ) : (
+                        <Text>
+                          Nothing in here! <br />
+                          Click to fill 'er up!
+                        </Text>
+                      )}
+                    </Box> */}
                   </Box>
-                  </Box> */}
-                <Stack align="center" mt={3}>
-                  {vault.status == 'claimed' ? <Text color="green.500">CLAIMED</Text> : null}
-                </Stack>
-              </Box>
+                  {/* <Box d="flex" alignItems="baseline">
+                    <Box color="gray.500" fontWeight="semibold" letterSpacing="wide" fontSize="sm" ml="2">
+                      <Text>
+                        Total Computable Value: {vault.totalValue}
+                      </Text>
+                    </Box>
+                    </Box> */}
+                  <Stack align="center" mt={3}>
+                    {vault.status == 'claimed' ? <Text color="green.500">CLAIMED</Text> : null}
+                  </Stack>
+                </Box>
+              </Link>
             )
           })
           

@@ -1,10 +1,11 @@
-import { ReactNode, useState } from 'react'
+import { ReactNode, useEffect, useState } from 'react'
 import BackgroundVideo from './BackgroundVideo'
 import { Flex, IconButton, useDisclosure, Badge, LightMode, Stack, Box, Button, Popover, PopoverTrigger, PopoverContent, PopoverArrow, PopoverCloseButton, PopoverBody, Text, Link} from '@chakra-ui/core'
 import { useWeb3React } from '@web3-react/core'
 import dynamic from 'next/dynamic'
 import { CHAIN_ID_NAMES } from '../utils'
 import { useEagerConnect, useQueryParameters, useUSDETHPrice } from '../hooks'
+
 import { useTransactions, useFirstToken, useSecondToken, useShowUSD } from '../context'
 import ColorBox from './ColorBox'
 import Account from './Account'
@@ -16,6 +17,7 @@ import { QueryParameters } from '../constants'
 import { Coval, CovalTest, CovalTestMatic, CovalMatic, CovalxDai, CovalBSC, CovalFantom, DEFAULT_TOKENS } from '../tokens'
 import Head from 'next/head'
 import transakSDK from '@transak/transak-sdk'
+import { useRouter } from 'next/router'
 
 // import Gun from 'gun';
 // import 'gun/sea'
@@ -42,7 +44,13 @@ export default function Layout({ children }: { children: ReactNode}): JSX.Elemen
 
   const queryParameters = useQueryParameters()
   const requiredChainId = queryParameters[QueryParameters.CHAIN]
-
+  const { query } = useRouter()
+  const [useLayout, setUseLayout] = useState(true)
+  useEffect(() => {
+    if (((query.noLayout && query.noLayout == 'true') || query.slideshowOnly && query.slideshowOnly == 'true') && useLayout) {
+      setUseLayout(false)
+    }
+  })
   const USDETHPrice = useUSDETHPrice()
 
   let transak
@@ -90,7 +98,7 @@ export default function Layout({ children }: { children: ReactNode}): JSX.Elemen
   const handleSearchClick = ()=>{
     let pieces = location.pathname.split('/')
     pieces.pop()
-    location.href = location.origin + pieces.join('/') + '/search'
+    location.href = location.origin + pieces.join('/') + '/find'
   }
   
   const handleNavigationclick = () => {
@@ -117,6 +125,7 @@ export default function Layout({ children }: { children: ReactNode}): JSX.Elemen
     <>
       <Settings isOpen={isOpenSettings} onClose={onCloseSettings} />
       <BackgroundVideo />
+      
       <ColorBox
         as={Flex}
         flexDirection="column"
@@ -125,107 +134,106 @@ export default function Layout({ children }: { children: ReactNode}): JSX.Elemen
           Number(chainId) === 1? "blue.500" : 
           Number(chainId) === 56? "orange" : 
           "orange.500"}
-        borderWidth={isTestnet ? '.5rem' : '.5rem'}
+        borderWidth={!useLayout ? '0em' : isTestnet ? '.5rem' : '.5rem'}
         minHeight="100vh"
         maxHeight="100vh"
       >
-        <Flex justifyContent="space-between" flexShrink={0} overflowX="auto" p="1rem">
-          <Stack spacing={0} direction="row">
-            <IconButton m={2} icon="settings" variant="ghost" onClick={onOpenSettings} aria-label="Settings" />
-            <IconButton m={2} icon="search" variant="ghost" onClick={handleSearchClick} aria-label="Search" />
-            <Button display={showOrHideNavLink('create')} m={2} variant="ghost" onClick={()=>{handleNewNavigationClick('create')}}>
-              Create
-            </Button>
-            <Button display={showOrHideNavLink('vaults')} m={2} variant="ghost" onClick={()=>{handleNewNavigationClick('vaults')}}>
-              My Vaults
-            </Button>
-            <Button display={showOrHideNavLink('featured')} m={2} variant="ghost" onClick={()=>{handleNewNavigationClick('featured')}}>
-              Featured
-            </Button>
-            <Button display={showOrHideNavLink('newest')} m={2} variant="ghost" onClick={()=>{handleNewNavigationClick('newest')}}>
-              Newest
-            </Button>
-            {/* <Button m={2} variant="ghost" onClick={handleNavigationclick}>
-              {' '}
-              {location.pathname.includes('vaultlist') ? 'Create' : 'Wallet (Vaults)'}
-            </Button>
-            <Button m={2} variant="ghost" onClick={handleNavigationFeaturedclick}>
-              {' '}
-              {location.pathname.includes('featured') ? 'Create' : 'Featured Vaults'}
-            </Button>
-            <Button m={2} variant="ghost" onClick={handleNavigationFeaturedclick}>
-              {' '}
-              {location.pathname.includes('featured') ? 'Create' : 'Featured Vaults'}
-            </Button> */}
-          </Stack>
-          <Account triedToEagerConnect={triedToEagerConnect} />
-        </Flex>
-
-        <Stack
-          position="absolute"
-          top={0}
-          right={0}
-          m={isTestnet ? '1.5rem' : '1rem'}
-          mt={isTestnet ? '5rem' : '4.5rem'}
-          alignItems="flex-end"
-          spacing="1rem"
-          zIndex={2}
-        >
-          {typeof account !== 'string' ? (
-            !triedToEagerConnect ||
-            (typeof chainId === 'number'
-              ? chainId !== ChainId.MAINNET
-              : typeof requiredChainId === 'number' && requiredChainId !== ChainId.MAINNET) ? null : (
-              <Box>
-                <WalletConnect />
-              </Box>
-            )
-          ) : (
-            // [DEFAULT_TOKENS.filter((tokenrrr) => tokenrrr.chainId == chainId)[0], firstToken, secondToken]
-            [
-              chainId == 1 ? Coval : 
-              chainId == 80001 ? CovalTestMatic : 
-              chainId == 137 ? CovalMatic : 
-              chainId == 100? CovalxDai : 
-              chainId == 56 ? CovalBSC :
-              chainId == 250 ? CovalFantom :
-              CovalTest,
-              firstToken ? (firstToken.symbol != 'Coval' ? firstToken : null) : null,
-              secondToken ? (secondToken.symbol != 'Coval' ? secondToken : null) : null,
-            ]
-              .filter((token) => token)
-              .filter((token) => !token?.equals(WETH[token.chainId]))
-              .map((token) => (
-                <Box key={token?.address}>
-                  <TokenBalance token={token as Token} />
+        {useLayout? (
+          <Flex justifyContent="space-between" flexShrink={0} overflowX="auto" p="1rem">
+            <Stack spacing={0} direction="row">
+              <IconButton m={2} icon="settings" variant="ghost" onClick={onOpenSettings} aria-label="Settings" />
+              <IconButton m={2} icon="search" variant="ghost" onClick={handleSearchClick} aria-label="Search" />
+              <Button display={showOrHideNavLink('create')} m={2} variant="ghost" onClick={()=>{handleNewNavigationClick('create')}}>
+                Create
+              </Button>
+              <Button display={showOrHideNavLink('vaults')} m={2} variant="ghost" onClick={()=>{handleNewNavigationClick('vaults')}}>
+                My Vaults
+              </Button>
+              <Button display={showOrHideNavLink('featured')} m={2} variant="ghost" onClick={()=>{handleNewNavigationClick('featured')}}>
+                Featured
+              </Button>
+              <Button display={showOrHideNavLink('newest')} m={2} variant="ghost" onClick={()=>{handleNewNavigationClick('newest')}}>
+                Newest
+              </Button>
+            </Stack>
+            <Account triedToEagerConnect={triedToEagerConnect} />
+          </Flex>
+        ): null}
+        
+        {useLayout? (
+          <Stack
+            position="absolute"
+            top={0}
+            right={0}
+            m={isTestnet ? '1.5rem' : '1rem'}
+            mt={isTestnet ? '5rem' : '4.5rem'}
+            alignItems="flex-end"
+            spacing="1rem"
+            zIndex={2}
+          >
+            {typeof account !== 'string' ? (
+              !triedToEagerConnect ||
+              (typeof chainId === 'number'
+                ? chainId !== ChainId.MAINNET
+                : typeof requiredChainId === 'number' && requiredChainId !== ChainId.MAINNET) ? null : (
+                <Box>
+                  <WalletConnect />
                 </Box>
-              ))
-          )}
-        </Stack>
+              )
+            ) : (
+              // [DEFAULT_TOKENS.filter((tokenrrr) => tokenrrr.chainId == chainId)[0], firstToken, secondToken]
+              [
+                chainId == 1 ? Coval : 
+                chainId == 80001 ? CovalTestMatic : 
+                chainId == 137 ? CovalMatic : 
+                chainId == 100? CovalxDai : 
+                chainId == 56 ? CovalBSC :
+                chainId == 250 ? CovalFantom :
+                CovalTest,
+                firstToken ? (firstToken.symbol != 'Coval' ? firstToken : null) : null,
+                secondToken ? (secondToken.symbol != 'Coval' ? secondToken : null) : null,
+              ]
+                .filter((token) => token)
+                .filter((token) => !token?.equals(WETH[token.chainId]))
+                .map((token) => (
+                  <Box key={token?.address}>
+                    <TokenBalance token={token as Token} />
+                  </Box>
+                ))
+            )}
+          </Stack>
+        ): null}
 
         <Flex id="shannon-container" flexGrow={1} direction="column" overflow="auto">
           {children}
+          {useLayout? null : (
+            <Account triedToEagerConnect={triedToEagerConnect} />
+          )}
         </Flex>
 
-        <Flex minHeight="1.5rem">
-          {typeof chainId === 'number' /*&& chainId !== 1*/ ? (
-            <LightMode>
-              <Link href="/swap">
-                <Badge
-                  variant="solid"
-                  variantColor={
-                    chainId == 137 || chainId == 1 ? 'blue' : 
-                    chainId == Number(56) ? 'orange':
-                    'orange'/*isTestnet ? 'blue' : undefined*/}
-                  fontSize="1rem"
-                  style={{ borderTopLeftRadius: 0, borderBottomRightRadius: 0, borderBottomLeftRadius: 0 }} >
-                  On {CHAIN_ID_NAMES[chainId].toLowerCase()} (click to swap networks)
-                  {/* (Swap to {chainId == 1 ? 'Matic' : 'Ethereum'}) */}
-                </Badge>
-              </Link>
-            </LightMode>
-          ):null}
-        </Flex>
+        
+
+        {useLayout? (
+          <Flex minHeight="1.5rem">
+            {typeof chainId === 'number' /*&& chainId !== 1*/ ? (
+              <LightMode>
+                <Link href="/swap">
+                  <Badge
+                    variant="solid"
+                    variantColor={
+                      chainId == 137 || chainId == 1 ? 'blue' : 
+                      chainId == Number(56) ? 'orange':
+                      'orange'/*isTestnet ? 'blue' : undefined*/}
+                    fontSize="1rem"
+                    style={{ borderTopLeftRadius: 0, borderBottomRightRadius: 0, borderBottomLeftRadius: 0 }} >
+                    On {CHAIN_ID_NAMES[chainId].toLowerCase()} (click to swap networks)
+                    {/* (Swap to {chainId == 1 ? 'Matic' : 'Ethereum'}) */}
+                  </Badge>
+                </Link>
+              </LightMode>
+            ):null}
+          </Flex>
+        ): null}
 
         {transactions.length > 0 && (
           <Stack
@@ -264,7 +272,7 @@ export default function Layout({ children }: { children: ReactNode}): JSX.Elemen
             </PopoverContent>
           </Popover> */}
         </Stack>
-
+        {useLayout? (
         <Stack
           position="absolute"
           bottom={1}
@@ -289,6 +297,7 @@ export default function Layout({ children }: { children: ReactNode}): JSX.Elemen
             Buy $Coval
           </Button>
         </Stack>
+        ): null}
       </ColorBox>
     </>
   )

@@ -164,7 +164,7 @@ export default function Provider({ children }: { children: ReactNode }): JSX.Ele
             setDeadline,
             setSlippage,
             setTransactions,
-            setTokens,
+            setTokens
           },
         ],
         [

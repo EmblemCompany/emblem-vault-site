@@ -37,7 +37,7 @@ import { useContract } from '../hooks'
 import { isETHAddress } from '../utils'
 import Embed from './Embed'
 // react-doka
-import { DokaImageEditor, DokaImageEditorModal, DokaImageEditorOverlay } from 'react-doka';
+import { DokaImageEditorModal } from 'react-doka';
 import transakSDK from '@transak/transak-sdk'
 
 // doka
@@ -51,7 +51,6 @@ import {
     setPlugins,
     plugin_crop,
     plugin_crop_locale_en_gb,
-    plugin_crop_defaults,
     plugin_finetune,
     plugin_finetune_locale_en_gb,
     plugin_finetune_defaults,
@@ -69,7 +68,6 @@ setPlugins(plugin_crop, plugin_finetune, plugin_filter, plugin_annotate);
 const editorDefaults = {
     imageReader: createDefaultImageReader(),
     imageWriter: createDefaultImageWriter(),
-    ...plugin_crop_defaults,
     ...plugin_finetune_defaults,
     ...plugin_filter_defaults,
     ...markup_editor_defaults,
@@ -123,7 +121,7 @@ export default function Create(props: any) {
   const [approving, setApproving] = useState(false)
   const [vaultKey, setVaultKey] = useState('')  
   const [vaultValue, setVaultValue] = useState('')
-  const [vaultType, setVaultType] = useState("image")
+  const [vaultType, setVaultType] = useState("upload")
   const [showEmbed, setShowEmbed] = useState(false)
   
 
@@ -311,8 +309,12 @@ export default function Create(props: any) {
         nonce = body.data.nonce
         signature = body.data.signature
         cipherTextHash = body.data.cipherTextHash
-        fireMetaMask()
+        // fireMetaMask()
+        alert("Minting has been disabled temporarily while we work with Opensea to solve a bug where new vaults are not showing. Mint ONLY if you don't plan on using Opensea")
         setShowPreVaultMsg(false)
+        checkLiveliness(tokenId, ()=>{
+          location.href = location.origin + '/nft?id=' + tokenId
+        })
       // } else {
       //   mintPassword = body.password
       //   setHash(body.data.tx)
@@ -600,7 +602,7 @@ export default function Create(props: any) {
                           }
                           <Divider />
                           <FormLabel htmlFor="type-selector">Display Type</FormLabel>
-                          <Select id="type-selector" w="45%" value={vaultType}
+                          <Select id="type-selector" w="100%" value={vaultType}
                             onChange={(e)=>{
                               setVaultType(e.target.value)
                               console.log("type", vaultType)
@@ -621,7 +623,6 @@ export default function Create(props: any) {
                                 {modalVisible && (
                                     <DokaImageEditorModal
                                         {...editorDefaults}
-                                        className='doka'
                                         src={vaultImage}
                                         onLoad={(res) => console.log('load modal image', res)}
                                         onHide={() => setModalVisible(false)}
@@ -739,8 +740,8 @@ export default function Create(props: any) {
                           Making Vault ...
                         </Button>
                       ) : (
-                        <Button onClick={handleSubmit} type="submit">
-                          DO IT!
+                        <Button onClick={(e)=>{handleSubmit(e);console.log("test")}} type="submit">
+                          Create Vault
                         </Button>
                       )}
                     </ButtonGroup>
