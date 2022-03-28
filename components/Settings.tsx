@@ -85,7 +85,7 @@ export default function Settings({ isOpen, onClose }: { isOpen: boolean; onClose
       <ModalOverlay />
       <ModalContent color={COLOR[colorMode]}>
         <ModalHeader>
-          <Text>Settings (Build #2021)</Text>
+          <Text>Settings (Build #2022)</Text>
         </ModalHeader>
         <ModalCloseButton />
         <ModalBody>
