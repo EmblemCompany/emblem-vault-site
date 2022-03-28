@@ -1,0 +1,12 @@
+{
+    "success":true,
+    "asset":"EMBLEMEPIC",
+    "asset_issuer_address":"1K4BJHFbxD776ZCRFvRX4Sd5zjX32ScgUV",
+    "asset_owner_address":"1K4BJHFbxD776ZCRFvRX4Sd5zjX32ScgUV",
+    "asset_supply":"10",
+    "asset_divisible":false,
+    "asset_locked":true,
+    "image":"https://emblem.finance/EMBLEMEPIC-sm.png",
+    "image_large":"https://emblem.finance/EMBLEMEPIC.png",
+    "image_title":"EMBLEMEPIC"
+}
