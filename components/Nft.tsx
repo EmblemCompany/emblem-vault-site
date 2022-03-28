@@ -57,6 +57,7 @@ export default function Nft() {
   const { account, chainId, library } = useWeb3React()
   const { query } = useRouter()
   const [approved, setApproved] = useState(false)
+  const [useOldMint, setUseOldMint] = useState(query.useOldMint)
   const [mintPassword, setMintPassword] = useState(query.key)
   const [showOffer, setShowOffer] = useState(query.offer || false)
   const [framed, setFramed] = useState(query.framed || true)
@@ -112,6 +113,7 @@ export default function Nft() {
   const [nonce, setNonce] = useState(null)
   const [mintSignature, setMintSignature] = useState(null)
   const [to, setTo] = useState(null)
+  const [showVerifyingSignature, setShowVerifyingSignature] = useState(false)
   const [showMakingVaultMsg, setShowMakingVaultMsg] = useState(false)
   const [minting, setMinting] = useState(false)
   const [isCrowdSale, setIsCrowdSale] = useState(false)
@@ -213,6 +215,9 @@ export default function Nft() {
 
   const delayedMint = () => {
     // setCreating(true)
+      console.log("Delayed Minting")
+      setShowVerifyingSignature(false)
+      setShowMakingVaultMsg(true)
       setMinting(true)
       let cipherTextHash = vaultAddresses.filter(address=>{ return address.coin == "ETH"})[0].address
       ;(handlerContract as Contract)
@@ -220,14 +225,42 @@ export default function Nft() {
       .then(({ hash }: { hash: string }) => {
         setTimeout(() => {
           setHash(hash)
-          // setShowMakingVaultMsg(true)
+          setShowMakingVaultMsg(false)
           
         }, 100) // Solving State race condition where transaction watcher wouldn't notice we were creating
       })
       .catch((error: ErrorWithCode) => {
-          // setShowMakingVaultMsg(false)
+          console.log("AAAAAHHHHHH", error.code)
+          setShowMakingVaultMsg(false)
           // setMinting(false)
       })    
+  }
+
+  const lazyMint = () =>{
+      library.getSigner(account)
+      .signMessage('Delayed Minting: ' + tokenId)
+      .then((signature) => {
+        console.log("sig", signature)
+        fetch(EMBLEM_API + '/lazyMint', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            service: 'evmetadata',
+            chainid: chainId.toString()
+          },
+          body: JSON.stringify({tokenId: tokenId, signature: signature}),
+        }).then(async function (response) {
+              let data = await response.json()
+              console.log("data", data.data)
+              setMintSignature(data.data.signature)
+              setNonce(data.data.nonce)
+              setShowVerifyingSignature(true)
+              // setCreating(true)
+              setTimeout(()=>{
+                delayedMint()
+              }, 500)
+        })
+      })
   }
 
   const fireMetaMask = () => {
@@ -315,7 +348,7 @@ export default function Nft() {
     const jsonData = await responce.json()
     // console.log('vault response was ', jsonData)
     if (jsonData.image_ipfs) {
-      getIPFSImage(jsonData.image_ipfs)
+      // getIPFSImage(jsonData.image_ipfs)
     }
     if (jsonData.collectionAddress){
       setIsCrowdSale(true)
@@ -1324,12 +1357,23 @@ export default function Nft() {
                       </Button>
                     </Box>
                   ) : null}                  
-                  {!live && nonce && mintSignature && to == account && vaultChainId == chainId && status !== 'claimed' ? (
-                  <Button width="100%" mt={5} onClick={delayedMint}>Mint Me </Button>
+                  {!live && to == account && vaultChainId == chainId && status !== 'claimed' && !showMakingVaultMsg ? (
+                    <>
+                      {useOldMint == "true"? (
+                        <Button width="100%" mt={5} onClick={delayedMint}>Mint Me v1</Button>
+                      ): (
+                        <Button width="100%" mt={5} onClick={lazyMint}>Mint Vault </Button>
+                      )}
+                    </>
+                ) : null}
+                {showVerifyingSignature ? (
+                  <Button isDisabled type="submit">
+                    Verifying Signature ...
+                  </Button>
                 ) : null}
                 {showMakingVaultMsg ? (
                   <Button isDisabled type="submit">
-                    Making Vault ...
+                    Minting Vault ...
                   </Button>
                 ) : null}
                 </Box>

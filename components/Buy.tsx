@@ -321,7 +321,7 @@ export default function Buy() {
     const jsonData = await responce.json()
     // console.log('vault response was ', jsonData)
     if (jsonData.image_ipfs) {
-      getIPFSImage(jsonData.image_ipfs)
+      // getIPFSImage(jsonData.image_ipfs)
     }
     if (!jsonData.name) {
       setState({ loaded: true })

@@ -22,6 +22,11 @@ type EmbedProps = {
 export class Embed extends Component<EmbedProps> {
   render() {
     let url = this.props.url || ""
+    let hash = url.replace("ipfs://","").split("?")[0].split("&")[0]
+    if (url.includes("ipfs://")) {
+      url =  "https://gateway.ipfs.io/ipfs/" + hash
+      getIPFSImage(hash)
+    }
     return (
       <>
         {url.includes('sketchfab.com/') ? (
@@ -68,6 +73,14 @@ export class Embed extends Component<EmbedProps> {
           <Vimeo
             url={url}
           />
+        ) : url.includes('ipfs.io') ? (
+          <Image
+                p={"20px"}
+                h={"100%"}
+                className={this.props.className + " " + hash || "d-block w-100"}
+                src={url}
+                width="250px"
+              />
         ) : url.includes('/dynamic/') || url.includes('arweave') || url.includes('https://s3.amazonaws.com/') ||  url.includes('googleusercontent.com') || url.includes('ipfs.io') || url.includes('framed/') ||  url.includes('.png') || url.includes('.jpg') || url.includes('.jpeg') || url.includes('.gif') || url.includes('.svg') || url.includes('data:image') ? (
               <Image
                 p={"20px"}
@@ -84,6 +97,18 @@ export class Embed extends Component<EmbedProps> {
           }
       </>
     )
+  }
+}
+
+const getIPFSImage = async function(hash){
+  const responce = await fetch('https://gateway.ipfs.io/ipfs/'+hash, {
+    method: 'GET',
+  })
+  let jsonData = await responce.text()
+  if (jsonData.includes("data:image")){
+    const preview = document.querySelector('img.' + hash) as HTMLImageElement 
+    preview.src = jsonData
+    console.log(jsonData)
   }
 }
 

@@ -191,6 +191,7 @@ export default function Create(props: any) {
   }
 
   const fireMetaMask = () => {
+    console.log("fire?")
     setCreating(true)
     // console.log(vaultAddress, tokenId, cipherTextHash, nonce, signature)
     // if (chainId === 137 || chainId === 1) {
@@ -310,11 +311,13 @@ export default function Create(props: any) {
         signature = body.data.signature
         cipherTextHash = body.data.cipherTextHash
         // fireMetaMask()
-        alert("Minting has been disabled temporarily while we work with Opensea to solve a bug where new vaults are not showing. Mint ONLY if you don't plan on using Opensea")
+        // alert("Minting has been disabled temporarily while we work with Opensea to solve a bug where new vaults are not showing. Mint ONLY if you don't plan on using Opensea")
         setShowPreVaultMsg(false)
+        setTimeout(() => {
         checkLiveliness(tokenId, ()=>{
           location.href = location.origin + '/nft?id=' + tokenId
         })
+      }, 500)
       // } else {
       //   mintPassword = body.password
       //   setHash(body.data.tx)

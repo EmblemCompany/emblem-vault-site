@@ -5,6 +5,11 @@ import { abi as CovalABI } from './abi/coval.json'
 import { abi as EmblemABI } from './abi/emblem.json'
 import { abi as NftradeABI } from './abi/nftrade.json'
 import { abi as ClaimedABI } from './abi/claimed.json'
+import { abi as VaultHandlerV8 } from './abi/VaultHandlerV8.json'
+import { abi as ClonableFactory } from './abi/ClonableFactory.json'
+import { abi as ERC20 } from './abi/ConfigurableERC20Upgradable.json'
+import { abi as ERC721 } from './abi/EmblemVault.json'
+import { abi as ERC1155 } from './abi/ERC1155Upgradable.json'
 
 export const BG = { light: 'gray.50', dark: 'gray.900' }
 export const COLOR = { light: 'black', dark: 'white' }
@@ -40,7 +45,8 @@ export const contractAddresses = {
     137: '0xedb9e7d618dddc081bd56014ea3842c67628b015',
     100: '0x6e02D718C08b9EBd971B4788fF30308cC997E2Ef',
     56: '0x34761221dBC6bE70A4f88E2077765dB8F14A1007',
-    250: '0x27B08ADcA39a684961e2cD289f0bEA893eDF0772'
+    250: '0x27B08ADcA39a684961e2cD289f0bEA893eDF0772',
+    1337: '0xe70AbBc99D8eB32124BF022196c493DB4fBc50FD'
   },
   vaultHandlerAbi: HandlerABI,
   emblemVault: {
@@ -50,7 +56,8 @@ export const contractAddresses = {
     137: '0x8b8407c6184f1f0Fd1082e83d6A3b8349cAcEd12',
     100: '0x9058d1A5Fdba852403D5b080abAF31D1379EF653',
     56: '0x9523022eb4B465Db3e3037d83e4910E3cFF1bD49',
-    250: '0x5434ba8b4A37755Cb3867C9fde39342C0D382857'
+    250: '0x5434ba8b4A37755Cb3867C9fde39342C0D382857',
+    1337: '0xe70AbBc99D8eB32124BF022196c493DB4fBc50FD'
   },
   emblemAbi: EmblemABI,
   coval: {
@@ -60,7 +67,8 @@ export const contractAddresses = {
     137: '0x4597c8A59Ab28B36840B82B3A674994A279593D0',
     100: '0x8b8407c6184f1f0Fd1082e83d6A3b8349cAcEd12',
     56: '0xd15CeE1DEaFBad6C0B3Fd7489677Cc102B141464',
-    250: '0x8b8407c6184f1f0fd1082e83d6a3b8349caced12'
+    250: '0x8b8407c6184f1f0fd1082e83d6a3b8349caced12',
+    1337: '0xe70AbBc99D8eB32124BF022196c493DB4fBc50FD'
   },
   covalAbi: CovalABI,
   nftrade: {
@@ -70,7 +78,16 @@ export const contractAddresses = {
   claimed: {
     1: '0xFd2E9C4F9820F475aE9d3C26B612e1be69FEC8F9'
   },
-  claimedAbi: ClaimedABI
+  claimedAbi: ClaimedABI,
+  vaultHandlerV8: {
+    4: "0xF2eCdFa77C3c8Cabf913529D95081DCB2DE314ec",
+    1337: "0xfc3A4BBfD522668342bCaDf273a94A46DCe25439"
+  },
+  vaultHandlerV8Abi: VaultHandlerV8,
+  clonableFactoryAbi: ClonableFactory,
+  erc20Abi: ERC20,
+  erc721Abi: ERC721,
+  erc1155Abi: ERC1155,
 
 }
 
