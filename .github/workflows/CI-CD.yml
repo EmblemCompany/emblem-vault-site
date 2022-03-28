@@ -19,9 +19,9 @@ jobs:
       - uses: actions/setup-node@v1
         with:
           node-version: ${{ matrix.node }}
-      - run: yarn
-      - run: yarn prettier
-      - run: yarn build
+      # - run: yarn
+      # - run: yarn prettier
+      # - run: yarn build
 
   deploy:
     runs-on: ubuntu-latest
