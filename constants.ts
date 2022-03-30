@@ -10,6 +10,7 @@ import { abi as ClonableFactory } from './abi/ClonableFactory.json'
 import { abi as ERC20 } from './abi/ConfigurableERC20Upgradable.json'
 import { abi as ERC721 } from './abi/EmblemVault.json'
 import { abi as ERC1155 } from './abi/ERC1155Upgradable.json'
+import xcpJson from './curated/xcp.json'
 
 export const BG = { light: 'gray.50', dark: 'gray.900' }
 export const COLOR = { light: 'black', dark: 'white' }
@@ -33,6 +34,21 @@ export const PERMIT_AND_CALL_ADDRESS = '0xe334094985bB046B95550793EA577F8DC4e611
 export const ZERO = JSBI.BigInt(0)
 export const MAX_UINT256 = JSBI.BigInt('0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff')
 
+export const curatedContracts = [
+  {
+    name: "Rare Pepe",
+    4: "0x29a2D689dEefE9FD1eaDAe1511200c4d96E29427",
+    "chain": "xcp"
+  },
+  {
+    name: "EMBLEM TEST",
+    4: "0x125355e3A87CB49ABD798bD96E7C5dA6F509cD09",
+    "chain": "xcp"
+  }
+]
+export const curatedAssets = {
+  xcp: xcpJson
+}
 export const contractAddresses = {
   salesFactory: {
     1: '0xfb51bcd2644c20d87e17106c27355732fd485e4e'
@@ -93,7 +109,7 @@ export const contractAddresses = {
 
 export const BURN_ADDRESS = '0x5D152dd902CC9198B97E5b6Cf5fc23a8e4330180'
 export const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000"
-export const EMBLEM_API = API_OVERLOAD? API_OVERLOAD :'https://api.emblemvault.io' //'http://localhost:3001'//
+export const EMBLEM_API = 'http://localhost:3001'//API_OVERLOAD? API_OVERLOAD :'https://api.emblemvault.io' //
 
 export enum QueryParameters {
   INPUT = 'input',
