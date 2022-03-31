@@ -921,7 +921,7 @@ export default function Nft() {
   }
 
   function visitOpenSeaLink() {
-    location.href = (
+    window.open(
       'https://' +
       (vaultChainId == 4 ? 'rinkeby.' : '') +
       'opensea.io/assets/' + 
@@ -929,8 +929,21 @@ export default function Nft() {
       (alternateContractAddress? alternateContractAddress : contractAddresses.emblemVault[vaultChainId]) +
       '/' +
       tokenId 
-    )
+    , '_blank')
   }
+
+  function visitLooksRareLink() {
+    window.open(
+      'https://' +
+      (vaultChainId == 4 ? 'rinkeby.' : '') +
+      'looksrare.org/collections/' + 
+      (vaultChainId == 137 ? 'matic/' : '') +
+      (alternateContractAddress? alternateContractAddress : contractAddresses.emblemVault[vaultChainId]) +
+      '/' +
+      tokenId 
+    , '_blank')
+  }
+
   { alternateContractAddress?
     emblemContract = getVaultContract(alternateContractAddress? alternateContractAddress: null)
   : null}
@@ -1197,19 +1210,28 @@ export default function Nft() {
 
                   {!(status === 'claimed') && (vaultChainId === 1 || vaultChainId === 4 || vaultChainId === 137 )? (
                     <Box d="flex" alignItems="baseline" justifyContent="space-between" mt="4">
-                      <Stack d="flex" width="100%">
+                      {/* <Stack d="flex" width="100%"> */}
                         <Button
                           className="nft_button"
-                          width="100%"
+                          width="50%"
+                          m={5}
                           onClick={() => {visitOpenSeaLink()}}
                         >
-                          View Vault on Opensea
+                          Opensea
+                        </Button>
+                        <Button
+                          className="nft_button"
+                          width="50%"
+                          m={5}
+                          onClick={() => {visitLooksRareLink()}}
+                        >
+                          LooksRare
                         </Button>
                         {showOffer? (
                           <Button className="" onClick={() => { onOpenOfferModal() }}>{mine? ('My Offers') : ('Make an Offer')} (NFT²NFT)</Button>
                         ) : null}
                         
-                      </Stack>
+                      {/* </Stack> */}
                     </Box>
                   ) : null}
                   {!(status === 'claimed') && mine && !acceptable?  (
