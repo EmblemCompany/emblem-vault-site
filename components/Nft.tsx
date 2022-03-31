@@ -314,9 +314,9 @@ export default function Nft() {
     })
     const jsonData = await responce.json()
     // console.log('vault response was ', jsonData)
-    if (jsonData.image_ipfs) {
-      getIPFSImage(jsonData.image_ipfs)
-    }
+    // if (jsonData.image_ipfs) {
+    //   getIPFSImage(jsonData.image_ipfs)
+    // }
     if (jsonData.collectionAddress){
       setIsCrowdSale(true)
       setAlternateContractAddress(jsonData.collectionAddress)
@@ -340,21 +340,6 @@ export default function Nft() {
     }
   }
 
-  const getIPFSImage = async function(hash){
-    // alert(0)
-    const responce = await fetch('https://gateway.ipfs.io/ipfs/'+hash, {
-      method: 'GET',
-      headers: {
-        // redirect:'follow'
-      },
-    })
-    let jsonData = await responce.text()
-    // setVaultImage(jsonData) 
-    const preview = document.querySelector('img.d-block') as HTMLImageElement 
-    preview.src = jsonData
-    console.log(jsonData)  
-  }
-
   const getWitness = async (cb) => {
     const responce = await fetch(EMBLEM_API + '/witness/' + tokenId, {
       method: 'GET',
@@ -375,7 +360,7 @@ export default function Nft() {
   }
 
   const setStates = (jsonData) => {
-    framed && !jsonData.image.includes('framed=') && !jsonData.image.includes('http') ? jsonData.image = jsonData.image + "&framed="+framed : null
+    framed && jsonData.image && !jsonData.image.includes('framed=') && !jsonData.image.includes('http') ? jsonData.image = jsonData.image + "&framed="+framed : null
     if (jsonData.ciphertextV2) {
       setVaultCiphertextV2(jsonData.ciphertextV2)
       console.log("ciphertextV2", jsonData.ciphertextV2)
