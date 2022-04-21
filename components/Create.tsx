@@ -310,7 +310,7 @@ export default function Create(props: any) {
         signature = body.data.signature
         cipherTextHash = body.data.cipherTextHash
         // fireMetaMask()
-        alert("Minting has been disabled temporarily while we work with Opensea to solve a bug where new vaults are not showing. Mint ONLY if you don't plan on using Opensea")
+        // alert("Minting has been disabled temporarily while we work with Opensea to solve a bug where new vaults are not showing. Mint ONLY if you don't plan on using Opensea")
         setShowPreVaultMsg(false)
         checkLiveliness(tokenId, ()=>{
           location.href = location.origin + '/nft?id=' + tokenId
