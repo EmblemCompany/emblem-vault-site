@@ -57,6 +57,7 @@ export default function Nft() {
   const { account, chainId, library } = useWeb3React()
   const { query } = useRouter()
   const [approved, setApproved] = useState(false)
+  const [useOldMint, setUseOldMint] = useState(query.useOldMint)
   const [mintPassword, setMintPassword] = useState(query.key)
   const [showOffer, setShowOffer] = useState(query.offer || false)
   const [framed, setFramed] = useState(query.framed || true)
@@ -112,10 +113,13 @@ export default function Nft() {
   const [nonce, setNonce] = useState(null)
   const [mintSignature, setMintSignature] = useState(null)
   const [to, setTo] = useState(null)
+  const [showVerifyingSignature, setShowVerifyingSignature] = useState(false)
   const [showMakingVaultMsg, setShowMakingVaultMsg] = useState(false)
   const [minting, setMinting] = useState(false)
   const [isCrowdSale, setIsCrowdSale] = useState(false)
   const [alternateContractAddress, setAlternateContractAddress] = useState(null)
+  const [targetAsset, setTargetAsset] = useState({name: '', image: '', metadata: ''})
+  const [targetContract, setTargetContract] = useState({name: '', chain: '', 4: '', 1: ''})
   // const [transferImage, setTransferImage] = useState('')
   
   const handlerContract = useContract(contractAddresses.vaultHandler[chainId], contractAddresses.vaultHandlerAbi, true)
@@ -211,21 +215,52 @@ export default function Nft() {
     .catch((error: ErrorWithCode) => {})
   }
 
+  const lazyMint = () =>{
+    library.getSigner(account)
+    .signMessage('Delayed Minting: ' + tokenId)
+    .then((signature) => {
+      console.log("sig", signature)
+      fetch(EMBLEM_API + '/lazyMint', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          service: 'evmetadata',
+          chainid: chainId.toString()
+        },
+        body: JSON.stringify({tokenId: tokenId, signature: signature}),
+      }).then(async function (response) {
+            let data = await response.json()
+            console.log("data", data.data)
+            setMintSignature(data.data.signature)
+            setNonce(data.data.nonce)
+            setShowVerifyingSignature(true)
+            // setCreating(true)
+            setTimeout(()=>{
+              delayedMint()
+            }, 500)
+      })
+    })
+}
+
   const delayedMint = () => {
     // setCreating(true)
+      setShowVerifyingSignature(false)
+      setShowMakingVaultMsg(true)
       setMinting(true)
-      let cipherTextHash = vaultAddresses.filter(address=>{ return address.coin == "ETH"})[0].address
+      // alert(vaultPrivacy)
+      let cipherTextHash = vaultPrivacy? "0x0000000000000000000000000000000000000000": vaultAddresses.filter(address=>{ return address.coin == "ETH"})[0].address
+      console.log({account, tokenId, cipherTextHash, nonce, mintSignature})
       ;(handlerContract as Contract)
       .buyWithSignature(account, tokenId, cipherTextHash, nonce, mintSignature)
       .then(({ hash }: { hash: string }) => {
         setTimeout(() => {
           setHash(hash)
-          // setShowMakingVaultMsg(true)
+          setShowMakingVaultMsg(false)
           
         }, 100) // Solving State race condition where transaction watcher wouldn't notice we were creating
       })
       .catch((error: ErrorWithCode) => {
-          // setShowMakingVaultMsg(false)
+          setShowMakingVaultMsg(false)
           // setMinting(false)
       })    
   }
@@ -372,9 +407,13 @@ export default function Nft() {
     setVaultTotalValue(jsonData.totalValue || 0)
     setVaultValues(vaultValues.concat(jsonData.values))
     setVaultDataValues(jsonData.attributes.filter(item=>{return item.trait_type === "key"}))
+    jsonData.values ? setVaultValues(vaultValues.concat(jsonData.values)): null
+    jsonData.attributes ? setVaultDataValues(jsonData.attributes.filter(item=>{return item.trait_type === "key"})): null
     setVaultAddresses(jsonData.addresses)
     setVaultIPFS(jsonData.ipfs || null)
     setVaultImageIPFS(jsonData.image_ipfs || null)
+    jsonData.targetAsset? setTargetAsset(jsonData.targetAsset) : null
+    jsonData.targetContract? setTargetContract(jsonData.targetAsset) : null
     if (jsonData.live == false) {
       checkLiveliness(jsonData.tokenId, ()=>{
 
@@ -1331,8 +1370,22 @@ export default function Nft() {
                       </Button>
                     </Box>
                   ) : null}                  
-                  {!live && nonce && mintSignature && to == account && vaultChainId == chainId && status !== 'claimed' ? (
-                  <Button width="100%" mt={5} onClick={delayedMint}>Mint Me </Button>
+                  {/* {!live && nonce && mintSignature && to == account && vaultChainId == chainId && status !== 'claimed' ? (
+                  <Button width="100%" mt={5} onClick={lazyMint}>Mint Me </Button>
+                ) : null} */}
+                {!live && to == account && vaultChainId == chainId && status !== 'claimed' && !showMakingVaultMsg ? (
+                    <>
+                      {useOldMint == "true"? (
+                        <Button width="100%" mt={5} onClick={delayedMint}>Mint Me v1</Button>
+                      ) : (
+                        <Button width="100%" mt={5} onClick={lazyMint}>Mint Vault </Button>
+                      )}
+                    </>
+                ) : null}
+                {showVerifyingSignature ? (
+                  <Button isDisabled type="submit">
+                    Verifying Signature ...
+                  </Button>
                 ) : null}
                 {showMakingVaultMsg ? (
                   <Button isDisabled type="submit">
