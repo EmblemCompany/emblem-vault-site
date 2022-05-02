@@ -1115,12 +1115,13 @@ export default function Nft2() {
                   {!vaultPrivacy && vaultTotalValue > 0 ? ': ~$' + vaultTotalValue.toLocaleString() : null}
                 </Box>
                 <Stack className="NFT-content" align="center">
-                  { vaultValues.length && vaultValues.filter(item=> {return item.type == "nft"}).length > 0 ? (
+                  {/* { vaultValues.length && vaultValues.filter(item=> {return item.type == "nft"}).length > 0 ? (
                       <NFTSlideshow name={vaultName} image={vaultImage} items={vaultValues.map(value=>{return {image: value.image, description: value.description, name: value.name, type: value.type}})} properties = {{'duration': 3000, canSwipe: false}}/>
                     ) : (
                       <Embed className="d-block w-100 NFT-image" url={vaultImage}/>
                     )
-                  }
+                  } */}
+                  <Embed className="d-block w-100 NFT-image" url={vaultImage}/>
                   {mine && ownedImage ? (
                     <Button onClick={() => {handleOwnedEmbed()}}>(OWNED) Show Full Embed</Button>
                   ): null}

@@ -41,7 +41,7 @@ export const curatedContracts = [
     "chain": "xcp"
   },
   {
-    name: "EMBLEM TEST",
+    name: "Emblem Test",
     4: "0x125355e3A87CB49ABD798bD96E7C5dA6F509cD09",
     "chain": "xcp"
   }

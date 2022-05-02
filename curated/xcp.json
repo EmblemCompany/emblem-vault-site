@@ -1747,6 +1747,24 @@
         "image": "https://xchain.io/img/cards/SPOLOSOMCXVI.jpg"
       }
     ],
+    "Emblem Test": [
+      {
+        "name":"EMBLEMCOMMON",
+        "image": "https://emblem.finance/EMBLEMCOMMON.png"
+      },
+      {
+        "name":"EMBLEMEPIC",
+        "image": "https://emblem.finance/EMBLEMEPIC.png"
+      },
+      {
+        "name":"EMBLEMLEGEND",
+        "image": "https://emblem.finance/EMBLEMLEGEND.png"
+      },
+      {
+        "name":"EMBLEMRARE",
+        "image": "https://emblem.finance/EMBLEMRARE.png"
+      }
+    ],
     "Force of Will": [
       {
         "name": "FWCFCALHAZRC",
