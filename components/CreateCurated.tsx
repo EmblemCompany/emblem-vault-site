@@ -45,7 +45,7 @@ export default function CreateCurated(props: any) {
       targetContract: targetContract,
       targetAsset: targetAsset
     }
-    let apiSuffix = '/create-curated'
+    let apiSuffix = '/v2/create-curated'
     fetch(EMBLEM_API + apiSuffix, {
       method: 'POST',
       headers: {

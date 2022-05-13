@@ -880,7 +880,7 @@ export default function Nft() {
   })
 
   function splitDescription(words) {
-    var desc = words.split('\n\n\n\n')
+    var desc = words? words.split('\n\n\n\n'): ['']
     return desc[0].trim()
   }
 
