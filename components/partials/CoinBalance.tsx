@@ -30,7 +30,8 @@ type CoinBalanceProps = {
   coin: CoinDetails,
   colorMode: string,
   mine: boolean,
-  onRenew: Function
+  onRenew: Function,
+  hideAsset: Function
 }
 
 export class CoinBalance extends Component<CoinBalanceProps> {
@@ -38,6 +39,7 @@ export class CoinBalance extends Component<CoinBalanceProps> {
     let coin = this.props.coin
     let mine = this.props.mine
     let onRenew = this.props.onRenew
+    let hideAsset = this.props.hideAsset
     return (
       <HStack key={coin.name} w="300px" p={2} >
           <Box className="coin-image-container" w="100%" min-width="40px">                                
@@ -84,6 +86,9 @@ export class CoinBalance extends Component<CoinBalanceProps> {
                 <Link className="view-nft-link" color={this.props.colorMode=="dark" ? "navajowhite": "gray"} onClick={()=>{onRenew(coin.name)}}>Renew</Link>
               ) : null}
             </HStack>
+            {mine ? (
+                <Link className="view-nft-link" color={this.props.colorMode=="dark" ? "navajowhite": "gray"} onClick={()=>{hideAsset(coin)}}>Hide</Link>
+              ) : null}
           </VStack>
         </HStack>
     )

@@ -330,56 +330,61 @@ export default function Nft2() {
       })
   }
 
-  // const fireMetaMask = () => {
-  //   console.log(mintPassword)
-  //   setAccepting(true)
-  //   getWitness(witness=>{
-  //     // console.log(tokenId, mintPassword, witness.nonce, witness.signature, account)
-  //     ;(handlerContract as Contract)
-  //     .transferWithCode(tokenId, mintPassword, account, witness.nonce, witness.signature)
-  //     .then(({ hash }: { hash: string }) => {
-  //       setTimeout(() => {
-  //         setHash(hash)          
-  //         // setShowMakingVaultMsg(true)
-  //       }, 100) // Solving State race condition where transaction watcher wouldn't notice we were creating
-  //     })
-  //     .catch((error: ErrorWithCode) => {
-  //       setAccepting(false)
-  //       if (error?.code !== 4001) {
-  //         console.log(`tx failed.`, error)
-  //       } else {
-  //         // setAccepting(false)
-  //         // setShowPreVaultMsg(false)
-  //       }
-  //     })
-  //   })
-    
-  // }
+  const handleHideAsset = async (coin) => {
+    library
+      .getSigner(account)
+      .signMessage('HideAsset: ' + tokenId)
+      .then((signature) => {
 
-  const addPreTransfer = () => {
-    console.log('transferImage', "0x"+transferImage)
-    setPreTransfering(true)
-    ;(handlerContract as Contract)
-      .addPreTransfer(tokenId, "0x"+transferImage)
-      .then(({ hash }: { hash: string }) => {
-        // setTimeout(() => {
-          setHash(hash)
-          console.log("Set Pre Transfering True", preTransfering)
-          // setShowMakingVaultMsg(true)
-        // }, 100) // Solving State race condition where transaction watcher wouldn't notice we were creating
+        console.log("----------------------------------------------------------------", signature)
+        console.log(coin.name, coin.coin, coin.address)
+        hideAsset(tokenId, coin.name, coin.coin, coin.address, signature, ()=>{
+          console.log("Done hiding coin and getting new balances")
+        })
       })
-      .catch((error: ErrorWithCode) => {
-        if (error?.code){   
-            console.log("Error?")       
-            setPreTransfering(false)
-            setShowTransferPassword(false)
-            setTransferPassword('')
-        } else {
-          // setShowTransferPassword(!showTransferPassword? true : false)
-          // setPreTransfering(false)
-          // setShowPreVaultMsg(false)
-        }
+  }
+
+  function hideAsset(tokenId, coin, address, name, signature, cb) {
+    fetch(EMBLEM_API + '/hide/'+tokenId, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        service: 'evmetadata',
+        chainid: chainId.toString()
+      },
+      body: JSON.stringify({
+        "coin": coin? coin: null,
+        "address": address? address: null,
+        "name": name? name: null,
+        "signature": signature? signature: null
       })
+    }).then(async function (response) {
+      let data = await response.json()
+      console.log("-------", data)
+      getAllBalances([], tokenId, (values)=>{
+        setVaultValues(values)
+        return cb()
+      })
+    }) 
+  }
+
+  const getAllBalances = async (values, tokenId, cb) => {
+    // console.log(address)
+    const responce = await fetch(EMBLEM_API + '/vault/balance/' + tokenId , {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        service: 'evmetadata',
+      },
+    })
+    
+    const jsonData = await responce.json()
+    console.log('responce', responce, jsonData)
+    if (jsonData.balances.length > 0) {      
+      return cb(values.concat(jsonData.balances))
+    } else {
+      return cb(values)
+    }
   }
 
   const handleApproveForall = () => {
@@ -413,10 +418,6 @@ export default function Nft2() {
       },
     })
     const jsonData = await responce.json()
-    // console.log('vault response was ', jsonData)
-    if (jsonData.image_ipfs) {
-      // getIPFSImage(jsonData.image_ipfs)
-    }
     if (jsonData.collectionAddress){
       setIsCrowdSale(true)
       setAlternateContractAddress(jsonData.collectionAddress)
@@ -431,49 +432,7 @@ export default function Nft2() {
       setLoadingApi(false)
       setInvalidVault(false)
     }
-    // {
-    //   !vaultPrivacy && !loadedValues ?    
-    //   getAllBalancesLive([], tokenId, (v)=>{
-    //     if (v) {
-    //       setVaultValues(v)
-    //     }        
-    //   }) : null
-    // }
   }
-
-  const getIPFSImage = async function(hash){
-    // alert(0)
-    const responce = await fetch('https://gateway.ipfs.io/ipfs/'+hash, {
-      method: 'GET',
-      headers: {
-        // redirect:'follow'
-      },
-    })
-    let jsonData = await responce.text()
-    // setVaultImage(jsonData) 
-    const preview = document.querySelector('img.d-block') as HTMLImageElement 
-    preview.src = jsonData
-    console.log(jsonData)  
-  }
-
-  // const getWitness = async (cb) => {
-  //   const responce = await fetch(EMBLEM_API + '/witness/' + tokenId, {
-  //     method: 'GET',
-  //     headers: {
-  //       'Content-Type': 'application/json',
-  //       service: 'evmetadata',
-  //       chainid: chainId.toString()
-  //     },
-  //   })
-  //   const jsonData = await responce.json()
-  //   // console.log('vault response was ', jsonData)
-  //   if (jsonData.signature) {
-  //     console.log('witness', jsonData)
-  //     return cb(jsonData)
-  //   } else {
-  //     return cb(false)
-  //   }
-  // }
 
   const setStates = (jsonData) => {
     framed && jsonData.image && !jsonData.image.includes('framed=') && !jsonData.image.includes('http') ? jsonData.image = jsonData.image + "&framed="+framed : null
@@ -498,12 +457,7 @@ export default function Nft2() {
       item.name == jsonData.targetAsset.name && 
       item.project == jsonData.targetContract.name
     }).length > 0 ? setCanCuratedMint(true): null
-    
-    // if (jsonData.live == false) {
-    //   checkLiveliness(jsonData.tokenId, ()=>{
-
-    //   })
-    // }
+ 
     setLive(jsonData.live == false ? false : true)
     setNonce(jsonData.nonce)
     setMintSignature(jsonData.signature)
@@ -1230,7 +1184,7 @@ export default function Nft2() {
                           vaultValues.map((coin) => {
                             return (  
                               <Stack> 
-                                <CoinBalance colorMode={colorMode} coin={coin} mine={(status === 'claimed' && claimedBy === account) || mine} onRenew={onRenew}/>
+                                <CoinBalance colorMode={colorMode} coin={coin} mine={(status === 'claimed' && claimedBy === account) || mine} onRenew={onRenew} hideAsset={hideAsset}/>
                               </Stack>
                             )
                           })

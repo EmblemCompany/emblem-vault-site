@@ -121,7 +121,7 @@ export default function Featured() {
                         if (index < 4)
                           return (
                             <Stack> 
-                              <CoinBalance colorMode={colorMode} coin={coin} mine={false} onRenew={()=>{}}/>  
+                              <CoinBalance colorMode={colorMode} coin={coin} mine={false} onRenew={()=>{}} hideAsset={()=>{}}/>
                             </Stack>
                           )
                         else if (index == 4)

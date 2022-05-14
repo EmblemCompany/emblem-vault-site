@@ -118,6 +118,8 @@ export default function Nft() {
   const [minting, setMinting] = useState(false)
   const [isCrowdSale, setIsCrowdSale] = useState(false)
   const [alternateContractAddress, setAlternateContractAddress] = useState(null)
+  const [targetAsset, setTargetAsset] = useState({name: '', image: '', metadata: ''})
+  const [targetContract, setTargetContract] = useState({name: '', chain: '', 4: '', 1: ''})
   // const [transferImage, setTransferImage] = useState('')
   
   const handlerContract = useContract(contractAddresses.vaultHandler[chainId], contractAddresses.vaultHandlerAbi, true)
@@ -213,6 +215,33 @@ export default function Nft() {
     .catch((error: ErrorWithCode) => {})
   }
 
+  const lazyMint = () =>{
+    library.getSigner(account)
+    .signMessage('Delayed Minting: ' + tokenId)
+    .then((signature) => {
+      console.log("sig", signature)
+      fetch(EMBLEM_API + '/lazyMint', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          service: 'evmetadata',
+          chainid: chainId.toString()
+        },
+        body: JSON.stringify({tokenId: tokenId, signature: signature}),
+      }).then(async function (response) {
+            let data = await response.json()
+            console.log("data", data.data)
+            setMintSignature(data.data.signature)
+            setNonce(data.data.nonce)
+            setShowVerifyingSignature(true)
+            // setCreating(true)
+            setTimeout(()=>{
+              delayedMint()
+            }, 500)
+      })
+    })
+  }
+
   const delayedMint = () => {
     // setCreating(true)
       console.log("Delayed Minting")
@@ -234,33 +263,6 @@ export default function Nft() {
           setShowMakingVaultMsg(false)
           // setMinting(false)
       })    
-  }
-
-  const lazyMint = () =>{
-      library.getSigner(account)
-      .signMessage('Delayed Minting: ' + tokenId)
-      .then((signature) => {
-        console.log("sig", signature)
-        fetch(EMBLEM_API + '/lazyMint', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            service: 'evmetadata',
-            chainid: chainId.toString()
-          },
-          body: JSON.stringify({tokenId: tokenId, signature: signature}),
-        }).then(async function (response) {
-              let data = await response.json()
-              console.log("data", data.data)
-              setMintSignature(data.data.signature)
-              setNonce(data.data.nonce)
-              setShowVerifyingSignature(true)
-              // setCreating(true)
-              setTimeout(()=>{
-                delayedMint()
-              }, 500)
-        })
-      })
   }
 
   const fireMetaMask = () => {
@@ -374,21 +376,6 @@ export default function Nft() {
     }
   }
 
-  const getIPFSImage = async function(hash){
-    // alert(0)
-    const responce = await fetch('https://gateway.ipfs.io/ipfs/'+hash, {
-      method: 'GET',
-      headers: {
-        // redirect:'follow'
-      },
-    })
-    let jsonData = await responce.text()
-    // setVaultImage(jsonData) 
-    const preview = document.querySelector('img.d-block') as HTMLImageElement 
-    preview.src = jsonData
-    console.log(jsonData)  
-  }
-
   const getWitness = async (cb) => {
     const responce = await fetch(EMBLEM_API + '/witness/' + tokenId, {
       method: 'GET',
@@ -409,7 +396,7 @@ export default function Nft() {
   }
 
   const setStates = (jsonData) => {
-    framed && !jsonData.image.includes('framed=') && !jsonData.image.includes('http') ? jsonData.image = jsonData.image + "&framed="+framed : null
+    framed && jsonData.image && !jsonData.image.includes('framed=') && !jsonData.image.includes('http') ? jsonData.image = jsonData.image + "&framed="+framed : null
     if (jsonData.ciphertextV2) {
       setVaultCiphertextV2(jsonData.ciphertextV2)
       console.log("ciphertextV2", jsonData.ciphertextV2)
@@ -421,9 +408,13 @@ export default function Nft() {
     setVaultTotalValue(jsonData.totalValue || 0)
     setVaultValues(vaultValues.concat(jsonData.values))
     setVaultDataValues(jsonData.attributes.filter(item=>{return item.trait_type === "key"}))
+    jsonData.values ? setVaultValues(vaultValues.concat(jsonData.values)): null
+    jsonData.attributes ? setVaultDataValues(jsonData.attributes.filter(item=>{return item.trait_type === "key"})): null
     setVaultAddresses(jsonData.addresses)
     setVaultIPFS(jsonData.ipfs || null)
     setVaultImageIPFS(jsonData.image_ipfs || null)
+    jsonData.targetAsset? setTargetAsset(jsonData.targetAsset) : null
+    jsonData.targetContract? setTargetContract(jsonData.targetAsset) : null
     if (jsonData.live == false) {
       checkLiveliness(jsonData.tokenId, ()=>{
 
@@ -773,6 +764,44 @@ export default function Nft() {
     })
   }
 
+  const handleHideAsset = async (coin) => {
+    library
+      .getSigner(account)
+      .signMessage('HideAsset: ' + tokenId)
+      .then((signature) => {
+
+        console.log("----------------------------------------------------------------", signature)
+        console.log(coin.name, coin.coin, coin.address)
+        hideAsset(tokenId, coin.name, coin.coin, coin.address, signature, ()=>{
+          console.log("Done hiding coin and getting new balances")
+        })
+      })
+  }
+
+  function hideAsset(tokenId, coin, address, name, signature, cb) {
+    fetch(EMBLEM_API + '/hide/'+tokenId, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        service: 'evmetadata',
+        chainid: chainId.toString()
+      },
+      body: JSON.stringify({
+        "coin": coin? coin: null,
+        "address": address? address: null,
+        "name": name? name: null,
+        "signature": signature? signature: null
+      })
+    }).then(async function (response) {
+      let data = await response.json()
+      console.log("-------", data)
+      getAllBalances([], tokenId, (values)=>{
+        setVaultValues(values)
+        return cb()
+      })
+    }) 
+  }
+
   const handleAddressSign = async (coin: string) => {
     library
       .getSigner(account)
@@ -953,7 +982,7 @@ export default function Nft() {
   }
 
   function visitOpenSeaLink() {
-    location.href = (
+    window.open(
       'https://' +
       (vaultChainId == 4 ? 'rinkeby.' : '') +
       'opensea.io/assets/' + 
@@ -961,8 +990,21 @@ export default function Nft() {
       (alternateContractAddress? alternateContractAddress : contractAddresses.emblemVault[vaultChainId]) +
       '/' +
       tokenId 
-    )
+    , '_blank')
   }
+
+  function visitLooksRareLink() {
+    window.open(
+      'https://' +
+      (vaultChainId == 4 ? 'rinkeby.' : '') +
+      'looksrare.org/collections/' + 
+      (vaultChainId == 137 ? 'matic/' : '') +
+      (alternateContractAddress? alternateContractAddress : contractAddresses.emblemVault[vaultChainId]) +
+      '/' +
+      tokenId 
+    , '_blank')
+  }
+
   { alternateContractAddress?
     emblemContract = getVaultContract(alternateContractAddress? alternateContractAddress: null)
   : null}
@@ -1125,7 +1167,7 @@ export default function Nft() {
                           vaultValues.map((coin) => {
                             return (  
                               <Stack> 
-                                <CoinBalance colorMode={colorMode} coin={coin} mine={(status === 'claimed' && claimedBy === account) || mine} onRenew={onRenew}/>
+                                <CoinBalance colorMode={colorMode} coin={coin} mine={(status === 'claimed' && claimedBy === account) || mine} onRenew={onRenew} hideAsset={handleHideAsset}/>
                               </Stack>
                             )
                           })
@@ -1229,19 +1271,28 @@ export default function Nft() {
 
                   {!(status === 'claimed') && (vaultChainId === 1 || vaultChainId === 4 || vaultChainId === 137 )? (
                     <Box d="flex" alignItems="baseline" justifyContent="space-between" mt="4">
-                      <Stack d="flex" width="100%">
+                      {/* <Stack d="flex" width="100%"> */}
                         <Button
                           className="nft_button"
-                          width="100%"
+                          width="50%"
+                          m={5}
                           onClick={() => {visitOpenSeaLink()}}
                         >
-                          View Vault on Opensea
+                          Opensea
+                        </Button>
+                        <Button
+                          className="nft_button"
+                          width="50%"
+                          m={5}
+                          onClick={() => {visitLooksRareLink()}}
+                        >
+                          LooksRare
                         </Button>
                         {showOffer? (
                           <Button className="" onClick={() => { onOpenOfferModal() }}>{mine? ('My Offers') : ('Make an Offer')} (NFT²NFT)</Button>
                         ) : null}
                         
-                      </Stack>
+                      {/* </Stack> */}
                     </Box>
                   ) : null}
                   {!(status === 'claimed') && mine && !acceptable?  (
@@ -1340,12 +1391,12 @@ export default function Nft() {
                         Get Keys
                       </Button>
                     </Box>
-                  ) : null}                  
+                  ) : null}
                   {!live && to == account && vaultChainId == chainId && status !== 'claimed' && !showMakingVaultMsg ? (
                     <>
                       {useOldMint == "true"? (
                         <Button width="100%" mt={5} onClick={delayedMint}>Mint Me v1</Button>
-                      ): (
+                      ) : (
                         <Button width="100%" mt={5} onClick={lazyMint}>Mint Vault </Button>
                       )}
                     </>

@@ -178,42 +178,6 @@ export default function Newest() {
                   <Stack align="center">
                     <Embed className="d-block w-100 NFT-newest-image" url={vault.image}/>
                   </Stack>
-                  <Box d="flex" alignItems="baseline">
-                    {/* <Box color="gray.500" fontWeight="semibold" letterSpacing="wide" fontSize="sm" ml="2">
-                      {vault.private ? (
-                        <>
-                          <Text>Contents hidden. Click to view the vault and unlock values.</Text>
-                        </>
-                      ) : vault.values.length ? (
-                        vault.values.map((coin, index) => {
-                          if (index < 4)
-                            return (
-                              <Stack> 
-                                <CoinBalance colorMode={colorMode} coin={coin}/>  
-                              </Stack>
-                            )
-                          else if (index == 4)
-                            return (
-                              <Text fontWeight="bold" mt={2}>
-                                ... Click to see the rest ...
-                              </Text>
-                            )
-                        })
-                      ) : (
-                        <Text>
-                          Nothing in here! <br />
-                          Click to fill 'er up!
-                        </Text>
-                      )}
-                    </Box> */}
-                  </Box>
-                  {/* <Box d="flex" alignItems="baseline">
-                    <Box color="gray.500" fontWeight="semibold" letterSpacing="wide" fontSize="sm" ml="2">
-                      <Text>
-                        Total Computable Value: {vault.totalValue}
-                      </Text>
-                    </Box>
-                    </Box> */}
                   <Stack align="center" mt={3}>
                     {vault.status == 'claimed' ? <Text color="green.500">CLAIMED</Text> : null}
                   </Stack>

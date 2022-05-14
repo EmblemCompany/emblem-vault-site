@@ -109,7 +109,7 @@ export const contractAddresses = {
 
 export const BURN_ADDRESS = '0x5D152dd902CC9198B97E5b6Cf5fc23a8e4330180'
 export const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000"
-export const EMBLEM_API = 'http://localhost:3001' //API_OVERLOAD? API_OVERLOAD :'https://api.emblemvault.io'
+export const EMBLEM_API = API_OVERLOAD? API_OVERLOAD :'https://api.emblemvault.io' // 'http://localhost:3001' //
 
 export enum QueryParameters {
   INPUT = 'input',
