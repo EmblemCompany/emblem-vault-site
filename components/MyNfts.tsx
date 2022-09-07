@@ -36,10 +36,10 @@ export default function MyNfts() {
         },
       })
       let jsonData = await response.json()    
-      setVaults(vaults.concat(jsonData))
+      setVaults(vaults.concat(jsonData.values))
       setState({ loaded: true })
       setLoadingApi(false)
-      console.log("Records received", jsonData.length)
+      console.log("Records received", jsonData.values.length)
       if (jsonData.length < PAGE_SIZE) {
         setHasMore(false)
       }
@@ -181,7 +181,7 @@ export default function MyNfts() {
           vaults.map((vault, index) => {
             let pieces = location.pathname.split('/')
             pieces.pop()
-            let url = location.origin + pieces.join('/') + '/asset?id=' + vault.tokenId + '&contract=' + vault.contract
+            let url = location.origin + pieces.join('/') + '/asset?id=' + vault.tokenId + '&contract=' + vault.address
             const flexSettings = {
               flex: '1',
               minW: '200px',

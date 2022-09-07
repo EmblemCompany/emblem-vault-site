@@ -62,6 +62,14 @@ export const CovalFantom = new Token(
   'Circuits of Value'
 )
 
+export const CovalAurora = new Token(
+  ChainId.RINKEBY,
+  '0x584039B84b1d36653DAb76DC1246D07b08218706',
+  8,
+  'Coval',
+  'Circuits of Value'
+)
+
 export const DEFAULT_TOKENS = [
   ...Object.values(WETH),
 

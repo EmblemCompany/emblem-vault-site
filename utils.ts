@@ -25,7 +25,8 @@ export const CHAIN_ID_NAMES: { [key: number]: string } = {
   97: 'bnbsc',
   100: 'xDai',
   56: 'Binance Smart Chain',
-  250: 'Fantom'
+  250: 'Fantom',
+  1313161554: 'Aurora'
 }
 
 export const INFURA_PREFIXES: { [key: number]: string } = {
@@ -40,7 +41,8 @@ export const INFURA_PREFIXES: { [key: number]: string } = {
   97: 'bnbsc',
   100: 'xdai',
   56: 'bsc',
-  250: 'fantom'
+  250: 'fantom',
+  1313161554: 'aurora'
 }
 
 export enum ExplorerTXType {
@@ -61,7 +63,8 @@ export const EXPLORER_PREFIXES: { [key: number]: string } = {
   97: 'bnbsc',
   100: 'blockscout.com/xdai/mainnet',
   56: 'bscscan.com',
-  250: 'ftmscan.com'
+  250: 'ftmscan.com',
+  1313161554: 'aurorascan.dev'
 }
 
 export const NETWORK_SHORTNAMES: { [key: number]: string } = {
@@ -75,7 +78,8 @@ export const NETWORK_SHORTNAMES: { [key: number]: string } = {
   97: 'bsctest',
   100: 'xdai',
   56: 'bsc',
-  250: 'fantom'
+  250: 'fantom',
+  1313161554: 'aurora'
 }
 
 interface ExplorerTypeData {

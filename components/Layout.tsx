@@ -14,7 +14,7 @@ import TokenBalance from './TokenBalance'
 import { WETH, ChainId, Token } from '@uniswap/sdk'
 import WalletConnect from './WalletConnect'
 import { QueryParameters } from '../constants'
-import { Coval, CovalTest, CovalTestMatic, CovalMatic, CovalxDai, CovalBSC, CovalFantom, DEFAULT_TOKENS } from '../tokens'
+import { Coval, CovalTest, CovalTestMatic, CovalMatic, CovalxDai, CovalBSC, CovalFantom, DEFAULT_TOKENS, CovalAurora } from '../tokens'
 import Head from 'next/head'
 import transakSDK from '@transak/transak-sdk'
 import { useRouter } from 'next/router'
@@ -189,6 +189,7 @@ export default function Layout({ children }: { children: ReactNode}): JSX.Elemen
                 chainId == 100? CovalxDai : 
                 chainId == 56 ? CovalBSC :
                 chainId == 250 ? CovalFantom :
+                chainId == 1313161554 ? CovalAurora:
                 CovalTest,
                 firstToken ? (firstToken.symbol != 'Coval' ? firstToken : null) : null,
                 secondToken ? (secondToken.symbol != 'Coval' ? secondToken : null) : null,
@@ -261,7 +262,7 @@ export default function Layout({ children }: { children: ReactNode}): JSX.Elemen
           alignItems="center"
           align="center"
         >
-          {/* <Popover usePortal>
+          <Popover usePortal>
             <PopoverTrigger>
             <IconButton size="sm" icon="warning-2" aria-label=''/>
             </PopoverTrigger>
@@ -270,7 +271,7 @@ export default function Layout({ children }: { children: ReactNode}): JSX.Elemen
               <PopoverCloseButton />
               <PopoverBody><Text fontSize="xs">Emblem Vault is experimental. Before purchasing $COVAL or $FUEL tokens, you must ensure that the nature, complexity and risks inherent in the trading of cryptocurrency are suitable for your objectives in light of your circumstances and financial position. Emblem, Emblem Vault, $COVAL, and/or $FUEL shall be under no obligation to purchase or to broker the purchase back from you of your cryptocurrency in circumstances where there is no viable market for the purchase of the same. The products and services presented on this website may only be purchased in jurisdictions in which their marketing and distribution are authorized. Using or Creating Vaults is done at your own risk.</Text></PopoverBody>
             </PopoverContent>
-          </Popover> */}
+          </Popover>
         </Stack>
         {useLayout? (
         <Stack

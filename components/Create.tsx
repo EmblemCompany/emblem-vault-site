@@ -253,7 +253,7 @@ export default function Create(props: any) {
   }
 
   const checkLiveliness = (tokenId, cb)=>{
-    fetch(EMBLEM_API + '/liveliness', {
+    fetch(EMBLEM_API + '/liveliness?cc=t', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

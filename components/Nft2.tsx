@@ -16,7 +16,12 @@ import {
   FormControl,
   FormLabel,
   useColorMode,
-  IconButton
+  IconButton,
+  Tabs,
+  TabList,
+  Tab,
+  TabPanel,
+  TabPanels
 } from '@chakra-ui/core'
 
 import {HStack, VStack, Circle } from '@chakra-ui/react'
@@ -44,7 +49,7 @@ import NFTSlideshow from './embed/NFTSlideshow'
 import CoinBalance from './partials/CoinBalance'
 import { chakra } from '@chakra-ui/system'
 import transakSDK from '@transak/transak-sdk'
-import { BigNumber } from '@ethersproject/bignumber';
+import Attributes from './partials/Attributes';
 
 const API_VERSION = '/v2'
 
@@ -79,6 +84,7 @@ export default function Nft2() {
   const [vaultValues, setVaultValues] = useState([])
   const [loadedValues, setLoadedValues] = useState(false)
   const [vaultDataValues, setVaultDataValues] = useState([])
+  const [attributes, setAttributes] = useState([])
   const [vaultAddresses, setVaultAddresses] = useState([])
   const [vaultPrivacy, setVaultPrivacy] = useState(false)
   const [vaultTotalValue, setVaultTotalValue] = useState(0)
@@ -263,7 +269,7 @@ export default function Nft2() {
           body: JSON.stringify({tokenId: tokenId, signature: signature, chainId: chainId.toString()}),
         }).then(async function (response){
           let data = await response.json()
-          console.log({data})
+          location.href = location.href.split("/")[0] + "/vaults"
         })
       })
   }
@@ -330,44 +336,6 @@ export default function Nft2() {
       })
   }
 
-  const handleHideAsset = async (coin) => {
-    library
-      .getSigner(account)
-      .signMessage('HideAsset: ' + tokenId)
-      .then((signature) => {
-
-        console.log("----------------------------------------------------------------", signature)
-        console.log(coin.name, coin.coin, coin.address)
-        hideAsset(tokenId, coin.name, coin.coin, coin.address, signature, ()=>{
-          console.log("Done hiding coin and getting new balances")
-        })
-      })
-  }
-
-  function hideAsset(tokenId, coin, address, name, signature, cb) {
-    fetch(EMBLEM_API + '/hide/'+tokenId, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        service: 'evmetadata',
-        chainid: chainId.toString()
-      },
-      body: JSON.stringify({
-        "coin": coin? coin: null,
-        "address": address? address: null,
-        "name": name? name: null,
-        "signature": signature? signature: null
-      })
-    }).then(async function (response) {
-      let data = await response.json()
-      console.log("-------", data)
-      getAllBalances([], tokenId, (values)=>{
-        setVaultValues(values)
-        return cb()
-      })
-    }) 
-  }
-
   const getAllBalances = async (values, tokenId, cb) => {
     // console.log(address)
     const responce = await fetch(EMBLEM_API + '/vault/balance/' + tokenId , {
@@ -409,7 +377,7 @@ export default function Nft2() {
 
   const getVault = async () => {
     console.log('getvault')
-    !slideshowOnly ? loadCache() : null
+    // !slideshowOnly ? loadCache() : null
     const responce = await fetch(EMBLEM_API + API_VERSION + '/meta/' + tokenId + '?experimental=true', {
       method: 'GET',
       headers: {
@@ -428,7 +396,7 @@ export default function Nft2() {
     } else {
       console.log("---------------", jsonData)
       setStates(jsonData)
-      !slideshowOnly? saveCache(jsonData) : null
+      // !slideshowOnly? saveCache(jsonData) : null
       setLoadingApi(false)
       setInvalidVault(false)
     }
@@ -447,6 +415,7 @@ export default function Nft2() {
     setVaultTotalValue(jsonData.totalValue || 0)
     jsonData.values ? setVaultValues(vaultValues.concat(jsonData.values)): null
     jsonData.attributes ? setVaultDataValues(jsonData.attributes.filter(item=>{return item.trait_type === "key"})): null
+    jsonData.attributes ? setAttributes(jsonData.attributes): null
     setVaultAddresses(jsonData.addresses)
     setVaultIPFS(jsonData.ipfs || null)
     setVaultImageIPFS(jsonData.image_ipfs || null)
@@ -459,6 +428,11 @@ export default function Nft2() {
     }).length > 0 ? setCanCuratedMint(true): null
  
     setLive(jsonData.live == false ? false : true)
+    if (!jsonData.live) {
+      checkLiveliness(tokenId, ()=>{
+        setLive(true)
+      })
+    }
     setNonce(jsonData.nonce)
     setMintSignature(jsonData.signature)
     setTo(jsonData.to)
@@ -472,6 +446,7 @@ export default function Nft2() {
       jsonData.network == "bsc" ? 56 : 
       jsonData.network == "fantom" ? 250 : 
       jsonData.network == "bitcoin" ? 0 : 
+      jsonData.network == "aurora" ? 1313161554 : 
       97
     )
     setStatus(jsonData.status)
@@ -717,11 +692,10 @@ export default function Nft2() {
       if (targetContract[chainId]) {
         emblemContract = getCuratedContract(targetContract[chainId])
         _owner = await emblemContract.getOwnerOfSerial(targetContract.serialNumber)
-        console.log("---------------------------", _owner, approved, account, contractAddresses.vaultHandlerV8[chainId])
+        console.log("--------------------------- owner", _owner, approved, account, contractAddresses.vaultHandlerV8[chainId])
       } else {
         _owner  = await emblemContract.ownerOf(tokenId)
       }
-      
       finish()
     } catch(err){
       _owner = "0x0000000000000000000000000000000000000000"
@@ -790,26 +764,17 @@ export default function Nft2() {
       emblemContract = getCuratedContract(targetContract[chainId])
       serialNumber = await emblemContract.getSerial(targetContract.tokenId, 0)
     }
-    
+
     library
       .getSigner(account)
       .signMessage('Claim: ' + (targetContract[chainId]? serialNumber: tokenId))
       .then((signature) => {
         getSignedJWT(signature, tokenId, (token)=>{
-          console.log("----------------------- JWT Response", token)
-          // console.log("Got JWT", token)
           getRemoteKey(tokenId, token.token, (keys)=>{
-            // console.log("Got Keys", keys)
             var bytes = CryptoJS.AES.decrypt(vaultCiphertextV2, keys.privateKey)
-            let payload = JSON.parse(bytes.toString(CryptoJS.enc.Utf8))
-            // console.log("Decrypted payload locally", payload)    
+            let payload = JSON.parse(bytes.toString(CryptoJS.enc.Utf8)) 
             setKeyValues(payload.values)
             setMnemonic(payload.phrase)
-            
-            // let btcKey = window.phrasePathToKey(payload.phrase, vaultAddresses.filter(address=>{ return address.coin == 'BTC'})[0].path)
-            // setPrivKeyBTC(btcKey)
-            // let ethKey = window.phrasePathToKey(payload.phrase, vaultAddresses.filter(address=>{ return address.coin == 'ETH'})[0].path)
-            // setPrivKeyETH(ethKey)
             vaultAddresses.forEach(address=>{              
               address.key = window.phrasePathToKey(payload.phrase,address.path)
               if (address.coin == 'BTC') setPrivKeyBTC(address.key)
@@ -821,6 +786,44 @@ export default function Nft2() {
         })
       // }
     })
+  }
+
+  const handleHideAsset = async (coin) => {
+    library
+      .getSigner(account)
+      .signMessage('HideAsset: ' + tokenId)
+      .then((signature) => {
+
+        console.log("----------------------------------------------------------------", signature)
+        console.log(coin.name, coin.coin, coin.address)
+        hideAsset(tokenId, coin.coin, coin.address, coin.name, signature, ()=>{
+          console.log("Done hiding coin and getting new balances")
+        })
+      })
+  }
+
+  function hideAsset(tokenId, coin, address, name, signature, cb) {
+    fetch(EMBLEM_API + '/hide/'+tokenId, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        service: 'evmetadata',
+        chainid: chainId.toString()
+      },
+      body: JSON.stringify({
+        "coin": coin? coin: null,
+        "address": address? address: null,
+        "name": name? name: null,
+        "signature": signature? signature: null
+      })
+    }).then(async function (response) {
+      let data = await response.json()
+      console.log("-------", data)
+      getAllBalances([], tokenId, (values)=>{
+        setVaultValues(values)
+        return cb()
+      })
+    }) 
   }
 
   const handleAddressSign = async (coin: string) => {
@@ -866,7 +869,7 @@ export default function Nft2() {
   }
 
   const pingClaimLogs = (cb)=>{
-    fetch(EMBLEM_API + '/web3/selfClaimLogs?chainId='+chainId.toString(), {
+    fetch(EMBLEM_API + '/web3/selfClaimLogs?chainId='+chainId.toString()+'_vercel_no_cache=1', {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -1011,16 +1014,29 @@ export default function Nft2() {
   }
 
   function visitOpenSeaLink() {
-    location.href = (
+    window.open(
       'https://' +
       (vaultChainId == 4 ? 'rinkeby.' : '') +
       'opensea.io/assets/' + 
       (vaultChainId == 137 ? 'matic/' : '') +
-      (alternateContractAddress? alternateContractAddress : contractAddresses.emblemVault[vaultChainId]) +
+      (alternateContractAddress? alternateContractAddress : targetContract? targetContract[chainId]: contractAddresses.emblemVault[vaultChainId]) +
       '/' +
-      tokenId 
-    )
+      (targetContract? targetContract.tokenId: tokenId)
+    , '_blank')
   }
+
+  function visitLooksRareLink() {
+    window.open(
+      'https://' +
+      (vaultChainId == 4 ? 'rinkeby.' : '') +
+      'looksrare.org/collections/' + 
+      (vaultChainId == 137 ? 'matic/' : '') +
+      (alternateContractAddress? alternateContractAddress : targetContract? targetContract[chainId]: contractAddresses.emblemVault[vaultChainId]) +
+      '/' +
+      (targetContract? targetContract.tokenId: tokenId) 
+    , '_blank')
+  }
+
   { alternateContractAddress?
     emblemContract = getVaultContract(alternateContractAddress? alternateContractAddress: null)
   : null}
@@ -1040,6 +1056,9 @@ export default function Nft2() {
               // });
               $(".NFT").trigger('mouseenter');
               $(".NFT").trigger('mouseclick'), '.NFT';
+              if (localStorage.getItem("darkMode") == 'false') {
+                localStorage.setItem("darkMode","true"); location.href = location.href
+              }
               `,
             }}
           />
@@ -1153,54 +1172,67 @@ export default function Nft2() {
                   </Box>                    
                 </Stack>
                 <Box p="6">
-                  {vaultPrivacy ? (
-                    <Box mb={5}>
-                      <Text pb={2} color={decryptedEffect ? 'green.500' : null}>
-                        {decryptedEffect ? decryptedEffect : 'Contents hidden. Enter password to unlock.'}
-                      </Text>
-                      <Input
-                        type="password"
-                        id="vault-password"
-                        onChange={(e) => tryDecrypt(e.target.value)}
-                        aria-describedby="password-helper-text"
-                      />
-                    </Box>
-                  ) : (
-                    <Box d="flex" backgroundColor={colorMode == "light"? "gray.100": "gray.700"} alignItems="baseline" className="coin-balance-content">
-                      <Box color="gray.500" letterSpacing="wide" fontSize="sm" ml="2">
-                        <Text as="h4" mt={2} fontWeight="semibold">
-                        
-                          Current Contents:  <button
-                          onClick={() =>{
-                            getAllBalancesLive([], tokenId, (v)=>{
-                              setLoadedValues(false)
-                              setVaultValues(v)
-                            })
-                          }}
-                        > [Refresh Balances]</button>
-                        </Text>
-                        <Text as="p" color={colorMode=="dark"? "lightgreen": "forestgreen"}>${Number(vaultTotalValue.toFixed(4)).toLocaleString()}</Text>
-                        { vaultValues.length ? (
-                          vaultValues.map((coin) => {
-                            return (  
-                              <Stack> 
-                                <CoinBalance colorMode={colorMode} coin={coin} mine={(status === 'claimed' && claimedBy === account) || mine} onRenew={onRenew} hideAsset={hideAsset}/>
-                              </Stack>
-                            )
-                          })
-                        ) : (<Refreshing /> ) } 
-                        { vaultDataValues.length ? (
-                          vaultDataValues.map((data) => {
-                            return (
-                              <Text>Data: {data.attribute_key}</Text>
-                            )                        
-                          })
-                        ) : !vaultDataValues.length && !vaultValues.length ? (
-                          <Text>Nothing in here! Fill 'er up!</Text>
-                        ) : null}
-                      </Box>
-                    </Box>
-                  )}                  
+                <Tabs isFitted variant='enclosed'>
+                  <TabList mb='1em'>
+                    <Tab>Balances</Tab>
+                    <Tab>Attributes</Tab>
+                  </TabList>
+                  <TabPanels>
+                    <TabPanel>
+                      {vaultPrivacy ? (
+                        <Box mb={5}>
+                          <Text pb={2} color={decryptedEffect ? 'green.500' : null}>
+                            {decryptedEffect ? decryptedEffect : 'Contents hidden. Enter password to unlock.'}
+                          </Text>
+                          <Input
+                            type="password"
+                            id="vault-password"
+                            onChange={(e) => tryDecrypt(e.target.value)}
+                            aria-describedby="password-helper-text"
+                          />
+                        </Box>
+                      ) : (
+                        <Box d="flex" backgroundColor={colorMode == "light"? "gray.100": "gray.700"} alignItems="baseline" className="coin-balance-content">
+                          <Box color="gray.500" letterSpacing="wide" fontSize="sm" ml="2">
+                            <Text as="h4" mt={2} fontWeight="semibold">
+                            
+                              Current Contents:  <button
+                              onClick={() =>{
+                                getAllBalancesLive([], tokenId, (v)=>{
+                                  setLoadedValues(false)
+                                  setVaultValues(v)
+                                })
+                              }}
+                            > [Refresh Balances]</button>
+                            </Text>
+                            <Text as="p" color={colorMode=="dark"? "lightgreen": "forestgreen"}>${Number(vaultTotalValue.toFixed(4)).toLocaleString()}</Text>
+                            { vaultValues.length ? (
+                              vaultValues.map((coin) => {
+                                return (  
+                                  <Stack> 
+                                    <CoinBalance colorMode={colorMode} coin={coin} mine={(status === 'claimed' && claimedBy === account) || mine} onRenew={onRenew} hideAsset={handleHideAsset}/>
+                                  </Stack>
+                                )
+                              })
+                            ) : (<Refreshing /> ) } 
+                            { vaultDataValues.length ? (
+                              vaultDataValues.map((data) => {
+                                return (
+                                  <Text>Data: {data.attribute_key}</Text>
+                                )                        
+                              })
+                            ) : !vaultDataValues.length && !vaultValues.length ? (
+                              <Text>Nothing in here! Fill 'er up!</Text>
+                            ) : null}
+                          </Box>
+                        </Box>
+                      )}
+                  </TabPanel>
+                    <TabPanel>
+                      <Attributes colorMode={colorMode} attributes={attributes}/>
+                      </TabPanel>
+                    </TabPanels>
+                  </Tabs>
                   
                   {!vaultPrivacy ? (
                     <Box d="flex" alignItems="baseline" justifyContent="space-between" mt="4">
@@ -1267,19 +1299,28 @@ export default function Nft2() {
 
                   {!(status === 'claimed') && live && (vaultChainId === 1 || vaultChainId === 4 || vaultChainId === 137 )? (
                     <Box d="flex" alignItems="baseline" justifyContent="space-between" mt="4">
-                      <Stack d="flex" width="100%">
+                      {/* <Stack d="flex" width="100%"> */}
                         <Button
                           className="nft_button"
-                          width="100%"
+                          width="50%"
+                          m={5}
                           onClick={() => {visitOpenSeaLink()}}
                         >
-                          View Vault on Opensea
+                          Opensea
+                        </Button>
+                        <Button
+                          className="nft_button"
+                          width="50%"
+                          m={5}
+                          onClick={() => {visitLooksRareLink()}}
+                        >
+                          LooksRare
                         </Button>
                         {showOffer? (
                           <Button className="" onClick={() => { onOpenOfferModal() }}>{mine? ('My Offers') : ('Make an Offer')} (NFT²NFT)</Button>
                         ) : null}
                         
-                      </Stack>
+                      {/* </Stack> */}
                     </Box>
                   ) : null}
                   {!(status === 'claimed') && mine && !acceptable?  (
@@ -1313,52 +1354,7 @@ export default function Nft2() {
                       </Box>
                     </>
                   ):null }
-                  {/* {mine && !acceptable ? (<>
-                    <Box d="flex" alignItems="baseline" justifyContent="space-between" mt="4">
-                      <Button 
-                        className="nft_button"
-                        width="100%" onClick={() => {
-                        if (!approved) {
-                          return handleApproveForall()
-                        } else {
-                          let key = CryptoJS.lib.WordArray.random(128/8).toString()
-                          let sha = CryptoJS.SHA256(key).toString()
-                          console.log('plain', key)
-                          console.log('sha', sha)
-                          setTransferPassword(key)
-                          transferImage = sha                          
-                          setTimeout(()=>{
-                            addPreTransfer()
-                          }, 500)
-                        }                                             
-                      }
-                    }> {approved ? "Get Link (Send Vault Via Link)" : "Approve Gifting" } </Button>
-                    </Box>
-                  </>) : null }
-                  {(showTransferPassword || mintPassword) && acceptable ? (
-                      <Box>
-                        <Link href={location.protocol +'//'+ location.host + '/nft?id=' + tokenId + '&key=' + (transferPassword || mintPassword)}>Copy Gift Link</Link>
-                        <Text>Password: {(transferPassword || mintPassword)}</Text>
-                      </Box>
-                      ) : null} */}
-                  {/* {acceptable && claimedBy !== account ? (
-                  <>
-                      <Button mt={2} width="100%" onClick={()=>{fireMetaMask()}}>Accept</Button>
-                      <Input
-                        mt={2}
-                        type="password"
-                        id="mintPassword"
-                        minLength={3}
-                        maxLength={200}
-                        value={mintPassword || ''}
-                        onChange={(e) => {
-                          console.log('grrr', e.target.value, mintPassword)
-                          setMintPassword(e.target.value)}
-                        }
-                        autoComplete="off"
-                      />
-                  </>
-                    ) : null} */}
+                  
                   {!(status === 'claimed') && account && vaultChainId === chainId && mine && !sealed ? (
                     <Box d="flex" alignItems="baseline" justifyContent="space-between" mt="4">
                       <Button
@@ -1378,7 +1374,7 @@ export default function Nft2() {
                         Get Keys
                       </Button>
                     </Box>
-                  ) : null}                  
+                  ) : null}
                   {!live && to == account && vaultChainId == chainId && status !== 'claimed' && !showMakingVaultMsg ? (
                     <>
                       {useOldMint == "true"? (
@@ -1390,7 +1386,7 @@ export default function Nft2() {
                       )}
                     </>
                 ) : null}
-                {!live && to == account && vaultChainId == chainId && !showMakingVaultMsg ? (
+                {(!live || status == 'claimed') && to == account && vaultChainId == chainId && !showMakingVaultMsg && vaultValues.length < 1 ? (
                   <Button width="100%" mt={5} onClick={deleteVault}>Delete Vault </Button>
                 ) : null}
                 {showVerifyingSignature ? (

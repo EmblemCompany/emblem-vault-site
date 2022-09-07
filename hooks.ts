@@ -142,7 +142,9 @@ const chainMappings: { [key: string]: number } = {
   bsc: 56,
   '56': 56,
   fantom: 250,
-  '250': 250
+  '250': 250,
+  aurora: 1313161554,
+  '1313161554': 1313161554
 }
 
 export function useQueryParameters(): {

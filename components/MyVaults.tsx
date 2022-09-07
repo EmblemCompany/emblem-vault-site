@@ -26,10 +26,11 @@ export default function MyVaults() {
 
   const getVaults = async () => {
     try {
-      const response = await fetch(EMBLEM_API + '/myvaults/'+(address ? address : account)+'?start='+offset+'&size='+PAGE_SIZE, {
+      const response = await fetch(EMBLEM_API + '/myvaults/'+(address ? address : account)+'?start='+offset+'&size='+PAGE_SIZE+'&_vercel_no_cache=1', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
+          '_vercel_no_cache':'1',
           service: 'evmetadata',
           chainId: chainId.toString(),
           vaultType: vaultType.toString()
@@ -178,7 +179,7 @@ export default function MyVaults() {
           vaults.map((vault, index) => {
             let pieces = location.pathname.split('/')
             pieces.pop()
-            let url = location.origin + pieces.join('/') + '/nft?id=' + vault.tokenId
+            let url = location.origin + pieces.join('/') + '/nft?id=' + vault.tokenId + '&cc=t'
             const flexSettings = {
               flex: '1',
               minW: '200px',

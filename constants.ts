@@ -44,7 +44,22 @@ export const curatedContracts = [
     name: "Emblem Test",
     4: "0x125355e3A87CB49ABD798bD96E7C5dA6F509cD09",
     "chain": "xcp"
-  }
+  },
+  // {
+  //   name: "Age of Chains",
+  //   4: "0x0000000000000000000000000000000000000000",
+  //   "chain": "xcp"
+  // },
+  // {
+  //   name: "Age of Rust",
+  //   4: "0x00000000000000000000000000000000000000000",
+  //   "chain": "xcp"
+  // },
+  // {
+  //   name: "AtOMo",
+  //   4: "0x00000000000000000000000000000000000000000",
+  //   chain: "xcp"
+  // }
 ]
 export const curatedAssets = {
   xcp: xcpJson
@@ -62,7 +77,8 @@ export const contractAddresses = {
     100: '0x6e02D718C08b9EBd971B4788fF30308cC997E2Ef',
     56: '0x34761221dBC6bE70A4f88E2077765dB8F14A1007',
     250: '0x27B08ADcA39a684961e2cD289f0bEA893eDF0772',
-    1337: '0xe70AbBc99D8eB32124BF022196c493DB4fBc50FD'
+    1337: '0xe70AbBc99D8eB32124BF022196c493DB4fBc50FD',
+    1313161554: '0x793F3cF97c57798732f3AA36416CaC742223aB20',
   },
   vaultHandlerAbi: HandlerABI,
   emblemVault: {
@@ -73,7 +89,8 @@ export const contractAddresses = {
     100: '0x9058d1A5Fdba852403D5b080abAF31D1379EF653',
     56: '0x9523022eb4B465Db3e3037d83e4910E3cFF1bD49',
     250: '0x5434ba8b4A37755Cb3867C9fde39342C0D382857',
-    1337: '0xe70AbBc99D8eB32124BF022196c493DB4fBc50FD'
+    1337: '0xe70AbBc99D8eB32124BF022196c493DB4fBc50FD',
+    1313161554: '0x14509fCc07892E80eD6BE4cf171407d206A92164',
   },
   emblemAbi: EmblemABI,
   coval: {
@@ -84,7 +101,8 @@ export const contractAddresses = {
     100: '0x8b8407c6184f1f0Fd1082e83d6A3b8349cAcEd12',
     56: '0xd15CeE1DEaFBad6C0B3Fd7489677Cc102B141464',
     250: '0x8b8407c6184f1f0fd1082e83d6a3b8349caced12',
-    1337: '0xe70AbBc99D8eB32124BF022196c493DB4fBc50FD'
+    1337: '0xe70AbBc99D8eB32124BF022196c493DB4fBc50FD',
+    1313161554: '0x584039B84b1d36653DAb76DC1246D07b08218706'
   },
   covalAbi: CovalABI,
   nftrade: {
@@ -92,12 +110,14 @@ export const contractAddresses = {
   },
   nftradeAbi: NftradeABI,
   claimed: {
-    1: '0xFd2E9C4F9820F475aE9d3C26B612e1be69FEC8F9'
+    1: '0xFd2E9C4F9820F475aE9d3C26B612e1be69FEC8F9',
+    1313161554: '0xE1213fcb2a085B6d26C52f9D8fEc54f0758Fd7b1',
   },
   claimedAbi: ClaimedABI,
   vaultHandlerV8: {
     4: "0xF2eCdFa77C3c8Cabf913529D95081DCB2DE314ec",
-    1337: "0xfc3A4BBfD522668342bCaDf273a94A46DCe25439"
+    1337: "0xfc3A4BBfD522668342bCaDf273a94A46DCe25439",
+    1313161554: '0xeDb2AC2BfD8d026E4d6C75a04548423936512135',
   },
   vaultHandlerV8Abi: VaultHandlerV8,
   clonableFactoryAbi: ClonableFactory,
@@ -109,7 +129,7 @@ export const contractAddresses = {
 
 export const BURN_ADDRESS = '0x5D152dd902CC9198B97E5b6Cf5fc23a8e4330180'
 export const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000"
-export const EMBLEM_API = API_OVERLOAD? API_OVERLOAD :'https://api.emblemvault.io' // 'http://localhost:3001' //
+export const EMBLEM_API = API_OVERLOAD? API_OVERLOAD :'https://api2.emblemvault.io' // 'http://localhost:3001' //
 
 export enum QueryParameters {
   INPUT = 'input',

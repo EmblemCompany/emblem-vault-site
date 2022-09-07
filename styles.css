@@ -126,3 +126,7 @@ a:hover, a:visited, a:link, a:active
   background: #2D3748 !important;
   width: 400px !important;
 }
+
+button:focus {
+  outline: none;
+}
