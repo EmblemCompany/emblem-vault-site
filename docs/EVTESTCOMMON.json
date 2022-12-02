@@ -6,8 +6,8 @@
     "asset_supply":"300",
     "asset_divisible":true,
     "asset_locked":true,
-    "image":"https://emblem.finance/EMBLEMCOMMON.png",
-    "image_large":"https://emblem.finance/EMBLEMCOMMON.png",
+    "image":"https://emblem.finance/EVTESTCOMMON-sm.png",
+    "image_large":"https://emblem.finance/EVTESTCOMMON.gif",
     "image_title":"EVTESTCOMMON",
     "website_social_twitter": "https://twitter.com/emblemvault"
 }
