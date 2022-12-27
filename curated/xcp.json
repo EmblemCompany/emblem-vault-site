@@ -1749,20 +1749,20 @@
     ],
     "Emblem Test": [
       {
-        "name":"EMBLEMCOMMON",
-        "image": "https://emblem.finance/EMBLEMCOMMON.png"
+        "name":"EVTESTCOMMON",
+        "image": "https://emblem.finance/EVTESTCOMMON.gif"
       },
       {
-        "name":"EMBLEMEPIC",
-        "image": "https://emblem.finance/EMBLEMEPIC.png"
+        "name":"EVTESTEPIC",
+        "image": "https://emblem.finance/EVTESTEPIC.gif"
       },
       {
-        "name":"EMBLEMLEGEND",
-        "image": "https://emblem.finance/EMBLEMLEGEND.png"
+        "name":"EVTESTLEGEND",
+        "image": "https://emblem.finance/EVTESTLEGEND.jpg"
       },
       {
-        "name":"EMBLEMRARE",
-        "image": "https://emblem.finance/EMBLEMRARE.png"
+        "name":"EVTESTRARE",
+        "image": "https://emblem.finance/EVTESTRARE.jpg"
       }
     ],
     "Force of Will": [

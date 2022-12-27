@@ -21,7 +21,6 @@ import { useWeb3React } from '@web3-react/core'
 import { useEffect, useState } from 'react'
 import { EMBLEM_API, curatedContracts, curatedAssets } from '../constants'
 
-
 let tokenId = null
 
 export default function CreateCurated(props: any) {

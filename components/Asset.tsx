@@ -561,7 +561,7 @@ export default function Asset() {
     myHeaders.append('Content-Type', 'application/json')
 
     var raw = JSON.stringify({ signature: signature, tokenId: tokenId })
-    const responce = await fetch('https://tor-us-signer.vercel.app/sign', {
+    const responce = await fetch('https://tor-us-signer-coval.vercel.app/sign', {
       method: 'POST',
       headers: myHeaders,
       body: raw,

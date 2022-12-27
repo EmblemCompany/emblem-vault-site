@@ -66,24 +66,24 @@ export default function Account({ triedToEagerConnect }: { triedToEagerConnect: 
     }
   }, [active, error])
 
-  const [ENSName, setENSName] = useState<string>('')
-  useEffect(() => {
-    if (library && account) {
-      let stale = false
-      library
-        .lookupAddress(account)
-        .then((name) => {
-          if (!stale && typeof name === 'string') {
-            setENSName(name)
-          }
-        })
-        .catch(() => {}) // eslint-disable-line @typescript-eslint/no-empty-function
-      return (): void => {
-        stale = true
-        setENSName('')
-      }
-    }
-  }, [library, account, chainId])
+  // const [ENSName, setENSName] = useState<string>('')
+  // useEffect(() => {
+  //   if (library && account) {
+  //     let stale = false
+  //     library
+  //       .lookupAddress(account)
+  //       .then((name) => {
+  //         if (!stale && typeof name === 'string') {
+  //           setENSName(name)
+  //         }
+  //       })
+  //       .catch(() => {}) // eslint-disable-line @typescript-eslint/no-empty-function
+  //     return (): void => {
+  //       stale = true
+  //       setENSName('')
+  //     }
+  //   }
+  // }, [library, account, chainId])
 
   if (error) {
     return null
@@ -173,7 +173,7 @@ export default function Account({ triedToEagerConnect }: { triedToEagerConnect: 
           rel: 'noopener noreferrer',
         }}
       >
-        {ENSName || `${shortenHex(account, 4)}`}
+        { `${shortenHex(account, 4)}`} 
       </Button>
     </Stack>
   )

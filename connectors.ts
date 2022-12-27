@@ -10,7 +10,7 @@ export function getNetwork(defaultChainId = 1): NetworkConnector {
       (urls, chainId) =>
         Object.assign(urls, {
           [chainId]:
-            chainId === 1 || chainId === 4 ? `https://${INFURA_PREFIXES[chainId]}.infura.io/v3/${process.env.INFURA_PROJECT_ID}`: 
+            chainId === 1 || chainId === 5 ? `https://${INFURA_PREFIXES[chainId]}.infura.io/v3/${process.env.INFURA_PROJECT_ID}`: 
               chainId === 80001 ? `https://rpc-mumbai.matic.today`: 
               chainId === 137 ? `https://rpc-mainnet.matic.today` : 
               chainId === 100 ? `https://rpc.xdaichain.com/` : 

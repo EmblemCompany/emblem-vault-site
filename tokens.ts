@@ -16,7 +16,15 @@ export const Coval = new Token(
 )
 export const CovalTest = new Token(
   ChainId.RINKEBY,
-  '0x44c1a9d7d1f932b4c2811a70edffdd6ae2eb60e6',
+  '0x44c1a9d7D1F932B4c2811A70eDfFDD6Ae2EB60e6',
+  8,
+  'Coval',
+  'Circuits of Value'
+)
+
+export const CovalGÖRLI = new Token(
+  ChainId.RINKEBY,
+  '0x1be2Ec95560A116E588614030e0ae7A8fE92BBf0',
   8,
   'Coval',
   'Circuits of Value'
@@ -56,7 +64,7 @@ export const CovalBSC = new Token(
 
 export const CovalFantom = new Token(
   ChainId.RINKEBY,
-  '0x8b8407c6184f1f0fd1082e83d6a3b8349caced12',
+  '0x8b8407c6184f1f0Fd1082e83d6A3b8349cAcEd12',
   8,
   'Coval',
   'Circuits of Value'
@@ -83,7 +91,8 @@ export const DEFAULT_TOKENS = [
   CovalxDai,
   CovalBSC,
   CovalFantom,
-  // new Token(ChainId.RINKEBY, '0x44c1a9d7d1f932b4c2811a70edffdd6ae2eb60e6', 8, 'Coval', 'Circuits of Value'),
+  CovalGÖRLI,
+  // new Token(ChainId.RINKEBY, '0x44c1a9d7D1F932B4c2811A70eDfFDD6Ae2EB60e6', 8, 'Coval', 'Circuits of Value'),
   new Token(ChainId.MAINNET, '0xdAC17F958D2ee523a2206206994597C13D831ec7', 6, 'USDT', 'Tether USD'),
   // stablecoin derivatives
   new Token(ChainId.MAINNET, '0x5d3a536E4D6DbD6114cc1Ead35777bAB948E3643', 8, 'cDAI', 'Compound Dai'),

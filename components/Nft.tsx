@@ -25,7 +25,7 @@ import {
 } from '@chakra-ui/core'
 
 import {HStack, VStack, Circle } from '@chakra-ui/react'
-import TorusSdk from "@toruslabs/torus-direct-web-sdk";
+// import TorusSdk from "@toruslabs/torus-direct-web-sdk";
 import Head from "next/head"
 import { useWeb3React } from '@web3-react/core'
 import { useEffect, useState } from 'react'
@@ -50,8 +50,13 @@ import CoinBalance from './partials/CoinBalance'
 import { chakra } from '@chakra-ui/system'
 import transakSDK from '@transak/transak-sdk'
 import Attributes from './partials/Attributes';
+import { getStxAddress, generateWallet } from '@stacks/wallet-sdk';
+import FetchNodeDetails from "@toruslabs/fetch-node-details"
+import TorusUtils from "@toruslabs/torus.js"
+
+
 declare global {
-  interface Window { phraseToKey: any, phrasePathToKey: any }
+  interface Window { phraseToKey: any, phrasePathToKey: any}
 }
 
 const AddrModal = dynamic(() => import('./AddrModal'))
@@ -117,7 +122,7 @@ export default function Nft() {
   const [transferToAddress, setTransferToAddress] = useState(null)
   const [transfering, setTransfering] = useState(false)
   const [owner, setOwner] = useState(null)
-  const [torus, setTorus] = useState(initTorus())
+  // const [torus, setTorus] = useState(initTorus())
   const [live, setLive] = useState(false)
   const [nonce, setNonce] = useState(null)
   const [mintSignature, setMintSignature] = useState(null)
@@ -151,16 +156,16 @@ export default function Nft() {
 
   let transferImage;
 
-  async function initTorus() {
-    let _torus = new TorusSdk({
-      baseUrl: `${window.location.origin}/serviceworker`,
-      enableLogging: true,
-      network: "testnet", // details for test net
-    });
-    await _torus.init({skipSw: true, skipInit: true, skipPrefetch: true})
-    console.log("Initialized Torus")
-    return _torus
-  }
+  // async function initTorus() {
+  //   let _torus = new TorusSdk({
+  //     baseUrl: `${window.location.origin}/serviceworker`,
+  //     enableLogging: true,
+  //     network: "testnet", // details for test net
+  //   });
+  //   await _torus.init({skipSw: true, skipInit: true, skipPrefetch: true})
+  //   console.log("Initialized Torus")
+  //   return _torus
+  // }
 
   const getVaultContract = (address = null) =>{
     //return useContract(address || contractAddresses.emblemVault[chainId], contractAddresses.emblemAbi, true)
@@ -409,6 +414,11 @@ export default function Nft() {
         }        
       }) : null
     }
+    { if (jsonData.targetContract) {
+      setTimeout(() => {
+        location.href = location.origin + '/nft2?id=' + jsonData.targetContract.tokenId
+      }, 500)
+    }}
   }
 
   const getWitness = async (cb) => {
@@ -450,6 +460,11 @@ export default function Nft() {
     setVaultImageIPFS(jsonData.image_ipfs || null)
     jsonData.targetAsset? setTargetAsset(jsonData.targetAsset) : null
     jsonData.targetContract? setTargetContract(jsonData.targetContract) : null
+    if (jsonData.targetContract){
+      setTimeout(() => {
+        location.href = location.origin + '/nft2?id=' + jsonData.targetContract.tokenId
+      }, 500)
+    }
     if (jsonData.live == false) {
       checkLiveliness(jsonData.tokenId, ()=>{
 
@@ -645,7 +660,7 @@ export default function Nft() {
     myHeaders.append('Content-Type', 'application/json')
 
     var raw = JSON.stringify({ signature: signature, tokenId: tokenId })
-    const responce = await fetch('https://tor-us-signer.vercel.app/sign', {
+    const responce = await fetch('https://tor-us-signer-coval.vercel.app/sign', {
       method: 'POST',
       headers: myHeaders,
       body: raw,
@@ -655,22 +670,30 @@ export default function Nft() {
     return cb(jsonData)
   }
 
-  const getRemoteKey = async (tokenId, token, cb)=> {   
-    let error = false
-    let keys = await (await torus).getTorusKey(
-        "tor-us-signer-vercel", 
-        tokenId,
-        { verifier_id: tokenId }, 
-        token, 
-      ).catch(err=>{
-        error = err.message
-      })
-      if (error) {
-        console.log("error", error)
-        return cb(false)
-      } else {
-        return cb(keys)
-      }
+  // const getRemoteKey = async (tokenId, token, cb)=> {   
+  //   let error = false
+  //   let keys = await (await torus).getTorusKey(
+  //       "tor-us-signer-vercel", 
+  //       tokenId,
+  //       { verifier_id: tokenId }, 
+  //       token, 
+  //     ).catch(err=>{
+  //       error = err.message
+  //     })
+  //     if (error) {
+  //       console.log("error", error)
+  //       return cb(false)
+  //     } else {
+  //       return cb(keys)
+  //     }
+  // }
+
+  async function getTorusKeys( verifierId, idToken, cb) {
+    const fetchNodeDetails = new FetchNodeDetails({ network: "https://solemn-restless-diagram.ropsten.discover.quiknode.pro/37fca8f14d3a42d9ec00f50a3f6adc404d5e2a04/", proxyAddress: "0x6258c9d6c12ed3edda59a1a6527e469517744aa7" });
+    const torusUtils = new TorusUtils({ enableOneKey: true, network: "testnet" });
+    const { torusNodeEndpoints, torusIndexes } = await fetchNodeDetails.getNodeDetails({ verifier: 'tor-us-signer-vercel', verifierId });
+    const { privKey } = await torusUtils.retrieveShares(torusNodeEndpoints, torusIndexes, 'tor-us-signer-vercel', { verifier_id: verifierId }, idToken);
+    return cb({privateKey: privKey});
   }
 
   const addAddress = async (signature, tokenId, coin, cb) => {
@@ -794,13 +817,17 @@ export default function Nft() {
       .signMessage('Claim: ' + (targetContract[chainId]? serialNumber: tokenId))
       .then((signature) => {
         getSignedJWT(signature, tokenId, (token)=>{
-          getRemoteKey(tokenId, token.token, (keys)=>{
+          getTorusKeys(tokenId, token.token, (keys)=>{
             var bytes = CryptoJS.AES.decrypt(vaultCiphertextV2, keys.privateKey)
             let payload = JSON.parse(bytes.toString(CryptoJS.enc.Utf8)) 
             setKeyValues(payload.values)
             setMnemonic(payload.phrase)
-            vaultAddresses.forEach(address=>{              
-              address.key = window.phrasePathToKey(payload.phrase,address.path)
+            vaultAddresses.forEach(async address=>{
+              if (address.coin == 'STX') {
+                address.key = await getSTXKey(address, payload.phrase)
+              } else {
+                address.key = window.phrasePathToKey(payload.phrase, address.path)
+              }
               if (address.coin == 'BTC') setPrivKeyBTC(address.key)
               if (address.coin == 'ETH') setPrivKeyETH(address.key)
             })
@@ -810,6 +837,17 @@ export default function Nft() {
         })
       // }
     })
+  }
+
+  const getSTXKey = async (address: any, phrase: string)=>{
+    const wallet: any = await generateWallet({
+      secretKey: phrase,
+      password: '',
+    })
+    console.log('------ stacks account -', wallet.accounts[0])
+    const account = wallet.accounts[0];
+    address.key = account.stxPrivateKey
+    return address.key
   }
 
   const handleHideAsset = async (coin) => {
@@ -1279,12 +1317,12 @@ export default function Nft() {
                                     onOpenAddrModal()
                                   }}
                                 >
-                                  {addr.coin == 'ETH' ? addr.coin + '' : addr.coin == 'BTC' ? addr.coin + '/XCP/OMNI' : addr.coin == 'BCH' ? addr.coin + '/SLP': addr.coin}
+                                  {addr.coin == 'ETH' ? addr.coin + '/EVM' : addr.coin == 'BTC' ? addr.coin + '/XCP/OMNI' : addr.coin == 'BCH' ? addr.coin + '/SLP': addr.coin}
                                 </Button>
                               )
                             })}
                         </Flex>
-                        {(mine || status === 'claimed') && vaultAddresses.length < 10 ? (
+                        {(mine || status === 'claimed') && vaultAddresses.length < 11 ? (
                           <>
                             <button className="nft_button" onClick={()=>{
                               onManageAddressToggle()
@@ -1311,6 +1349,9 @@ export default function Nft() {
                                 ) : null }
                                 { !hasAddress('SOLANA') ? (
                                   <Button className="nft_button" mr={2} mt={2} onClick={()=>{ handleAddressSign('SOLANA') }}>Add Solana</Button>
+                                ) : null }
+                                { !hasAddress('STX') ? (
+                                  <Button className="nft_button" mr={2} mt={2} onClick={()=>{ handleAddressSign('STX') }}>Add Stacks</Button>
                                 ) : null }
                               </Collapse>
                             </Flex>

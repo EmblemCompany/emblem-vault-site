@@ -11,12 +11,16 @@ import Embed from './Embed'
 export default function MyVaults() {
   const { query } = useRouter()
   const [pagePosition, setPagePosition] = useState(Number(query.start) || 0)
+  const [curatedType, setCuratedType] = useState('live')
   const { account, chainId } = useWeb3React()
   const [vaults, setVaults] = useState([])
+  const [liveVaults, setLiveVaults] = useState([])
+  const [unMintedVaults, setUnMintedVaults] = useState([])
+  const [claimedVaults, setClaimedVaults] = useState([])
   const [state, setState] = useState({ loaded: false })
   const [loadingApi, setLoadingApi] = useState(false)
   const [address, setAddress] = useState(query.address)
-  const [vaultType, setVaultType] = useState(query.type || "unclaimed")
+  const [vaultType, setVaultType] = useState(query.type || "curated")
   const [experimental, setExperimental] = useState(query.experimental)
   const { colorMode } = useColorMode()
   const [shouldFetchData, setShouldFetchData] = useState(false)
@@ -36,12 +40,21 @@ export default function MyVaults() {
           vaultType: vaultType.toString()
         },
       })
-      let jsonData = await response.json()    
-      setVaults(vaults.concat(jsonData))
-      setState({ loaded: true })
-      setLoadingApi(false)
-      console.log("Records received", jsonData.length)
-      if (jsonData.length < PAGE_SIZE) {
+      let jsonData = await response.json()
+      if (vaultType.toString() != 'curated') {
+        setVaults(vaults.concat(jsonData))
+        setState({ loaded: true })
+        setLoadingApi(false)
+        console.log("Records received", jsonData.length)
+      } else if (vaultType.toString() == 'curated'){
+        setLiveVaults(jsonData.live)
+        setUnMintedVaults(jsonData.unMinted)
+        setClaimedVaults(jsonData.claimed)
+        setVaults(jsonData.live)
+        setState({ loaded: true })
+        setLoadingApi(false)
+        setHasMore(false)
+      } else if (jsonData.length < PAGE_SIZE) {
         setHasMore(false)
       }
     } catch (error) {}
@@ -53,41 +66,41 @@ export default function MyVaults() {
     setShouldFetchData(true)
   }
 
-  const more = ()=>{
-    if (location.href.includes('start')) {
-      location.href = location.href.replace('start='+pagePosition, 'start='+(pagePosition + PAGE_SIZE))
-    } else {
-      location.href = location.href + '?start='+(pagePosition + PAGE_SIZE)
-    }
-    // setPagePosition(pagePosition + PAGE_SIZE)
-    // getVaults()
-  }
+  // const more = ()=>{
+  //   if (location.href.includes('start')) {
+  //     location.href = location.href.replace('start='+pagePosition, 'start='+(pagePosition + PAGE_SIZE))
+  //   } else {
+  //     location.href = location.href + '?start='+(pagePosition + PAGE_SIZE)
+  //   }
+  //   // setPagePosition(pagePosition + PAGE_SIZE)
+  //   // getVaults()
+  // }
 
-  const less = ()=>{
-    if (pagePosition - PAGE_SIZE < 0) {
-      setPagePosition(PAGE_SIZE)
-    }
-    if (location.href.includes('start')) {
-      location.href = location.href.replace('start='+pagePosition, 'start='+(pagePosition - PAGE_SIZE))
-    } else {
-      location.href = location.href + '?start='+(pagePosition - PAGE_SIZE)
-    }
-    // setPagePosition(pagePosition + 3)
-    // getVaults()
-  }
+  // const less = ()=>{
+  //   if (pagePosition - PAGE_SIZE < 0) {
+  //     setPagePosition(PAGE_SIZE)
+  //   }
+  //   if (location.href.includes('start')) {
+  //     location.href = location.href.replace('start='+pagePosition, 'start='+(pagePosition - PAGE_SIZE))
+  //   } else {
+  //     location.href = location.href + '?start='+(pagePosition - PAGE_SIZE)
+  //   }
+  //   // setPagePosition(pagePosition + 3)
+  //   // getVaults()
+  // }
 
-  const loadCache = () => {
-    let vaults = JSON.parse(localStorage.getItem((address ? address : account) + '_' + chainId + '_newest')) // Load vaults from storage before updating from server!
-    if (vaults) {
-      setState({ loaded: true })
-      setVaults(vaults)
-      setLoadingApi(true)
-    }
-  }
+  // const loadCache = () => {
+  //   let vaults = JSON.parse(localStorage.getItem((address ? address : account) + '_' + chainId + '_newest')) // Load vaults from storage before updating from server!
+  //   if (vaults) {
+  //     setState({ loaded: true })
+  //     setVaults(vaults)
+  //     setLoadingApi(true)
+  //   }
+  // }
 
-  const saveCache = (vaults) => {
-    localStorage.setItem((address ? address : account) + '_' + chainId + '_newest', JSON.stringify(vaults)) // Save new state for later
-  }
+  // const saveCache = (vaults) => {
+  //   localStorage.setItem((address ? address : account) + '_' + chainId + '_newest', JSON.stringify(vaults)) // Save new state for later
+  // }
 
   const [acct, setAcct] = useState('')
   useEffect(() => {
@@ -138,11 +151,11 @@ export default function MyVaults() {
   return (
     <>
     <Stack pl="10" spacing={0} direction="row">
-      <Button isDisabled={showOrHideNavLink('unclaimed')} m={2} variant="ghost" onClick={()=>{handleNewNavigationClick('unclaimed')}}>
-          Unclaimed
-      </Button>
       <Button isDisabled={showOrHideNavLink('curated')} m={2} variant="ghost" onClick={()=>{handleNewNavigationClick('curated')}}>
           Curated
+      </Button>
+      <Button isDisabled={showOrHideNavLink('unclaimed')} m={2} variant="ghost" onClick={()=>{handleNewNavigationClick('unclaimed')}}>
+          Unclaimed
       </Button>
       <Button isDisabled={showOrHideNavLink('claimed')} m={2} variant="ghost" onClick={()=>{handleNewNavigationClick('claimed')}}>
           Claimed
@@ -150,13 +163,33 @@ export default function MyVaults() {
       <Button isDisabled={showOrHideNavLink('unminted')} m={2} variant="ghost" onClick={()=>{handleNewNavigationClick('unminted')}}>
           Not Minted
       </Button>
-      <Button isDisabled={showOrHideNavLink('created')} m={2} variant="ghost" onClick={()=>{handleNewNavigationClick('created')}}>
+      {/* <Button isDisabled={showOrHideNavLink('created')} m={2} variant="ghost" onClick={()=>{handleNewNavigationClick('created')}}>
           Created by me
       </Button>
       <Button isDisabled={false} m={2} variant="ghost" onClick={()=>{handleNftsNavigationClick()}}>
           Other NFT's
-      </Button>
+      </Button> */}
     </Stack>
+    {showOrHideNavLink('curated')? (
+      <Stack pl="8.7rem" spacing={0} direction="row">
+        {liveVaults.length? (
+          <Button isDisabled={curatedType=='live'} m={2} variant="ghost" onClick={()=>{setVaults(liveVaults); setCuratedType('live')}}>
+            Unclaimed (curated) {liveVaults.length}
+          </Button>
+        ): null}
+        {claimedVaults.length? (
+          <Button isDisabled={curatedType=='claimed'} m={2} variant="ghost" onClick={()=>{setVaults(claimedVaults); setCuratedType('claimed')}}>
+            Claimed (curated) {claimedVaults.length}
+          </Button>
+        ): null}
+        {unMintedVaults.length? (
+          <Button isDisabled={curatedType=='unminted'} m={2} variant="ghost" onClick={()=>{setVaults(unMintedVaults); setCuratedType('unminted')}}>
+            Not Minted (curated) {unMintedVaults.length}
+          </Button>
+        ): null}
+        
+      </Stack>
+    ): null}
     <Loader loaded={state.loaded}>
       {loadingApi ? <Refreshing /> : ''}
         
@@ -165,7 +198,7 @@ export default function MyVaults() {
           scrollableTarget="shannon-container"
           // height={200}
           dataLength={vaults.length} //This is important field to render the next data
-          next={fetchData}
+          next={!showOrHideNavLink('curated')? fetchData: ()=>{}}
           hasMore={hasMore}
           loader={<Refreshing />}
           endMessage={
@@ -179,7 +212,7 @@ export default function MyVaults() {
           vaults.map((vault, index) => {
             let pieces = location.pathname.split('/')
             pieces.pop()
-            let url = location.origin + pieces.join('/') + '/nft?id=' + vault.tokenId + '&cc=t'
+            let url = location.origin + pieces.join('/') + '/nft'+(vaultType == 'curated'? '2': '')+'?id=' + vault.tokenId + '&cc=t'
             const flexSettings = {
               flex: '1',
               minW: '200px',

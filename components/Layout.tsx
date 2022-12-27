@@ -14,7 +14,7 @@ import TokenBalance from './TokenBalance'
 import { WETH, ChainId, Token } from '@uniswap/sdk'
 import WalletConnect from './WalletConnect'
 import { QueryParameters } from '../constants'
-import { Coval, CovalTest, CovalTestMatic, CovalMatic, CovalxDai, CovalBSC, CovalFantom, DEFAULT_TOKENS, CovalAurora } from '../tokens'
+import { Coval, CovalTest, CovalTestMatic, CovalMatic, CovalxDai, CovalBSC, CovalFantom, DEFAULT_TOKENS, CovalAurora, CovalGÖRLI } from '../tokens'
 import Head from 'next/head'
 import transakSDK from '@transak/transak-sdk'
 import { useRouter } from 'next/router'
@@ -146,6 +146,9 @@ export default function Layout({ children }: { children: ReactNode}): JSX.Elemen
               <Button display={showOrHideNavLink('create')} m={2} variant="ghost" onClick={()=>{handleNewNavigationClick('create')}}>
                 Create
               </Button>
+              <Button display={showOrHideNavLink('createcurated')} m={2} variant="ghost" onClick={()=>{handleNewNavigationClick('createcurated')}}>
+                Create Curated
+              </Button>
               <Button display={showOrHideNavLink('vaults')} m={2} variant="ghost" onClick={()=>{handleNewNavigationClick('vaults')}}>
                 My Vaults
               </Button>
@@ -184,6 +187,7 @@ export default function Layout({ children }: { children: ReactNode}): JSX.Elemen
               // [DEFAULT_TOKENS.filter((tokenrrr) => tokenrrr.chainId == chainId)[0], firstToken, secondToken]
               [
                 chainId == 1 ? Coval : 
+                chainId == 5 ? CovalGÖRLI:
                 chainId == 80001 ? CovalTestMatic : 
                 chainId == 137 ? CovalMatic : 
                 chainId == 100? CovalxDai : 
@@ -218,19 +222,19 @@ export default function Layout({ children }: { children: ReactNode}): JSX.Elemen
           <Flex minHeight="1.5rem">
             {typeof chainId === 'number' /*&& chainId !== 1*/ ? (
               <LightMode>
-                <Link href="/swap">
+                {/* <Link href="/swap"> */}
                   <Badge
                     variant="solid"
                     variantColor={
                       chainId == 137 || chainId == 1 ? 'blue' : 
-                      chainId == Number(56) ? 'orange':
+                      chainId == Number(56) || Number(5) ? 'orange':
                       'orange'/*isTestnet ? 'blue' : undefined*/}
                     fontSize="1rem"
                     style={{ borderTopLeftRadius: 0, borderBottomRightRadius: 0, borderBottomLeftRadius: 0 }} >
-                    On {CHAIN_ID_NAMES[chainId].toLowerCase()} (click to swap networks)
+                    On {CHAIN_ID_NAMES[chainId].toLowerCase()} 
                     {/* (Swap to {chainId == 1 ? 'Matic' : 'Ethereum'}) */}
                   </Badge>
-                </Link>
+                {/* </Link> */}
               </LightMode>
             ):null}
           </Flex>

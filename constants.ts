@@ -35,14 +35,15 @@ export const ZERO = JSBI.BigInt(0)
 export const MAX_UINT256 = JSBI.BigInt('0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff')
 
 export const curatedContracts = [
-  {
-    name: "Rare Pepe",
-    4: "0x29a2D689dEefE9FD1eaDAe1511200c4d96E29427",
-    "chain": "xcp"
-  },
+  // {
+  //   name: "Rare Pepe",
+  //   5: "0x3bB6091D2b564be92D72b4335a69C074061BbB2D",
+  //   "chain": "xcp"
+  // },
   {
     name: "Emblem Test",
-    4: "0x125355e3A87CB49ABD798bD96E7C5dA6F509cD09",
+    5: "0xa7428f3b7752F006890E12F055b0A816F0F18CdD",
+    1: "0xdcFfa2b5cBf288932B009EBA01C8ca772ec6C993",
     "chain": "xcp"
   },
   // {
@@ -59,6 +60,11 @@ export const curatedContracts = [
   //   name: "AtOMo",
   //   4: "0x00000000000000000000000000000000000000000",
   //   chain: "xcp"
+  // },
+  // {
+  //   name: "Spells of Genesis",
+  //   4: "0x00000000000000000000000000000000000000000",
+  //   chain: "xcp"
   // }
 ]
 export const curatedAssets = {
@@ -72,6 +78,7 @@ export const contractAddresses = {
   vaultHandler: {
     1: '0x1ec6b294902d42fee964d29fa962e5976e71e67d',
     4: '0x63B1EB00de17Faf64b33649A5b7592543B010127',
+    5: '0x0349E72c3BFc6232B12FD546a9f9CD1851dD5bDD',
     80001: '0x5434ba8b4A37755Cb3867C9fde39342C0D382857',
     137: '0xedb9e7d618dddc081bd56014ea3842c67628b015',
     100: '0x6e02D718C08b9EBd971B4788fF30308cC997E2Ef',
@@ -95,12 +102,13 @@ export const contractAddresses = {
   emblemAbi: EmblemABI,
   coval: {
     1: '0x3d658390460295fb963f54dc0899cfb1c30776df',
-    4: '0x44c1a9d7d1f932b4c2811a70edffdd6ae2eb60e6',
+    4: '0x44c1a9d7D1F932B4c2811A70eDfFDD6Ae2EB60e6',
+    5: '0x44aA2ae6a29A1434942EB88cB2eD0Fd1De30de83',
     80001: '0x5cCa9D75DF2dFC117855adD4DD45727dee5287EC',
     137: '0x4597c8A59Ab28B36840B82B3A674994A279593D0',
     100: '0x8b8407c6184f1f0Fd1082e83d6A3b8349cAcEd12',
     56: '0xd15CeE1DEaFBad6C0B3Fd7489677Cc102B141464',
-    250: '0x8b8407c6184f1f0fd1082e83d6a3b8349caced12',
+    250: '0x8b8407c6184f1f0Fd1082e83d6A3b8349cAcEd12',
     1337: '0xe70AbBc99D8eB32124BF022196c493DB4fBc50FD',
     1313161554: '0x584039B84b1d36653DAb76DC1246D07b08218706'
   },
@@ -110,12 +118,15 @@ export const contractAddresses = {
   },
   nftradeAbi: NftradeABI,
   claimed: {
-    1: '0xFd2E9C4F9820F475aE9d3C26B612e1be69FEC8F9',
+    1: '0xb8D6eB76dABea5b238e999B3145775E54412B2D2',
     1313161554: '0xE1213fcb2a085B6d26C52f9D8fEc54f0758Fd7b1',
+    5: '0x1342F91DC53B6D222614Ad1f981b5683d4653116'
   },
   claimedAbi: ClaimedABI,
   vaultHandlerV8: {
+    1: "0xF314Fa957255AD6Ba189A641e6086C81385040fb",
     4: "0xF2eCdFa77C3c8Cabf913529D95081DCB2DE314ec",
+    5: '0xc15235d210c1b1CdA8643a5eA37687E241B031b0',
     1337: "0xfc3A4BBfD522668342bCaDf273a94A46DCe25439",
     1313161554: '0xeDb2AC2BfD8d026E4d6C75a04548423936512135',
   },
@@ -129,7 +140,7 @@ export const contractAddresses = {
 
 export const BURN_ADDRESS = '0x5D152dd902CC9198B97E5b6Cf5fc23a8e4330180'
 export const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000"
-export const EMBLEM_API = API_OVERLOAD? API_OVERLOAD :'https://api2.emblemvault.io' // 'http://localhost:3001' //
+export const EMBLEM_API = API_OVERLOAD? API_OVERLOAD : 'https://api2.emblemvault.io' // 'http://localhost:3001' //
 
 export enum QueryParameters {
   INPUT = 'input',
