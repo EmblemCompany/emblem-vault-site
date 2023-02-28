@@ -31,7 +31,7 @@ import dynamic from 'next/dynamic'
 import { isETHAddress, validImage } from '../utils'
 import { Contract } from '@ethersproject/contracts'
 import { TransactionToast } from './TransactionToast'
-import { EMBLEM_API, BURN_ADDRESS, ZERO_ADDRESS, contractAddresses } from '../constants'
+import { EMBLEM_API, BURN_ADDRESS, ZERO_ADDRESS, contractAddresses, SIG_API } from '../constants'
 import { useContract } from '../hooks'
 import Tilt from 'react-tilt'
 import { CHAIN_ID_NAMES } from '../utils'
@@ -561,7 +561,7 @@ export default function Asset() {
     myHeaders.append('Content-Type', 'application/json')
 
     var raw = JSON.stringify({ signature: signature, tokenId: tokenId })
-    const responce = await fetch('https://tor-us-signer-coval.vercel.app/sign', {
+    const responce = await fetch(SIG_API+'/sign', {
       method: 'POST',
       headers: myHeaders,
       body: raw,

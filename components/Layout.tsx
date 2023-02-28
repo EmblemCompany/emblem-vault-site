@@ -297,7 +297,7 @@ export default function Layout({ children }: { children: ReactNode}): JSX.Elemen
             //   target: '_blank',
             //   rel: 'noopener noreferrer',
             // }}
-            onClick={()=>{initializeTransak(account, 'COVAL')}}
+            onClick={()=>{location.href = "https://app.uniswap.org/#/swap?outputCurrency=0x3d658390460295fb963f54dc0899cfb1c30776df"}}
           >
             Buy $Coval
           </Button>

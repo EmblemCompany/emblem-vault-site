@@ -70,6 +70,7 @@
     "react-infinite-scroll-component": "^6.1.0",
     "react-loader": "^2.4.7",
     "react-markdown": "^5.0.2",
+    "react-papaparse": "^4.1.0",
     "react-router-dom": "^5.2.0",
     "react-select": "^5.2.1",
     "react-tilt": "^0.1.4",

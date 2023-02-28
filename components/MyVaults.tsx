@@ -20,7 +20,7 @@ export default function MyVaults() {
   const [state, setState] = useState({ loaded: false })
   const [loadingApi, setLoadingApi] = useState(false)
   const [address, setAddress] = useState(query.address)
-  const [vaultType, setVaultType] = useState(query.type || "curated")
+  const [vaultType, setVaultType] = useState(query.type || "unclaimed")
   const [experimental, setExperimental] = useState(query.experimental)
   const { colorMode } = useColorMode()
   const [shouldFetchData, setShouldFetchData] = useState(false)
@@ -155,10 +155,10 @@ export default function MyVaults() {
           Curated
       </Button>
       <Button isDisabled={showOrHideNavLink('unclaimed')} m={2} variant="ghost" onClick={()=>{handleNewNavigationClick('unclaimed')}}>
-          Unclaimed
+          Locked
       </Button>
       <Button isDisabled={showOrHideNavLink('claimed')} m={2} variant="ghost" onClick={()=>{handleNewNavigationClick('claimed')}}>
-          Claimed
+          Unlocked
       </Button>
       <Button isDisabled={showOrHideNavLink('unminted')} m={2} variant="ghost" onClick={()=>{handleNewNavigationClick('unminted')}}>
           Not Minted
@@ -241,7 +241,7 @@ export default function MyVaults() {
                     <Embed className="d-block w-100 NFT-newest-image" url={vault.image}/>
                   </Stack>
                   <Stack align="center" mt={3}>
-                    {vault.status == 'claimed' ? <Text color="green.500">CLAIMED</Text> : null}
+                    {vault.status == 'claimed' ? <Text color="green.500">UNLOCKED</Text> : null}
                   </Stack>
                 </Box>
               </Link>

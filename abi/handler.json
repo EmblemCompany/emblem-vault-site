@@ -99,24 +99,6 @@
       "inputs": [
         {
           "internalType": "uint256",
-          "name": "_tokenId",
-          "type": "uint256"
-        },
-        {
-          "internalType": "uint256",
-          "name": "index",
-          "type": "uint256"
-        }
-      ],
-      "name": "acceptOffer",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "uint256",
           "name": "chainId",
           "type": "uint256"
         }
@@ -135,17 +117,12 @@
     {
       "inputs": [
         {
-          "internalType": "uint256",
-          "name": "_tokenId",
-          "type": "uint256"
-        },
-        {
-          "internalType": "uint256",
-          "name": "_for",
-          "type": "uint256"
+          "internalType": "address",
+          "name": "_address",
+          "type": "address"
         }
       ],
-      "name": "addOffer",
+      "name": "addClaimAddress",
       "outputs": [],
       "stateMutability": "nonpayable",
       "type": "function"
@@ -212,24 +189,52 @@
     {
       "inputs": [
         {
-          "internalType": "address",
-          "name": "_to",
-          "type": "address"
-        },
-        {
           "internalType": "uint256",
-          "name": "_tokenId",
+          "name": "size",
           "type": "uint256"
-        },
-        {
-          "internalType": "string",
-          "name": "image",
-          "type": "string"
         }
       ],
-      "name": "buyWithPaymentOnly",
+      "name": "adjustBlockWindow",
       "outputs": [],
-      "stateMutability": "payable",
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "x",
+          "type": "bytes32"
+        }
+      ],
+      "name": "asciiToInteger",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "name": "blacklisted",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
       "type": "function"
     },
     {
@@ -261,6 +266,44 @@
         }
       ],
       "name": "buyWithSignature",
+      "outputs": [],
+      "stateMutability": "payable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_to",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_tokenId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "string",
+          "name": "_payload",
+          "type": "string"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_nonce",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "signedBlock",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes",
+          "name": "_signature",
+          "type": "bytes"
+        }
+      ],
+      "name": "buyWithSignature2",
       "outputs": [],
       "stateMutability": "payable",
       "type": "function"
@@ -306,19 +349,6 @@
     {
       "inputs": [
         {
-          "internalType": "address",
-          "name": "coupon",
-          "type": "address"
-        }
-      ],
-      "name": "changeCoupon",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
           "internalType": "string",
           "name": "_uri",
           "type": "string"
@@ -356,19 +386,6 @@
         }
       ],
       "name": "changeNft",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "uint256",
-          "name": "_price",
-          "type": "uint256"
-        }
-      ],
-      "name": "changeOfferPrice",
       "outputs": [],
       "stateMutability": "nonpayable",
       "type": "function"
@@ -495,7 +512,7 @@
     },
     {
       "inputs": [],
-      "name": "couponAddress",
+      "name": "claimAddress",
       "outputs": [
         {
           "internalType": "address",
@@ -504,6 +521,19 @@
         }
       ],
       "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "claimOnChain",
+      "outputs": [],
+      "stateMutability": "nonpayable",
       "type": "function"
     },
     {
@@ -550,6 +580,11 @@
           "type": "uint256"
         },
         {
+          "internalType": "string",
+          "name": "payload",
+          "type": "string"
+        },
+        {
           "internalType": "bytes",
           "name": "signature",
           "type": "bytes"
@@ -575,28 +610,31 @@
         },
         {
           "internalType": "uint256",
-          "name": "index",
+          "name": "_nonce",
           "type": "uint256"
+        },
+        {
+          "internalType": "string",
+          "name": "payload",
+          "type": "string"
+        },
+        {
+          "internalType": "uint256",
+          "name": "blockNumber",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes",
+          "name": "signature",
+          "type": "bytes"
         }
       ],
-      "name": "getOffer",
+      "name": "getAddressFromSignature",
       "outputs": [
         {
-          "components": [
-            {
-              "internalType": "uint256",
-              "name": "tokenId",
-              "type": "uint256"
-            },
-            {
-              "internalType": "address",
-              "name": "_from",
-              "type": "address"
-            }
-          ],
-          "internalType": "struct VaultHandlerV6.Offer",
+          "internalType": "address",
           "name": "",
-          "type": "tuple"
+          "type": "address"
         }
       ],
       "stateMutability": "view",
@@ -605,20 +643,73 @@
     {
       "inputs": [
         {
+          "internalType": "bytes32",
+          "name": "_hash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes",
+          "name": "signature",
+          "type": "bytes"
+        }
+      ],
+      "name": "getAddressFromSignature",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
           "internalType": "uint256",
           "name": "_tokenId",
           "type": "uint256"
-        }
-      ],
-      "name": "getOfferCount",
-      "outputs": [
+        },
         {
           "internalType": "uint256",
-          "name": "",
+          "name": "_nonce",
           "type": "uint256"
+        },
+        {
+          "internalType": "bytes",
+          "name": "signature",
+          "type": "bytes"
+        }
+      ],
+      "name": "getAddressFromSignature",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
         }
       ],
       "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "string",
+          "name": "_payload",
+          "type": "string"
+        }
+      ],
+      "name": "getHash",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "pure",
       "type": "function"
     },
     {
@@ -675,7 +766,7 @@
               "type": "bytes32"
             }
           ],
-          "internalType": "struct VaultHandlerV6.PreMint",
+          "internalType": "struct VaultHandlerV7a.PreMint",
           "name": "",
           "type": "tuple"
         }
@@ -711,7 +802,7 @@
               "type": "bytes32"
             }
           ],
-          "internalType": "struct VaultHandlerV6.PreMint",
+          "internalType": "struct VaultHandlerV7a.PreMint",
           "name": "",
           "type": "tuple"
         }
@@ -766,7 +857,7 @@
               "type": "address"
             }
           ],
-          "internalType": "struct VaultHandlerV6.PreTransfer",
+          "internalType": "struct VaultHandlerV7a.PreTransfer",
           "name": "",
           "type": "tuple"
         }
@@ -807,7 +898,7 @@
               "type": "address"
             }
           ],
-          "internalType": "struct VaultHandlerV6.PreTransfer",
+          "internalType": "struct VaultHandlerV7a.PreTransfer",
           "name": "",
           "type": "tuple"
         }
@@ -903,45 +994,6 @@
     },
     {
       "inputs": [],
-      "name": "offerPrice",
-      "outputs": [
-        {
-          "internalType": "uint256",
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "payToAcceptOffer",
-      "outputs": [
-        {
-          "internalType": "bool",
-          "name": "",
-          "type": "bool"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "payToMakeOffer",
-      "outputs": [
-        {
-          "internalType": "bool",
-          "name": "",
-          "type": "bool"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [],
       "name": "paymentAddress",
       "outputs": [
         {
@@ -977,24 +1029,6 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "uint256",
-          "name": "_tokenId",
-          "type": "uint256"
-        },
-        {
-          "internalType": "uint256",
-          "name": "index",
-          "type": "uint256"
-        }
-      ],
-      "name": "rejectOffer",
-      "outputs": [],
-      "stateMutability": "nonpayable",
       "type": "function"
     },
     {
@@ -1043,15 +1077,90 @@
       "type": "function"
     },
     {
-      "inputs": [],
-      "name": "togglePayToAcceptOffer",
-      "outputs": [],
-      "stateMutability": "nonpayable",
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        }
+      ],
+      "name": "toString",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "pure",
       "type": "function"
     },
     {
-      "inputs": [],
-      "name": "togglePayToMakeOffer",
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "value",
+          "type": "uint256"
+        }
+      ],
+      "name": "toString",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes",
+          "name": "data",
+          "type": "bytes"
+        }
+      ],
+      "name": "toString",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "value",
+          "type": "bytes32"
+        }
+      ],
+      "name": "toString",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_address",
+          "type": "address"
+        }
+      ],
+      "name": "toggleBlacklist",
       "outputs": [],
       "stateMutability": "nonpayable",
       "type": "function"
@@ -1210,18 +1319,19 @@
       "inputs": [
         {
           "internalType": "uint256",
-          "name": "_tokenId",
-          "type": "uint256"
-        },
-        {
-          "internalType": "uint256",
-          "name": "index",
+          "name": "",
           "type": "uint256"
         }
       ],
-      "name": "withdrawOffer",
-      "outputs": [],
-      "stateMutability": "nonpayable",
+      "name": "usedTokenIds",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
       "type": "function"
     },
     {

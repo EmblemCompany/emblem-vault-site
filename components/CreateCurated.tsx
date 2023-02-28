@@ -15,7 +15,7 @@ import {
   Select,
   Image
 } from '@chakra-ui/core'
-
+import { useRouter } from 'next/router'
 import Loader from 'react-loader'
 import { useWeb3React } from '@web3-react/core'
 import { useEffect, useState } from 'react'
@@ -24,13 +24,14 @@ import { EMBLEM_API, curatedContracts, curatedAssets } from '../constants'
 let tokenId = null
 
 export default function CreateCurated(props: any) {
+  const { query } = useRouter()
   const [tabIndex, setTabIndex] = useState(0)
   const { account, chainId } = useWeb3React()
   const [vaultAddress, setVaultAddress] = useState(account || '')
   const [state, setState] = useState({ loaded: true, private: false })
   const [targetAsset, setTargetAsset] = useState({name: '', image: ''})
   const [targetContract, setTargetContract] = useState({name: '', chain: ''})
-  
+  const [enableCurated, setEnableCurated] = useState(query.curated == 't')
 
   const handleSubmit = (evt: { preventDefault: () => void }) => {
     evt.preventDefault()
@@ -107,9 +108,10 @@ export default function CreateCurated(props: any) {
                           >
                             <option value="" >---Choose Project---</option>
                             {curatedContracts.map(project=>{
-                              return (
+                              
+                              return enableCurated || project.name == 'Emblem Test'? (
                                 <option value={project.name} >{project.name}</option>
-                              )
+                              ) : null
                             })}
                             
                           </Select>

@@ -36,7 +36,7 @@ import dynamic from 'next/dynamic'
 import { isETHAddress, validImage } from '../utils'
 import { Contract } from '@ethersproject/contracts'
 import { TransactionToast } from './TransactionToast'
-import { EMBLEM_API, BURN_ADDRESS, ZERO_ADDRESS, contractAddresses } from '../constants'
+import { EMBLEM_API, BURN_ADDRESS, ZERO_ADDRESS, contractAddresses, SIG_API } from '../constants'
 import { useContract } from '../hooks'
 import Tilt from 'react-tilt'
 import { CHAIN_ID_NAMES } from '../utils'
@@ -638,31 +638,13 @@ export default function Nft2() {
     storedPw && acceptable ? setMintPassword(storedPw) : null //setMintPassword(null)
   }
 
-  // const getKeys = async (signature, tokenId, cb) => {
-  //   var myHeaders = new Headers()
-  //   myHeaders.append('chainId', chainId.toString())
-  //   myHeaders.append('service', 'evmetadata')
-  //   myHeaders.append('Content-Type', 'application/json')
-
-  //   var raw = JSON.stringify({ signature: signature })
-  //   const responce = await fetch(EMBLEM_API + '/claim/' + tokenId, {
-  //     method: 'POST',
-  //     headers: myHeaders,
-  //     body: raw,
-  //     redirect: 'follow',
-  //   })
-  //   const jsonData = await responce.json()
-  //   // console.log('getKeys response is ', jsonData)
-  //   return cb(jsonData)
-  // }
-
   const getSignedJWT = async (signature, tokenId, cb)=>{
     var myHeaders = new Headers()
     myHeaders.append('chainid', chainId.toString())
     myHeaders.append('Content-Type', 'application/json')
 
     var raw = JSON.stringify({ signature: signature, tokenId: tokenId })
-    const responce = await fetch('https://tor-us-signer-coval.vercel.app/sign', {
+    const responce = await fetch(SIG_API+'/sign', {
       method: 'POST',
       headers: myHeaders,
       body: raw,
@@ -672,27 +654,12 @@ export default function Nft2() {
     return cb(jsonData)
   }
 
-  // const getRemoteKey = async (tokenId, token, cb)=> {   
-  //   let error = false
-  //   let keys = await (await torus).getTorusKey(
-  //       "tor-us-signer-vercel", 
-  //       tokenId,
-  //       { verifier_id: tokenId }, 
-  //       token, 
-  //     ).catch(err=>{
-  //       error = err.message
-  //     })
-  //     if (error) {
-  //       console.log("error", error)
-  //       return cb(false)
-  //     } else {
-  //       return cb(keys)
-  //     }
-  // }
-
   async function getTorusKeys( verifierId, idToken, cb) {
-    const fetchNodeDetails = new FetchNodeDetails({ network: "https://solemn-restless-diagram.ropsten.discover.quiknode.pro/37fca8f14d3a42d9ec00f50a3f6adc404d5e2a04/", proxyAddress: "0x6258c9d6c12ed3edda59a1a6527e469517744aa7" });
-    const torusUtils = new TorusUtils({ enableOneKey: true, network: "testnet" });
+    // const fetchNodeDetails = new FetchNodeDetails({ network: "https://solemn-restless-diagram.ropsten.discover.quiknode.pro/37fca8f14d3a42d9ec00f50a3f6adc404d5e2a04/", proxyAddress: "0x6258c9d6c12ed3edda59a1a6527e469517744aa7" });
+    // const torusUtils = new TorusUtils({ enableOneKey: true, network: "testnet" });
+    const fetchNodeDetails = new FetchNodeDetails({ network: "mainnet" });
+    const torusUtils = new TorusUtils({ enableOneKey: true, network: "mainnet" });
+
     const { torusNodeEndpoints, torusIndexes } = await fetchNodeDetails.getNodeDetails({ verifier: 'tor-us-signer-vercel', verifierId });
     const { privKey } = await torusUtils.retrieveShares(torusNodeEndpoints, torusIndexes, 'tor-us-signer-vercel', { verifier_id: verifierId }, idToken);
     return cb({privateKey: privKey});

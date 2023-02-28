@@ -36,6 +36,7 @@ import { Contract } from '@ethersproject/contracts'
 import { useContract } from '../hooks'
 import { isETHAddress } from '../utils'
 import Embed from './Embed'
+import gfm from 'remark-gfm'
 // react-doka
 import { DokaImageEditorModal } from 'react-doka';
 import transakSDK from '@transak/transak-sdk'
@@ -62,6 +63,7 @@ import {
     markup_editor_defaults,
     markup_editor_locale_en_gb,
 } from 'doka';
+import ReactMarkdown from 'react-markdown'
 
 setPlugins(plugin_crop, plugin_finetune, plugin_filter, plugin_annotate);
 
@@ -92,24 +94,19 @@ export default function Create(props: any) {
 
   const { isOpen, onToggle } = useDisclosure()
   const { query } = useRouter()
-  const [tabIndex, setTabIndex] = useState(0)
+  const [tabIndex, setTabIndex] = useState(query.image? 2: query.to || query.title || query.description? 1: 0)
+  const [batchId, setBatchId] = useState(query.batchId? query.batchId.toString(): null)
   const { account, chainId } = useWeb3React()
-  const [vaultAddress, setVaultAddress] = useState(account || '')
-  const [vaultPubPriv, setVaultPubPriv] = useState('Public')
-  const [vaultName, setVaultName] = useState('')
-  const [vaultDesc, setVaultDesc] = useState('')
-  const [vaultImage, setVaultImage] = useState('')
-  const [ownedImage, setOwnedImage] = useState('')
+  const [vaultAddress, setVaultAddress] = useState(query.to || account || '')
+  const [vaultPubPriv, setVaultPubPriv] = useState(query.public == 'f'? 'Private': 'Public')
+  const [vaultName, setVaultName] = useState(query.title || '')
+  const [vaultDesc, setVaultDesc] = useState(query.description || '')
+  const [vaultImage, setVaultImage] = useState(query.image || '')
+  const [ownedImage, setOwnedImage] = useState(query.ownedUrl || '')
   const [password, setPassword] = useState('')
-  // const [service, setService] = useState('')
   const [isCovalApproved, setIsCovalApproved] = useState(false)
   const [state, setState] = useState({ loaded: true, private: false })
   const [hash, setHash] = useState(null)
-  // const [cipherTextHash, setCipherTextHash] = useState(null)
-  // const [tokenId, setTokenId] = useState(null)
-  // const [mintPassword, setMintPassword] = useState(null)
-  // const [nonce, setNonce] = useState(null)
-  // const [signature, setSignature] = useState(null)
   const [experimental, setExperimental] = useState(true)
   const [showPreVaultMsg, setShowPreVaultMsg] = useState(false)
   const [showMakingVaultMsg, setShowMakingVaultMsg] = useState(false)
@@ -121,8 +118,8 @@ export default function Create(props: any) {
   const [approving, setApproving] = useState(false)
   const [vaultKey, setVaultKey] = useState('')  
   const [vaultValue, setVaultValue] = useState('')
-  const [vaultType, setVaultType] = useState("upload")
-  const [showEmbed, setShowEmbed] = useState(false)
+  const [vaultType, setVaultType] = useState(query.image? 'embed':"upload")
+  const [showEmbed, setShowEmbed] = useState(query.image? true: false)
   
 
   const handlerContract = useContract(contractAddresses.vaultHandler[chainId], contractAddresses.vaultHandlerAbi, true)
@@ -275,7 +272,7 @@ export default function Create(props: any) {
     //   return alert('incorrect password')
     // }
     setState({ loaded: false, private: state.private })
-    let body = {
+    let body: any = {
       fromAddress: account,
       toAddress: vaultAddress,
       description: vaultDesc,
@@ -290,6 +287,9 @@ export default function Create(props: any) {
     }
     if (vaultKey && vaultValue) {
       body.values.push({"key": vaultKey, value: vaultValue})
+    }
+    if (batchId) {
+      body.batchId = batchId
     }
     console.log(JSON.stringify(body))
     let apiSuffix = '/mint3' //(chainId == 137 || chainId == 1) ? '/mint3' : '/mint'
@@ -359,7 +359,7 @@ export default function Create(props: any) {
   useEffect(() => {
     if (account && acct != account) {
       setAcct(account)
-      setVaultAddress(account)
+      setVaultAddress(query.to || account)
     }
   }, [account, acct])
 
@@ -416,7 +416,7 @@ export default function Create(props: any) {
                       <FormLabel>Public or Private?</FormLabel>
                       <RadioGroup
                         id="pubpriv"
-                        defaultValue="Public"
+                        defaultValue={vaultPubPriv}
                         onChange={(e) => {
                           setVaultPubPriv(e.target.value)
                           setState({ loaded: state.loaded, private: e.target.value === 'Private' })
@@ -578,22 +578,27 @@ export default function Create(props: any) {
                                   autoComplete="off"
                                   w={300}
                                 />
-                                <hr/>
-                                <FormLabel mt={3} htmlFor="owned-url">Optional URL For Vault Owner *</FormLabel>
-                                <Input
-                                  type="text"
-                                  id="owned-url"
-                                  aria-describedby="owned-url-text"
-                                  minLength={3}
-                                  maxLength={200}
-                                  value={ownedImage}
-                                  defaultValue="http://"
-                                  onChange={(e) => {
-                                    setOwnedImage(e.target.value)
-                                  }}
-                                  autoComplete="off"
-                                  w={300}
-                                />
+                                
+                                {(query.image && query.ownedUrl) || !query.image ? (
+                                  <>
+                                    <FormLabel mt={3} htmlFor="owned-url">Optional URL For Vault Owner *</FormLabel>
+                                    <Input
+                                      type="text"
+                                      id="owned-url"
+                                      aria-describedby="owned-url-text"
+                                      minLength={3}
+                                      maxLength={200}
+                                      value={ownedImage}
+                                      defaultValue="http://"
+                                      onChange={(e) => {
+                                        setOwnedImage(e.target.value)
+                                      }}
+                                      autoComplete="off"
+                                      w={300}
+                                    />
+                                  </>
+                                ) : null}
+                                
                               </>
                             ) : (
                               <>
@@ -603,19 +608,22 @@ export default function Create(props: any) {
                               </>
                             )
                           }
-                          <Divider />
-                          <FormLabel htmlFor="type-selector">Display Type</FormLabel>
-                          <Select id="type-selector" w="100%" value={vaultType}
-                            onChange={(e)=>{
-                              setVaultType(e.target.value)
-                              console.log("type", vaultType)
-                            }}
-                          >
-                            <option value="embed" >Embed (url)</option>
-                            <option value="upload" >Image (upload)</option>
-                            {/* <option value="embed" >Embed (url)</option>
-                            <option value="video" >Video (url)</option> */}
-                          </Select>
+                          {!query.image? (
+                            <>
+                              <Divider />
+                              <FormLabel htmlFor="type-selector">Display Type</FormLabel>
+                              <Select id="type-selector" w="100%" value={vaultType}
+                                onChange={(e)=>{
+                                  setVaultType(e.target.value)
+                                  console.log("type", vaultType)
+                                }}
+                              >
+                                <option value="embed" >Embed (url)</option>
+                                <option value="upload" >Image (upload)</option>
+                              </Select>
+                            </>
+                          ): null}
+                          
                           {
                             vaultType == "upload" ? (
                               <>
@@ -653,10 +661,12 @@ export default function Create(props: any) {
                               </>
                             ) : showEmbed == true ? (
                               <>                                
-                                <Embed url={vaultImage}/>
+                                <Embed url={vaultImage.toString()}/>
                               </>
                             ) : null
                           }
+
+
                           
                         </Stack>
                       </Box>
@@ -676,13 +686,26 @@ export default function Create(props: any) {
                     </FormControl>
                   </Stack> */}
 
-                  {isCovalApproved ? (
+                  {/* {isCovalApproved ? (
                     <Stack direction="row" align="flex-start" spacing="0rem" flexWrap="wrap" shouldWrapChildren>
                       <Box maxW="sm" borderWidth="1px" p={1} rounded="lg" overflow="hidden">
                         <Text>Creating a vault spends {price * Math.pow(10, -decimals)} Coval from your wallet</Text>
                       </Box>
                     </Stack>
-                  ) : null}
+                  ) : null} */}
+
+                  {
+                    (
+                      <>
+                        <Text mt={2} as="h4" ml="4" mr="4" textAlign="center" fontSize="xs" fontStyle="italic" className="md">
+                          <ReactMarkdown plugins={[gfm]} children={vaultName.toString() + '\n\n'} />
+                        </Text>
+                        <Text mt={2} as="h4" ml="4" mr="4" fontSize="xs" fontStyle="italic" className="md">
+                          <ReactMarkdown plugins={[gfm]} children={vaultDesc.toString()} />
+                        </Text>
+                      </>
+                    )
+                  }
 
                   {Number(balance) < Number(price) ? (
                     <Box d="flex" alignItems="baseline" justifyContent="space-between" mt="2">
@@ -698,7 +721,7 @@ export default function Create(props: any) {
                         //   target: '_blank',
                         //   rel: 'noopener noreferrer',
                         // }}
-                        onClick={()=>{initializeTransak(vaultAddress, 'COVAL')}}
+                        onClick={()=>{location.href = "https://app.uniswap.org/#/swap?outputCurrency=0x3d658390460295fb963f54dc0899cfb1c30776df"}}
                       >
                         Buy $Coval
                       </Button>
@@ -743,7 +766,7 @@ export default function Create(props: any) {
                           Making Vault ...
                         </Button>
                       ) : (
-                        <Button onClick={(e)=>{handleSubmit(e);console.log("test")}} type="submit">
+                        <Button onClick={(e)=>{handleSubmit(e)}} type="submit">
                           Create Vault
                         </Button>
                       )}

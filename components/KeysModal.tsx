@@ -142,26 +142,6 @@ export default function KeysModal({
                 {phraseCopied ? <Text>Copied!</Text> : <Text>{phrase}</Text>}
               </Button>
             </Stack>
-
-            {/* <Stack direction="row" mt={4}>
-              <Text>Your BTC private key (click to copy):</Text>
-            </Stack>
-
-            <Stack direction="row" justify="space-between">
-              <Button whiteSpace="unset" height="unset" p={2} onClick={() => copyWithFlag(btcKey, 'BTCKey')}>
-                {BTCKeyCopied ? <Text>Copied!</Text> : <Text isTruncated>{btcKey}</Text>}
-              </Button>
-            </Stack>
-
-            <Stack direction="row" mt={4}>
-              <Text>Your ETH private key (click to copy):</Text>
-            </Stack>
-
-            <Stack direction="row" justify="space-between">
-              <Button whiteSpace="unset" height="unset" p={2} onClick={() => copyWithFlag(ethKey, 'ETHKey')}>
-                {ETHKeyCopied ? <Text>Copied!</Text> : <Text isTruncated>{ethKey}</Text>}
-              </Button>
-            </Stack> */}
             
             {privValues && privValues.length > 0 ? (
             <>
@@ -201,24 +181,6 @@ export default function KeysModal({
                 </>
               )
             }): null}
-
-            {/* {addresses.length > 0 ? addresses.map((item: any, index) => {
-              if (item.coin == "NMC")
-              return (
-                <>
-                  <Stack direction="row" mt={4}>
-                    <Text>Your NMC private key (click to copy):</Text>
-                  </Stack>
-
-                  <Stack direction="row" justify="space-between">
-                    <Button whiteSpace="unset" height="unset" p={2} onClick={() => copyWithFlag(item.key, 'BCHKey')}>
-                      {BCHKeyCopied ? <Text>Copied!</Text> : <Text isTruncated>{item.key}</Text>}
-                    </Button>
-                  </Stack>
-                </>
-              )
-            }): null} */}
-            
           </Stack>
         </ModalBody>
       </ModalContent>

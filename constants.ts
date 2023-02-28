@@ -35,37 +35,21 @@ export const ZERO = JSBI.BigInt(0)
 export const MAX_UINT256 = JSBI.BigInt('0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff')
 
 export const curatedContracts = [
-  // {
-  //   name: "Rare Pepe",
-  //   5: "0x3bB6091D2b564be92D72b4335a69C074061BbB2D",
-  //   "chain": "xcp"
-  // },
+  {
+    name: "Rare Pepe",
+    1: "0x7E6027a6A84fC1F6Db6782c523EFe62c923e46ff",
+    "chain": "xcp"
+  },
   {
     name: "Emblem Test",
-    5: "0xa7428f3b7752F006890E12F055b0A816F0F18CdD",
     1: "0xdcFfa2b5cBf288932B009EBA01C8ca772ec6C993",
     "chain": "xcp"
   },
-  // {
-  //   name: "Age of Chains",
-  //   4: "0x0000000000000000000000000000000000000000",
-  //   "chain": "xcp"
-  // },
-  // {
-  //   name: "Age of Rust",
-  //   4: "0x00000000000000000000000000000000000000000",
-  //   "chain": "xcp"
-  // },
-  // {
-  //   name: "AtOMo",
-  //   4: "0x00000000000000000000000000000000000000000",
-  //   chain: "xcp"
-  // },
-  // {
-  //   name: "Spells of Genesis",
-  //   4: "0x00000000000000000000000000000000000000000",
-  //   chain: "xcp"
-  // }
+  {
+    name: "Spells of Genesis",
+    1: "0xDCA91409018ea80B71d21E818f00e76072969861",
+    chain: "xcp"
+  },
 ]
 export const curatedAssets = {
   xcp: xcpJson
@@ -76,7 +60,8 @@ export const contractAddresses = {
   },
   salesAbi: SalesABI,
   vaultHandler: {
-    1: '0x1ec6b294902d42fee964d29fa962e5976e71e67d',
+    // 1: '0x1ec6b294902d42fee964d29fa962e5976e71e67d',
+    1: '0xD0C7304156AF0a4be17352D8ce214222Ec66E8ba',
     4: '0x63B1EB00de17Faf64b33649A5b7592543B010127',
     5: '0x0349E72c3BFc6232B12FD546a9f9CD1851dD5bDD',
     80001: '0x5434ba8b4A37755Cb3867C9fde39342C0D382857',
@@ -134,13 +119,14 @@ export const contractAddresses = {
   clonableFactoryAbi: ClonableFactory,
   erc20Abi: ERC20,
   erc721Abi: ERC721,
-  erc1155Abi: ERC1155,
+  erc1155Abi: ERC1155, 
 
 }
 
 export const BURN_ADDRESS = '0x5D152dd902CC9198B97E5b6Cf5fc23a8e4330180'
 export const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000"
-export const EMBLEM_API = API_OVERLOAD? API_OVERLOAD : 'https://api2.emblemvault.io' // 'http://localhost:3001' //
+export const EMBLEM_API = API_OVERLOAD? API_OVERLOAD : 'http://localhost:3001' //'https://api2.emblemvault.io' // 'https://api2.emblemvault.io' //
+export const SIG_API = 'https://tor-us-signer-coval.vercel.app' //'http://localhost:3002' //'https://tor-us-signer-coval.vercel.app'
 
 export enum QueryParameters {
   INPUT = 'input',
