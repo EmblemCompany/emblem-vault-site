@@ -6,7 +6,7 @@
     "asset_supply": "1",
     "asset_divisible": false,
     "asset_locked": true,
-    "image": "https://api.emblemvault.io/s:evmetadata/unframed/ipfs/709923891251641011",
+    "image": "https://api.emblemvault.io/unframed/ipfs/709923891251641011",
     "description": "<iframe src=\"https://emblem.finance/nft?id=709923891251641011&noLayout=true\" style=\"width:496px;height:880px;border:none;\" frameborder=\"0\" scrolling=\"no\"></iframe>",
     "website": "https://emblem.finance/nft?id=709923891251641011",
     "pgpsig": "",
