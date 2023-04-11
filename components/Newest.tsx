@@ -11,6 +11,7 @@ import Embed from './Embed'
 export default function Newest() {
   const { query } = useRouter()
   const [pagePosition, setPagePosition] = useState(Number(query.start) || 0)
+  const [reverse, setReverse] = useState(query.reverse == 'true' || false)
   const { account, chainId } = useWeb3React()
   const [vaults, setVaults] = useState([])
   const [state, setState] = useState({ loaded: false })
@@ -26,7 +27,7 @@ export default function Newest() {
   const getVaults = async () => {    
     console.log('getting vaults')
     try {
-      const response = await fetch(EMBLEM_API + '/newest/?start='+offset+'&size='+PAGE_SIZE, {
+      const response = await fetch(EMBLEM_API + '/newest/?start='+offset+'&size='+PAGE_SIZE+'&reverse='+reverse, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',

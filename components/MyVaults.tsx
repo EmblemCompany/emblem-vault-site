@@ -26,11 +26,14 @@ export default function MyVaults() {
   const [shouldFetchData, setShouldFetchData] = useState(false)
   const [hasMore, setHasMore] = useState(true)
   const [offset, setOffset] = useState(0)
+  const [liveCollections, setLiveCollections] = useState([])
+  const [unMintedCollections, setUnMintedCollections] = useState([])
+  const [claimedCollections, setClaimedCollections] = useState([])
   const PAGE_SIZE = 20
 
   const getVaults = async () => {
     try {
-      const response = await fetch(EMBLEM_API + '/myvaults/'+(address ? address : account)+'?start='+offset+'&size='+PAGE_SIZE+'&_vercel_no_cache=1', {
+      const response = await fetch(EMBLEM_API + '/myvaults/'+(address ? address : account)+'?start='+offset+'&size='+PAGE_SIZE, { //+'&_vercel_no_cache=1'
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -54,6 +57,9 @@ export default function MyVaults() {
         setState({ loaded: true })
         setLoadingApi(false)
         setHasMore(false)
+        setLiveCollections(Array.from(new Set(jsonData.live.map(item=>{return item.targetContract.name}))))
+        setUnMintedCollections(Array.from(new Set(jsonData.unMinted.map(item=>{return item.targetContract.name}))))
+        setClaimedCollections(Array.from(new Set(jsonData.claimed.map(item=>{return item.targetContract.name}))))
       } else if (jsonData.length < PAGE_SIZE) {
         setHasMore(false)
       }
@@ -171,24 +177,49 @@ export default function MyVaults() {
       </Button> */}
     </Stack>
     {showOrHideNavLink('curated')? (
-      <Stack pl="8.7rem" spacing={0} direction="row">
-        {liveVaults.length? (
-          <Button isDisabled={curatedType=='live'} m={2} variant="ghost" onClick={()=>{setVaults(liveVaults); setCuratedType('live')}}>
-            Unclaimed (curated) {liveVaults.length}
-          </Button>
-        ): null}
-        {claimedVaults.length? (
-          <Button isDisabled={curatedType=='claimed'} m={2} variant="ghost" onClick={()=>{setVaults(claimedVaults); setCuratedType('claimed')}}>
-            Claimed (curated) {claimedVaults.length}
-          </Button>
-        ): null}
-        {unMintedVaults.length? (
-          <Button isDisabled={curatedType=='unminted'} m={2} variant="ghost" onClick={()=>{setVaults(unMintedVaults); setCuratedType('unminted')}}>
-            Not Minted (curated) {unMintedVaults.length}
-          </Button>
-        ): null}
-        
-      </Stack>
+      <>
+        <Stack pl="8.7rem" spacing={0} direction="row">
+          {liveVaults.length? (
+            <Button isDisabled={curatedType=='live'} m={2} variant="ghost" onClick={()=>{setVaults(liveVaults); setCuratedType('live')}}>
+              Unclaimed (curated) {liveVaults.length}
+            </Button>
+          ): null}
+          {claimedVaults.length? (
+            <Button isDisabled={curatedType=='claimed'} m={2} variant="ghost" onClick={()=>{setVaults(claimedVaults); setCuratedType('claimed')}}>
+              Claimed (curated) {claimedVaults.length}
+            </Button>
+          ): null}
+          {unMintedVaults.length? (
+            <Button isDisabled={curatedType=='unminted'} m={2} variant="ghost" onClick={()=>{setVaults(unMintedVaults); setCuratedType('unminted')}}>
+              Not Minted (curated) {unMintedVaults.length}
+            </Button>
+          ): null}
+          
+        </Stack>
+          <Stack pl="12.7rem" spacing={0} direction="row">
+            {liveCollections.length && curatedType == 'live' ? (
+              liveCollections.map((name, index) => {
+                return (
+                  <Button isDisabled={true} key={index} m={2} variant="ghost">{name}</Button>
+                )
+              })
+            ) : null}
+            {claimedCollections.length && curatedType == 'claimed' ? (
+              claimedCollections.map((name, index) => {
+                return (
+                  <Button isDisabled={true} key={index} m={2} variant="ghost">{name}</Button>
+                )
+              })
+            ) : null}
+            {unMintedCollections.length && curatedType == 'unminted' ? (
+              unMintedCollections.map((name, index) => {
+                return (
+                  <Button isDisabled={true} key={index} m={2} variant="ghost">{name}</Button>
+                )
+              })
+            ) : null}
+          </Stack>
+      </>
     ): null}
     <Loader loaded={state.loaded}>
       {loadingApi ? <Refreshing /> : ''}

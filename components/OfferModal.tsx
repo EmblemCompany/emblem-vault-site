@@ -90,7 +90,7 @@ export default function OfferModal({
   
   const getMetadata = async function(uri, cb){
     // alert(0)
-    uri = uri.replace('http://104.154.252.216','https://api.emblemvault.io/s:evmetadata')
+    uri = uri.replace('http://104.154.252.216','https://api.emblemvault.io')
     let responce
     try {
         responce = await fetch(uri, {

@@ -55,6 +55,8 @@ import FetchNodeDetails from "@toruslabs/fetch-node-details"
 import TorusUtils from "@toruslabs/torus.js"
 import { toBytes } from '@stacks/common'
 import { BigNumber } from '@ethersproject/bignumber'
+import JsonDownloadLink from './JsonDownloadLink'
+import { green } from '@material-ui/core/colors'
 
 
 declare global {
@@ -146,6 +148,9 @@ export default function Nft() {
   const [allowance, setAllowance] = useState(null)
   const [balance, setBalance] = useState(null)
   const [price, setPrice] = useState(null)
+  const [mineUnMinted, setMineUnMinted] = useState(false)
+  const [mintLockedForever, setMintLockedForever] = useState(false)
+  const [rawMetadata, setRawMetadata] = useState({})
   
   const handlerContract = useContract(contractAddresses.vaultHandler[chainId], contractAddresses.vaultHandlerAbi, true)
   const vaultHandlerContract = useContract(contractAddresses.vaultHandlerV8[chainId], contractAddresses.vaultHandlerV8Abi, true)
@@ -157,6 +162,7 @@ export default function Nft() {
   const { isOpen: isOpenOfferModal, onOpen: onOpenOfferModal, onClose: onCloseOfferModal } = useDisclosure()
   const { isOpen, onToggle } = useDisclosure()
   const { isOpen: isManageAddressOpen, onToggle: onManageAddressToggle } = useDisclosure()
+  const { isOpen: isAdvancedOpen, onToggle: onAdvancedToggle } = useDisclosure()
 
   const { colorMode } = useColorMode()
 
@@ -237,14 +243,14 @@ export default function Nft() {
     return cb()
   }
 
-  const transferVault = () => {
-    setTransfering(true)
-    ;(emblemContract as Contract).transferFrom(account, transferToAddress, tokenId)
-    .then(({ hash }: { hash: string }) => {
-      setHash(hash)
-    })
-    .catch((error: ErrorWithCode) => {})
-  }
+  // const transferVault = () => {
+  //   setTransfering(true)
+  //   ;(emblemContract as Contract).transferFrom(account, transferToAddress, tokenId)
+  //   .then(({ hash }: { hash: string }) => {
+  //     setHash(hash)
+  //   })
+  //   .catch((error: ErrorWithCode) => {})
+  // }
 
   const lazyMint = () =>{
     library.getSigner(account)
@@ -284,7 +290,7 @@ export default function Nft() {
       setShowMakingVaultMsg(true)
       setMinting(true)
       let cipherTextHash = vaultAddresses.filter(address=>{ return address.coin == "ETH"})[0].address
-      // console.log("--------------------------------------------------------Delayed Minting", account, tokenId, cipherTextHash, nonce, block, sig)
+      console.log("--------------------------------------------------------Delayed Minting", account, tokenId, cipherTextHash, nonce, block, sig)
       ;(handlerContract as Contract)
       .buyWithSignature2(account, tokenId, cipherTextHash, nonce, block, sig)
       .then(({ hash }: { hash: string }) => {
@@ -442,6 +448,7 @@ export default function Nft() {
       },
     })
     const jsonData = await responce.json()
+    setRawMetadata(jsonData)
     setStates(jsonData)
     // console.log('vault response was ', jsonData)
     if (jsonData.image_ipfs) {
@@ -521,8 +528,9 @@ export default function Nft() {
     framed && jsonData.image && !jsonData.image.includes('framed=') && !jsonData.image.includes('http') ? jsonData.image = jsonData.image + "&framed="+framed : null
     if (jsonData.ciphertextV2) {
       setVaultCiphertextV2(jsonData.ciphertextV2)
-      console.log("ciphertextV2", jsonData.ciphertextV2)
+      // console.log("ciphertextV2", jsonData.ciphertextV2)
     }
+    setMintLockedForever(jsonData.mintLocked && jsonData.mintLockBlock == 0)
     setVaultName(jsonData.name)
     setVaultImage(jsonData.image)
     setOwnedImage(jsonData.ownedImage || null)
@@ -793,6 +801,7 @@ export default function Nft() {
   }
 
   const getContractStates = async () => {
+    // alert(0)
     console.log("Contract states")
     let owned = false
     let _owner: string
@@ -803,7 +812,7 @@ export default function Nft() {
         _owner = await emblemContract.getOwnerOfSerial(targetContract.serialNumber)
         console.log("--------------------------- owner", _owner, approved, account, contractAddresses.vaultHandlerV8[chainId])
       } else {
-        _owner  = await emblemContract.ownerOf(tokenId)
+        _owner  = live? await emblemContract.ownerOf(tokenId): "0x0000000000000000000000000000000000000000"
       }
       setDecimals(await covalContract.decimals())
       setAllowance(
@@ -824,17 +833,22 @@ export default function Nft() {
       //   Number(balance) > Number(price)
       // )
       if (Number(allowance) >= Number(price)) {
+        // alert(true)
         setIsCovalApproved(true)
       } else {
+        // alert(false)
         setIsCovalApproved(false)
       }
       finish()
     } catch(err){
+      console.log("-------", err)
+      // approveCovalFlow()
       _owner = "0x0000000000000000000000000000000000000000"
       finish()
     }
 
     async function finish(){
+     
       let acceptable = await handlerContract.getPreTransfer(tokenId)
       let isApproved: boolean | ((prevState: boolean) => boolean)
       if (targetContract[chainId]) {
@@ -845,8 +859,10 @@ export default function Nft() {
       setApproved(isApproved)
       setAcceptable(acceptable._from !== "0x0000000000000000000000000000000000000000")
       setOwner(_owner)
-      setMine(_owner === account)
+      setMine(_owner === account || (to === account && _owner === "0x0000000000000000000000000000000000000000"))
+      setMineUnMinted(to === account && _owner === "0x0000000000000000000000000000000000000000")
       loadPasswordFromLocalStorage()
+      // alert(to == account)
     }
     
   }
@@ -857,6 +873,7 @@ export default function Nft() {
     console.log("accepting?", accepting)
     console.log("acceptable", acceptable)
     console.log("qualified", qualifiedCollection)
+    console.log("owner",owner)
   })
 
   const hasAddress = (coin: string)=>{
@@ -903,6 +920,10 @@ export default function Nft() {
       .getSigner(account)
       .signMessage('Claim: ' + (targetContract[chainId]? serialNumber: tokenId))
       .then((signature: any) => {
+        setState({loaded: false})
+        if (mineUnMinted && status != "claimed" && !mintLockedForever) {
+          setMintLockedForever(true)
+        }
         getSignedJWT(signature, tokenId, (token: { token: any })=>{
           getTorusKeys(tokenId, token.token, async (keys: { privateKey: any })=>{
             try {
@@ -921,12 +942,14 @@ export default function Nft() {
               })
             } catch(err){
               // alert('out of sync')
-              await syncAccount()
+              // await syncAccount()
+              alert(err)
               setTimeout(()=>{location.href = location.href}, 2000)
               
             }
             
             // setKeyValues(vaultAddresses)
+            setState({loaded: true})
             onOpenKeysModal()
           })          
         })
@@ -1283,7 +1306,7 @@ export default function Nft() {
       ) : null}
       
 
-      {/* <Loader loaded={state.loaded}> */}
+      <Loader loaded={state.loaded}>
         <Box height="40px"></Box>
         {loadingApi ? <Refreshing /> : ''}
         {!invalidVault && !slideshowOnly ? (
@@ -1352,8 +1375,8 @@ export default function Nft() {
                     <Button onClick={() => {handleOwnedEmbed()}}>(OWNED) Show Full Embed</Button>
                   ): null}
                 </Stack>
-                <Stack align="center">
-                  <Box mt="2" ml="4" lineHeight="tight">
+                <Stack align="center" maxWidth="400px">
+                  <Box mt="2" ml="4" lineHeight="tight" maxWidth="400px">
                     <Stack>
                       <Text fontSize="xs">
                       { vaultChainId == chainId ? (
@@ -1362,7 +1385,7 @@ export default function Nft() {
                         </Link>
                       ) : null }
                       </Text>
-                      <Text mt={2} as="h4" ml="4" mr="4" fontSize="xs" fontStyle="italic" className="md">
+                      <Text overflowWrap="anywhere" mt={2} as="h4" ml="4" mr="4" fontSize="xs" fontStyle="italic" className="md">
                         <ReactMarkdown plugins={[gfm]} children={splitDescription(vaultDesc)} />
                       </Text>
                       
@@ -1457,7 +1480,7 @@ export default function Nft() {
                                 </Button>
                               )
                             })}
-                        </Flex>
+                          </Flex>
                         {(mine || status === 'claimed') && vaultAddresses.length < 12 ? (
                           <>
                             <button className="nft_button" onClick={()=>{
@@ -1527,119 +1550,73 @@ export default function Nft() {
                       {/* </Stack> */}
                     </Box>
                   ) : null}
+                  
                   {isCovalApproved ? (
                     <Stack direction="row" align="flex-start" spacing="0rem" flexWrap="wrap" shouldWrapChildren>
                       <Box maxW="sm" borderWidth="1px" p={1} rounded="lg" overflow="hidden">
                         <Text>Creating a vault spends {price * Math.pow(10, -decimals)} Coval from your wallet</Text>
+                        {/* <Text>48 hour Free minting - sponsored by the team at MegaPunks <Link href="https://megapunks.com">https://megapunks.com</Link></Text> */}
                       </Box>
                     </Stack>
                   ) : null}
-                  {mine && !acceptable && !approved ? (<>
-                    <Box d="flex" alignItems="baseline" justifyContent="space-between" mt="4">
-                      <Button 
-                        className="nft_button"
-                        width="100%" onClick={() => {
-                        if (!approved) {
-                          return handleApproveForall()
-                        }                                      
-                      }
-                    }>Approve Minting</Button>
-                    </Box>
-                  </>) : null }
-                  {!(status === 'claimed') && mine && !acceptable?  (
-                    <>
-                     <Box d="flex" alignItems="baseline" justifyContent="space-between" mt="4" width="100%">
-                        <Stack direction="column" align="center" width="100%">
-                          <Button className="nft_button" width="100%" onClick={onToggle}>Transfer Vault</Button>
-                          <Collapse isOpen={isOpen}>
-                            <Box d="flex" alignItems="baseline" justifyContent="space-between" mt="2" width="100%">
-                            <FormLabel htmlFor="owner-address">Address</FormLabel>
-                              <Input
-                                mt={1}
-                                type="text"
-                                id="transferAddress"
-                                value={transferToAddress || ''}
-                                onChange={(e) => {                              
-                                  console.log("Transfer to", e.target.value)
-                                  setTransferToAddress(e.target.value)
-                                }}
-                                autoComplete="off"
-                              />
-                            </Box>
-                            <Box d="flex" alignItems="baseline" justifyContent="space-between" mt="2" width="100%">
-                              <Button isDisabled={!isETHAddress(transferToAddress)} onClick={()=>{
-                                onToggle()
-                                transferVault()
-                              }}>Transfer Now</Button> 
-                            </Box>
-                          </Collapse>
-                        </Stack>
-                      </Box>
-                    </>
-                  ):null }
 
-                  {mine && !acceptable ? (<>
+                  {mine && !approved ? (<>
                     <Box d="flex" alignItems="baseline" justifyContent="space-between" mt="4">
-                      <Button 
+                      <Button
+                        backgroundColor={"#02b402"}
+                        color={"black !important"}
+                        fontWeight={"bold !important"}
                         className="nft_button"
                         width="100%" onClick={() => {
-                        if (!approved) {
-                          return handleApproveForall()
-                        } else {
-                          let key = CryptoJS.lib.WordArray.random(128/8).toString()
-                          let sha = CryptoJS.SHA256(key).toString()
-                          console.log('plain', key)
-                          console.log('sha', sha)
-                          setTransferPassword(key)
-                          transferImage = sha                          
-                          setTimeout(()=>{
-                            addPreTransfer()
-                          }, 500)
-                        }                                             
+                          return handleApproveForall()                                       
                       }
-                    }> {approved ? "Get Link (Send Vault Via Link)" : "Approve Gifting" } </Button>
+                    }> Approve Minting</Button>
                     </Box>
                   </>) : null }
+
+                  {!live && mine && vaultChainId == chainId && status !== 'claimed' && !showMakingVaultMsg && approved && !isCovalApproved ? (
+                    <>                      
+                        <Button backgroundColor={"#02b402"}
+                        color={"black !important"}
+                        fontWeight={"bold !important"}
+                        width="100%" mt={5} onClick={approveCovalFlow}>Approve Spending Coval</Button>
+                    </>
+                ) : null}
 
                   {(showTransferPassword || mintPassword) && acceptable ? (
                       <Box>
                         <Link href={location.protocol +'//'+ location.host + '/nft?id=' + tokenId + '&key=' + (transferPassword || mintPassword)}>Copy Gift Link</Link>
                         <Text>Password: {(transferPassword || mintPassword)}</Text>
                       </Box>
-                      ) : null}
+                  ) : null}
                   {acceptable && claimedBy !== account ? (
-                  <>
-                      <Button mt={2} width="100%" onClick={()=>{fireMetaMask()}}>Accept</Button>
-                      <Input
-                        mt={2}
-                        type="password"
-                        id="mintPassword"
-                        minLength={3}
-                        maxLength={200}
-                        value={mintPassword || ''}
-                        onChange={(e) => {
-                          console.log('grrr', e.target.value, mintPassword)
-                          setMintPassword(e.target.value)}
-                        }
-                        autoComplete="off"
-                      />
-                  </>
-                    ) : null}
-                    {mine && showMove && qualifiedCollection? (
-                      <Box d="flex" alignItems="baseline" justifyContent="space-between" mt="4">
-                      <Button
-                        width="100%"
-                        onClick={() => {
-                          handleMove()
-                        }}
-                        isDisabled={moving}
-                      >
-                        {moving ? 'Moving ...' : 'Move Vault'}
-                      </Button>
-                    </Box>
-                    ) : null}
+                    <>
+                        <Button mt={2} width="100%" onClick={()=>{fireMetaMask()}}>Accept</Button>
+                        <Input
+                          mt={2}
+                          type="password"
+                          id="mintPassword"
+                          minLength={3}
+                          maxLength={200}
+                          value={mintPassword || ''}
+                          onChange={(e) => {
+                            console.log('grrr', e.target.value, mintPassword)
+                            setMintPassword(e.target.value)}
+                          }
+                          autoComplete="off"
+                        />
+                    </>
+                  ) : null}
 
-                  {!(status === 'claimed') && account && vaultChainId === chainId && mine && !sealed && approved ? (
+                   
+
+                  {!live && mine && vaultChainId == chainId && status !== 'claimed' && !showMakingVaultMsg && approved && isCovalApproved ? (
+                      <>                      
+                          <Button width="100%" mt={5} isDisabled={(!vaultPrivacy && vaultValues.length < 1)|| mintLockedForever} onClick={lazyMint}>{mintLockedForever? 'Mint Locked - keys accessed before mint' : !vaultPrivacy && vaultValues.length < 1? 'Please load the vault to mint': 'Mint Vault'}</Button>
+                      </>
+                  ) : null}
+
+                  {!(status === 'claimed') && account && vaultChainId === chainId && mine && !sealed && approved && live ? (
                     <Box d="flex" alignItems="baseline" justifyContent="space-between" mt="4">
                       <Button
                         width="100%"
@@ -1651,25 +1628,55 @@ export default function Nft() {
                         {claiming ? 'Claiming ...' : 'Unlock Vault (Get Private Keys)'}
                       </Button>
                     </Box>
-                    // || !live && nonce && mintSignature && vaultCiphertextV2 && to == account
-                  ) : (status === 'claimed' && claimedBy === account && vaultChainId === chainId)  ? (
+                  ) : (vaultChainId === chainId && ((status == 'claimed' || mintLockedForever) && (claimedBy === account || mine))) ? (
                     <Box d="flex" alignItems="baseline" justifyContent="space-between" mt="4">
                       <Button width="100%" onClick={handleSign}>
-                        Get Keys
+                      Get Keys
                       </Button>
                     </Box>
                   ) : null}
+                    <Stack mt={5}>
+                      <>
+                        <button className="nft_button" onClick={()=>{
+                          onAdvancedToggle()
+                        }}>Advanced Operations</button>
+                        <Flex w="100%" justify="center" flexWrap="wrap">
+                          <Collapse width={"100%"} isOpen={isAdvancedOpen}>
+                          { mineUnMinted && status != "claimed" && !mintLockedForever ? (
+                          <Box d="flex" alignItems="baseline" justifyContent="space-between" mt="4">
+                            <Button width="100%" onClick={handleSign}>
+                              Get Keys (Unlocking will prevent minting)
+                            </Button>
+                          </Box>
+                        ) : null}
+                          {mine && showMove && qualifiedCollection? (
+                            <Box d="flex" alignItems="baseline" justifyContent="space-between" mt="4">
+                            <Button
+                              width="100%"
+                              onClick={() => {
+                                handleMove()
+                              }}
+                              isDisabled={moving}
+                            >
+                              {moving ? 'Moving ...' : 'Move Vault'}
+                            </Button>
+                          </Box>
+                          ) : null}
 
-                  {!live && to == account && vaultChainId == chainId && status !== 'claimed' && !showMakingVaultMsg ? (
-                    <>                      
-                        <Button width="100%" mt={5} onClick={lazyMint}>Mint Vault </Button>
-                    </>
-                ) : null}
+                        {mine || claimedBy == account? (
+                          <JsonDownloadLink data={rawMetadata} filename={`EmblemVault-${tokenId}.json`}/>
+                        ): null}                
 
-                {(!live || status == 'claimed') && to == account && vaultChainId == chainId && !showMakingVaultMsg && vaultValues.length < 1 ? (
-                  <Button width="100%" mt={5} onClick={deleteVault}>Delete Vault </Button>
-                ) : null}
-                {showVerifyingSignature ? (
+                      {(!live || status == 'claimed') && to == account && vaultChainId == chainId && !showMakingVaultMsg && vaultValues.length < 1 ? (
+                        <Button width="100%" mt={5} onClick={deleteVault}>Delete Vault </Button>
+                      ) : null}
+                          </Collapse>
+                        </Flex>
+                      </>
+                    </Stack>
+
+                    
+                {/* {showVerifyingSignature ? (
                   <Button isDisabled type="submit">
                     Verifying Signature ...
                   </Button>
@@ -1678,32 +1685,36 @@ export default function Nft() {
                   <Button isDisabled type="submit">
                     Minting Vault ...
                   </Button>
-                ) : null}
+                ) : null} */}
                 </Box>
                 {vaultIPFS ? (
-                  <Stack>
+                  // <Stack>
                     <HStack align="center">
                       <Link target='new' mb={2} ml={35} href={'https://gateway.ipfs.io/ipfs/'+vaultIPFS} isExternal>View Metadata on IPFS </Link>
                       {vaultImageIPFS? (
                         <Link mb={2} href={'https://gateway.ipfs.io/ipfs/'+vaultImageIPFS} isExternal>View Image on IPFS </Link>
                       ) : null}                      
                     </HStack> 
-                  </Stack>
+                  // </Stack>
                 ) : null }
+
                 {sealed ? (
                     <Box d="flex" mb={2} ml={35} alignItems="baseline" justifyContent="space-between" mt="4">
                       <Text>*This vault is sealed forever.</Text>
                     </Box>
                   ) : null}
+
                 <Stack direction="column" align="center">
                   {status == 'claimed' ? <Text color="green.500">CLAIMED</Text> : null}
                 </Stack>
+
                 {hash ? (
                   <Alert status="info">
                     <AlertIcon />
                     { accepting ? "Accepting Your Gift Vault" : claiming ? "Claiming your Vault ..." : approving? "Handling Approval Flow ..." : transfering? "Transfering Vault ...":  minting? "Minting Vault" : "Generating Gift Link ..."}
                   </Alert>
                 ) : null}
+
               </Box>
             </Flex>
         ) : vaultValues.length > 0 && slideshowOnly? (
@@ -1738,9 +1749,9 @@ export default function Nft() {
                 setStatus('claimed')
                 setClaiming(false)
                 setClaimedBy(account)
-                pingClaimLogs(()=>{
+                // pingClaimLogs(()=>{
                   location.href = location.origin + '/nft?id=' + tokenId + '&cc=t';
-                })
+                // })
               } else if (preTransfering) {
                 savePasswordToLocalStorage()
                 setShowTransferPassword(true)
@@ -1754,6 +1765,7 @@ export default function Nft() {
                 setApproving(false)
                 getVault()
                 setHash(null)
+                location.href = location.origin + '/nft?id=' + tokenId
               } else if(transfering) {
                 setTransfering(false)
                 getVault()
@@ -1762,10 +1774,12 @@ export default function Nft() {
                 checkLiveliness(tokenId, ()=>{
                   setMinting(false)
                   setLive(true)
+                  location.href = location.origin + '/nft?id=' + tokenId + '&cc=t';
                   // setShowMakingVaultMsg(false)
                   // location.href = location.origin + '/nft?id=' + tokenId
                 })
               } else {
+                location.href = location.origin + '/nft?id=' + tokenId
                 console.log('minting', minting) 
                 console.log('claiming', claiming) 
                 console.log('accepting', accepting) 
@@ -1777,7 +1791,7 @@ export default function Nft() {
           />
         ) : null}
         <Box height="40px"></Box>
-      {/* </Loader> */}
+      </Loader>
     </>
   )
 }

@@ -26,7 +26,7 @@ function Balance({ token }: { token: Token }): JSX.Element {
       backgroundColor={BG[colorMode]}
       onClick={() => {
         let tokenInfo = JSON.parse(JSON.stringify(token))
-        tokenInfo.image = "https://circuitsofvalue.com/public/coval-logo.png"
+        tokenInfo.image ="https://raw.githubusercontent.com/EmblemCompany/Coval-Site/master/public/coval-logo.png"// "https://circuitsofvalue.com/public/coval-logo.png"
         addTokenToWallet(tokenInfo)
       }}
       {...{

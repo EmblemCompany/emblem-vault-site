@@ -4,7 +4,7 @@ import { isMobile } from 'react-device-detect'
 import classes from './BackgroundVideo.module.css'
 
 const BackgroundVideo = () => {
-  const videoSource = 'https://circuitsofvalue.com/public/circuits.mp4'
+  const videoSource = 'circuits.mp4'//'https://circuitsofvalue.com/public/circuits.mp4'
   return (
     <>
       {!isMobile ? (

@@ -23,10 +23,14 @@ import Embed from './Embed';
 
 export default function Batch() {
   const { query } = useRouter()
+  const [running, setRunning] = useState(false)
+  const [offset, setOffset] = useState(Number(query.offset) || 0)
   const [status, setStatus] = useState('configure')
   const [batches, setBatches] = useState([])
   const [demoIndex, setDemoIndex] = useState(-1)
   const [action, setAction] = useState(query.action || 'list')
+  const [batchVaults, setBatchVaults] = useState([])
+  const [updateCount, setUpdateCount] = useState(0)
   const [batchName, setBatchName] = useState("");
   const [imageBaseUrl, setImageBaseUrl] = useState("");
   const [inscriptionBaseUrl, setInscriptionBaseUrl] = useState("");
@@ -38,15 +42,17 @@ export default function Batch() {
   const [batchDataJson, setBatchDataJson] = useState([]);
   const [batchId, setBatchId] = useState(query.batch_id || "")
   const [state, setState] = useState({ loaded: false })
+  const [vaultAddresses, setVaultAddresses] = useState([])
   const { readString, jsonToCSV } = usePapaParse();
 
 
   useEffect(() => {
     if (!state.loaded && batchId && !batchName) {
       getBatch()
+      getVaultsForBatch(batchId.toString(), ()=>{})
     } else if (!state.loaded && !batchId && !batchName && action == 'list') {
       getBatches()
-    } else {
+    }  else {
       setState({ loaded: true })
     }
   }, [])
@@ -76,6 +82,66 @@ export default function Batch() {
     })
   }
 
+  const getVaultsForBatch = async (batchId: string, cb: () => any)=>{
+    // alert(0)
+    var requestOptions = {
+      method: 'GET'
+    };
+    
+    fetch(EMBLEM_API + "/batchVaults/"+batchId+"?_vercel_no_cache=1", requestOptions)
+    .then(async (response) => {
+      let records = await response.json()
+      setBatchVaults(records)
+      let exported_records = records.map(record=>{ 
+        console.log(exported_records)
+        return { to: record.to, tokenId: record.tokenId, address: record.addresses.filter(addy=>{return addy.coin == 'TAP'})[0].address }})// address: record.addresses.filter(addy=>{return addy.coin == 'LTC'})[0].address, tokenId: record.tokenId, owner: record.to
+      // let addresses = records.map(record=>{ return {tokenId: record.tokenId}})
+      
+      let csvData: any = jsonToCSV(exported_records.reverse())
+      setVaultAddresses(csvData)
+      console.log(csvData)
+      return cb()
+    }).catch(err => {
+      console.log(err)
+    })
+  }
+
+  const goUpdateLoop = async(overrideOffset: number)=>{
+    var requestOptions = {
+      method: 'GET'
+    };
+    
+    fetch(EMBLEM_API + `/updateNextBatchItem/${batchId}?offset=${overrideOffset || offset}&_vercel_no_cache=1`, requestOptions)
+    .then(async (response) => {
+      let record = await response.json()
+      setUpdateCount(record.index)
+      // alert(record.index)
+      setOffset(record.index)
+      goUpdateLoop(record.index)
+    }).catch(err => {
+      console.log(err)
+      goUpdateLoop(overrideOffset)
+    })
+  }
+
+
+  const goCreateLoop = async ()=>{
+    var requestOptions = {
+      method: 'GET'
+    };
+    
+    fetch(EMBLEM_API + "/createNextBatchItem?_vercel_no_cache=1", requestOptions)
+    .then(async (response) => {
+      // let records = await response.json()
+      getVaultsForBatch(batchId.toString(), ()=>{
+        setTimeout(()=>{goCreateLoop()}, 10000)
+      })
+    }).catch(err => {
+      console.log(err)
+      goCreateLoop()
+    })
+  }
+
   const getBatches = async () => {
     var requestOptions: any = {
       method: 'GET'
@@ -90,6 +156,25 @@ export default function Batch() {
       console.log(err)
     })
   }
+
+  const doRefresh = async (needle: string, haystack: string, offset: number) => {
+    var requestOptions: any = {
+      method: 'GET'
+    };
+
+    fetch(EMBLEM_API + `/bulkRefresh?live=true&needle=${needle}&haystack=${haystack}&start=${offset}`, requestOptions).then(async (response) => {
+      let record= await response.json()
+      doRefresh(needle, haystack, record.index + 1)
+      setUpdateCount(record.index)
+      setState({ loaded: true })
+    }).catch(err => {
+      console.log(err)
+      doRefresh(needle, haystack, offset)
+    })
+  }
+
+  
+
 
   const startBatch = async () =>{
     var myHeaders = new Headers();
@@ -190,13 +275,14 @@ export default function Batch() {
     return items;
   }
 
-  function isValidBatchData() {
+  function isValidBatchData(statusCheck) {
     if (!batchDataJson) return false
     let hasRows = batchDataJson.length > 1
     if (!hasRows) return false
+    // alert(JSON.stringify(batchDataJson))
     let correctColumns = batchDataJson[0].length == 4
     let correctHeaders = batchDataJson[0][0] == 'asset_number' && batchDataJson[0][1] == 'inscription_number' && batchDataJson[0][2] == 'inscription_hash' && batchDataJson[0][3] == 'to'
-    let batchNotStarted = status == 'configure'
+    let batchNotStarted = status == statusCheck || 'configure'
     return hasRows && correctColumns && correctHeaders && batchNotStarted
   }
 
@@ -211,7 +297,7 @@ export default function Batch() {
                 <Link margin="10px" href={"/batch?action=list"}> All Batch Jobs</Link>
                 {batchId? (
                   <Link margin="10px" href={"/batch?action=view&batch_id="+batchId}> View Job</Link>
-                ): null}                
+                ): null}
               </Stack>
                 <form onSubmit={handleSubmit}>
                   <Stack direction="row" align="flex-start" padding="25px" spacing="2rem" flexWrap="wrap" shouldWrapChildren>
@@ -277,7 +363,7 @@ export default function Batch() {
                       <FormLabel htmlFor="title-template">Title Template</FormLabel>
                       <Textarea
                         id="title-template"
-                        fontSize={'xx-small'}
+                        fontSize={'x-small'}
                         size="lg"
                         aria-describedby="title-template-text"
                         minLength={3}
@@ -295,7 +381,7 @@ export default function Batch() {
                       <FormLabel htmlFor="description-template">Description Template</FormLabel>
                       <Textarea
                         id="description-template"
-                        fontSize={'xx-small'}
+                        fontSize={'x-small'}
                         size="lg"
                         aria-describedby="description-template-text"
                         minLength={3}
@@ -348,15 +434,15 @@ export default function Batch() {
                     </FormControl>
                   </Stack>
                   <Stack direction="row" align="flex-start" padding="15px" spacing="2rem" flexWrap="wrap" shouldWrapChildren>
-                    <Button mt={4} type="submit" isDisabled={!isValidBatchData()} >
+                    <Button mt={4} type="submit" isDisabled={false} >
                       Save Batch Job
                     </Button>
-                    <Button mt={4} isDisabled={!isValidBatchData() || status == "running"} onClick={startBatch}>
+                    <Button mt={4} isDisabled={!isValidBatchData('configure') || !isValidBatchData('running')} onClick={startBatch}>
                       Start Batch Job
                     </Button>
                   </Stack>
                   <Stack direction="row" align="flex-start" padding="15px" spacing="2rem" flexWrap="wrap" shouldWrapChildren>
-                    {isValidBatchData()? (
+                    {!isValidBatchData('running') && isValidBatchData('configure')? (
                       <Select id="type-selector" w="100%" value={demoIndex}
                       onChange={(e)=>{
                         setDemoIndex(Number(e.target.value))
@@ -399,6 +485,49 @@ export default function Batch() {
               )
             }):null}
           <Link margin="10px" href={"/batch?action=add"}> Add New Batch</Link>
+          </Box>
+        ): action == 'view'? (
+          <Box maxW="lg"  margin="10px" borderWidth="1px" rounded="lg" overflow="hidden">
+            <Stack>
+                <Link margin="10px" href={"/batch?action=list"}> All Batch Jobs</Link>
+                {batchId? (
+                  <Link margin="10px" href={"/batch?action=edit&batch_id="+batchId}> Edit Job</Link>
+                ): null}
+                <Text padding="10px">{batchVaults.length} of {total} vaults created</Text>
+                <Text padding="10px">{updateCount} of {total} vaults updated</Text>
+                <Link padding="10px" isDisabled={running} onClick={()=>{goCreateLoop();setRunning(true)}}>Start Mint Loop - </Link>
+                <Link padding="10px" isDisabled={running} onClick={()=>{goUpdateLoop(offset)}}>Start Update Loop</Link>
+                <Link padding="10px" isDisabled={running} onClick={()=>{doRefresh(batchName, 'name', offset)}}>Start Refresh Loop</Link>
+                <Link padding="10px" href={`${location.href.replace(`offset=${offset}`, `offset=${offset+600}`)}`} isDisabled={running} onClick={()=>{}}>spawn offset</Link>
+              </Stack>
+            
+              {/* {batchDataJson.map((item, index)=>{
+                  // if (index > 0) {
+                    
+                    if (batchVaults[index]) {
+                      let address = batchVaults[index].addresses.filter(addy=>{return addy.coin == addressType})[0].address
+                      // vaultAddresses.push(address)
+                      return (
+                        <Stack padding={"10px"}>
+                          <Link href={'/nft?id='+batchVaults[index].tokenId}>{batchVaults[index].name}</Link>
+                          <Text>{batchVaults[index].tokenId}</Text>
+                          <Text fontSize={'xx-small'}>{address}</Text>
+                        </Stack>
+                      )
+                    }
+                  // }
+                })} */}
+                <Textarea
+                        id="addresses"
+                        size="lg"
+                        fontSize={'xx-small'}
+                        aria-describedby="addresses-text"
+                        minLength={3}
+                        value={JSON.stringify(vaultAddresses)}
+                        autoComplete="off"
+                      />
+                <Link padding="10px" isDisabled={running} onClick={()=>{goCreateLoop();setRunning(true)}}>Start Mint Loop</Link>
+                
           </Box>
         ): null}
         

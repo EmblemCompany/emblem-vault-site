@@ -119,14 +119,13 @@ export const contractAddresses = {
   clonableFactoryAbi: ClonableFactory,
   erc20Abi: ERC20,
   erc721Abi: ERC721,
-  erc1155Abi: ERC1155, 
-
+  erc1155Abi: ERC1155
 }
 
 export const BURN_ADDRESS = '0x5D152dd902CC9198B97E5b6Cf5fc23a8e4330180'
 export const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000"
-export const EMBLEM_API = API_OVERLOAD? API_OVERLOAD : 'http://localhost:3001' //'https://api2.emblemvault.io' // 'https://api2.emblemvault.io' //
-export const SIG_API = 'https://tor-us-signer-coval.vercel.app' //'http://localhost:3002' //'https://tor-us-signer-coval.vercel.app'
+export const EMBLEM_API = API_OVERLOAD? API_OVERLOAD : 'https://api2.emblemvault.io' //'http://localhost:3001' // 
+export const SIG_API = 'https://tor-us-signer-coval.vercel.app' //'http://localhost:3002' //
 
 export enum QueryParameters {
   INPUT = 'input',

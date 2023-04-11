@@ -27,6 +27,9 @@ export class Embed extends Component<EmbedProps> {
       url =  "https://gateway.ipfs.io/ipfs/" + hash
       getIPFSImage(hash)
     }
+    if (url.includes('image-scale')) {
+      url = url + '&size=400'
+    }
     return (
       <>
         {url.includes('sketchfab.com/') ? (
@@ -86,7 +89,7 @@ export class Embed extends Component<EmbedProps> {
                 p={"20px"}
                 h={"100%"}
                 className={this.props.className || "d-block w-100"}
-                src={validImage(url) ? url : 'https://circuitsofvalue.com/public/coval-logo.png'}
+                src={validImage(url) ? url : 'https://raw.githubusercontent.com/EmblemCompany/Coval-Site/master/public/coval-logo.png' /*'https://circuitsofvalue.com/public/coval-logo.png'*/}
                 width="250px"
               />
         ) : (
