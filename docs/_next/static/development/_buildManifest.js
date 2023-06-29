@@ -1,1 +1,1 @@
-self.__BUILD_MANIFEST = {__rewrites:[],"/_error":["static\u002Fchunks\u002Fpages\u002F_error.js"],sortedPages:["\u002F_app","\u002F_error"]};self.__BUILD_MANIFEST_CB && self.__BUILD_MANIFEST_CB()
+self.__BUILD_MANIFEST = {__rewrites:[],"/_error":["static\u002Fchunks\u002Fpages\u002F_error.js"],"/nft2":["static\u002Fchunks\u002Fpages\u002Fnft2.js"],"/vaults":["static\u002Fchunks\u002Fpages\u002Fvaults.js"],sortedPages:["\u002F_app","\u002F_error","\u002Fnft2","\u002Fvaults"]};self.__BUILD_MANIFEST_CB && self.__BUILD_MANIFEST_CB()
