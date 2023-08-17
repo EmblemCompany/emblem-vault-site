@@ -19,10 +19,10 @@ import {
   Tab,
   TabPanel,
   TabPanels
-} from '@chakra-ui/react'
+} from '@chakra-ui/core'
 
 import { BigNumber } from '@ethersproject/bignumber'
-import {HStack} from '@chakra-ui/react'
+import {HStack} from '@chakra-ui/core'
 import Head from "next/head"
 import { useWeb3React } from '@web3-react/core'
 import { useEffect, useState } from 'react'

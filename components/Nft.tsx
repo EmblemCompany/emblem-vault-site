@@ -18,9 +18,9 @@ import {
   Tab,
   TabPanel,
   TabPanels
-} from '@chakra-ui/react'
+} from '@chakra-ui/core'
 
-import {HStack} from '@chakra-ui/react'
+import {HStack} from '@chakra-ui/core'
 import Head from "next/head"
 import { useWeb3React } from '@web3-react/core'
 import { SetStateAction, useEffect, useState } from 'react'

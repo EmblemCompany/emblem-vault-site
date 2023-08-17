@@ -1,1 +1,0 @@
-{"ast":null,"code":"import React from \"react\";\nvar __jsx = React.createElement;\nimport Buy from '../components/Buy';\nexport default function BuyPage() {\n  return __jsx(Buy, null);\n}","map":null,"metadata":{},"sourceType":"module"}

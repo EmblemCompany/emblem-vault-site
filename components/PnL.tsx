@@ -1,11 +1,11 @@
-import { Box, Flex, Text, Link, Image, Stack, Button, BoxProps, Input, Select, Tabs, Tab, TabList, TabPanels, TabPanel } from '@chakra-ui/react'
+import { Box, Flex, Text, Link, Image, Stack, Button, BoxProps, Input, Select, Tabs, Tab, TabList, TabPanels, TabPanel } from '@chakra-ui/core'
 import Loader from 'react-loader'
 import Refreshing from './Refreshing'
 import { useRouter } from 'next/router'
 import { useWeb3React } from '@web3-react/core'
 import { useEffect, useState } from 'react'
 import InfiniteScroll from 'react-infinite-scroll-component';
-import {HStack, VStack, Circle, Divider } from '@chakra-ui/react'
+import {HStack, VStack, Circle, Divider } from '@chakra-ui/core'
 
 export default function PnL() {
   const { query } = useRouter()

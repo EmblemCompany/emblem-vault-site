@@ -1,4 +1,4 @@
-import { Button, IconButton, ButtonGroup } from '@chakra-ui/react'
+import { Button, IconButton, ButtonGroup } from '@chakra-ui/core'
 
 export function Notify({
   message,

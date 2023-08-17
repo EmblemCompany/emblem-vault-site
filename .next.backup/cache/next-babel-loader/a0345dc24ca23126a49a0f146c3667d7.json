@@ -1,1 +1,0 @@
-{"ast":null,"code":"import React from \"react\";\nvar __jsx = React.createElement;\nimport ERC1155 from '../components/contract/ERC1155';\nexport default function AssetPage() {\n  return __jsx(ERC1155, null);\n}","map":null,"metadata":{},"sourceType":"module"}

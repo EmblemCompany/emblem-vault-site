@@ -17,9 +17,9 @@ import {
   FormLabel,
   useColorMode,
   IconButton
-} from '@chakra-ui/react'
+} from '@chakra-ui/core'
 
-import {HStack, VStack, Circle } from '@chakra-ui/react'
+import {HStack, VStack, Circle } from '@chakra-ui/core'
 import TorusSdk from "@toruslabs/torus-direct-web-sdk";
 import Head from "next/head"
 import { useWeb3React } from '@web3-react/core'

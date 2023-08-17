@@ -14,7 +14,7 @@ import {
   Flex,
   Icon,
   Box,
-} from '@chakra-ui/react'
+} from '@chakra-ui/core'
 import { Combobox, ComboboxInput, ComboboxPopover, ComboboxList, ComboboxOption } from '@reach/combobox'
 import { getAddress } from '@ethersproject/address'
 import { useWeb3React } from '@web3-react/core'

@@ -10,7 +10,7 @@ import {
   Stack,
   Button,
   useColorMode,
-} from '@chakra-ui/react'
+} from '@chakra-ui/core'
 import copy from 'copy-to-clipboard'
 import { COLOR } from '../constants'
 import { address } from 'bitcoinjs-lib'

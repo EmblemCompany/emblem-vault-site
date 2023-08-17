@@ -1,5 +1,5 @@
 import React, { Component, useEffect, useState } from 'react'
-import { Button, Flex} from '@chakra-ui/react'
+import { Button, Flex} from '@chakra-ui/core'
 
 import { Contract } from '@ethersproject/contracts'
 import { useWeb3React } from '@web3-react/core'

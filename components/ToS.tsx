@@ -1,5 +1,5 @@
-// import { Box, Flex, Text, Link, Image, Stack, Spinner, useColorMode } from '@chakra-ui/react'
-import { Box, Flex, Text, Link, Image, Stack, Button, FormControl, FormLabel, Checkbox, CheckboxGroup, Radio, RadioGroup, Input, FormHelperText, useColorMode, Heading, List, ListItem } from '@chakra-ui/react'
+// import { Box, Flex, Text, Link, Image, Stack, Spinner, useColorMode } from '@chakra-ui/core'
+import { Box, Flex, Text, Link, Image, Stack, Button, FormControl, FormLabel, Checkbox, CheckboxGroup, Radio, RadioGroup, Input, FormHelperText, useColorMode, Heading, List, ListItem } from '@chakra-ui/core'
 
 export default function ToS() {
   return (

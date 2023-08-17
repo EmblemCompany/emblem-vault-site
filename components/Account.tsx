@@ -1,5 +1,5 @@
 import { useState, useEffect, Suspense, useRef, useLayoutEffect } from 'react'
-import { Button, Stack, Box, IconButton } from '@chakra-ui/react'
+import { Button, Stack, Box, IconButton } from '@chakra-ui/core'
 import { Web3Provider } from '@ethersproject/providers'
 import { useWeb3React } from '@web3-react/core'
 import { UserRejectedRequestError } from '@web3-react/injected-connector'

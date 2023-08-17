@@ -11,7 +11,7 @@ import {
   Stack,
   Button,
   useColorMode,
-} from '@chakra-ui/react'
+} from '@chakra-ui/core'
 import copy from 'copy-to-clipboard'
 import QRCode from 'qrcode.react'
 import { COLOR } from '../constants'

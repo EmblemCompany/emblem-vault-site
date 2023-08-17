@@ -1,4 +1,4 @@
-import { useColorMode, BoxProps, Box } from '@chakra-ui/react'
+import { useColorMode, BoxProps, Box } from '@chakra-ui/core'
 
 import { BG, COLOR } from '../constants'
 

@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import { validImage } from '../utils'
-import { Image } from '@chakra-ui/react'
+import { Image } from '@chakra-ui/core'
 import SketchFab from './embed/SketchFab'
 import ShaderToy from './embed/ShaderToy'
 import Bandcamp from './embed/Bandcamp'

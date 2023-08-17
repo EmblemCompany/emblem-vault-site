@@ -1,1 +1,0 @@
-{"ast":null,"code":"$ = jQuery = require('jquery');","map":{"version":3,"sources":["/Users/shannoncode/repo/Emblem.Currentwork/emblem-vault-site/loader.js"],"names":["$","jQuery","require"],"mappings":"AAAAA,CAAC,GAAGC,MAAM,GAAGC,OAAO,CAAC,QAAD,CAApB","sourcesContent":["$ = jQuery = require('jquery')"]},"metadata":{},"sourceType":"script"}

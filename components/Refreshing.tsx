@@ -1,5 +1,5 @@
 import React from 'react'
-import { Flex, Text, Spinner } from '@chakra-ui/react'
+import { Flex, Text, Spinner } from '@chakra-ui/core'
 
 const Refreshing = () => {
   return (

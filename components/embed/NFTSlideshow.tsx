@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import Carousel from 'react-bootstrap/Carousel';
 import Container from 'react-bootstrap/Container';
-import {Box, Stack} from '@chakra-ui/react'
+import {Box, Stack} from '@chakra-ui/core'
 import Embed from '../Embed'
 type ImageProp = {
   image: string,

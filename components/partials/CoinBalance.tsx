@@ -6,7 +6,7 @@ import {
   Link,
   useColorMode,
   Button
-} from '@chakra-ui/react'
+} from '@chakra-ui/core'
 
 import {HStack, VStack, Circle } from '@chakra-ui/react'
 import {validImage } from '../../utils'

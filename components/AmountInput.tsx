@@ -1,5 +1,5 @@
 import { useLayoutEffect, ChangeEvent, useRef } from 'react'
-import { Input } from '@chakra-ui/react'
+import { Input } from '@chakra-ui/core'
 
 import { escapeRegExp } from '../utils'
 

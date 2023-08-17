@@ -16,7 +16,7 @@ import {
   Select,
   Image,
   Input
-} from '@chakra-ui/react'
+} from '@chakra-ui/core'
 import { useRouter } from 'next/router'
 import Loader from 'react-loader'
 import { useWeb3React } from '@web3-react/core'

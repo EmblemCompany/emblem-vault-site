@@ -8,9 +8,9 @@ import {
   Button,
   Flex,
   PseudoBox
-} from '@chakra-ui/react'
+} from '@chakra-ui/core'
 
-import {HStack, VStack, Circle } from '@chakra-ui/react'
+import {HStack, VStack, Circle } from '@chakra-ui/core'
 
 type AttributesProps = {
   attributes: any[],

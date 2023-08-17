@@ -1,1 +1,0 @@
-{"ast":null,"code":"import React from \"react\";\nvar __jsx = React.createElement;\nimport Ownership from '../components/Ownership';\nexport default function OwnershipPage() {\n  return __jsx(Ownership, null);\n}","map":null,"metadata":{},"sourceType":"module"}

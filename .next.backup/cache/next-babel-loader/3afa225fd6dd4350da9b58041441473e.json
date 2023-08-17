@@ -1,1 +1,0 @@
-{"ast":null,"code":"import React from \"react\";\nvar __jsx = React.createElement;\nimport Maintenance from '../components/Maintenance';\nexport default function MaintenancePage() {\n  return __jsx(Maintenance, null);\n}","map":null,"metadata":{},"sourceType":"module"}

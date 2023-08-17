@@ -19,14 +19,14 @@ import {
   useDisclosure,
   Link,
   
-} from '@chakra-ui/react'
+} from '@chakra-ui/core'
 import {
   // Accordion,
   AccordionItem,
   AccordionPanel,
   AccordionIcon,
   AccordionButton,
-} from "@chakra-ui/react"
+} from "@chakra-ui/core"
 // import { Accordion } from 'react-bootstrap';
 // import copy from 'copy-to-clipboard'
 import QRCode from 'qrcode.react'
@@ -36,7 +36,7 @@ import { ExplorerTXType, formatEtherscanLink, NETWORK_SHORTNAMES } from '../util
 // import { useContract } from '../hooks'
 import { useTokenBalance, useTokenAllowance, useETHBalance } from '../data'
 import { Contract, ContractInterface } from '@ethersproject/contracts'
-import { HStack } from '@chakra-ui/react'
+import { HStack } from '@chakra-ui/core'
 import { TransactionToast } from './TransactionToast'
 import { addTokenToWallet } from '../public/web3'
 import Embed from './Embed'
