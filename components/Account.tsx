@@ -1,5 +1,5 @@
 import { useState, useEffect, Suspense, useRef, useLayoutEffect } from 'react'
-import { Button, Stack, Box, IconButton } from '@chakra-ui/core'
+import { Button, Stack, Box, IconButton } from '@chakra-ui/react'
 import { Web3Provider } from '@ethersproject/providers'
 import { useWeb3React } from '@web3-react/core'
 import { UserRejectedRequestError } from '@web3-react/injected-connector'
@@ -96,7 +96,7 @@ export default function Account({ triedToEagerConnect }: { triedToEagerConnect: 
         {MetaMaskOnboarding.isMetaMaskInstalled() || (window as any)?.ethereum || (window as any)?.web3 ? (
           <Button
             isLoading={connecting}
-            leftIcon={MetaMaskOnboarding.isMetaMaskInstalled() ? ('metamask' as 'edit') : undefined}
+            // leftIcon={MetaMaskOnboarding.isMetaMaskInstalled() ? ('metamask' as 'edit') : undefined}
             onClick={(): void => {
               setConnecting(true)
               activate(injected, undefined, true).catch((error) => {
@@ -112,7 +112,9 @@ export default function Account({ triedToEagerConnect }: { triedToEagerConnect: 
             {MetaMaskOnboarding.isMetaMaskInstalled() ? 'Connect to MetaMask' : 'Connect to Wallet'}
           </Button>
         ) : (
-          <Button leftIcon={'metamask' as 'edit'} onClick={() => onboarding.current?.startOnboarding()}>
+          <Button 
+            // leftIcon={'metamask' as 'edit'} 
+            onClick={() => onboarding.current?.startOnboarding()}>
             Install Metamask
           </Button>
         )}
@@ -134,7 +136,7 @@ export default function Account({ triedToEagerConnect }: { triedToEagerConnect: 
         fallback={
           <IconButton
             variant="outline"
-            icon="warning"
+            // icon="warning"
             aria-label="Failed"
             isDisabled
             cursor="default !important"
@@ -164,8 +166,8 @@ export default function Account({ triedToEagerConnect }: { triedToEagerConnect: 
 
       <Button
         as="a"
-        leftIcon={leftIcon ? (leftIcon as 'edit') : undefined}
-        rightIcon="external-link"
+        // leftIcon={leftIcon ? (leftIcon as 'edit') : undefined}
+        // rightIcon="external-link"
         style={{ borderTopLeftRadius: 0, borderBottomLeftRadius: 0 }}
         {...{
           href: formatEtherscanLink(ExplorerTXType.Account, [chainId as number, account]),

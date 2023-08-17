@@ -1,6 +1,7 @@
 import { ReactNode, useEffect, useState } from 'react'
 import BackgroundVideo from './BackgroundVideo'
-import { Flex, IconButton, useDisclosure, Badge, LightMode, Stack, Box, Button, Popover, PopoverTrigger, PopoverContent, PopoverArrow, PopoverCloseButton, PopoverBody, Text, Link} from '@chakra-ui/core'
+import { } from '@chakra-ui/react'
+import { Badge, Popover, PopoverTrigger, PopoverContent, PopoverArrow, PopoverCloseButton, PopoverBody, IconButton, LightMode, Flex, useDisclosure, Stack, Box, Button, Text, Link } from '@chakra-ui/react'
 import { useWeb3React } from '@web3-react/core'
 import dynamic from 'next/dynamic'
 import { CHAIN_ID_NAMES } from '../utils'
@@ -231,10 +232,10 @@ export default function Layout({ children }: { children: ReactNode}): JSX.Elemen
                 {/* <Link href="/swap"> */}
                   <Badge
                     variant="solid"
-                    variantColor={
-                      chainId == 137 || chainId == 1 ? 'blue' : 
-                      chainId == Number(56) || Number(5) ? 'orange':
-                      'orange'/*isTestnet ? 'blue' : undefined*/}
+                    // variantColor={
+                    //   chainId == 137 || chainId == 1 ? 'blue' : 
+                    //   chainId == Number(56) || Number(5) ? 'orange':
+                    //   'orange'/*isTestnet ? 'blue' : undefined*/}
                     fontSize="1rem"
                     style={{ borderTopLeftRadius: 0, borderBottomRightRadius: 0, borderBottomLeftRadius: 0 }} >
                     On {CHAIN_ID_NAMES[chainId].toLowerCase()} 
@@ -272,7 +273,7 @@ export default function Layout({ children }: { children: ReactNode}): JSX.Elemen
           alignItems="center"
           align="center"
         >
-          <Popover usePortal>
+          {/* <Popover usePortal>
             <PopoverTrigger>
             <IconButton size="sm" icon="warning-2" aria-label=''/>
             </PopoverTrigger>
@@ -984,7 +985,7 @@ parties and are not intended to confer third-party beneficiary rights upon any o
 entity.
 If you have any questions about these Terms please contact hello@emblem.pro.</Text></PopoverBody>
             </PopoverContent>
-          </Popover>
+          </Popover> */}
         </Stack>
         {useLayout? (
         <Stack

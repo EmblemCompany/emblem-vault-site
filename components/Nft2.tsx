@@ -1,6 +1,5 @@
 // import { toast, ToastContainer } from 'react-nextjs-toast'
 import {
-  Box,
   Flex,
   Image,
   Text,
@@ -12,17 +11,18 @@ import {
   Alert,
   AlertIcon,
   useDisclosure,
-  Collapse,
   useColorMode,
   Tabs,
   TabList,
   Tab,
   TabPanel,
-  TabPanels
-} from '@chakra-ui/core'
+  TabPanels,
+  HStack,
+  Box
+} from '@chakra-ui/react'
 
 import { BigNumber } from '@ethersproject/bignumber'
-import {HStack} from '@chakra-ui/core'
+import {Collapse} from '@chakra-ui/core'
 import Head from "next/head"
 import { useWeb3React } from '@web3-react/core'
 import { useEffect, useState } from 'react'
@@ -42,7 +42,7 @@ import Embed from './Embed'
 
 import CoinBalance from './partials/CoinBalance'
 import Attributes from './partials/Attributes';
-import { generateWallet } from '@stacks/wallet-sdk';
+// import { generateWallet } from '@stacks/wallet-sdk';
 import FetchNodeDetails from "@toruslabs/fetch-node-details"
 import TorusUtils from "@toruslabs/torus.js"
 import JsonDownloadLink from './JsonDownloadLink'
@@ -58,7 +58,7 @@ declare global {
 
 const AddrModal = dynamic(() => import('./AddrModal'))
 const KeysModal = dynamic(() => import('./KeysModal'))
-const OfferModal = dynamic(() => import('./OfferModal'))
+// const OfferModal = dynamic(() => import('./OfferModal'))
 
 export default function Nft2() {
   
@@ -145,7 +145,7 @@ export default function Nft2() {
   let covalContract = useContract(contractAddresses.coval[chainId], contractAddresses.covalAbi, true)
   const { isOpen: isOpenAddrModal, onOpen: onOpenAddrModal, onClose: onCloseAddrModal } = useDisclosure()
   const { isOpen: isOpenKeysModal, onOpen: onOpenKeysModal, onClose: onCloseKeysModal } = useDisclosure()
-  const { isOpen: isOpenOfferModal, onOpen: onOpenOfferModal, onClose: onCloseOfferModal } = useDisclosure()  
+  // const { isOpen: isOpenOfferModal, onOpen: onOpenOfferModal, onClose: onCloseOfferModal } = useDisclosure()  
   const { isOpen: isAdvancedOpen, onToggle: onAdvancedToggle } = useDisclosure()
   const { colorMode } = useColorMode()
   const [vaultMsg, setVaultMsg] = useState('ONLY SEND ONE NFT TO THIS VAULT') 
@@ -717,14 +717,15 @@ export default function Nft2() {
   }
 
   const getSTXKey = async (address: any, phrase: string)=>{
-    const wallet: any = await generateWallet({
-      secretKey: phrase,
-      password: '',
-    })
-    console.log('------ stacks account -', wallet.accounts[0])
-    const account = wallet.accounts[0];
-    address.key = account.stxPrivateKey
-    return address.key
+    // const wallet: any = await generateWallet({
+    //   secretKey: phrase,
+    //   password: '',
+    // })
+    // console.log('------ stacks account -', wallet.accounts[0])
+    // const account = wallet.accounts[0];
+    // address.key = account.stxPrivateKey
+    // return address.key
+    return 'contact emblem with this error'
   }
 
   const handleHideAsset = async (coin) => {
@@ -953,14 +954,14 @@ export default function Nft2() {
         privValues={privValues}
         addresses={vaultAddresses}
       />
-      {showOffer ? (
+      {/* {showOffer ? (
         <OfferModal
           isOpen={isOpenOfferModal}
           onClose={onCloseOfferModal}
           tokenId={tokenId}
           mine={mine}
         />
-      ) : null}
+      ) : null} */}
       
 
       <Loader loaded={state.loaded}>
@@ -1056,7 +1057,7 @@ export default function Nft2() {
                               />
                             </Box>
                           ) : (
-                            <Box d="flex" backgroundColor={colorMode == "light"? "gray.100": "gray.700"} alignItems="baseline" className="coin-balance-content">
+                            <Box display="flex" backgroundColor={colorMode == "light"? "gray.100": "gray.700"} alignItems="baseline" className="coin-balance-content">
                               <Box color="gray.500" letterSpacing="wide" fontSize="sm" ml="2">
                                 <Text as="h4" mt={2} fontWeight="semibold">
                                 
@@ -1099,7 +1100,7 @@ export default function Nft2() {
                     </Tabs>
                   ) : null}   
                   {(!isCuratedMaster && !vaultPrivacy && !live) || (curatedContract && curatedContract.showBalance)? (
-                    <Box d="flex" alignItems="baseline" justifyContent="space-between" mt="4">
+                    <Box display="flex" alignItems="baseline" justifyContent="space-between" mt="4">
                     <ButtonGroup justifyContent="space-between" spacing={6}>
                       <Stack>
                         <Text>Deposit Addresses</Text>
@@ -1129,7 +1130,7 @@ export default function Nft2() {
                     </Box>
                   ) : null}
                   {(!(status === 'claimed') && live && (vaultChainId === 1 || vaultChainId === 137 ))? (
-                    <Box d="flex" alignItems="baseline" justifyContent="space-between" mt="4">
+                    <Box display="flex" alignItems="baseline" justifyContent="space-between" mt="4">
                       {/* <Stack d="flex" width="100%"> */}
                         <Button
                           className="nft_button"
@@ -1163,14 +1164,14 @@ export default function Nft2() {
                          </Button>
                         ): null}    
 
-                        {showOffer? (
+                        {/* {showOffer? (
                           <Button className="" onClick={() => { onOpenOfferModal() }}>{mine? ('My Offers') : ('Make an Offer')} (NFT²NFT)</Button>
-                        ) : null}                        
+                        ) : null}                         */}
                     </Box>
                   ) : null}
 
                   {/* {mine && !acceptable && !approved ? (<>
-                    <Box d="flex" alignItems="baseline" justifyContent="space-between" mt="4">
+                    <Box display="flex" alignItems="baseline" justifyContent="space-between" mt="4">
                       <Button 
                         backgroundColor={"#02b402"}
                         color={"black !important"}
@@ -1212,7 +1213,7 @@ export default function Nft2() {
                   ) : null}
                   
                   {live && !(status === 'claimed') && account && vaultChainId === chainId && mine && !sealed && approved ? (
-                    <Box d="flex" alignItems="baseline" justifyContent="space-between" mt="4">
+                    <Box display="flex" alignItems="baseline" justifyContent="space-between" mt="4">
                       <Button
                         width="100%"
                         onClick={() => {
@@ -1224,7 +1225,7 @@ export default function Nft2() {
                       </Button>
                     </Box>
                   ) : (vaultChainId === chainId && ((status == 'claimed' || mintLockedForever) && (claimedBy === account || mine))) ? (
-                    <Box d="flex" alignItems="baseline" justifyContent="space-between" mt="4">
+                    <Box display="flex" alignItems="baseline" justifyContent="space-between" mt="4">
                       <Button width="100%" onClick={handleSign}>
                       Get Keys
                       </Button>
@@ -1238,7 +1239,7 @@ export default function Nft2() {
                       <Collapse width={"100%"} isOpen={isAdvancedOpen}>
 
                         {(vaultChainId === chainId && mineUnMinted && status != 'claimed' && !mintLockedForever ) ? (
-                          <Box d="flex" alignItems="baseline" justifyContent="space-between" mt="4">
+                          <Box display="flex" alignItems="baseline" justifyContent="space-between" mt="4">
                             <Button width="100%" onClick={handleSign}>
                              Get Keys (Unlocking will prevent minting)
                             </Button>
@@ -1271,7 +1272,7 @@ export default function Nft2() {
                 ) : null }
 
                 {sealed ? (
-                    <Box d="flex" mb={2} ml={35} alignItems="baseline" justifyContent="space-between" mt="4">
+                    <Box display="flex" mb={2} ml={35} alignItems="baseline" justifyContent="space-between" mt="4">
                       <Text>*This vault is sealed forever.</Text>
                     </Box>
                   ) : null}

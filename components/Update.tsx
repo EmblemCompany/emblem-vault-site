@@ -1,14 +1,5 @@
-// import { Box, Flex, Text, Link, Image, Stack, Spinner, useColorMode } from '@chakra-ui/core'
-import { Box, Flex, Text, Link, Image, Stack, Button, FormControl, FormLabel, Checkbox, CheckboxGroup, Radio, RadioGroup, Input, FormHelperText, useColorMode, Heading } from '@chakra-ui/core'
-import {Center, HStack, VStack } from '@chakra-ui/core'
-import Loader from 'react-loader'
-import Refreshing from './Refreshing'
-import { useRouter } from 'next/router'
-import { useWeb3React } from '@web3-react/core'
-import { Component, useEffect, useState } from 'react'
-import { EMBLEM_API } from '../constants'
-import InfiniteScroll from 'react-infinite-scroll-component';
-import Embed from './Embed'
+import { Box, Text,Heading } from '@chakra-ui/react'
+
 export default function Update() {
   return (
 

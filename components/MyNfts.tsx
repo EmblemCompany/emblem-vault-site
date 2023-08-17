@@ -1,4 +1,5 @@
-import { Box, Flex, Text, Link, Image, Stack, Spinner, useColorMode, Button } from '@chakra-ui/core'
+import { Flex, Text, Link, Image, Stack, Spinner, useColorMode, Button } from '@chakra-ui/react'
+import { Box } from '@chakra-ui/react'
 import Loader from 'react-loader'
 import Refreshing from './Refreshing'
 import { useRouter } from 'next/router'
@@ -209,7 +210,7 @@ export default function MyNfts() {
                   <Stack align="center">
                     <Embed className="d-block w-100 NFT-newest-image" url={vault.image}/>
                   </Stack>
-                  <Box d="flex" alignItems="baseline">
+                  <Box display="flex" alignItems="baseline">
                   </Box>                
                   <Stack align="center" mt={3}>
                     {vault.status == 'claimed' ? <Text color="green.500">CLAIMED</Text> : null}

@@ -1,0 +1,14 @@
+graph LR
+  subgraph User
+    U((User))
+  end  
+  subgraph Metamask
+    M((Metamask))
+  end  
+  subgraph EmblemVault_Contract
+    E((EmblemVault_Contract))
+  end
+
+  U -- 1: Sign Request <--> M
+  U -- 2: Transfer Vault <-->  E <--> safeTransferFrom
+

@@ -9,7 +9,7 @@ import TableHead from '@material-ui/core/TableHead';
 import TablePagination from '@material-ui/core/TablePagination';
 import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
-import { Checkbox } from '@chakra-ui/core'
+import { Checkbox } from '@chakra-ui/react'
 
 import { useWeb3React } from '@web3-react/core'
 import { useState } from 'react'

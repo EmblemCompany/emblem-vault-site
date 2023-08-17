@@ -1,5 +1,6 @@
 import { Suspense } from 'react'
-import { Button, Text, IconButton, useColorMode } from '@chakra-ui/core'
+import { Text, useColorMode } from '@chakra-ui/react'
+import {Button, IconButton} from '@chakra-ui/react'
 import { useWeb3React} from '@web3-react/core'
 import { addTokenToWallet } from '../public/web3'
 import { Token, TokenAmount } from '@uniswap/sdk'
@@ -21,7 +22,7 @@ function Balance({ token }: { token: Token }): JSX.Element {
   return (
     <Button
       as="a"
-      rightIcon="external-link"
+      // rightIcon="external-link"
       variant="outline"
       backgroundColor={BG[colorMode]}
       onClick={() => {
@@ -55,7 +56,7 @@ export default function TokenBalance({ token }: { token: Token }): JSX.Element {
         <IconButton
           variant="outline"
           backgroundColor={BG[colorMode]}
-          icon="warning"
+          // icon="warning"
           aria-label="Failed"
           isDisabled
           cursor="default !important"

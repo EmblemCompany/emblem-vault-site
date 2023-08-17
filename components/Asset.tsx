@@ -1,9 +1,7 @@
 import {
-  Box,
   Flex,
   Image,
   Text,
-  Stack,
   Button,
   ButtonGroup,
   Input,
@@ -12,14 +10,16 @@ import {
   AlertIcon,
   useDisclosure,
   Tooltip,
-  Collapse,
   FormControl,
   FormLabel,
   useColorMode,
-  IconButton
-} from '@chakra-ui/core'
+  IconButton,
+  Stack,
+  Box
+} from '@chakra-ui/react'
+import {Collapse } from '@chakra-ui/core'
 
-import {HStack, VStack, Circle } from '@chakra-ui/core'
+import {HStack} from '@chakra-ui/react'
 import TorusSdk from "@toruslabs/torus-direct-web-sdk";
 import Head from "next/head"
 import { useWeb3React } from '@web3-react/core'
@@ -50,7 +50,7 @@ declare global {
 
 const AddrModal = dynamic(() => import('./AddrModal'))
 const KeysModal = dynamic(() => import('./KeysModal'))
-const OfferModal = dynamic(() => import('./OfferModal'))
+// const OfferModal = dynamic(() => import('./OfferModal'))
 
 export default function Asset() {
   const { account, chainId, library } = useWeb3React()
@@ -952,14 +952,14 @@ export default function Asset() {
         privValues={privValues}
         addresses={vaultAddresses}
       />
-      {showOffer ? (
+      {/* {showOffer ? (
         <OfferModal
           isOpen={isOpenOfferModal}
           onClose={onCloseOfferModal}
           tokenId={tokenId}
           mine={mine}
         />
-      ) : null}
+      ) : null} */}
       
 
       <Loader loaded={state.loaded}>
@@ -1046,7 +1046,7 @@ export default function Asset() {
                       />
                     </Box>
                   ) : (
-                    <Box d="flex" backgroundColor={colorMode == "light"? "gray.100": "gray.700"} alignItems="baseline" className="coin-balance-content">
+                    <Box display="flex" backgroundColor={colorMode == "light"? "gray.100": "gray.700"} alignItems="baseline" className="coin-balance-content">
                       <Box color="gray.500" letterSpacing="wide" fontSize="sm" ml="2">
                         <Text as="h4" mt={2} fontWeight="semibold">
                         
@@ -1083,7 +1083,7 @@ export default function Asset() {
                   )}                  
                   
                   {!vaultPrivacy ? (
-                    <Box d="flex" alignItems="baseline" justifyContent="space-between" mt="4">
+                    <Box display="flex" alignItems="baseline" justifyContent="space-between" mt="4">
                       <ButtonGroup justifyContent="space-between" spacing={6}>
                         <Stack>
                           <Text>Deposit Addresses</Text>
@@ -1161,8 +1161,8 @@ export default function Asset() {
                   ) : null}
 
                   {!(status === 'claimed') && (vaultChainId === 1 || vaultChainId === 4 || vaultChainId === 137 )? (
-                    <Box d="flex" alignItems="baseline" justifyContent="space-between" mt="4">
-                      <Stack d="flex" width="100%">
+                    <Box display="flex" alignItems="baseline" justifyContent="space-between" mt="4">
+                      <Stack display="flex" width="100%">
                         <Button
                           className="nft_button"
                           width="100%"
@@ -1179,11 +1179,11 @@ export default function Asset() {
                   ) : null}
                   {!(status === 'claimed') && mine && !acceptable?  (
                     <>
-                     <Box d="flex" alignItems="baseline" justifyContent="space-between" mt="4" width="100%">
+                     <Box display="flex" alignItems="baseline" justifyContent="space-between" mt="4" width="100%">
                         <Stack direction="column" align="center" width="100%">
                           <Button className="nft_button" width="100%" onClick={onToggle}>Transfer Vault</Button>
                           <Collapse isOpen={isOpen}>
-                            <Box d="flex" alignItems="baseline" justifyContent="space-between" mt="2" width="100%">
+                            <Box display="flex" alignItems="baseline" justifyContent="space-between" mt="2" width="100%">
                             <FormLabel htmlFor="owner-address">Address</FormLabel>
                               <Input
                                 mt={1}
@@ -1197,7 +1197,7 @@ export default function Asset() {
                                 autoComplete="off"
                               />
                             </Box>
-                            <Box d="flex" alignItems="baseline" justifyContent="space-between" mt="2" width="100%">
+                            <Box display="flex" alignItems="baseline" justifyContent="space-between" mt="2" width="100%">
                               <Button isDisabled={!isETHAddress(transferToAddress)} onClick={()=>{
                                 onToggle()
                                 transferVault()
@@ -1209,7 +1209,7 @@ export default function Asset() {
                     </>
                   ):null }
                   {mine && !acceptable ? (<>
-                    <Box d="flex" alignItems="baseline" justifyContent="space-between" mt="4">
+                    <Box display="flex" alignItems="baseline" justifyContent="space-between" mt="4">
                       <Button 
                         className="nft_button"
                         width="100%" onClick={() => {
@@ -1256,7 +1256,7 @@ export default function Asset() {
                     ) : null}
 
                   {!(status === 'claimed') && account && vaultChainId === chainId && mine ? (
-                    <Box d="flex" alignItems="baseline" justifyContent="space-between" mt="4">
+                    <Box display="flex" alignItems="baseline" justifyContent="space-between" mt="4">
                       <Button
                         width="100%"
                         onClick={() => {
@@ -1269,7 +1269,7 @@ export default function Asset() {
                     </Box>
                     // || !live && nonce && mintSignature && vaultCiphertextV2 && to == account
                   ) : (status === 'claimed' && claimedBy === account && vaultChainId === chainId)  ? (
-                    <Box d="flex" alignItems="baseline" justifyContent="space-between" mt="4">
+                    <Box display="flex" alignItems="baseline" justifyContent="space-between" mt="4">
                       <Button width="100%" onClick={handleSign}>
                         Get Keys
                       </Button>

@@ -1,0 +1,13 @@
+{
+    "success":true,
+    "asset":"EVTESTLEGEND",
+    "asset_issuer_address":"1K4BJHFbxD776ZCRFvRX4Sd5zjX32ScgUV",
+    "asset_owner_address":"1K4BJHFbxD776ZCRFvRX4Sd5zjX32ScgUV",
+    "asset_supply":"40",
+    "asset_divisible":false,
+    "asset_locked":true,
+    "image":"https://emblem.finance/EVTESTLEGEND-sm.png",
+    "image_large":"https://emblem.finance/EVTESTLEGEND.jpg",
+    "image_title":"EVTESTLEGEND",
+    "website_social_twitter": "https://twitter.com/emblemvault"
+}

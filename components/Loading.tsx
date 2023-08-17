@@ -1,4 +1,4 @@
-import { Flex, Spinner } from '@chakra-ui/core'
+import { Flex, Spinner } from '@chakra-ui/react'
 import { useState, useEffect } from 'react'
 
 export default function Loading(): JSX.Element {

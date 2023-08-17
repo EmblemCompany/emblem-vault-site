@@ -1,4 +1,5 @@
-import { Button, IconButton, ButtonGroup } from '@chakra-ui/core'
+import { ButtonGroup } from '@chakra-ui/react'
+import {Button, IconButton} from '@chakra-ui/react'
 
 export function Notify({
   message,
@@ -11,13 +12,15 @@ export function Notify({
 }): JSX.Element {
   return (
     <ButtonGroup spacing={0}>
-      <Button variantColor={color} style={{ borderTopRightRadius: 0, borderBottomRightRadius: 0 }}>
+      <Button 
+        // variantColor={color} 
+        style={{ borderTopRightRadius: 0, borderBottomRightRadius: 0 }}>
         {message}
       </Button>
 
       <IconButton
-        icon="close"
-        variantColor={color}
+        // icon="close"
+        // variantColor={color}
         aria-label="Close"
         style={{ borderTopLeftRadius: 0, borderBottomLeftRadius: 0 }}
         borderLeft="1px solid white"

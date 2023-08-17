@@ -1,4 +1,5 @@
-import { Box, Button } from '@chakra-ui/core';
+import { Button } from '@chakra-ui/react';
+import {Box} from '@chakra-ui/react'
 import React from 'react';
 
 const JsonDownloadLink = ({ data, filename }) => {
@@ -25,7 +26,7 @@ const JsonDownloadLink = ({ data, filename }) => {
 
   return (
       <>
-          <Box d="flex" alignItems="baseline" justifyContent="space-between" mt="4">
+          <Box display="flex" alignItems="baseline" justifyContent="space-between" mt="4">
               <Button id="downloadLink" width="100%" onClick={handleClick}>
                   Backup Vault
               </Button>

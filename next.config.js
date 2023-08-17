@@ -2,10 +2,10 @@ const debug = process.env.NODE_ENV !== 'production'
 const withTM = require('next-transpile-modules')([
   // 'doka', 
   // 'react-doka', 
-  // '@ethereumjs/util',
-  // 'micro-ftch', 
-  // '@noble/curves', 
-  // '@noble/hashes', 
+  '@ethereumjs/util',
+  'micro-ftch', 
+  '@noble/curves', 
+  '@noble/hashes', 
   // '@noble/secp256k1',
   // '@chakra-ui/react',
   // '@chakra-ui/system',
@@ -13,6 +13,7 @@ const withTM = require('next-transpile-modules')([
   // '@zag-js/dom-query',
   // '@zag-js/element-size',
   // '@zag-js/focus-visible'
+  'web3-core-method'
 ])
 
 module.exports = withTM({
@@ -25,7 +26,7 @@ module.exports = withTM({
     MAINTENANCE: false
   },
   devIndicators: {
-    autoPrerender: false,
+    // autoPrerender: false,
   }
 });
 // module.exports = {

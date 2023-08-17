@@ -1,4 +1,4 @@
-import { Button } from '@chakra-ui/core'
+import { Button } from '@chakra-ui/react'
 import { useWeb3React } from '@web3-react/core'
 import { Web3Provider } from '@ethersproject/providers'
 import { useEffect, useState } from 'react'
@@ -23,13 +23,13 @@ export default function WalletConnect(): JSX.Element | null {
   return (
     <Button
       isLoading={connecting}
-      leftIcon={'walletconnect' as 'edit'}
+      // leftIcon={'walletconnect' as 'edit'}
       onClick={(): void => {
         setConnecting(true)
         // reset the connector if it was tried already
-        if (walletconnect?.walletConnectProvider?.wc?.uri) {
-          walletconnect.walletConnectProvider = undefined
-        }
+        // if (walletconnect?.walletConnectProvider) {
+        //   walletconnect.walletConnectProvider = undefined
+        // }
         activate(walletconnect, undefined, true).catch((error) => {
           if (error instanceof UserRejectedRequestError) {
             setConnecting(false)

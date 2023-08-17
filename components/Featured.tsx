@@ -1,4 +1,5 @@
-import { Box, Flex, Text, Link, Image, Stack, Spinner, useColorMode } from '@chakra-ui/core'
+import { Flex, Text, Link, Image, Stack, Spinner, useColorMode } from '@chakra-ui/react'
+import {Box} from '@chakra-ui/react'
 import Loader from 'react-loader'
 import Refreshing from './Refreshing'
 import { useRouter } from 'next/router'
@@ -110,7 +111,7 @@ export default function Featured() {
                 <Stack align="center">
                   <Embed url={vault.image}/>
                 </Stack>
-                <Box d="flex" alignItems="baseline">
+                <Box display="flex" alignItems="baseline">
                   <Box color="gray.500" fontWeight="semibold" letterSpacing="wide" fontSize="sm" ml="2">
                     {vault.private ? (
                       <>

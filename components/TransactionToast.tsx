@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
-import { Button, Spinner, IconButton, ButtonGroup } from '@chakra-ui/core'
+import { Spinner, ButtonGroup } from '@chakra-ui/react'
+import {Button, IconButton} from '@chakra-ui/react'
 import { useWeb3React } from '@web3-react/core'
 
 import { useTransactions } from '../context'
@@ -34,15 +35,15 @@ export function TransactionToast({ hash, onComplete }: { hash: string; onComplet
     <ButtonGroup spacing={0}>
       <Button
         as="a"
-        variantColor={typeof confirmed === 'boolean' ? (confirmed ? 'green' : 'red') : 'blue'}
-        leftIcon={
-          typeof confirmed === 'boolean'
-            ? confirmed
-              ? 'check-circle'
-              : 'warning'
-            : (): JSX.Element => <Spinner size="sm" mr="0.5rem" ml="-0.25rem" />
-        }
-        rightIcon="external-link"
+        // variantColor={typeof confirmed === 'boolean' ? (confirmed ? 'green' : 'red') : 'blue'}
+        // leftIcon={
+        //   typeof confirmed === 'boolean'
+        //     ? confirmed
+        //       ? 'check-circle'
+        //       : 'warning'
+        //     : (): JSX.Element => <Spinner size="sm" mr="0.5rem" ml="-0.25rem" />
+        // }
+        // rightIcon="external-link"
         style={{ borderTopRightRadius: 0, borderBottomRightRadius: 0 }}
         {...{
           href: formatEtherscanLink(ExplorerTXType.Transaction, [chainId as number, hash]),
@@ -54,8 +55,8 @@ export function TransactionToast({ hash, onComplete }: { hash: string; onComplet
       </Button>
 
       <IconButton
-        icon="close"
-        variantColor={typeof confirmed === 'boolean' ? (confirmed ? 'green' : 'red') : 'blue'}
+        // icon="close"
+        // variantColor={typeof confirmed === 'boolean' ? (confirmed ? 'green' : 'red') : 'blue'}
         aria-label="Close"
         style={{ borderTopLeftRadius: 0, borderBottomLeftRadius: 0 }}
         borderLeft="1px solid white"

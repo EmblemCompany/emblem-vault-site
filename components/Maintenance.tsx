@@ -1,4 +1,4 @@
-import { Flex, Text, Stack} from '@chakra-ui/core'
+import { Flex, Text, Stack} from '@chakra-ui/react'
 
 
 export default function Meintenance() {

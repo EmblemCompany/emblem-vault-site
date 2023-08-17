@@ -10,7 +10,6 @@
     "skipLibCheck": true,
     // "strict": true,
     "forceConsistentCasingInFileNames": true,
-    "noEmit": true,
     "esModuleInterop": true,
     "module": "esnext",
     "moduleResolution": "node",
@@ -19,7 +18,8 @@
     "jsx": "preserve",
     "noImplicitAny": false,
     "strict": false,
-    "incremental": true
+    "incremental": false,
+    "noEmit": true
   },
   "exclude": [
     "node_modules"

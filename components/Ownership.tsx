@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Box, Button, Flex, Input, Select, useColorMode, Table, Thead, Tbody, Tr, Th, Td, useToast } from "@chakra-ui/core";
+import { Box, Button, Flex, Input, Select, useColorMode, Table, Thead, Tbody, Tr, Th, Td, useToast } from "@chakra-ui/react";
 import { EMBLEM_V2_API } from '../constants';
 
 export default function TokenOwnershipTable() {

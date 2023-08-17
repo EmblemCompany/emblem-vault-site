@@ -1,4 +1,17 @@
-import { theme } from '@chakra-ui/core'
+import { extendTheme } from '@chakra-ui/react';
+const theme = extendTheme({
+  useSystemColorMode: true,
+  gray: {
+    100: "#f7fafc",
+    // ... rest of your colors
+  },
+  colors: {
+    gray: {
+      100: "#f7fafc",
+      // ... rest of your colors
+    }
+  }
+})
 
 const customIcons = {
   walletconnect: {
@@ -104,6 +117,9 @@ export default {
   icons: {
     ...theme.icons,
     ...customIcons,
+  },
+  colors: {
+    ...theme.colors,
   },
   palette: {
     primary: {

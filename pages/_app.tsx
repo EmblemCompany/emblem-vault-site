@@ -2,7 +2,7 @@ import { useState, useLayoutEffect, useEffect } from 'react'
 import { NextComponentType } from 'next'
 import NextApp from 'next/app'
 import Head from 'next/head'
-import { ThemeProvider, CSSReset, ColorModeProvider, Text } from '@chakra-ui/core'
+import { CSSReset, ColorModeProvider, ThemeProvider } from '@chakra-ui/react'
 import { Web3Provider } from '@ethersproject/providers'
 import { Web3ReactProvider, useWeb3React } from '@web3-react/core'
 // import 'doka/doka.css'
@@ -47,7 +47,7 @@ function FunctionalApp({ Component }: { Component: NextComponentType }): JSX.Ele
     
     <>
     {/* <Text>Testing APP Level {useLayout.toString()} </Text> */}
-      <ColorModeProvider >
+      <ColorModeProvider options={undefined} >
         <Favicon />
         <Provider>
           <Layout>

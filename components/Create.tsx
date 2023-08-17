@@ -10,9 +10,7 @@ import {
   TabPanels,
   Tab,
   TabPanel,
-  Box,
   Flex,
-  RadioGroup,
   Radio,
   Textarea,
   Button,
@@ -21,11 +19,12 @@ import {
   Divider,
   Alert,
   AlertIcon,
-  Collapse,
   useDisclosure,
   Select,
-  Checkbox
-} from '@chakra-ui/core'
+  Checkbox,
+  Box
+} from '@chakra-ui/react'
+import {Collapse, RadioGroup} from '@chakra-ui/core'
 
 import Loader from 'react-loader'
 import { useWeb3React } from '@web3-react/core'
@@ -39,7 +38,7 @@ import { isETHAddress } from '../utils'
 import Embed from './Embed'
 import gfm from 'remark-gfm'
 // react-doka
-import { DokaImageEditorModal } from 'react-doka';
+// import { DokaImageEditorModal } from 'react-doka';
 import transakSDK from '@transak/transak-sdk'
 
 // doka
@@ -628,7 +627,7 @@ export default function Create(props: any) {
                                   <img id="preview" src={modalResult} width="250" margin-top="6"></img>
                                 
                                 
-                                {modalVisible && (
+                                {/* {modalVisible && (
                                     <DokaImageEditorModal
                                         {...editorDefaults}
                                         src={vaultImage}
@@ -646,7 +645,7 @@ export default function Create(props: any) {
                                           }
                                         }
                                     />
-                                )}
+                                )} */}
                                 {/* {!!modalResult.length && (
                                     <p>
                                         <img src={modalResult} alt="" />
@@ -705,7 +704,7 @@ export default function Create(props: any) {
                   }
 
                   {Number(balance) < Number(price) ? (
-                    <Box d="flex" alignItems="baseline" justifyContent="space-between" mt="2">
+                    <Box display="flex" alignItems="baseline" justifyContent="space-between" mt="2">
                       <Button
                         width="100%"
                         // as="a"
