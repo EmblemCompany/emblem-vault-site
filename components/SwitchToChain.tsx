@@ -1,4 +1,4 @@
-import { Flex, Button, Stack, Text } from '@chakra-ui/core'
+import { Flex, Button, Stack, Text } from '@chakra-ui/react'
 import { useRouter } from 'next/router'
 
 import { CHAIN_ID_NAMES, modifyUrlObjectForIPFS } from '../utils'

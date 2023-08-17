@@ -1,10 +1,10 @@
-import { Box, Flex, Text, Link, Image, Stack, Spinner, useColorMode, Button } from '@chakra-ui/core'
+import { Box, Flex, Text, Link, Image, Stack, Spinner, useColorMode, Button } from '@chakra-ui/react'
 import Loader from 'react-loader'
 import Refreshing from './Refreshing'
 import { useRouter } from 'next/router'
 import { useWeb3React } from '@web3-react/core'
 import { useEffect, useState } from 'react'
-import { EMBLEM_API } from '../constants'
+import { EMBLEM_API, curatedContracts } from '../constants'
 import InfiniteScroll from 'react-infinite-scroll-component';
 import Embed from './Embed'
 
@@ -22,18 +22,57 @@ export default function MyVaults() {
   const [address, setAddress] = useState(query.address)
   const [vaultType, setVaultType] = useState(query.type || "unclaimed")
   const [experimental, setExperimental] = useState(query.experimental)
-  const { colorMode } = useColorMode()
+  const {colorMode } = useColorMode()
   const [shouldFetchData, setShouldFetchData] = useState(false)
-  const [hasMore, setHasMore] = useState(true)
+  const [version, setVersion] = useState(query.version != null)
+  const [hasMore, setHasMore] = useState(version? true: false)
   const [offset, setOffset] = useState(0)
   const [liveCollections, setLiveCollections] = useState([])
   const [unMintedCollections, setUnMintedCollections] = useState([])
   const [claimedCollections, setClaimedCollections] = useState([])
+  const [showJump, setShowHJump] = useState(query.jump == "true")
+  
   const PAGE_SIZE = 20
+
+  const isAllowedJump = (vaultData) => {
+    // console.log('here', vaultData)
+    let found =  curatedContracts.some(contract => 
+      contract.allowedJump && contract.allowedJump(vaultData.ownership, [])
+    );
+    // console.log('-------', found)
+    return found
+  }
+
+  const selectVaultImage = (vaultData) => {
+    // curatedType == 'live' && vaultType == 'curated'? vault.items[0].image : vault.image
+    if (vaultData.ownership && vaultData.ownership.balances && vaultData.ownership.balances.length > 0 && vaultData.ownership.category == 'erc721') {
+      return vaultData.ownership.balances[0].image
+    } else if (vaultData.ownership && vaultData.ownership.category == 'erc721a' && vaultData.ownership.balances && vaultData.ownership.balances.length > 0) {
+      return vaultData.ownership.balances[0].image
+    } else if (vaultData.ownership && vaultData.ownership.category == 'erc721a') {
+      return vaultData.targetAsset.image
+    }
+    return vaultData.image
+  }
+
+  const allowedJumpContracts = (vaultData) => {
+    let foundContracts = curatedContracts.filter(contract => 
+      contract.allowedJump && contract.allowedJump(vaultData.ownership, [])
+    );
+    return foundContracts;
+  }
+
+  const contractInfo = (vaultData) => {
+    if (vaultData.ownership && vaultData.ownership.category == 'erc721Legacy') {
+      return "Legacy Vault"
+    } else {
+      return vaultData.targetContract.name
+    }
+  }
 
   const getVaults = async () => {
     try {
-      const response = await fetch(EMBLEM_API + '/myvaults/'+(address ? address : account)+'?start='+offset+'&size='+PAGE_SIZE, { //+'&_vercel_no_cache=1'
+      const response = await fetch('https://metadata.emblemvault.io' + `/${version || vaultType == "curated"? 'v1-':''}myvaults/`+(address ? address : account)+'?start='+offset+'&size='+PAGE_SIZE, { //+'&_vercel_no_cache=1'
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -50,10 +89,10 @@ export default function MyVaults() {
         setLoadingApi(false)
         console.log("Records received", jsonData.length)
       } else if (vaultType.toString() == 'curated'){
-        setLiveVaults(jsonData.live)
+        setLiveVaults(groupItemsByTargetTokenId(jsonData.live))
         setUnMintedVaults(jsonData.unMinted)
         setClaimedVaults(jsonData.claimed)
-        setVaults(jsonData.live)
+        setVaults(groupItemsByTargetTokenId(jsonData.live))
         setState({ loaded: true })
         setLoadingApi(false)
         setHasMore(false)
@@ -70,6 +109,31 @@ export default function MyVaults() {
     console.log(offset, PAGE_SIZE, offset+PAGE_SIZE)
     setOffset(offset+PAGE_SIZE)
     setShouldFetchData(true)
+  }
+
+  function groupItemsByTargetTokenId(data) {
+    // const data = JSON.parse(jsonData);
+    const itemsMap = new Map();
+  
+    // Iterate through the data and group items by targetTokenId
+    for (const item of data) {
+      const targetTokenId = item.targetTokenId;
+      if (itemsMap.has(targetTokenId)) {
+        itemsMap.get(targetTokenId).push(item);
+      } else {
+        itemsMap.set(targetTokenId, [item]);
+      }
+    }
+  
+    // Convert the itemsMap to an array of objects
+    const items = Array.from(itemsMap.entries()).map(([targetTokenId, items]) => {
+      return {
+        targetTokenId: targetTokenId,
+        items: items
+      };
+    });
+  
+    return items;
   }
 
   // const more = ()=>{
@@ -132,9 +196,9 @@ export default function MyVaults() {
 
   const handleNewNavigationClick = (path)=>{
     if (!address) {
-      location.href = location.origin + location.pathname + "?type=" + path
+      location.href = location.origin + location.pathname + "?type=" + path + (showJump? '&jump=true': '')
     } else {
-      location.href = location.origin + location.pathname + "?address=" + address + "&type=" + path
+      location.href = location.origin + location.pathname + "?address=" + address + "&type=" + path + (showJump? '&jump=true': '')
     }
   }
 
@@ -157,9 +221,9 @@ export default function MyVaults() {
   return (
     <>
     <Stack pl="10" spacing={0} direction="row">
-      <Button isDisabled={showOrHideNavLink('curated')} m={2} variant="ghost" onClick={()=>{handleNewNavigationClick('curated')}}>
+      {/* <Button isDisabled={showOrHideNavLink('curated')} m={2} variant="ghost" onClick={()=>{handleNewNavigationClick('curated')}}>
           Curated
-      </Button>
+      </Button> */}
       <Button isDisabled={showOrHideNavLink('unclaimed')} m={2} variant="ghost" onClick={()=>{handleNewNavigationClick('unclaimed')}}>
           Locked
       </Button>
@@ -233,9 +297,10 @@ export default function MyVaults() {
           hasMore={hasMore}
           loader={<Refreshing />}
           endMessage={
-            <p style={{ textAlign: 'center' }}>
-              <b>No more vaults to load.</b> 
-            </p>
+            <></>
+            // <p style={{ textAlign: 'center' }}>
+            //   <b>No more vaults to load.</b> 
+            // </p>
           }
         >
       <Flex w="100%" justify="center" flexWrap="wrap" mt={10}>        
@@ -243,8 +308,26 @@ export default function MyVaults() {
           vaults.map((vault, index) => {
             let pieces = location.pathname.split('/')
             pieces.pop()
-            let url = location.origin + pieces.join('/') + '/nft'+(vaultType == 'curated'? '2': '')+'?id=' + vault.tokenId + '&cc=t'
-            const flexSettings = {
+            let isERC721a = vault.items && vault.items[0].targetContract && vault.items[0].targetContract.collectionType == 'ERC721a'? true : false
+            let isLiveCurated = curatedType == 'live' && vaultType == 'curated'
+            let url = location.origin + pieces.join('/') + '/nft'+(vaultType == 'curated' || vault.targetContract ? '2': '')+'?id=' + (isLiveCurated? (isERC721a ? vault.items[0].tokenId: vault.targetTokenId) : vault.tokenId) + '&cc=t'
+            const vaultContainerSettings = {
+              flex: '1',
+              minW: '200px',
+              maxW: '200px',
+              minH: '250px',
+              maxH: '250px',
+              borderWidth: '1px',
+              // color: 'white',
+              mx: '6',
+              mb: '6',
+              rounded: 'lg',
+              overflow: 'hidden',
+              borderColor: vault.network == 'matic' ? '#7145db !important' : vault.network == 'rinkeby'? '#ed6d20 !important': '#627eea !important',
+              cursor: 'pointer',
+            }
+            let infoContainerSettings = {
+              borderColor : '',
               flex: '1',
               minW: '200px',
               maxW: '200px',
@@ -253,29 +336,48 @@ export default function MyVaults() {
               mx: '6',
               mb: '6',
               rounded: 'lg',
-              overflow: 'hidden',
-              borderColor: vault.status == 'claimed' ? 'green !important' : '',
-              cursor: 'pointer',
+              overflow: 'hidden'
             }
             const redirect = function () {
               setLoadingApi(true)
               location.href = url
             }
             return (
-              <Link href={url} className="vaultLink">
-                <Box className="NFT newest" key={index} {...flexSettings} onClick={redirect}>
-                  <Text fontWeight="semibold" textAlign="center" mt={2} pl={2} isTruncated={true}>
-                    {vault.name}
-                    {!vault.private && vault.totalValue > 0 ? ': ~$' + vault.totalValue : null}
-                  </Text>
-                  <Stack align="center">
-                    <Embed className="d-block w-100 NFT-newest-image" url={vault.image}/>
-                  </Stack>
-                  <Stack align="center" mt={3}>
-                    {vault.status == 'claimed' ? <Text color="green.500">UNLOCKED</Text> : null}
-                  </Stack>
+              <Box>
+                <Link href={url} className="vaultLink">
+                  <Box className="NFT newest" key={index} {...vaultContainerSettings} onClick={redirect}>
+                    <Text fontWeight="semibold" textAlign="center" mt={2} pl={2} isTruncated={true}>                    
+                      {curatedType == 'live' && vaultType == 'curated' ? vault.items[0].name: vault.name}
+                      {!vault.private && vault.totalValue > 0 ? ': ~$' + vault.totalValue : null}
+                      
+                    </Text>
+                    <Stack align="center">
+                      <Embed className="d-block NFT-image-v3" url={selectVaultImage(vault)}/>                    
+                      {curatedType == 'live' && vaultType == 'curated' && vault.items.length > 1 ? (<Text>{' you own '+ vault.items.length}</Text>) : null}
+                    </Stack>
+                    <Stack align="center" mt={3}>
+                      {curatedType == 'live' && vaultType == 'curated' && vault.items.length > 1 ? ' you own '+ vault.items.length : null}
+                    </Stack>
+                  </Box>                
+                </Link>
+                
+                  <Box className="NFT newest" key={index} {...infoContainerSettings} >
+                  <Text fontSize={'small'} fontWeight="semibold" textAlign="left" pl={2} isTruncated={true}> Network: {vault.network} </Text>
+                  <Text fontSize={'small'} fontWeight="semibold" textAlign="left" pl={2} isTruncated={true}> Contract: {contractInfo(vault)} </Text>
+                  {allowedJumpContracts(vault).length > 0 && showJump ? (
+                    <>                      
+                      {allowedJumpContracts(vault).map((contract, index) => {
+                        return (
+                          <Link fontSize={'x-small'} textAlign="left" pl={2}> Circuit jump to: {contract.name} Collection</Link>
+                        )
+                      })}
+                    </>
+                  ) : null}
+                  
                 </Box>
-              </Link>
+                
+                
+              </Box>
             )
           })
           

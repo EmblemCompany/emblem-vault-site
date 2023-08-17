@@ -9,7 +9,7 @@ import {
   IconButton,
   Icon,
   StatArrow,
-} from '@chakra-ui/core'
+} from '@chakra-ui/react'
 import { Route, Trade } from '@uniswap/sdk'
 
 import { getTokenDisplayValue, getPercentChange } from '../utils'

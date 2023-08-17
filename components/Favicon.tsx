@@ -1,5 +1,5 @@
 import Head from 'next/head'
-import { useColorMode } from '@chakra-ui/core'
+import { useColorMode } from '@chakra-ui/react'
 
 export default function Favicon(): JSX.Element {
   const { colorMode } = useColorMode()

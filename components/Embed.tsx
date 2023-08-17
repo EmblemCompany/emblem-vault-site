@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import { validImage } from '../utils'
-import { Image } from '@chakra-ui/core'
+import { Image } from '@chakra-ui/react'
 import SketchFab from './embed/SketchFab'
 import ShaderToy from './embed/ShaderToy'
 import Bandcamp from './embed/Bandcamp'
@@ -83,14 +83,25 @@ export class Embed extends Component<EmbedProps> {
                 className={this.props.className + " " + hash || "d-block w-100"}
                 src={url}
                 width="250px"
+                maxWidth={"250px"}
               />
-        ) : url.includes('/dynamic/') || url.includes('arweave') || url.includes('https://s3.amazonaws.com/') ||  url.includes('googleusercontent.com') || url.includes('ipfs.io') || url.includes('framed/') ||  url.includes('.png') || url.includes('.jpg') || url.includes('.jpeg') || url.includes('.gif') || url.includes('.svg') || url.includes('data:image') ? (
+        ) : url.includes('image-scaler.vercel') ? (
+          <Image
+            p={"20px"}
+            h={"100%"}
+            className={this.props.className || "d-block w-100"}
+            src={url}
+            width="250px"
+            height="300px"
+          />
+        ) :  url.includes('/dynamic/') || url.includes('arweave') || url.includes('https://s3.amazonaws.com/') ||  url.includes('googleusercontent.com') || url.includes('ipfs.io') || url.includes('framed/') ||  url.includes('.png') || url.includes('.jpg') || url.includes('.jpeg') || url.includes('.gif') || url.includes('.svg') || url.includes('data:image') ? (
               <Image
                 p={"20px"}
                 h={"100%"}
                 className={this.props.className || "d-block w-100"}
                 src={validImage(url) ? url : 'https://raw.githubusercontent.com/EmblemCompany/Coval-Site/master/public/coval-logo.png' /*'https://circuitsofvalue.com/public/coval-logo.png'*/}
                 width="250px"
+                maxWidth={"250px"}
               />
         ) : (
           <Generic

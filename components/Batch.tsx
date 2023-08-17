@@ -11,7 +11,7 @@ import {
   Button,
   Link,
   Select
-} from '@chakra-ui/core'
+} from '@chakra-ui/react'
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react'
 import { EMBLEM_API } from '../constants'

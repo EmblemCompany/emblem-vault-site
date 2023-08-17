@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Button, Spinner, IconButton, ButtonGroup } from '@chakra-ui/core'
+import { Button, Spinner, IconButton, ButtonGroup } from '@chakra-ui/react'
 import { useWeb3React } from '@web3-react/core'
 
 import { useTransactions } from '../context'

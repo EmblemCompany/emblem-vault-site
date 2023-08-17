@@ -2,10 +2,10 @@ import { useState, useLayoutEffect, useEffect } from 'react'
 import { NextComponentType } from 'next'
 import NextApp from 'next/app'
 import Head from 'next/head'
-import { ThemeProvider, CSSReset, ColorModeProvider, Text } from '@chakra-ui/core'
+import { ThemeProvider, CSSReset, ColorModeProvider, Text } from '@chakra-ui/react'
 import { Web3Provider } from '@ethersproject/providers'
 import { Web3ReactProvider, useWeb3React } from '@web3-react/core'
-import 'doka/doka.css'
+// import 'doka/doka.css'
 import theme from '../theme'
 import { useQueryParameters } from '../hooks'
 import Base from '../components/Base'
@@ -92,9 +92,17 @@ export default class App extends NextApp {
           <script src="/bip39/jsbip39.js"></script>
           <script src="/bip39/entropy.js"></script>
           <script src="/bip39/new.js"></script>
+          <script async src="https://www.googletagmanager.com/gtag/js?id=G-Q2CN08G2WW"></script>
+
           <script
             dangerouslySetInnerHTML={{
-              __html: `                
+              __html: `
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){dataLayer.push(arguments);}
+                gtag('js', new Date());
+
+                gtag('config', 'G-Q2CN08G2WW');
+              
                 if (location.href.includes('/vault?')) {
                   location.href = location.href.replace('/vault?', '/nft?')
                 }

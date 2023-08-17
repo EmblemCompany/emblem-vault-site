@@ -1,0 +1,1 @@
+{"ast":null,"code":"import React from \"react\";\nvar __jsx = React.createElement;\nimport Nft2 from '../components/Nft2';\nexport default function VaultPage() {\n  return __jsx(Nft2, null);\n}","map":null,"metadata":{},"sourceType":"module"}

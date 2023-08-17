@@ -1,0 +1,1 @@
+{"ast":null,"code":"import React from \"react\";\nvar __jsx = React.createElement;\nimport Nftrade from '../components/Nftrade';\nexport default function SearchPage() {\n  return __jsx(Nftrade, null);\n}","map":null,"metadata":{},"sourceType":"module"}

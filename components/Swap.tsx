@@ -11,7 +11,7 @@ import { id } from '@ethersproject/hash'
 import { defaultAbiCoder } from '@ethersproject/abi'
 import IERC20 from '@uniswap/v2-core/build/IERC20.json'
 import { abi as IUniswapV2Router02ABI } from '@uniswap/v2-periphery/build/IUniswapV2Router02.json'
-import { Stack, Button, Text, BoxProps } from '@chakra-ui/core'
+import { Stack, Button, Text, BoxProps } from '@chakra-ui/react'
 
 import AmountInput from '../components/AmountInput'
 import TokenSelect from '../components/TokenSelect'

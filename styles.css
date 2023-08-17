@@ -7,6 +7,10 @@ body {
   line-height: 1.5;
 }
 
+.warning {
+  color: #ff0000 !important;
+}
+
 html,
 body {
   max-width: 100% !important;
@@ -20,6 +24,12 @@ body {
   box-shadow: 0 5px 35px #100b0b !important;
   background-color: rgb(0 0 0 / 39%);
   border-color: #e2e8f029 !important;
+}
+
+.NFT-image-v3 {
+  max-height: 200px !important;
+  width: unset !important;
+  padding: unset !important;
 }
 
 .NFT-newest-image {

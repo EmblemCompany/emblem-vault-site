@@ -1,5 +1,5 @@
 import React, { Component, Dispatch, useState } from 'react'
-import { Box, Flex, Text, Link, Image, Stack, Button, FormControl, FormLabel, Input, FormHelperText, Select } from '@chakra-ui/core'
+import { Box, Flex, Text, Link, Image, Stack, Button, FormControl, FormLabel, Input, FormHelperText, Select } from '@chakra-ui/react'
 import { Contract } from '@ethersproject/contracts';
 import { contractAddresses } from '../constants';
 import { TransactionToast } from './TransactionToast';

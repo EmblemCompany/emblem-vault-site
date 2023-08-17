@@ -1,5 +1,5 @@
 import { Suspense } from 'react'
-import { Button, Text, IconButton, useColorMode } from '@chakra-ui/core'
+import { Button, Text, IconButton, useColorMode } from '@chakra-ui/react'
 import { useWeb3React} from '@web3-react/core'
 import { addTokenToWallet } from '../public/web3'
 import { Token, TokenAmount } from '@uniswap/sdk'

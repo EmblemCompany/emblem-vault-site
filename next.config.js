@@ -1,5 +1,20 @@
 const debug = process.env.NODE_ENV !== 'production'
-const withTM = require('next-transpile-modules')(['doka', 'react-doka']);
+const withTM = require('next-transpile-modules')([
+  // 'doka', 
+  // 'react-doka', 
+  // '@ethereumjs/util',
+  // 'micro-ftch', 
+  // '@noble/curves', 
+  // '@noble/hashes', 
+  // '@noble/secp256k1',
+  // '@chakra-ui/react',
+  // '@chakra-ui/system',
+  // 'toasted-notes',
+  // '@zag-js/dom-query',
+  // '@zag-js/element-size',
+  // '@zag-js/focus-visible'
+])
+
 module.exports = withTM({
   reactStrictMode: false,
   assetPrefix: '/',

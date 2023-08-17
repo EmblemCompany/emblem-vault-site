@@ -1,0 +1,1 @@
+{"ast":null,"code":"import React from \"react\";\nvar __jsx = React.createElement;\nimport CreateCurated from '../components/CreateCurated';\nexport default function CreateVault() {\n  return __jsx(CreateCurated, null);\n}","map":null,"metadata":{},"sourceType":"module"}

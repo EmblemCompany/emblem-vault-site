@@ -11,21 +11,16 @@ import {
   Alert,
   AlertIcon,
   useDisclosure,
-  Tooltip,
   Collapse,
-  FormControl,
-  FormLabel,
   useColorMode,
-  IconButton,
   Tabs,
   TabList,
   Tab,
   TabPanel,
   TabPanels
-} from '@chakra-ui/core'
+} from '@chakra-ui/react'
 
-import {HStack, VStack, Circle } from '@chakra-ui/react'
-// import TorusSdk from "@toruslabs/torus-direct-web-sdk";
+import {HStack} from '@chakra-ui/react'
 import Head from "next/head"
 import { useWeb3React } from '@web3-react/core'
 import { SetStateAction, useEffect, useState } from 'react'
@@ -33,30 +28,23 @@ import { useRouter } from 'next/router'
 import Refreshing from './Refreshing'
 import Loader from 'react-loader'
 import dynamic from 'next/dynamic'
-import { isETHAddress, validImage } from '../utils'
 import { Contract } from '@ethersproject/contracts'
 import { TransactionToast } from './TransactionToast'
-import { EMBLEM_API, BURN_ADDRESS, ZERO_ADDRESS, contractAddresses, curatedContracts, SIG_API } from '../constants'
+import { EMBLEM_API, contractAddresses, curatedContracts, SIG_API, EMBLEM_V2_API, ZERO_ADDRESS } from '../constants'
 import { useContract } from '../hooks'
-import Tilt from 'react-tilt'
 import { CHAIN_ID_NAMES } from '../utils'
 import CryptoJS from 'crypto-js'
-import { addTokenToWallet, addMany } from '../public/web3'
 import ReactMarkdown from 'react-markdown'
 import gfm from 'remark-gfm'
 import Embed from './Embed'
 import NFTSlideshow from './embed/NFTSlideshow'
 import CoinBalance from './partials/CoinBalance'
-import { chakra } from '@chakra-ui/system'
-import transakSDK from '@transak/transak-sdk'
 import Attributes from './partials/Attributes';
-import { getStxAddress, generateWallet } from '@stacks/wallet-sdk';
+import { generateWallet } from '@stacks/wallet-sdk';
 import FetchNodeDetails from "@toruslabs/fetch-node-details"
 import TorusUtils from "@toruslabs/torus.js"
-import { toBytes } from '@stacks/common'
-import { BigNumber } from '@ethersproject/bignumber'
 import JsonDownloadLink from './JsonDownloadLink'
-import { green } from '@material-ui/core/colors'
+import ApprovalButton from './partials/ApprovalButton'
 
 
 declare global {
@@ -74,16 +62,13 @@ export default function Nft() {
   const { query } = useRouter()
   const [clearCache, setCache] = useState(query.cc == 't')
   const [showMove, setShowMove] = useState(query.curated == 't')
-  const [qualifiedCollection, setQualifiedCollection] = useState({name: '', chain: ''})
+  const [qualifiedCollection, setQualifiedCollection] = useState({1: '', name: '', chain: ''})
   const [moving, setMoving] = useState(false)
-  const [approved, setApproved] = useState(false)
-  const [useOldMint, setUseOldMint] = useState(query.useOldMint)
+  
   const [mintPassword, setMintPassword] = useState(query.key)
   const [showOffer, setShowOffer] = useState(query.offer || false)
   const [framed, setFramed] = useState(query.framed || true)
   const [tokenId, setTokenId] = useState(query.id)
-  const [experimental, setExperimental] = useState(query.experimental)
-  const [noLayout, setNoLayout] = useState(query.noLayout)
   const [slideshowOnly, setSlideshowOnly] = useState(query.slideshowOnly || false)
   const [vaultName, setVaultName] = useState('')
   const [vaultIPFS, setVaultIPFS] = useState('')
@@ -119,18 +104,16 @@ export default function Nft() {
   const [decryptedEffectRunning, setDecryptedEffectRunning] = useState(false)
   const [decryptPassword, setDecryptPassword] = useState('')
   const [invalidVault, setInvalidVault] = useState(false)
-  const [hasCheckedNft, setHasCheckedNft] = useState(false)
   const [accepting, setAccepting] = useState(false)
   const [approving, setApproving] = useState(false)
   const [acceptable, setAcceptable] = useState(false)
   const [transferPassword, setTransferPassword] = useState('')
   const [showTransferPassword, setShowTransferPassword] = useState(false)
   const [preTransfering, setPreTransfering] = useState(false)
-  const [transferToAddress, setTransferToAddress] = useState(null)
   const [transfering, setTransfering] = useState(false)
   const [owner, setOwner] = useState(null)
-  // const [torus, setTorus] = useState(initTorus())
   const [live, setLive] = useState(false)
+  const [checkLive, setCheckLive] = useState(false)
   const [nonce, setNonce] = useState(null)
   const [block, setBlock] = useState(null)
   const [mintSignature, setMintSignature] = useState(null)
@@ -142,8 +125,10 @@ export default function Nft() {
   const [alternateContractAddress, setAlternateContractAddress] = useState(null)
   const [targetAsset, setTargetAsset] = useState({name: '', image: '', metadata: ''})
   const [targetContract, setTargetContract] = useState({name: '', chain: '', 4: '', 1: '', tokenId: {}, serialNumber: {'hex':''} })
-  // const [transferImage, setTransferImage] = useState('')
+  const [move_targetAsset, setMoveTargetAsset] = useState({name: '', image: '', metadata: ''})
+  const [move_targetContract, setMoveTargetContract] = useState({name: '', chain: '', 4: '', 1: '', tokenId: {}, serialNumber: {'hex':''} })
   const [isCovalApproved, setIsCovalApproved] = useState(false)
+  const [approved, setApproved] = useState(false)
   const [decimals, setDecimals] = useState(null)
   const [allowance, setAllowance] = useState(null)
   const [balance, setBalance] = useState(null)
@@ -174,58 +159,16 @@ export default function Nft() {
 
   let transferImage: string;
 
-  // async function initTorus() {
-  //   let _torus = new TorusSdk({
-  //     baseUrl: `${window.location.origin}/serviceworker`,
-  //     enableLogging: true,
-  //     network: "testnet", // details for test net
-  //   });
-  //   await _torus.init({skipSw: true, skipInit: true, skipPrefetch: true})
-  //   console.log("Initialized Torus")
-  //   return _torus
-  // }
-
   const getVaultContract = (address = null) =>{
-    //return useContract(address || contractAddresses.emblemVault[chainId], contractAddresses.emblemAbi, true)
     return new Contract(address || contractAddresses.emblemVault[chainId], contractAddresses.emblemAbi, library.getSigner(account).connectUnchecked())
   }
 
   const getCuratedContract = (address = null) =>{
     return new Contract(address, contractAddresses.erc1155Abi, library.getSigner(account).connectUnchecked())
-  }
-
-  const initializeTransak = (address?: string, coin? : string)=>{
-    transak = new transakSDK({
-      apiKey: 'e8bed1bd-6844-4eb1-973a-7a11a48fafab',  // Your API Key
-      environment: 'PRODUCTION', // STAGING/PRODUCTION
-      defaultCryptoCurrency: coin || 'ETH',
-      walletAddress: address || '', // Your customer's wallet address
-      themeColor: '000000', // App theme color
-      fiatCurrency: 'USD', // INR/GBP
-      // fiatAmount: 350,
-      email: '', // Your customer's email address
-      redirectURL: '',
-      // paymentMethod: 'neft_bank_transfer',
-      hostURL: window.location.origin,
-      widgetHeight: '550px',
-      widgetWidth: '450px'
-    });
-  
-    // To get all the events
-    transak.on(transak.ALL_EVENTS, (data: any) => {
-      console.log(data)
-    });
-  
-    // This will trigger when the user marks payment is made.
-    transak.on(transak.EVENTS.TRANSAK_ORDER_SUCCESSFUL, (orderData: any) => {
-      console.log(orderData);
-      transak.close();
-    });
-  
-    transak.init()
-  }
+  }  
 
   const checkLiveliness = (tokenId: string | string[], cb: { (): void; (): void; (): any })=>{
+    // alert(`here ${owner}, ${move_targetAsset} ${move_targetContract}`)
     fetch(EMBLEM_API + '/liveliness', {
       method: 'POST',
       headers: {
@@ -242,15 +185,6 @@ export default function Nft() {
     })
     return cb()
   }
-
-  // const transferVault = () => {
-  //   setTransfering(true)
-  //   ;(emblemContract as Contract).transferFrom(account, transferToAddress, tokenId)
-  //   .then(({ hash }: { hash: string }) => {
-  //     setHash(hash)
-  //   })
-  //   .catch((error: ErrorWithCode) => {})
-  // }
 
   const lazyMint = () =>{
     library.getSigner(account)
@@ -365,8 +299,7 @@ export default function Nft() {
       .setApprovalForAll(contractAddresses.vaultHandler[chainId], true)
       .then(({ hash }: { hash: string }) => {
         setTimeout(() => {
-          setHash(hash)          
-          // setShowMakingVaultMsg(true)
+          setHash(hash)
         }, 100) // Solving State race condition where transaction watcher wouldn't notice we were creating
       })
       .catch((error: ErrorWithCode) => {
@@ -374,8 +307,6 @@ export default function Nft() {
           console.log(`tx failed.`, error)
         } else {
           setApproving(false)
-
-          // setShowPreVaultMsg(false)
         }
       })
   }
@@ -406,8 +337,7 @@ export default function Nft() {
             service: 'evmetadata'
           },
           body: JSON.stringify({tokenId: tokenId, signature: signature, chainId: chainId.toString()}),
-        }).then(async function (response){
-          let data = await response.json()
+        }).then(async function () {
           location.href = location.href.split("/")[0] + "/vaults"
         })
       })
@@ -435,11 +365,7 @@ export default function Nft() {
   
 
   const getVault = async () => {
-    // syncAccount()
-    console.log('getvault')
-    // !slideshowOnly ? loadCache() : null
-    // console.log("---------",EMBLEM_API + '/meta/' + tokenId + '?experimental=true')
-    const responce = await fetch(EMBLEM_API + '/meta/' + tokenId + '?experimental=true'+(clearCache ? '&_vercel_no_cache=1' : ''), {
+    const response = await fetch(EMBLEM_API + '/meta/' + tokenId + '?experimental=true'+(clearCache ? '&_vercel_no_cache=1' : ''), {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -447,7 +373,7 @@ export default function Nft() {
         cc: (clearCache ? 't' : '')
       },
     })
-    const jsonData = await responce.json()
+    const jsonData = await response.json()
     setRawMetadata(jsonData)
     setStates(jsonData)
     // console.log('vault response was ', jsonData)
@@ -475,17 +401,17 @@ export default function Nft() {
         }        
       }) : null
     }
-    { if (jsonData.targetContract) {
-      setTimeout(() => {
-        location.href = location.origin + '/nft2?id=' + jsonData.targetContract.tokenId
-      }, 500)
-    }}
+    // { if (jsonData.targetContract) {
+    //   setTimeout(() => {
+    //     location.href = location.origin + '/nft2?id=' + jsonData.tokenId
+    //   }, 500)
+    // }}
   }
 
   
 
   const getWitness = async (cb: { (witness: any): void; (arg0: boolean): any }) => {
-    const responce = await fetch(EMBLEM_API + '/witness/' + tokenId, {
+    const response = await fetch(EMBLEM_API + '/witness/' + tokenId, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -494,8 +420,7 @@ export default function Nft() {
         chainid: chainId.toString()
       },
     })
-    const jsonData = await responce.json()
-    // console.log('vault response was ', jsonData)
+    const jsonData = await response.json()
     if (jsonData.signature) {
       console.log('witness', jsonData)
       return cb(jsonData)
@@ -504,31 +429,10 @@ export default function Nft() {
     }
   }
 
-  const getMoveableCollections= async () => {
-    // alert(0)
-    console.log("-----------------------------------", vaultValues.length, attributes.length)
-    if(vaultValues.length == 1 && attributes.length > 0){
-      let project = attributes.filter(item=>{return item.value == vaultValues[0].name})
-      if (project.length > 0) {
-          // console.log(project[0].trait_type)
-          let projectName = project[0].trait_type
-          let _qualifiedCollection = curatedContracts.filter(item=>{return item.name == projectName})
-          if (_qualifiedCollection.length > 0) {
-              // console.log('--------- @@@@@@@@@@@ -------------- @@@@@qualified', _qualifiedCollection[0])
-              setQualifiedCollection(_qualifiedCollection[0])
-          }
-      }
-      
-    } else {
-      // setTimeout(()=>{getMoveableCollections()}, 1000)
-    }
-  }
-
   const setStates = (jsonData) => {
     framed && jsonData.image && !jsonData.image.includes('framed=') && !jsonData.image.includes('http') ? jsonData.image = jsonData.image + "&framed="+framed : null
     if (jsonData.ciphertextV2) {
       setVaultCiphertextV2(jsonData.ciphertextV2)
-      // console.log("ciphertextV2", jsonData.ciphertextV2)
     }
     setMintLockedForever(jsonData.mintLocked && jsonData.mintLockBlock == 0)
     setVaultName(jsonData.name)
@@ -544,16 +448,14 @@ export default function Nft() {
     setVaultImageIPFS(jsonData.image_ipfs || null)
     jsonData.targetAsset? setTargetAsset(jsonData.targetAsset) : null
     jsonData.targetContract? setTargetContract(jsonData.targetContract) : null
-    if (jsonData.targetContract){
+    jsonData.move_targetContract? setMoveTargetContract(jsonData.move_targetContract) : null
+    jsonData.move_targetAsset? setMoveTargetAsset(jsonData.move_targetAsset) : null
+    
+    if (jsonData.targetContract && jsonData.targetContract[chainId]){
       setTimeout(() => {
         location.href = location.origin + '/nft2?id=' + jsonData.targetContract.tokenId
       }, 500)
-    }
-    if (jsonData.live == false) {
-      checkLiveliness(jsonData.tokenId, ()=>{
-
-      })
-    }
+    }    
     setLive(jsonData.live == false ? false : true)
     setNonce(jsonData.nonce)
     setMintSignature(jsonData.signature)
@@ -575,7 +477,7 @@ export default function Nft() {
     if (status === 'claimed') {
       setClaimedBy(jsonData.claimedBy)
     }
-    // console.log('inside getstates. mine is ', mine)
+
     setState({ loaded: true })
     let isPvt =
       jsonData.addresses.filter((item: { address: string | string[] }) => {
@@ -587,58 +489,21 @@ export default function Nft() {
     } else {
       setSealed(false)
     }
-    getMoveableCollections()
+    if(jsonData.values.length == 1 && jsonData.attributes.length > 0){
+      let project = jsonData.attributes.filter(item=>{return item.value == jsonData.values[0].name})
+      if (project.length > 0) {
+          let projectName = project[0].trait_type
+          let _qualifiedCollection = curatedContracts.filter(item=>{return item.name == projectName})
+          if (_qualifiedCollection.length > 0) {            
+              setQualifiedCollection(_qualifiedCollection[0])
+          }
+      }      
+    }    
   }
-
-  // const getEthBalances = async (address, cb) => {
-  //   const responce = await fetch(EMBLEM_API + '/eth/balance/' + address, {
-  //     method: 'GET',
-  //     headers: {
-  //       'Content-Type': 'application/json',
-  //       service: 'evmetadata',
-  //     },
-  //   })
-  //   const jsonData = await responce.json()
-  //   // console.log(Number(vaultTotalValue), Number(jsonData.totalValue))
-  //   setVaultTotalValue(Number(vaultTotalValue) + Number(jsonData.totalValue))
-  //   // console.log('get eth balances', jsonData.values)
-  //   return cb(jsonData.values)
-  // }
-
-  // const getBtcBalance = async (values, address, cb) => {
-  //   const responce = await fetch(EMBLEM_API + '/btc/balance/' + address, {
-  //     method: 'GET',
-  //     headers: {
-  //       'Content-Type': 'application/json',
-  //       service: 'evmetadata',
-  //     },
-  //   })
-  //   const jsonData = await responce.json()
-  //   // setVaultValues(values.concat(jsonData.values))
-  //   return cb(values.concat(jsonData.values))
-  // }
-
-  // const getNftBalance = async (values, address, cb) => {
-  //   // console.log(address)
-  //   const responce = await fetch(EMBLEM_API + '/eth/nft/' + address, {
-  //     method: 'GET',
-  //     headers: {
-  //       'Content-Type': 'application/json',
-  //       service: 'evmetadata',
-  //     },
-  //   })
-  //   const jsonData = await responce.json()
-  //   if (jsonData.length > 0) {
-  //     // console.log("Fuckling NFT", jsonData, values.concat(jsonData))
-  //     return cb(values.concat(jsonData))
-  //   } else {
-  //     return cb(values)
-  //   }
-  // }
 
   const getAllBalances = async (values: string | any[], tokenId: string, cb: { (values: any): any; (arg0: any): any }) => {
     // console.log(address)
-    const responce = await fetch(EMBLEM_API + '/vault/balance/' + tokenId , {
+    const response = await fetch(EMBLEM_API + '/vault/balance/' + tokenId , {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -646,8 +511,8 @@ export default function Nft() {
       },
     })
     
-    const jsonData = await responce.json()
-    console.log('responce', responce, jsonData)
+    const jsonData = await response.json()
+    console.log('response', response, jsonData)
     if (jsonData.balances.length > 0) {      
       return cb(values.concat(jsonData.balances))
     } else {
@@ -656,13 +521,11 @@ export default function Nft() {
   }
 
   const getAllBalancesLive = async (values: string | any[], tokenId: string | string[], cb: { (v: any): void; (v: any): void; (arg0: boolean): any }) => {
-    // setVaultValues([])
-    // console.log(address)
     if (loadedValues) {
       return cb(false)
     }
     setLoadedValues(true)
-    const responce = await fetch(EMBLEM_API + '/vault/balance/' + tokenId + '?live=true&_vercel_no_cache=1' , {
+    const response = await fetch(EMBLEM_API + '/vault/balance/' + tokenId + '?live=true&_vercel_no_cache=1' , {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -670,8 +533,8 @@ export default function Nft() {
       },
     })
     
-    const jsonData = await responce.json()
-    console.log('responce', responce, jsonData)
+    const jsonData = await response.json()
+    console.log('response', response, jsonData)
     if (jsonData.balances.length > 0) {      
       return cb(values.concat(jsonData.balances))
     } else {
@@ -680,8 +543,7 @@ export default function Nft() {
   }
 
   const getAllBalancesByAddress = async (values: string | any[], ethAddress: string, btcAddress: string, cb: { (values: any): void; (arg0: any): any }) => {
-    // console.log(address)
-    const responce = await fetch(EMBLEM_API + '/vault/balance/' + ethAddress + '/' + btcAddress, {
+    const response = await fetch(EMBLEM_API + '/vault/balance/' + ethAddress + '/' + btcAddress, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -689,26 +551,12 @@ export default function Nft() {
       },
     })
     
-    const jsonData = await responce.json()
-    console.log('responce', responce, jsonData)
+    const jsonData = await response.json()
+    console.log('response', response, jsonData)
     if (jsonData.balances.length > 0) {      
       return cb(values.concat(jsonData.balances))
     } else {
       return cb(values)
-    }
-  }
-
-  const saveCache = (vault: any) => {
-    localStorage.setItem(account + '_' + chainId + '_' + tokenId + '_vault', JSON.stringify(vault)) // Save new state for later
-  }
-
-  const loadCache = () => {
-    console.log('cache')
-    let vault = JSON.parse(localStorage.getItem(account + '_' + chainId + '_' + tokenId + '_vault')) // Load vaults from storage before updating from server!
-    if (vault) {
-      setState({ loaded: true })
-      setStates(vault)
-      setLoadingApi(true)
     }
   }
 
@@ -721,43 +569,23 @@ export default function Nft() {
     storedPw && acceptable ? setMintPassword(storedPw) : null //setMintPassword(null)
   }
 
-  // const getKeys = async (signature, tokenId, cb) => {
-  //   var myHeaders = new Headers()
-  //   myHeaders.append('chainId', chainId.toString())
-  //   myHeaders.append('service', 'evmetadata')
-  //   myHeaders.append('Content-Type', 'application/json')
-
-  //   var raw = JSON.stringify({ signature: signature })
-  //   const responce = await fetch(EMBLEM_API + '/claim/' + tokenId, {
-  //     method: 'POST',
-  //     headers: myHeaders,
-  //     body: raw,
-  //     redirect: 'follow',
-  //   })
-  //   const jsonData = await responce.json()
-  //   // console.log('getKeys response is ', jsonData)
-  //   return cb(jsonData)
-  // }
-
   const getSignedJWT = async (signature: any, tokenId: string | string[], cb: { (token: any): void; (arg0: any): any })=>{
     var myHeaders = new Headers()
     myHeaders.append('chainid', chainId.toString())
     myHeaders.append('Content-Type', 'application/json')
 
     var raw = JSON.stringify({ signature: signature, tokenId: tokenId })
-    const responce = await fetch(SIG_API+'/sign', {
+    const response = await fetch(SIG_API+'/sign', {
       method: 'POST',
       headers: myHeaders,
       body: raw,
       redirect: 'follow',
     })
-    const jsonData = await responce.json()
+    const jsonData = await response.json()
     return cb(jsonData)
   }
 
   async function getTorusKeys( verifierId, idToken, cb) {
-    // const fetchNodeDetails = new FetchNodeDetails({ network: "https://solemn-restless-diagram.ropsten.discover.quiknode.pro/37fca8f14d3a42d9ec00f50a3f6adc404d5e2a04/", proxyAddress: "0x6258c9d6c12ed3edda59a1a6527e469517744aa7" });
-    // const torusUtils = new TorusUtils({ enableOneKey: true, network: "testnet" });
     const fetchNodeDetails = new FetchNodeDetails({ network: "mainnet" });
     const torusUtils = new TorusUtils({ enableOneKey: true, network: "mainnet" });
 
@@ -773,13 +601,13 @@ export default function Nft() {
     myHeaders.append('Content-Type', 'application/json')
 
     var raw = JSON.stringify({ signature: signature, coin: coin })
-    const responce = await fetch(EMBLEM_API + '/address/' + tokenId, {
+    const response = await fetch(EMBLEM_API + '/address/' + tokenId, {
       method: 'POST',
       headers: myHeaders,
       body: raw,
       redirect: 'follow',
     })
-    const jsonData = await responce.json()
+    const jsonData = await response.json()
     return cb(jsonData)
   }
 
@@ -790,13 +618,13 @@ export default function Nft() {
     myHeaders.append('Content-Type', 'application/json')
 
     var raw = JSON.stringify({ signature: signature })
-    const responce = await fetch(EMBLEM_API + '/embed/' + tokenId, {
+    const response = await fetch(EMBLEM_API + '/embed/' + tokenId, {
       method: 'POST',
       headers: myHeaders,
       body: raw,
       redirect: 'follow',
     })
-    const jsonData = await responce.json()
+    const jsonData = await response.json()
     return cb(jsonData)
   }
 
@@ -822,27 +650,13 @@ export default function Nft() {
       )
       setBalance(await covalContract.balanceOf(account).then((balance: { toString: () => string }) => balance.toString()))
       setPrice(await handlerContract.price().then((balance: { toString: () => string }) => balance.toString()))
-      // console.log(
-      //   'balance',
-      //   balance,
-      //   'allowance',
-      //   allowance,
-      //   'price',
-      //   price,
-      //   Number(allowance) >= Number(price),
-      //   Number(balance) > Number(price)
-      // )
       if (Number(allowance) >= Number(price)) {
-        // alert(true)
         setIsCovalApproved(true)
       } else {
-        // alert(false)
         setIsCovalApproved(false)
       }
       finish()
-    } catch(err){
-      console.log("-------", err)
-      // approveCovalFlow()
+    } catch(err){      
       _owner = "0x0000000000000000000000000000000000000000"
       finish()
     }
@@ -862,7 +676,23 @@ export default function Nft() {
       setMine(_owner === account || (to === account && _owner === "0x0000000000000000000000000000000000000000"))
       setMineUnMinted(to === account && _owner === "0x0000000000000000000000000000000000000000")
       loadPasswordFromLocalStorage()
-      // alert(to == account)
+      if (owner && live == false && !checkLive) {
+        setCheckLive(true)
+        checkLiveliness(tokenId, ()=>{
+    
+        })
+      //   if (owner === ZERO_ADDRESS && move_targetContract && move_targetContract.serialNumber) {
+      //     // is moving
+      //     setTimeout(() => {
+      //       location.href = location.origin + '/nft2?id=' + tokenId
+      //     }, 500)
+      //   } else {
+      //     setCheckLive(true)
+      //     checkLiveliness(tokenId, ()=>{
+    
+      //     })
+      //   }
+      }
     }
     
   }
@@ -941,19 +771,13 @@ export default function Nft() {
                 if (address.coin == 'ETH') setPrivKeyETH(address.key)
               })
             } catch(err){
-              // alert('out of sync')
-              // await syncAccount()
               alert(err)
               setTimeout(()=>{location.href = location.href}, 2000)
-              
             }
-            
-            // setKeyValues(vaultAddresses)
             setState({loaded: true})
             onOpenKeysModal()
           })          
         })
-      // }
     })
   }
 
@@ -973,9 +797,6 @@ export default function Nft() {
       .getSigner(account)
       .signMessage('HideAsset: ' + tokenId)
       .then((signature: any) => {
-
-        console.log("----------------------------------------------------------------", signature)
-        console.log(coin.name, coin.coin, coin.address)
         hideAsset(tokenId, coin.coin, coin.address, coin.name, signature, ()=>{
           console.log("Done hiding coin and getting new balances")
         })
@@ -1029,50 +850,49 @@ export default function Nft() {
   }
 
   const handleMove = async () => {
-    // setMoving(true)
-    getMoveableCollections()
     console.log('---------- qualified move', qualifiedCollection)
-    fetch(EMBLEM_API + '/v2/move-vault/', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        service: 'evmetadata',
-        chainid: chainId.toString()
-      },
-      body: JSON.stringify({
-        "chainId": 1,
-        "from": account,
-        "sourceContract": {
-            "1": "0x82c7a8f707110f5fbb16184a5933e9f78a34c6ab"
+    library.getSigner(account)
+    .signMessage('Move Vault: ' + tokenId)
+    .then((signature: any) => {
+      fetch(EMBLEM_V2_API + '/move-vault/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          service: 'evmetadata',
+          chainid: chainId.toString()
         },
-        "targetContract": {
-            "1": qualifiedCollection[chainId],
-            "name": qualifiedCollection.name,
-            "chain": qualifiedCollection.chain
-        },
-        "targetAsset": {
-            "name": vaultValues[0].name
-        },
-        "amount": 1,
-        "tokenId": tokenId
-    })
-    }).then(async function (response: any) {
-      let data = await response.json()
-      
-      // console.log("------------- ","0x82c7a8f707110f5fbb16184a5933e9f78a34c6ab", "0xDCA91409018ea80B71d21E818f00e76072969861", "3523401",data.tokenId, data.nonce, data.sig, "0x0000000000000000000000000000000000000000000000000000000000000000")
-      if (data.sig) {
-        vaultHandlerContract.moveVault("0x82c7a8f707110f5fbb16184a5933e9f78a34c6ab", qualifiedCollection[chainId], tokenId, data.tokenId, data.nonce, data.sig, "0x0000000000000000000000000000000000000000000000000000000000000000").then((hash: any): void =>{
-          setHash(hash)
-          setMoving(false)
-        })
-      }
+        body: JSON.stringify({
+          "chainId": 1,
+          "from": account,
+          "sourceContract": {
+              "1": contractAddresses.emblemVault[vaultChainId]
+          },
+          "targetContract": {
+              "1": qualifiedCollection[chainId],
+              "name": qualifiedCollection.name,
+              "chain": qualifiedCollection.chain
+          },
+          "targetAsset": {
+              "name": vaultValues[0].name
+          },
+          "amount": 1,
+          "tokenId": tokenId,
+          "signature": signature
+      })
+      }).then(async function (response: any) {
+        let data = await response.json()
+        
+        if (data.sig) {
+          vaultHandlerContract.moveVault(contractAddresses.emblemVault[vaultChainId], qualifiedCollection[chainId], tokenId, data.tokenId, data.nonce, data.sig, data.serial).then((hash: any): void =>{
+            setHash(hash.hash)
+          })
+        }
+      })
     })
   }
 
   const handleClaim = async () => {
     if (targetContract[chainId]) {
-      // emblemContract = getCuratedContract(targetContract[chainId])
-      // let tokenId = await emblemContract.getTokenIdForSerialNumber(targetContract.serialNumber)
       vaultHandlerContract.claim(targetContract[chainId], targetContract.tokenId).then(({ hash }: { hash: string }) => {
         setClaiming(true)
         setTimeout(() => {
@@ -1087,22 +907,7 @@ export default function Nft() {
         }, 100) // Solving State race condition where transaction watcher wouldn't notice we were claiming
       })
     }
-  }
-
-  const pingClaimLogs = (cb: { (): void; (): any })=>{
-    fetch(EMBLEM_API + '/web3/selfClaimLogs?chainId='+chainId.toString()+'_vercel_no_cache=1', {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        service: 'evmetadata',
-        cc: 't'
-      }
-    }).then(async function (response) {
-      let data = await response.json()
-      console.log("Log check", data)
-      return cb()
-    })    
-  }
+  } 
 
   const startDecryptEffect = async () => {
     if (decryptedEffectRunning) {
@@ -1132,9 +937,7 @@ export default function Nft() {
     })(clen * increment + 1)
     function nextFrame(pos: number) {
       for (var i = 0; i < clen - stri; i++) {
-        //Random number
         var num = Math.floor(theLetters.length * Math.random())
-        //Get random letter
         var letter = theLetters.charAt(num)
         block = block + letter
       }
@@ -1142,19 +945,15 @@ export default function Nft() {
         stri++
       }
       if (si == increment) {
-        // Add a letter;
-        // every speed*10 ms
         fixed = fixed + ctnt.charAt(stri - 1)
         si = 0
       }
-      // $("#output").html(fixed + block);
       setDecryptedEffect(fixed + block)
       block = ''
     }
   }
 
   useEffect(() => {
-    console.log('----')
     getVault()
   }, [])
 
@@ -1186,37 +985,7 @@ export default function Nft() {
       getAllBalancesByAddress([], ethAddress, btcAddress, (values: SetStateAction<any[]>)=>{
         setVaultValues(values)
       })
-      // getEthBalances(
-      //   vaultAddresses.filter((item) => {
-      //     return item.coin === 'ETH'
-      //   })[0].address,
-      //   (values) => {
-      //     getBtcBalance(
-      //       values,
-      //       vaultAddresses.filter((item) => {
-      //         return item.coin === 'BTC'
-      //       })[0].address,
-      //       (_values) => {
-      //         // console.log("Have fucking values", values)
-      //         getNftBalance(
-      //           _values,
-      //           vaultAddresses.filter((item) => {
-      //             return item.coin === 'ETH'
-      //           })[0].address,
-      //           (__values) => {
-      //             setVaultValues(__values.concat(vaultValues))
-      //           }
-      //         )
-      //       }
-      //     )
-      //   }
-      // )
     } catch (err) {console.log('WTF', err)}
-  }
-
-  function getAddresses() {
-    console.log("Getting Addresses")
-    return vaultAddresses
   }
 
   function decryptAddresses(key: any) {
@@ -1240,7 +1009,7 @@ export default function Nft() {
       'https://' +
       (vaultChainId == 4 ? 'rinkeby.' : '') +
       'opensea.io/assets/' + 
-      (vaultChainId == 137 ? 'matic/' : '') +
+      (vaultChainId == 137 ? 'matic/' : 'ethereum/') +
       (alternateContractAddress? alternateContractAddress : contractAddresses.emblemVault[vaultChainId]) +
       '/' +
       tokenId 
@@ -1257,6 +1026,11 @@ export default function Nft() {
       '/' +
       tokenId 
     , '_blank')
+  }
+
+  function visitArcadeLink() {
+    window.open(
+      `https://app.arcade.xyz/terms/asset/${targetContract[vaultChainId]? targetContract[vaultChainId]: contractAddresses.emblemVault[vaultChainId]}/${tokenId}` , '_blank')
   }
 
   { alternateContractAddress?
@@ -1335,21 +1109,6 @@ export default function Nft() {
                 >
                   Vault Network: {CHAIN_ID_NAMES[vaultChainId]}
                 </Box>
-                {/* {isCrowdSale ? (
-                  <Box
-                  mt="1"
-                  fontWeight="semibold"
-                  as="h3"
-                  lineHeight="tight"
-                  p={2}
-                  textAlign="center"
-                  textTransform="uppercase"
-                  alignItems="center"
-                  color="red.500"
-                >
-                  Part of a crowdsale, sealed for 1 week.
-                </Box>
-                ) : null} */}
                 
                 <Box
                   mt="1"
@@ -1483,9 +1242,7 @@ export default function Nft() {
                           </Flex>
                         {(mine || status === 'claimed') && vaultAddresses.length < 12 ? (
                           <>
-                            <button className="nft_button" onClick={()=>{
-                              onManageAddressToggle()
-                            }}>Manage Addresses</button>
+                            <button className="nft_button" onClick={()=>{onManageAddressToggle()}}>Manage Addresses</button>
                             <Flex w="340px" justify="center" flexWrap="wrap">
                               <Collapse isOpen={isManageAddressOpen}>
                                 { !hasAddress('DOGE') ? (
@@ -1524,34 +1281,48 @@ export default function Nft() {
                     </Box>
                   ) : null}
 
-                  {!(status === 'claimed') && live && (vaultChainId === 1 || vaultChainId === 4 || vaultChainId === 137 )? (
+                  {!(status === 'claimed') && live && (vaultChainId === 1 || vaultChainId === 137 )? (
                     <Box d="flex" alignItems="baseline" justifyContent="space-between" mt="4">
                       {/* <Stack d="flex" width="100%"> */}
                         <Button
                           className="nft_button"
-                          width="50%"
-                          m={5}
-                          onClick={() => {visitOpenSeaLink()}}
-                        >
-                          Opensea
+                          width={mine && vaultChainId == 1? "33%" : vaultChainId == 137? "100%": "50%"}
+                          m={2.5}
+                          mb={5}
+                          onClick={() => {visitOpenSeaLink()}}>
+                            Opensea
                         </Button>
-                        <Button
+
+                        { vaultChainId == 1 ?(
+                          <Button
                           className="nft_button"
-                          width="50%"
-                          m={5}
+                          width={mine? "33%" : "50%"}
+                          m={2.5}
+                          mb={5}
                           onClick={() => {visitLooksRareLink()}}
                         >
                           LooksRare
                         </Button>
-                        {showOffer? (
-                          <Button className="" onClick={() => { onOpenOfferModal() }}>{mine? ('My Offers') : ('Make an Offer')} (NFT²NFT)</Button>
                         ) : null}
                         
-                      {/* </Stack> */}
+                        { mine && vaultChainId == 1? (
+                           <Button
+                           className="nft_button"
+                           width="33%"
+                           m={2.5}
+                           mb={5}
+                           onClick={() => {visitArcadeLink()}}
+                         >
+                           Arcade
+                         </Button>
+                        ): null}                       
+                        {showOffer? (
+                          <Button className="" onClick={() => { onOpenOfferModal() }}>{mine? ('My Offers') : ('Make an Offer')} (NFT²NFT)</Button>
+                        ) : null}                        
                     </Box>
                   ) : null}
                   
-                  {isCovalApproved ? (
+                  {isCovalApproved && !live ? (
                     <Stack direction="row" align="flex-start" spacing="0rem" flexWrap="wrap" shouldWrapChildren>
                       <Box maxW="sm" borderWidth="1px" p={1} rounded="lg" overflow="hidden">
                         <Text>Creating a vault spends {price * Math.pow(10, -decimals)} Coval from your wallet</Text>
@@ -1560,28 +1331,30 @@ export default function Nft() {
                     </Stack>
                   ) : null}
 
-                  {mine && !approved ? (<>
-                    <Box d="flex" alignItems="baseline" justifyContent="space-between" mt="4">
-                      <Button
-                        backgroundColor={"#02b402"}
-                        color={"black !important"}
-                        fontWeight={"bold !important"}
-                        className="nft_button"
-                        width="100%" onClick={() => {
-                          return handleApproveForall()                                       
+                {/* {mine && !approved ? (<>
+                  <Box d="flex" alignItems="baseline" justifyContent="space-between" mt="4">
+                    <Button
+                      backgroundColor={"#02b402"}
+                      color={"black !important"}
+                      fontWeight={"bold !important"}
+                      className="nft_button"
+                      width="100%" onClick={() => {
+                        return handleApproveForall()
                       }
-                    }> Approve Minting</Button>
-                    </Box>
-                  </>) : null }
+                      }> Approve Minting</Button>
+                  </Box>
+                </>) : null}
 
-                  {!live && mine && vaultChainId == chainId && status !== 'claimed' && !showMakingVaultMsg && approved && !isCovalApproved ? (
-                    <>                      
-                        <Button backgroundColor={"#02b402"}
-                        color={"black !important"}
-                        fontWeight={"bold !important"}
-                        width="100%" mt={5} onClick={approveCovalFlow}>Approve Spending Coval</Button>
-                    </>
-                ) : null}
+                {!live && mine && vaultChainId == chainId && status !== 'claimed' && !showMakingVaultMsg && approved && !isCovalApproved ? (
+                  <>
+                    <Button backgroundColor={"#02b402"}
+                      color={"black !important"}
+                      fontWeight={"bold !important"}
+                      width="100%" mt={5} onClick={approveCovalFlow}>
+                      Approve Spending Coval
+                    </Button>
+                  </>
+                ) : null} */}
 
                   {(showTransferPassword || mintPassword) && acceptable ? (
                       <Box>
@@ -1589,6 +1362,7 @@ export default function Nft() {
                         <Text>Password: {(transferPassword || mintPassword)}</Text>
                       </Box>
                   ) : null}
+                  
                   {acceptable && claimedBy !== account ? (
                     <>
                         <Button mt={2} width="100%" onClick={()=>{fireMetaMask()}}>Accept</Button>
@@ -1608,11 +1382,9 @@ export default function Nft() {
                     </>
                   ) : null}
 
-                   
-
                   {!live && mine && vaultChainId == chainId && status !== 'claimed' && !showMakingVaultMsg && approved && isCovalApproved ? (
                       <>                      
-                          <Button width="100%" mt={5} isDisabled={(!vaultPrivacy && vaultValues.length < 1)|| mintLockedForever} onClick={lazyMint}>{mintLockedForever? 'Mint Locked - keys accessed before mint' : !vaultPrivacy && vaultValues.length < 1? 'Please load the vault to mint': 'Mint Vault'}</Button>
+                        <Button width="100%" mt={5} isDisabled={(!vaultPrivacy && vaultValues.length < 1)|| mintLockedForever} onClick={lazyMint}>{mintLockedForever? 'Mint Locked - keys accessed before mint' : !vaultPrivacy && vaultValues.length < 1? 'Please load the vault to mint': 'Mint Vault'}</Button>
                       </>
                   ) : null}
 
@@ -1635,67 +1407,95 @@ export default function Nft() {
                       </Button>
                     </Box>
                   ) : null}
-                    <Stack mt={5}>
-                      <>
-                        <button className="nft_button" onClick={()=>{
-                          onAdvancedToggle()
-                        }}>Advanced Operations</button>
-                        <Flex w="100%" justify="center" flexWrap="wrap">
-                          <Collapse width={"100%"} isOpen={isAdvancedOpen}>
-                          { mineUnMinted && status != "claimed" && !mintLockedForever ? (
+
+                <Stack mt={5}>
+                  <>
+                  {mine? (
+                    <>
+                    {!isCovalApproved ?(
+                    <ApprovalButton
+                      handler={{address: contractAddresses.vaultHandler[chainId], abi: contractAddresses.vaultHandlerAbi}} 
+                      spending={{address: contractAddresses.coval[chainId], abi: contractAddresses.covalAbi}} 
+                      amount={1000} 
+                      label = "Approve Spending Coval"
+                      watcher={setHash}
+                    />): null}
+                    {!approved ?(
+                    <ApprovalButton
+                      handler={{address:  contractAddresses.vaultHandler[chainId], abi: contractAddresses.vaultHandlerAbi}} 
+                      spending={{address: contractAddresses.emblemVault[chainId], abi: contractAddresses.emblemAbi}}
+                      amount={0}
+                      label = "Approve Creating / Burning Vaults"
+                      watcher={setHash}
+                    />): null}
+                  </>
+                  ): null}
+                    
+                    
+                    <button className="nft_button" onClick={() => { onAdvancedToggle() }}>Advanced Operations</button>
+                    <Flex w="100%" justify="center" flexWrap="wrap">
+                      <Collapse width={"100%"} isOpen={isAdvancedOpen}>
+                        {vaultChainId === chainId && mineUnMinted && status != "claimed" && !mintLockedForever ? (
                           <Box d="flex" alignItems="baseline" justifyContent="space-between" mt="4">
                             <Button width="100%" onClick={handleSign}>
                               Get Keys (Unlocking will prevent minting)
                             </Button>
                           </Box>
                         ) : null}
-                          {mine && showMove && qualifiedCollection? (
+
+                        {mine && showMove && qualifiedCollection && qualifiedCollection[chainId] && qualifiedCollection.name && qualifiedCollection.chain ? (
+                          <>
+                            <ApprovalButton
+                              handler={{address: contractAddresses.vaultHandlerV8[chainId] , abi: contractAddresses.vaultHandlerV8Abi }} 
+                              spending={{address: contractAddresses.emblemVault[chainId], abi: contractAddresses.emblemAbi}}
+                              amount={0}
+                              label = "Approve Moving (part 1)"
+                              watcher={setHash}
+                            />
+                            <ApprovalButton
+                              handler={{address: contractAddresses.vaultHandlerV8[chainId] , abi: contractAddresses.vaultHandlerV8Abi }} 
+                              spending={{address: qualifiedCollection[chainId], abi: contractAddresses.erc1155Abi}}
+                              amount={0}
+                              label = "Approve Moving (part 2)"
+                              watcher={setHash}
+                            />
+
                             <Box d="flex" alignItems="baseline" justifyContent="space-between" mt="4">
-                            <Button
-                              width="100%"
-                              onClick={() => {
-                                handleMove()
-                              }}
-                              isDisabled={moving}
-                            >
-                              {moving ? 'Moving ...' : 'Move Vault'}
-                            </Button>
-                          </Box>
-                          ) : null}
+                              
+                              <Button
+                                width="100%"
+                                onClick={() => {
+                                  setMoving(true)
+                                  handleMove()
+                                }}
+                                isDisabled={moving}
+                              >
+                                {moving ? 'Moving ...' : 'Move Vault'}
+                              </Button>
+                            </Box>
+                          </>
+                        ) : null}
 
-                        {mine || claimedBy == account? (
-                          <JsonDownloadLink data={rawMetadata} filename={`EmblemVault-${tokenId}.json`}/>
-                        ): null}                
+                        {mine || claimedBy == account ? (
+                          <JsonDownloadLink data={rawMetadata} filename={`EmblemVault-${tokenId}.json`} />
+                        ) : null}
 
-                      {(!live || status == 'claimed') && to == account && vaultChainId == chainId && !showMakingVaultMsg && vaultValues.length < 1 ? (
-                        <Button width="100%" mt={5} onClick={deleteVault}>Delete Vault </Button>
-                      ) : null}
-                          </Collapse>
-                        </Flex>
-                      </>
-                    </Stack>
+                        {(!live || status == 'claimed') && to == account && vaultChainId == chainId && !showMakingVaultMsg && vaultValues.length < 1 ? (
+                          <Button width="100%" mt={5} onClick={deleteVault}>Delete Vault </Button>
+                        ) : null}
+                      </Collapse>
+                    </Flex>
+                  </>
+                </Stack>
 
-                    
-                {/* {showVerifyingSignature ? (
-                  <Button isDisabled type="submit">
-                    Verifying Signature ...
-                  </Button>
-                ) : null}
-                {showMakingVaultMsg ? (
-                  <Button isDisabled type="submit">
-                    Minting Vault ...
-                  </Button>
-                ) : null} */}
                 </Box>
                 {vaultIPFS ? (
-                  // <Stack>
                     <HStack align="center">
                       <Link target='new' mb={2} ml={35} href={'https://gateway.ipfs.io/ipfs/'+vaultIPFS} isExternal>View Metadata on IPFS </Link>
                       {vaultImageIPFS? (
                         <Link mb={2} href={'https://gateway.ipfs.io/ipfs/'+vaultImageIPFS} isExternal>View Image on IPFS </Link>
                       ) : null}                      
                     </HStack> 
-                  // </Stack>
                 ) : null }
 
                 {sealed ? (
@@ -1711,7 +1511,7 @@ export default function Nft() {
                 {hash ? (
                   <Alert status="info">
                     <AlertIcon />
-                    { accepting ? "Accepting Your Gift Vault" : claiming ? "Claiming your Vault ..." : approving? "Handling Approval Flow ..." : transfering? "Transfering Vault ...":  minting? "Minting Vault" : "Generating Gift Link ..."}
+                    { accepting ? "Accepting Your Gift Vault" : claiming ? "Claiming your Vault ..." : approving? "Handling Approval Flow ..." : transfering? "Transfering Vault ...":  minting? "Minting Vault" : "Validating transaction"}
                   </Alert>
                 ) : null}
 
@@ -1740,18 +1540,20 @@ export default function Nft() {
             </Text>
           </Stack>
         ): null}
+
         {hash ? (
           <TransactionToast
             hash={hash}
             onComplete={() => {
-              if (claiming && !accepting && !preTransfering) {
+              if(moving) {
+                setMoving(false)
+                location.href = location.origin + '/nft2?id=' + tokenId + '&cc=t';
+            } else if (claiming && !accepting && !preTransfering) {
                 setHash(null)
                 setStatus('claimed')
                 setClaiming(false)
                 setClaimedBy(account)
-                // pingClaimLogs(()=>{
-                  location.href = location.origin + '/nft?id=' + tokenId + '&cc=t';
-                // })
+                location.href = location.origin + '/nft?id=' + tokenId + '&cc=t';
               } else if (preTransfering) {
                 savePasswordToLocalStorage()
                 setShowTransferPassword(true)
@@ -1775,17 +1577,10 @@ export default function Nft() {
                   setMinting(false)
                   setLive(true)
                   location.href = location.origin + '/nft?id=' + tokenId + '&cc=t';
-                  // setShowMakingVaultMsg(false)
-                  // location.href = location.origin + '/nft?id=' + tokenId
                 })
-              } else {
+              } 
+              else {
                 location.href = location.origin + '/nft?id=' + tokenId
-                console.log('minting', minting) 
-                console.log('claiming', claiming) 
-                console.log('accepting', accepting) 
-                console.log('preTransfering', preTransfering)
-                console.log('approving', approving)
-                console.log("Unknown state")
               }
             }}
           />

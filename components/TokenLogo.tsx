@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Image, Icon } from '@chakra-ui/core'
+import { Image, Icon } from '@chakra-ui/react'
 import { Token, WETH } from '@uniswap/sdk'
 
 let BROKEN: { [chainId: number]: { [address: string]: boolean } } = {}

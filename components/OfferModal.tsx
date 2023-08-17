@@ -19,7 +19,7 @@ import {
   useDisclosure,
   Link,
   
-} from '@chakra-ui/core'
+} from '@chakra-ui/react'
 import {
   // Accordion,
   AccordionItem,
@@ -28,7 +28,7 @@ import {
   AccordionButton,
 } from "@chakra-ui/react"
 // import { Accordion } from 'react-bootstrap';
-import copy from 'copy-to-clipboard'
+// import copy from 'copy-to-clipboard'
 import QRCode from 'qrcode.react'
 import { COLOR, contractAddresses } from '../constants'
 import { useWeb3React } from '@web3-react/core'
@@ -353,7 +353,7 @@ export default function OfferModal({
   }
 
   function copyWithFlag(content: string): void {
-    copy(content)
+    // copy(content)
     setCopied(true)
   }
 

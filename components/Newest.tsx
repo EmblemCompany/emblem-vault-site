@@ -1,4 +1,4 @@
-import { Box, Flex, Text, Link, Image, Stack, Spinner, useColorMode } from '@chakra-ui/core'
+import { Box, Flex, Text, Link, Image, Stack, Spinner, useColorMode } from '@chakra-ui/react'
 import Loader from 'react-loader'
 import Refreshing from './Refreshing'
 import { useRouter } from 'next/router'
@@ -151,7 +151,8 @@ export default function Newest() {
           vaults.map((vault, index) => {
             let pieces = location.pathname.split('/')
             pieces.pop()
-            let url = location.origin + pieces.join('/') + '/nft?id=' + vault.tokenId
+            console.log("vault", vault)
+            let url = location.origin + pieces.join('/') + '/nft?id=' + (!vault.targetAsset? vault.tokenId: vault.targetContract.tokenId)
             const flexSettings = {
               flex: '1',
               minW: '200px',
@@ -173,11 +174,11 @@ export default function Newest() {
               <Link href={url} className="vaultLink">
                 <Box className="NFT newest" key={index} {...flexSettings} onClick={redirect}>
                   <Text fontWeight="semibold" textAlign="center" mt={2} pl={2} isTruncated={true}>
-                    {vault.name}
+                    {vault.targetAsset? vault.targetAsset.name: vault.name}
                     {!vault.private && vault.totalValue > 0 ? ': ~$' + vault.totalValue : null}
                   </Text>
                   <Stack align="center">
-                    <Embed className="d-block w-100 NFT-newest-image" url={vault.image}/>
+                    <Embed className="d-block w-100 NFT-newest-image" url={vault.targetAsset? vault.targetAsset.image: vault.image}/>
                   </Stack>
                   <Stack align="center" mt={3}>
                     {vault.status == 'claimed' ? <Text color="green.500">CLAIMED</Text> : null}

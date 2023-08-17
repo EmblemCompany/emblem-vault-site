@@ -1,0 +1,1 @@
+{"ast":null,"code":"import React from \"react\";\nvar __jsx = React.createElement;\nimport Pre from '../components/Pre';\nexport default function PrePage() {\n  return __jsx(Pre, null);\n}","map":null,"metadata":{},"sourceType":"module"}

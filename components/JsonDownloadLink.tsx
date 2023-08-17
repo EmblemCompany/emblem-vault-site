@@ -1,4 +1,4 @@
-import { Box, Button } from '@chakra-ui/core';
+import { Box, Button } from '@chakra-ui/react';
 import React from 'react';
 
 const JsonDownloadLink = ({ data, filename }) => {

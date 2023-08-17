@@ -20,7 +20,7 @@ import {
   Button,
   Link,
   Switch,
-} from '@chakra-ui/core'
+} from '@chakra-ui/react'
 import copy from 'copy-to-clipboard'
 
 import { COLOR, DEFAULT_DEADLINE, DEFAULT_SLIPPAGE, QueryParameters } from '../constants'

@@ -1,4 +1,4 @@
-import { Box, Flex, Text, Link, Image, Stack, Spinner, useColorMode } from '@chakra-ui/core'
+import { Box, Flex, Text, Link, Image, Stack, Spinner, useColorMode } from '@chakra-ui/react'
 import Loader from 'react-loader'
 import Refreshing from './Refreshing'
 import { useRouter } from 'next/router'

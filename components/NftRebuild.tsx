@@ -19,7 +19,7 @@ import {
   Tab,
   TabPanel,
   TabPanels
-} from '@chakra-ui/core'
+} from '@chakra-ui/react'
 
 import {HStack } from '@chakra-ui/react'
 import Head from "next/head"
@@ -771,7 +771,7 @@ export default function NftRebuild() {
       'https://' +
       (vaultChainId == 4 ? 'rinkeby.' : '') +
       'opensea.io/assets/' + 
-      (vaultChainId == 137 ? 'matic/' : '') +
+      (vaultChainId == 137 ? 'matic/' : 'ethereum/') +
       (alternateContractAddress? alternateContractAddress : contractAddresses.emblemVault[vaultChainId]) +
       '/' +
       tokenId 

@@ -1,4 +1,4 @@
-import { Flex, Stack, Text } from '@chakra-ui/core'
+import { Flex, Stack, Text } from '@chakra-ui/react'
 
 export default function Error(): JSX.Element {
   return (

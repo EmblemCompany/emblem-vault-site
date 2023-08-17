@@ -17,7 +17,7 @@ import {
   FormLabel,
   useColorMode,
   IconButton
-} from '@chakra-ui/core'
+} from '@chakra-ui/react'
 
 import {HStack, VStack, Circle } from '@chakra-ui/react'
 import TorusSdk from "@toruslabs/torus-direct-web-sdk";
@@ -914,7 +914,7 @@ export default function Asset() {
       'https://' +
       (vaultChainId == 4 ? 'rinkeby.' : '') +
       'opensea.io/assets/' + 
-      (vaultChainId == 137 ? 'matic/' : '') +
+      (vaultChainId == 137 ? 'matic/' : 'ethereum/') +
       contractAddresses.emblemVault[vaultChainId] +
       '/' +
       tokenId 

@@ -1,0 +1,1 @@
+{"ast":null,"code":"import React from \"react\";\nvar __jsx = React.createElement;\nimport Swap from '../components/Swap';\nexport default function Buy() {\n  return __jsx(Swap, {\n    buy: true\n  });\n}","map":null,"metadata":{},"sourceType":"module"}

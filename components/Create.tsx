@@ -23,8 +23,9 @@ import {
   AlertIcon,
   Collapse,
   useDisclosure,
-  Select
-} from '@chakra-ui/core'
+  Select,
+  Checkbox
+} from '@chakra-ui/react'
 
 import Loader from 'react-loader'
 import { useWeb3React } from '@web3-react/core'
@@ -120,7 +121,8 @@ export default function Create(props: any) {
   const [vaultValue, setVaultValue] = useState('')
   const [vaultType, setVaultType] = useState(query.image? 'embed':"upload")
   const [showEmbed, setShowEmbed] = useState(query.image? true: false)
-  
+  const [acceptedTos, setAcceptedTos] = useState(false) // ToS
+  const [showTos, setShowTos] = useState(true) // ToS
 
   const handlerContract = useContract(contractAddresses.vaultHandler[chainId], contractAddresses.vaultHandlerAbi, true)
   const covalContract = useContract(contractAddresses.coval[chainId], contractAddresses.covalAbi, true)
@@ -128,37 +130,31 @@ export default function Create(props: any) {
   interface ErrorWithCode extends Error {
     code?: number
   }
+  
+  const checkTOS = ()=>{
+    let tosMemory = localStorage.getItem('tos') == 'true'
+    if (!tosMemory) {
+      setAcceptedTos(false)
+      setShowTos(true)
+    } else {
+      setAcceptedTos(true)
+      setShowTos(false)
+    }
+  }
 
-  let transak
-  const initializeTransak = (address?: string, coin? : string)=>{
-    transak = new transakSDK({
-      apiKey: 'e8bed1bd-6844-4eb1-973a-7a11a48fafab',  // Your API Key
-      environment: 'PRODUCTION', // STAGING/PRODUCTION
-      defaultCryptoCurrency: coin || 'ETH',
-      walletAddress: address || '', // Your customer's wallet address
-      themeColor: '000000', // App theme color
-      fiatCurrency: 'USD', // INR/GBP
-      // fiatAmount: 350,
-      email: '', // Your customer's email address
-      redirectURL: '',
-      // paymentMethod: 'neft_bank_transfer',
-      hostURL: window.location.origin,
-      widgetHeight: '550px',
-      widgetWidth: '450px'
-    });
-  
-    // To get all the events
-    transak.on(transak.ALL_EVENTS, (data) => {
-      console.log(data)
-    });
-  
-    // This will trigger when the user marks payment is made.
-    transak.on(transak.EVENTS.TRANSAK_ORDER_SUCCESSFUL, (orderData) => {
-      console.log(orderData);
-      transak.close();
-    });
-  
-    transak.init()
+  const handleTOSCheck = (e)=>{
+    setAcceptedTos(e.target.checked)
+    localStorage.setItem('tos', e.target.checked)
+  }
+
+  const checkMintDisabled = ()=>{
+    return !vaultAddress ||
+    !isETHAddress(vaultAddress) ||
+    !vaultName ||
+    vaultName.length < 3 ||
+    !vaultDesc ||
+    vaultDesc.length < 3 || 
+    !vaultImage || !acceptedTos
   }
 
   const getContractStates = async () => {
@@ -360,6 +356,7 @@ export default function Create(props: any) {
     if (account && acct != account) {
       setAcct(account)
       setVaultAddress(query.to || account)
+      checkTOS()
     }
   }, [account, acct])
 
@@ -735,13 +732,7 @@ export default function Create(props: any) {
                         <Button isDisabled type="submit">
                           No Wallet Connected!
                         </Button>
-                      ) : !vaultAddress ||
-                        !isETHAddress(vaultAddress) ||
-                        !vaultName ||
-                        vaultName.length < 3 ||
-                        !vaultDesc ||
-                        vaultDesc.length < 3 || 
-                        !vaultImage ? (
+                      ) : checkMintDisabled() ?  (
                         <Button isDisabled type="submit">
                           Check Fields!
                         </Button>
@@ -749,18 +740,6 @@ export default function Create(props: any) {
                       //   <Button isDisabled type="submit">
                       //     Creation Password?
                       //   </Button>
-                      ) : !isCovalApproved && !approving ? (
-                        <Button onClick={approveCovalFlow} type="submit">
-                          Approve Coval
-                        </Button>
-                      ) : !isCovalApproved && approving ? (
-                        <Button isDisabled type="submit">
-                          Approving ...
-                        </Button>
-                      ) : Number(balance) < Number(price) ? (
-                        <Button isDisabled type="submit">
-                          Insufficient Balance
-                        </Button>
                       ) : hash || creating || showPreVaultMsg || showMakingVaultMsg ? (
                         <Button isDisabled type="submit">
                           Making Vault ...
@@ -772,6 +751,13 @@ export default function Create(props: any) {
                       )}
                     </ButtonGroup>
                   </Stack>
+                  { showTos ? (
+                    <Stack>
+                      <FormLabel><Checkbox mr={5} mt={1} onClick={handleTOSCheck}/>Agree to <a href="/tos" target="_blank">Terms of Service</a></FormLabel>
+                    </Stack>
+                  ): (
+                    <Text><a href="/tos" target="_blank">Terms of Service</a></Text>
+                  )}
                 </Stack>
                 {showPreVaultMsg ? (
                   <Alert status="info">
