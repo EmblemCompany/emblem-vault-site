@@ -310,7 +310,7 @@ export default function MyVaults() {
             pieces.pop()
             let isERC721a = vault.items && vault.items[0].targetContract && vault.items[0].targetContract.collectionType == 'ERC721a'? true : false
             let isLiveCurated = curatedType == 'live' && vaultType == 'curated'
-            let url = location.origin + pieces.join('/') + '/nft'+(vaultType == 'curated' || vault.targetContract ? '2': '')+'?id=' + (isLiveCurated? (isERC721a ? vault.items[0].tokenId: vault.targetTokenId) : vault.tokenId) + '&cc=t'
+            let url = location.origin + pieces.join('/') + '/nft'+(vaultType == 'curated' || vault.targetContract ? '2': '')+'?id=' + (isLiveCurated? (isERC721a ? vault.items[0].tokenId: vault.targetTokenId) : vault.tokenId) 
             const vaultContainerSettings = {
               flex: '1',
               minW: '200px',
@@ -362,9 +362,9 @@ export default function MyVaults() {
                 </Link>
                 
                   <Box className="NFT newest" key={index} {...infoContainerSettings} >
-                  <Text fontSize={'small'} fontWeight="semibold" textAlign="left" pl={2} isTruncated={true}> Network: {vault.network} </Text>
+                  <Text fontSize={'small'} fontWeight="semibold" textAlign="left" pl={2} isTruncated={true}> Network: {vault.network == "mainnet"? "Ethereum": vault.network == "matic"? "Polygon": vault.network} </Text>
                   <Text fontSize={'small'} fontWeight="semibold" textAlign="left" pl={2} isTruncated={true}> Contract: {contractInfo(vault)} </Text>
-                  {allowedJumpContracts(vault).length > 0 && showJump ? (
+                  {showJump && allowedJumpContracts(vault).length > 0 ? (
                     <>                      
                       {allowedJumpContracts(vault).map((contract, index) => {
                         return (

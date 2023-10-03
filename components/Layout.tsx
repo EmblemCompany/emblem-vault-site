@@ -1,4 +1,5 @@
 import { ReactNode, useEffect, useState } from 'react'
+import { FaCog } from 'react-icons/fa'
 import BackgroundVideo from './BackgroundVideo'
 import { } from '@chakra-ui/react'
 import { Badge, Popover, PopoverTrigger, PopoverContent, PopoverArrow, PopoverCloseButton, PopoverBody, IconButton, LightMode, Flex, useDisclosure, Stack, Box, Button, Text, Link } from '@chakra-ui/react'
@@ -142,8 +143,8 @@ export default function Layout({ children }: { children: ReactNode}): JSX.Elemen
         {useLayout? (
           <Flex justifyContent="space-between" flexShrink={0} overflowX="auto" p="1rem">
             <Stack spacing={0} direction="row">
-              {/* <IconButton m={2} icon="settings" variant="ghost" onClick={onOpenSettings} aria-label="Settings" />
-              <IconButton m={2} icon="search" variant="ghost" onClick={handleSearchClick} aria-label="Search" /> */}
+              <IconButton m={2} variant="ghost" onClick={onOpenSettings} aria-label="Settings" icon={<FaCog />}/>
+              {/* <IconButton m={2} icon="search" variant="ghost" onClick={handleSearchClick} aria-label="Search" /> */}
               {/* <Button display={showOrHideNavLink('create')} m={2} variant="ghost" onClick={()=>{handleNewNavigationClick('create')}}>
                 Create
               </Button> */}

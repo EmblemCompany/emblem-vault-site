@@ -33,7 +33,7 @@ export default function CreateCurated(props: any) {
   const [vaultAddress, setVaultAddress] = useState(account || '')
   const [state, setState] = useState({ loaded: true, private: false })
   const [targetAsset, setTargetAsset] = useState({name: '', image: ''})
-  const [targetContract, setTargetContract] = useState({name: '', chain: '', image:(data)=>{return ''}, allowed: (data)=>{return false}, allowedName: (data)=>{return false}, placeholder: ()=>{return ''}, loading: ()=>{return ''}, loadTypes: []})
+  const [targetContract, setTargetContract] = useState({name: '', collectionChain: '', image:(data)=>{return ''}, allowed: (data)=>{return false}, allowedName: (data)=>{return false}, placeholder: ()=>{return ''}, loading: ()=>{return ''}, loadTypes: []})
   const [enableAllCurated, setEnableCurated] = useState(query.curated == 't')
   const [mintDisabled, setMintDisabled] = useState(true)
   const [curatedError, setCuratedError] = useState('')
@@ -191,11 +191,11 @@ export default function CreateCurated(props: any) {
                               <Select id="asset-selector" w="100%" value={targetAsset.name}
                                 onChange={(e)=>{
                                   setMintDisabled(false)
-                                  setTargetAsset(curatedAssets[targetContract.chain][targetContract.name].filter(item=>{return item.name == e.target.value})[0])
+                                  setTargetAsset(curatedAssets[targetContract.collectionChain][targetContract.name].filter(item=>{return item.name == e.target.value})[0])
                                 }}
                               >
                                 <option value="" >---Choose One---</option>
-                                {curatedAssets[targetContract.chain][targetContract.name] ? curatedAssets[targetContract.chain][targetContract.name].map(asset=>{
+                                {curatedAssets[targetContract.collectionChain][targetContract.name] ? curatedAssets[targetContract.collectionChain][targetContract.name].sort((a, b) => {if (a.name < b.name) return -1;if (a.name > b.name) return 1;return 0;}).map(asset=>{
                                   return (
                                     <option value={asset.name} >{asset.name}</option>
                                   )
@@ -239,7 +239,7 @@ export default function CreateCurated(props: any) {
                                     h={"100%"}
                                     className={"d-block w-100"}
                                     src={curatedContentType == 'text/plain;charset=utf-8'? targetContract.placeholder() : targetAsset.image}
-                                    width="250px"
+                                    width="250px !important"
                                   />
                                 ): null}
                         </Stack>

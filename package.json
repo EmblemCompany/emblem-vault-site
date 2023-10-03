@@ -70,6 +70,7 @@
     "react-dom": "latest",
     "react-dropzone": "^11.0.3",
     "react-gun": "^1.1.1",
+    "react-icons": "^4.11.0",
     "react-infinite-scroll-component": "^6.1.0",
     "react-loader": "^2.4.7",
     "react-markdown": "^5.0.2",

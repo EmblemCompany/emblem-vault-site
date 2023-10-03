@@ -35,18 +35,21 @@ export const ROUTER_ADDRESS = '0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D'
 export const PERMIT_AND_CALL_ADDRESS = '0xe334094985bB046B95550793EA577F8DC4e6112B'
 export const ZERO = JSBI.BigInt(0)
 export const MAX_UINT256 = JSBI.BigInt('0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff')
-
+export const curatedAssets = {
+  xcp: xcpJson
+}
 export const curatedContracts = [
   {
     name: "Rare Pepe",
     1: "0x7E6027a6A84fC1F6Db6782c523EFe62c923e46ff",
-    "chain": "xcp",
+    collectionChain: "xcp",
     mintable: true,
     collectionType: "ERC1155",
     loadTypes: ['select'],
+    nativeAssets: ["BTC", "XCP"],
     description: "This Curated Emblem Vault contains 1 Rare Pepe NFT that was minted on Bitcoin using the Counterparty protocol. Rare Pepes is a collection of 1,774 unique cards with varying designs and rarities that were created by more than 300 artists from 2016 to 2018. ",
     purchaseMethod: 'buyWithQuote',
-    showBalance: false,
+    showBalance: true,
     price: 20000000,
     attributes: [],
     allowed: (data: any) => {
@@ -56,47 +59,104 @@ export const curatedContracts = [
       let curatedItemFound = xcpJson["Rare Pepe"].filter(item => { return item.name == asset })
       return asset && curatedItemFound.length > 0
     },
+    filterNativeBalances: (balance: any, _this: any): any => {
+      return balance.balances.filter((item: { name: any; }) => !_this.nativeAssets.includes(item.name));
+    },
     address: (addresses: any[]) => {
       return addresses.filter(item => { return item.coin === "BTC" })[0].address
     },
-    addresses: (addresses: any[]) => {
-      return addresses.filter(item => { return item.coin === "BTC" })
+    addresses: (addresses: any[], _this: any) => {
+      return addresses.filter(item => _this.nativeAssets.includes(item.coin));
+    },
+    balanceExplorer(address: string) {
+        return `https://xchain.io/address/${address}`
     }
   },
   {
     name: "Emblem Test",
     1: "0xdcFfa2b5cBf288932B009EBA01C8ca772ec6C993",
     5: "0xa7428f3b7752F006890E12F055b0A816F0F18CdD",
-    "chain": "xcp",
+    collectionChain: "xcp",
     mintable: true,
     collectionType: "ERC1155",
     loadTypes: ['select'],
+    nativeAssets: ["BTC", "XCP"],
     description: "Created by Pepe artists Oliver Morris and Zoe Davies, the Emblem Test series of four cards—COMMON, RARE, LEGEND, and EPIC—were made to test Emblem Vault's new curated collection (ERC-1155) contracts. The cards were free and airdropped to Emblem Vault followers in December 2022",
     purchaseMethod: 'buyWithQuote',
     showBalance: false,
     price: 20000000,
     attributes: [
 
-    ]
+    ],
+    filterNativeBalances: (balance: any, _this: any): any => {
+      return balance.balances.filter((item: { name: any; }) => !_this.nativeAssets.includes(item.name));
+    },
+    addresses: (addresses: any[], _this: any) => {
+      return addresses.filter(item => _this.nativeAssets.includes(item.coin));
+    },
+    balanceExplorer(address: string) {
+        return `https://xchain.io/address/${address}`
+    }
   },
   {
     name: "Spells of Genesis",
     1: "0xDCA91409018ea80B71d21E818f00e76072969861",
-    chain: "xcp",
-    mintable: false,
+    collectionChain: "xcp",
+    mintable: true,
     collectionType: "ERC1155",
     loadTypes: ['select'],
+    nativeAssets: ["BTC", "XCP"],
     description: "",
     purchaseMethod: 'buyWithQuote',
-    showBalance: false
+    showBalance: true,
+    allowed: (data, _this, msgCallback = null) => {
+      return data.project == _this.name 
+    },
+    allowedName: (asset: any, _this: any, targetAsset: any, msgCallback: any = null) => {
+      return  asset !== undefined &&
+           (!_this.autoLoad && asset == targetAsset.name) ||
+           (_this.autoLoad && (curatedAssets[asset]? curatedAssets[asset]: curatedAssets[_this.collectionChain][_this.name].filter((item: { name: any; })=>{return item.name == asset}).length > 0))
+   },
+    allowedNetwork: (fromNetwork, toNetwork, msgCallback = null) => {
+        return fromNetwork == toNetwork; // don't allow cross chain
+    },
+    allowedJump: (ownership_balances, _this) => {
+        let hasAnyBalance = ownership_balances && ownership_balances.status != "claimed";
+        if (hasAnyBalance) {
+            let filteredBalances = _this.filterNativeBalances(ownership_balances, _this);
+            // single
+            if (filteredBalances.length == 1) {
+                return _this.allowed(filteredBalances[0], _this);
+            }
+            else {
+                return false;
+            }
+        }
+        else {
+            return false;
+        }
+    },
+    filterNativeBalances: (balance: any, _this: any): any => {
+        return balance.balances.filter((item: { name: any; }) => !_this.nativeAssets.includes(item.name));
+    },
+    address: (addresses: any[]) => {
+        return addresses[0].address
+    },
+    addresses: (addresses: any[], _this: any) => {
+      return addresses.filter(item => _this.nativeAssets.includes(item.coin));
+    },
+    balanceExplorer(address: string) {
+        return `https://xchain.io/address/${address}`
+    }
   },
   {
     name: "Cursed Ordinal",
     1: "0x769Fdf030A9e176EC8B6D66EFdCB63e8fA69885c",
-    chain: "cursedordinalsbtc",
+    collectionChain: "cursedordinalsbtc",
     mintable: true,
     collectionType: "ERC721",
     loadTypes: ['input', 'empty'],
+    nativeAssets: ["TAP"],
     description: `Cursed Ordinals are a collection of unindexed or "bugged" Ordinals not included initially in the Ord Client. \n\nWARNING: The inscription number of this Cursed Ordinal may change. Emblem Vault's dynamic vaults will update the metadata of this vault whenever a new Ord Client upgrade is posted and implemented.`,
     purchaseMethod: 'buyWithQuote',
     showBalance: true,
@@ -160,17 +220,18 @@ export const curatedContracts = [
     address: (addresses: any[]) => {
       return addresses.filter(item => { return item.coin === "TAP" })[0].address
     },
-    addresses: (addresses: any[]) => {
-      return addresses.filter(item => { return item.coin === "TAP" })
+    addresses: (addresses: any[], _this: any) => {
+      return addresses.filter(item => _this.nativeAssets.includes(item.coin));
     }
   },
   {
     1: "0x8C3c0274c33f263F0A55d129cFC8eaa3667A9E8b",
     name: "Ethscription",    
-    chain: "ethscription",
+    collectionChain: "ethscription",
     mintable: true,
     collectionType: "ERC721",
     loadTypes: ['empty'],
+    nnativeAssets: ["ETH"],
     description: `Ethscriptions are on-chain digital artifacts stored on the Ethereum blockchain using transaction calldata. LFG!`,
     purchaseMethod: 'buyWithQuote',
     showBalance: true,
@@ -216,17 +277,18 @@ export const curatedContracts = [
     address: (addresses: any[]) => {
       return addresses.filter(item => { return item.coin === "ETH" })[0].address
     },
-    addresses: (addresses: any[]) => {
-      return addresses.filter(item => { return item.coin === "ETH" })
+    addresses: (addresses: any[], _this: any) => {
+      return addresses.filter(item => _this.nativeAssets.includes(item.coin));
     }
   },
   {
     1: "0x363D0C12eDCAF2C5962110401f651491f58C760a",
-    name: "$OXBT",    
-    chain: "oxbt",
+    name: "$OXBT",
+    collectionChain: "oxbt",
     mintable: true,
     collectionType: "ERC721a",
     loadTypes: ['empty'],
+    nativeAssets: ["TAP"],
     description: `$OXBT is a BRC-20 utility token used to enable artists, creators, & builders on Bitcoin.`,
     purchaseMethod: 'buyWithQuote',
     showBalance: true,
@@ -267,17 +329,18 @@ export const curatedContracts = [
     address: (addresses: any[]) => {
       return addresses.filter(item => { return item.coin === "TAP" })[0].address
     },
-    addresses: (addresses: any[]) => {
-      return addresses.filter(item => { return item.coin === "TAP" })
+    addresses: (addresses: any[], _this: any) => {
+      return addresses.filter(item => _this.nativeAssets.includes(item.coin));
     }
   },
   {
     1: "0x49aCD1b04702a30fb2cE8522298c299527E31913",
     name: "$ORDI",    
-    chain: "ordi",
+    collectionChain: "ordi",
     mintable: true,
     collectionType: "ERC721a",
     loadTypes: ['empty'],
+    nativeAssets: ["TAP"],
     description: `Ordi is the first brc-20, an experiment into fungibility on Bitcoin utilizing ordinal theory and inscriptions.`,
     purchaseMethod: 'buyWithQuote',
     showBalance: true,
@@ -307,28 +370,29 @@ export const curatedContracts = [
           msgCallback? msgCallback("Load vault with exactly 200 $ORDI"): null
       }
       return false;
-  },
-  allowedName: (asset, msgCallback = null) => {
+    },
+    allowedName: (asset, msgCallback = null) => {
       if (asset == "200 $ORDI") {
           return true;
       }
       msgCallback? msgCallback("Incorrect Asset In Vault"): null
       return false;
-  },
+    },
     address: (addresses: any[]) => {
       return addresses.filter(item => { return item.coin === "TAP" })[0].address
     },
-    addresses: (addresses: any[]) => {
-      return addresses.filter(item => { return item.coin === "TAP" })
+    addresses: (addresses: any[], _this: any) => {
+      return addresses.filter(item => _this.nativeAssets.includes(item.coin));
     }
   },
   {
     1: "0x9885d3F9b3B71A1Ff69D6a8B4AC87426A60F993d",
     name: "Rinkeby",    
-    chain: "rinkeby",
+    collectionChain: "rinkeby",
     mintable: false,
     collectionType: "ERC721a",
     loadTypes: ['empty'],
+    nativeAssets: ["ETH"],
     description: `Vaults migrated from Rinkeby testnet.`,
     purchaseMethod: 'buyWithQuote',
     showBalance: true,
@@ -379,14 +443,285 @@ export const curatedContracts = [
     address: (addresses: any[]) => {
       return addresses[0].address
     },
-    addresses: (addresses: any[]) => {
-      return addresses
+    addresses: (addresses: any[], _this: any) => {
+      return addresses.filter(item => _this.nativeAssets.includes(item.coin));
     }
+  },
+  {
+      1: "0x4C03BCAD293fb0562D26FAa7D90A0cb3Ea74c919",
+      name: "Fake Rares",
+      collectionChain: "xcp",
+      nativeAssets: ["BTC", "XCP"],
+      mintable: true,
+      autoLoad: true,
+      collectionType: "ERC1155",
+      loadTypes: ['empty'],
+      description: `tbd.`,
+      purchaseMethod: 'buyWithQuote',
+      showBalance: true,
+      balanceUrl: "https://serverless-metadata-xcp.vercel.app/",
+      price: 20000000,
+      attributes: [
+      ],
+      image: (data: any) => {
+          return `https://raw.githubusercontent.com/DecentricCorp/DecentricAssets/master/emblem/icons/App/512x512.png`
+      },
+      loading: () => {
+          let images = [
+              "https://raw.githubusercontent.com/DecentricCorp/DecentricAssets/master/emblem/icons/App/512x512.png",
+          ]
+          return images[Math.floor(Math.random() * images.length)] // Random image
+      },
+      placeholder: () => {
+          let images: any[] = []
+          return images[Math.floor(Math.random() * images.length)] // Random image
+      },
+      allowed: (data, _this, msgCallback = null) => {
+        return data.project == _this.name 
+      },
+      allowedName: (asset: any, _this: any, targetAsset: any, msgCallback: any = null) => {
+        return  asset !== undefined &&
+             (!_this.autoLoad && asset == targetAsset.name) ||
+             (_this.autoLoad && (curatedAssets[asset]? curatedAssets[asset]: curatedAssets[_this.collectionChain][_this.name].filter((item: { name: any; })=>{return item.name == asset}).length > 0))
+     },
+      allowedNetwork: (fromNetwork, toNetwork, msgCallback = null) => {
+          return fromNetwork == toNetwork; // don't allow cross chain
+      },
+      allowedJump: (ownership_balances, _this) => {
+          let hasAnyBalance = ownership_balances && ownership_balances.status != "claimed";
+          if (hasAnyBalance) {
+              let filteredBalances = _this.filterNativeBalances(ownership_balances, _this);
+              // single
+              if (filteredBalances.length == 1) {
+                  return _this.allowed(filteredBalances[0], _this);
+              }
+              else {
+                  return false;
+              }
+          }
+          else {
+              return false;
+          }
+      },
+      filterNativeBalances: (balance: any, _this: any): any => {
+          return balance.balances.filter((item: { name: any; }) => !_this.nativeAssets.includes(item.name));
+      },
+      address: (addresses: any[]) => {
+          return addresses[0].address
+      },
+      addresses: (addresses: any[], _this: any) => {
+        return addresses.filter(item => _this.nativeAssets.includes(item.coin));
+      },
+      balanceExplorer(address: string) {
+          return `https://xchain.io/address/${address}`
+      }
+  },
+  {
+      1: "0xE95a169f585BfEc57FCBD5D77e4b2dF0b1cD59bc",
+      name: "Age of Rust",
+      collectionChain: "xcp",
+      nativeAssets: ["BTC", "XCP", "BUYOFFER"],
+      mintable: true,
+      autoLoad: false,
+      addressChain: "BTC",
+      collectionType: "ERC1155",
+      loadTypes:  ['select'],
+      description: `tbd.`,
+      purchaseMethod: 'buyWithQuote',
+      showBalance: false,
+      balanceUrl: "https://serverless-metadata-xcp.vercel.app/",
+      price: 20000000,
+      attributes: [
+      ],
+      image: (data: any) => {
+          return `https://raw.githubusercontent.com/DecentricCorp/DecentricAssets/master/emblem/icons/App/512x512.png`
+      },
+      loading: () => {
+          let images = [
+              "https://raw.githubusercontent.com/DecentricCorp/DecentricAssets/master/emblem/icons/App/512x512.png",
+          ]
+          return images[Math.floor(Math.random() * images.length)] // Random image
+      },
+      placeholder: () => {
+          let images: any[] = []
+          return images[Math.floor(Math.random() * images.length)] // Random image
+      },
+      allowed: (data: any, _this: any, msgCallback: any = null) => {
+          return data.project == _this.name
+      },
+      allowedName: (asset: any, msgCallback: any = null) => {
+          return asset !== undefined
+      },
+      allowedNetwork: (fromNetwork: any, toNetwork: any, msgCallback: any = null) => {
+          return fromNetwork == toNetwork // don't allow cross chain
+      },
+      allowedJump: (ownership_balances: any, _this: any): boolean => {
+          let hasAnyBalance = ownership_balances && ownership_balances.status != "claimed"
+          if (hasAnyBalance) {
+              let filteredBalances = _this.filterNativeBalances(ownership_balances, _this)
+              // single
+              if (filteredBalances.length == 1) {
+                  return _this.allowed(filteredBalances[0], _this)
+              } else {
+                  return false
+              }
+          } else {
+              return false
+          }
+      },
+      filterNativeBalances: (balance: any, _this: any): any => {
+          return balance.balances.filter((item: { name: any; }) => !_this.nativeAssets.includes(item.name));
+      },
+      address: (addresses: any[]) => {
+          return addresses[0].address
+      },
+      addresses: (addresses: any[], _this: any) => {
+        return addresses.filter(item => _this.nativeAssets.includes(item.coin));
+      },
+      balanceExplorer(address: string) {
+          return `https://xchain.io/address/${address}`
+      }
+  },
+  {
+      1: "0x99DA31CF682d1F2b61b57c826B954bB1783D50E5",
+      name: "Dank Rares",
+      collectionChain: "xcp",
+      nativeAssets: ["BTC", "XCP"],
+      mintable: true,
+      autoLoad: true,
+      collectionType: "ERC1155",
+      loadTypes: ['empty'],
+      description: `tbd.`,
+      purchaseMethod: 'buyWithQuote',
+      showBalance: true,
+      balanceUrl: "https://serverless-metadata-xcp.vercel.app/",
+      price: 20000000,
+      attributes: [
+      ],
+      image: (data: any) => {
+          return `https://raw.githubusercontent.com/DecentricCorp/DecentricAssets/master/emblem/icons/App/512x512.png`
+      },
+      loading: () => {
+          let images = [
+              "https://raw.githubusercontent.com/DecentricCorp/DecentricAssets/master/emblem/icons/App/512x512.png",
+          ]
+          return images[Math.floor(Math.random() * images.length)] // Random image
+      },
+      placeholder: () => {
+          let images: any[] = []
+          return images[Math.floor(Math.random() * images.length)] // Random image
+      },
+      allowed: (data, _this, msgCallback = null) => {
+        return data.project == _this.name 
+      },
+      allowedName: (asset: any, _this: any, targetAsset: any, msgCallback: any = null) => {
+        return  asset !== undefined &&
+             (!_this.autoLoad && asset == targetAsset.name) ||
+             (_this.autoLoad && (curatedAssets[asset]? curatedAssets[asset]: curatedAssets[_this.collectionChain][_this.name].filter((item: { name: any; })=>{return item.name == asset}).length > 0))
+     },
+      allowedNetwork: (fromNetwork, toNetwork, msgCallback = null) => {
+          return fromNetwork == toNetwork; // don't allow cross chain
+      },
+      allowedJump: (ownership_balances, _this) => {
+          let hasAnyBalance = ownership_balances && ownership_balances.status != "claimed";
+          if (hasAnyBalance) {
+              let filteredBalances = _this.filterNativeBalances(ownership_balances, _this);
+              // single
+              if (filteredBalances.length == 1) {
+                  return _this.allowed(filteredBalances[0], _this);
+              }
+              else {
+                  return false;
+              }
+          }
+          else {
+              return false;
+          }
+      },
+      filterNativeBalances: (balance: any, _this: any): any => {
+          return balance.balances.filter((item: { name: any; }) => !_this.nativeAssets.includes(item.name));
+      },
+      address: (addresses: any[]) => {
+          return addresses[0].address
+      },
+      addresses: (addresses: any[], _this: any) => {
+        return addresses.filter(item => _this.nativeAssets.includes(item.coin));
+      },
+      balanceExplorer(address: string) {
+          return `https://xchain.io/address/${address}`
+      }
+  },
+  {
+      1: "0xDE542530037Fd01D10AaBe0C5953feC17BdCCEd4",
+      name: "Fake Commons",
+      collectionChain: "xcp",
+      nativeAssets: ["BTC", "XCP"],
+      mintable: true,
+      autoLoad: true,
+      collectionType: "ERC1155",
+      loadTypes: ['empty'],
+      description: `tbd.`,
+      purchaseMethod: 'buyWithQuote',
+      showBalance: true,
+      balanceUrl: "https://serverless-metadata-xcp.vercel.app/",
+      price: 20000000,
+      attributes: [
+      ],
+      image: (data: any) => {
+          return `https://raw.githubusercontent.com/DecentricCorp/DecentricAssets/master/emblem/icons/App/512x512.png`
+      },
+      loading: () => {
+          let images = [
+              "https://raw.githubusercontent.com/DecentricCorp/DecentricAssets/master/emblem/icons/App/512x512.png",
+          ]
+          return images[Math.floor(Math.random() * images.length)] // Random image
+      },
+      placeholder: () => {
+          let images: any[] = []
+          return images[Math.floor(Math.random() * images.length)] // Random image
+      },
+      allowed: (data, _this, msgCallback = null) => {
+        return data.project == _this.name 
+      },
+      allowedName: (asset: any, _this: any, targetAsset: any, msgCallback: any = null) => {
+        return  asset !== undefined &&
+             (!_this.autoLoad && asset == targetAsset.name) ||
+             (_this.autoLoad && (curatedAssets[asset]? curatedAssets[asset]: curatedAssets[_this.collectionChain][_this.name].filter((item: { name: any; })=>{return item.name == asset}).length > 0))
+     },
+      allowedNetwork: (fromNetwork, toNetwork, msgCallback = null) => {
+          return fromNetwork == toNetwork; // don't allow cross chain
+      },
+      allowedJump: (ownership_balances, _this) => {
+          let hasAnyBalance = ownership_balances && ownership_balances.status != "claimed";
+          if (hasAnyBalance) {
+              let filteredBalances = _this.filterNativeBalances(ownership_balances, _this);
+              // single
+              if (filteredBalances.length == 1) {
+                  return _this.allowed(filteredBalances[0], _this);
+              }
+              else {
+                  return false;
+              }
+          }
+          else {
+              return false;
+          }
+      },
+      filterNativeBalances: (balance: any, _this: any): any => {
+          return balance.balances.filter((item: { name: any; }) => !_this.nativeAssets.includes(item.name));
+      },
+      address: (addresses: any[]) => {
+          return addresses[0].address
+      },
+      addresses: (addresses: any[], _this: any) => {
+        return addresses.filter(item => _this.nativeAssets.includes(item.coin));
+      },
+      balanceExplorer(address: string) {
+          return `https://xchain.io/address/${address}`
+      }
   }
 ]
-export const curatedAssets = {
-  xcp: xcpJson
-}
+
 export const contractAddresses = {
   salesFactory: {
     1: '0xfb51bcd2644c20d87e17106c27355732fd485e4e'
@@ -464,7 +799,7 @@ export const contractAddresses = {
 export const BURN_ADDRESS = '0x5D152dd902CC9198B97E5b6Cf5fc23a8e4330180'
 export const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000"
 export const EMBLEM_API = API_OVERLOAD? API_OVERLOAD : 'https://api2.emblemvault.io' //'http://localhost:3001' // 
-export const EMBLEM_V2_API =  'https://v2.emblemvault.io' // 'http://localhost:3001' //
+export const EMBLEM_V2_API = 'https://v2.emblemvault.io' // 'http://localhost:3001' //
 export const SIG_API = 'https://tor-us-signer-coval.vercel.app' //'http://localhost:3002' //
 export const ORD_API = 'https://api-ord.emblemvault.io/bitcoin/'
 

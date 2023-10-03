@@ -1,9 +1,10 @@
 import { extendTheme } from '@chakra-ui/react';
 const theme = extendTheme({
   useSystemColorMode: true,
-  gray: {
-    100: "#f7fafc",
-    // ... rest of your colors
+  fonts: {
+    heading: `'Raleway', monospace`,
+    mono: `'Raleway', monospace`,
+    body: `'Raleway', monospace`,
   },
   colors: {
     gray: {
@@ -11,7 +12,7 @@ const theme = extendTheme({
       // ... rest of your colors
     }
   }
-})
+});
 
 const customIcons = {
   walletconnect: {
@@ -109,30 +110,30 @@ const customIcons = {
 
 export default {
   ...theme,
-  fonts: {
-    heading: `'Raleway', monospace`,
-    mono: `'Raleway', monospace`,
-    body: `'Raleway', monospace`,
-  },
-  icons: {
-    ...theme.icons,
-    ...customIcons,
-  },
-  colors: {
-    ...theme.colors,
-  },
-  palette: {
-    primary: {
-      main: '#426b94',
-    },
-    secondary: {
-      main: '#2e323c',
-    },
-    error: {
-      main: '#f04141',
-    },
-    background: {
-      default: '#222428',
-    },
-  },
+  // fonts: {
+  //   heading: `'Raleway', monospace`,
+  //   mono: `'Raleway', monospace`,
+  //   body: `'Raleway', monospace`,
+  // },
+  // icons: {
+  //   ...theme.icons,
+  //   ...customIcons,
+  // },
+  // colors: {
+  //   ...theme.colors,
+  // },
+  // palette: {
+  //   primary: {
+  //     main: '#426b94',
+  //   },
+  //   secondary: {
+  //     main: '#2e323c',
+  //   },
+  //   error: {
+  //     main: '#f04141',
+  //   },
+  //   background: {
+  //     default: '#222428',
+  //   },
+  // },
 }

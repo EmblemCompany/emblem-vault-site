@@ -6,6 +6,31 @@ body {
   text-rendering: optimizeSpeed;
   line-height: 1.5;
 }
+ .NFT h3{
+   /* font-family: 'Raleway', monospace; */
+   font-size: inherit !important;
+ }
+
+ .coin-balance-content p {
+  font-family: 'Raleway', monospace;
+  margin-top: 0;
+  margin-bottom: unset;
+ }
+
+ .NFT.newest p {
+  margin-bottom: 0.2rem;
+ }
+
+ .coin-image-container .chakra-stack, .chakra-stack p {
+    /* padding: 2px !important;  */
+    gap: 0px !important;
+    /* padding-left: 15px; */
+ }
+
+ .chakra-tabs__tab-panel {
+   padding: 0px !important;
+ }
+ 
 
 .Video {
   position: absolute;

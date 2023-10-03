@@ -86,6 +86,7 @@ export default function Nft2() {
   const [vaultImage, setVaultImage] = useState('')
   const [ownedImage, setOwnedImage] = useState('')
   const [vaultValues, setVaultValues] = useState([])
+  const [backingValues, setBackingValues] = useState([])
   const [loadedValues, setLoadedValues] = useState(false)
   const [vaultDataValues, setVaultDataValues] = useState([])
   const [attributes, setAttributes] = useState([])
@@ -131,7 +132,7 @@ export default function Nft2() {
   const [isCrowdSale, setIsCrowdSale] = useState(false)
   const [alternateContractAddress, setAlternateContractAddress] = useState(null)
   const [targetAsset, setTargetAsset] = useState({name: '', image: '', metadata: ''})
-  const [targetContract, setTargetContract] = useState({name: '', chain: '', 4: '', 1: '', tokenId: {}, serialNumber: {'hex':''}, collectionType: '' })
+  const [targetContract, setTargetContract] = useState({collectionType: ''})
   const [canCuratedMint, setCanCuratedMint] = useState(false)
   const [move_targetAsset, setMoveTargetAsset] = useState({name: '', image: '', metadata: ''})
   const [move_targetContract, setMoveTargetContract] = useState({name: '', chain: '', 4: '', 1: '', tokenId: {}, serialNumber: {'hex':''} })
@@ -159,11 +160,8 @@ export default function Nft2() {
   }
 
   const getCuratedContract = (address = null) =>{
-    let allowedContracts = curatedContracts.filter(contract=>{return contract[chainId] == address})
-    if (allowedContracts.length > 0){     
-       setCuratedContract(allowedContracts[0])
-      return new Contract(address, allowedContracts[0].collectionType == 'ERC1155'? contractAddresses.erc1155Abi:  allowedContracts[0].collectionType == 'ERC721a'? contractAddresses.erc721aAbi: contractAddresses.erc721Abi, library.getSigner(account).connectUnchecked())
-    }
+      let curatedContract: any = targetContract
+      return new Contract(address, curatedContract.collectionType == 'ERC1155'? contractAddresses.erc1155Abi:  curatedContract.collectionType == 'ERC721a'? contractAddresses.erc721aAbi: contractAddresses.erc721Abi, library.getSigner(account).connectUnchecked())
   }
 
   const checkLiveliness = (tokenId, targetContract, cb)=>{
@@ -206,7 +204,7 @@ export default function Nft2() {
   }
 
   function chooseMintPath() {
-    let curatedContract = curatedContracts.filter(contract=>{return contract[chainId] == targetContract[chainId]})[0]
+    let curatedContract: any = targetContract
     if (curatedContract.purchaseMethod && curatedContract.purchaseMethod == 'buyWithQuote'){
       return lazyMintCuratedWithEth()
     } else {
@@ -229,7 +227,6 @@ export default function Nft2() {
           body: JSON.stringify({method: 'buyWithSignedPrice', tokenId: tokenId, signature: signature, chainId: chainId.toString()}),
         }).then(async function (response){
           let data = await response.json()
-          alert(0)
           setCuratedMintingParameters(data)
           ;(vaultHandlerContract as Contract)
             .buyWithSignedPrice(data._nftAddress, data._payment, data._price, data._to, data._tokenId, data._nonce, data._signature, data.serialNumber, 1)
@@ -256,6 +253,7 @@ export default function Nft2() {
           setState({ loaded: true })
       })
   }
+  
   const lazyMintCuratedWithEth = () =>{
     setState({ loaded: false })
     library.getSigner(account)
@@ -272,6 +270,7 @@ export default function Nft2() {
           let data = await response.json()
           if (data.err && data.msg) {
             alert(data.msg)
+            setState({loaded: true})
           } else {
             setCuratedMintingParameters(data)
             // alert(data._price)
@@ -324,41 +323,6 @@ export default function Nft2() {
     }
   }
 
-  const handleApproveForall = () => {
-    setApproving(true)
-    if (targetContract.name) {
-      emblemContract = getCuratedContract(targetContract[chainId])
-      emblemContract.setApprovalForAll(contractAddresses.vaultHandlerV8[chainId], true)
-      .then(({ hash }: { hash: string }) => {
-        setTimeout(() => {
-          setHash(hash)
-        }, 100) // Solving State race condition where transaction watcher wouldn't notice we were creating
-      })
-      .catch((error: ErrorWithCode) => {
-        if (error?.code !== 4001) {
-          console.log(`tx failed.`, error)
-        } else {
-          setApproving(false)
-        }
-      })
-    } else {
-      (emblemContract as Contract)
-      .setApprovalForAll(contractAddresses.vaultHandler[chainId], true)
-      .then(({ hash }: { hash: string }) => {
-        setTimeout(() => {
-          setHash(hash)
-        }, 100) // Solving State race condition where transaction watcher wouldn't notice we were creating
-      })
-      .catch((error: ErrorWithCode) => {
-        if (error?.code !== 4001) {
-          console.log(`tx failed.`, error)
-        } else {
-          setApproving(false)
-        }
-      })
-    }
-  }
-
   const getVault = async () => {
     console.log('getvault')
     const response = await fetch(EMBLEM_V2_API + '/meta/' + tokenId + '?experimental=true', {
@@ -374,6 +338,7 @@ export default function Nft2() {
       setIsCrowdSale(true)
       setAlternateContractAddress(jsonData.collectionAddress)
     }
+
     if (!jsonData.name) {
       setState({ loaded: true })
       setInvalidVault(true)
@@ -382,18 +347,10 @@ export default function Nft2() {
       setStates(jsonData)
       setLoadingApi(false)
       setInvalidVault(false)
-    }
-    {
-      !vaultPrivacy && !loadedValues ?    
-      getAllBalancesLive([], tokenId, (v)=>{
-        if (v) {
-          setVaultValues(v)
-        }        
-      }) : null
-    }
+    }    
   }
 
-  const setStates = (jsonData) => {
+  const setStates = (jsonData) => {    
     if (!jsonData.targetAsset && !jsonData.move_targetAsset && !enableLegacy) {
       location.href = location.origin + '/nft?id=' + tokenId
     }
@@ -415,14 +372,15 @@ export default function Nft2() {
     setVaultImageIPFS(jsonData.image_ipfs || null)
     jsonData.targetContract && jsonData.targetContract.tokenId == tokenId && jsonData.targetContract.serialNumber? setIsCuratedMaster(true): null
     jsonData.targetAsset? setTargetAsset(jsonData.targetAsset) : null
-    jsonData.targetContract? setTargetContract(jsonData.targetContract) : null
+    if (jsonData.targetContract) {
+      let contract: any = curatedContracts.find(contract=>{return contract[chainId] == jsonData.targetContract[chainId]})
+      contract.tokenId = jsonData.targetContract.tokenId
+      contract.serialNumber = jsonData.targetContract.serialNumber
+      jsonData.targetContract? setTargetContract(contract) : null
+    }
+    
     jsonData.move_targetAsset? setMoveTargetAsset(jsonData.move_targetAsset) : null
     jsonData.move_targetContract? setMoveTargetContract(jsonData.move_targetContract) : null
-    // jsonData.values && jsonData.targetAsset && jsonData.values.filter(item=>{
-    //   return item.coin.toLowerCase() == jsonData.targetContract.chain && 
-    //   item.name == jsonData.targetAsset.name && 
-    //   item.project == jsonData.targetContract.name
-    // }).length > 0 ? setCanCuratedMint(true): null
  
     setLive(jsonData.live == false ? false : true)
     
@@ -464,7 +422,24 @@ export default function Nft2() {
       setSealed(true)
     } else {
       setSealed(false)
+    }    
+  }
+
+  const getAllBackingVaults = async (values, tokenId, cb) => {
+    if (loadedValues) {
+      return cb(false)
     }
+    setLoadedValues(true)
+    const response = await fetch(EMBLEM_V2_API + '/allBackingIdsForTokenId/' + tokenId , {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+    })
+    
+    const jsonData = await response.json()
+    console.log('response', response, jsonData)
+      return cb(jsonData)
   }
 
   const getAllBalancesLive = async (values, tokenId, cb) => {
@@ -482,11 +457,7 @@ export default function Nft2() {
     
     const jsonData = await response.json()
     console.log('response', response, jsonData)
-    if (jsonData.balances.length > 0) {      
-      return cb(values.concat(jsonData.balances))
-    } else {
-      return cb(values)
-    }
+      return cb(jsonData.balances)
   }
 
   const getAllBalancesByAddress = async (values, ethAddress, btcAddress, cb) => {
@@ -562,16 +533,17 @@ export default function Nft2() {
     
     let _owner
     try {
-      if (targetContract[chainId]) {
-        let allowedContracts = curatedContracts.filter(contract=>{return contract[chainId] == targetContract[chainId]})
-        if (allowedContracts.length > 0 && allowedContracts[0].allowedName && allowedContracts[0].allowed && vaultValues && vaultValues.length > 0){
-          setCanCuratedMint(
-            allowedContracts[0].allowedName(vaultValues[0].name, setVaultMsg) && 
-            allowedContracts[0].allowed(vaultValues[0], setVaultMsg)
+      
+      if (targetContract[chainId]) {        
+        let allowedContracts: any = targetContract
+        if (allowedContracts.allowedName && allowedContracts.allowed && vaultValues && vaultValues.length > 0){
+          setCanCuratedMint(            
+            allowedContracts.allowedName(vaultValues[0].name, allowedContracts, targetAsset, setVaultMsg) && allowedContracts.allowed(vaultValues[0], allowedContracts, setVaultMsg)
           )
         } else {
           setCanCuratedMint(false)
         }
+        
         emblemContract = getCuratedContract(targetContract[chainId])
         setDecimals(await covalContract.decimals())
         setPrice(250 * Math.pow(10, decimals))
@@ -587,16 +559,18 @@ export default function Nft2() {
         } else {
           setIsCovalApproved(false)
         }
-        if (allowedContracts.length > 0) {
-          if (allowedContracts[0].collectionType == 'ERC1155') {
-            let balanceOf = await emblemContract.balanceOf(account, targetContract.tokenId).then((balance: { toString: () => string }) => balance.toString())
-            _owner = Number(balanceOf) > 0 ? account : "0x0000000000000000000000000000000000000000"
+        if (allowedContracts.name) {
+          if (allowedContracts.collectionType == 'ERC1155') {
+            
+            let balanceOf = await emblemContract.balanceOf(account, allowedContracts.tokenId).then((balance: { toString: () => string }) => balance.toString())
+            
+            _owner = Number(balanceOf) > 0 ? account : "0x0000000000000000000000000000000000000000"            
             if (Number(balanceOf) > 0) {
               setOwnedCuratedBalance(balanceOf)
             }
           } else {
             setOwnedCuratedBalance(1)            
-            _owner  = await emblemContract.ownerOf(allowedContracts[0].collectionType == 'ERC721a' ? targetContract.tokenId :tokenId)
+            _owner  = await emblemContract.ownerOf(allowedContracts.collectionType == 'ERC721a' ? allowedContracts.tokenId :tokenId)
             // alert(_owner)
           }
         } else {
@@ -605,6 +579,7 @@ export default function Nft2() {
       } else {
         _owner  = await emblemContract.ownerOf(tokenId)
       }
+      
       finish()
     } catch(err){
       _owner = "0x0000000000000000000000000000000000000000"
@@ -612,16 +587,17 @@ export default function Nft2() {
     }
 
     async function finish(){
+      
       let isApproved
-      if (targetContract[chainId]) {
-        isApproved = await emblemContract.isApprovedForAll(account, contractAddresses.vaultHandlerV8[chainId])
-        setApproved(isApproved)
-      } else {
-        isApproved = await emblemContract.isApprovedForAll(account, contractAddresses.vaultHandler[chainId])
-        setApproved(isApproved)
-      }
+      // if (targetContract[chainId]) {
+      //   isApproved = await emblemContract.isApprovedForAll(account, contractAddresses.vaultHandlerV8[chainId])
+      //   setApproved(isApproved)
+      // } else {
+      //   isApproved = await emblemContract.isApprovedForAll(account, contractAddresses.vaultHandler[chainId])
+      //   setApproved(isApproved)
+      // }
       // if (targetContract.collectionType == 'ERC721a'){
-      //   setApproved(true)
+        setApproved(true)
       // }
       setOwner(_owner)
       setMine(_owner === account || (to === account && _owner === "0x0000000000000000000000000000000000000000"))
@@ -657,28 +633,13 @@ export default function Nft2() {
         })
       })
   }
-
-  const approveCovalFlow = () => {
-    setApproving(true)
-    let handlerToApprove = targetContract.name? contractAddresses.vaultHandlerV8[chainId]: contractAddresses.vaultHandler[chainId]
-    ;(covalContract as Contract)
-      .approve(handlerToApprove, '100000000000000')
-      .then(({ hash }: { hash: string }) => {
-        setHash(hash)
-      })
-      .catch((error: ErrorWithCode) => {
-        if (error?.code == 4001) {
-          setApproving(false)
-        }
-      })
-  }
   
   const handleSign = async () => {
     let serialNumber
     if (targetContract[chainId]) {     
-      let allowedContracts = curatedContracts.filter(contract=>{return contract[chainId] == targetContract[chainId]}) 
+      let allowedContracts: any = targetContract
       emblemContract = getCuratedContract(targetContract[chainId])
-      serialNumber = allowedContracts[0].collectionType == 'ERC1155' ? targetContract.serialNumber : allowedContracts[0].collectionType == 'ERC721a' ? tokenId: targetContract.tokenId     
+      serialNumber = allowedContracts.collectionType == 'ERC1155' ? allowedContracts.serialNumber : allowedContracts.collectionType == 'ERC721a' ? tokenId: allowedContracts.tokenId     
     }
 
     library
@@ -707,7 +668,7 @@ export default function Nft2() {
               })
             } catch(err){
               alert(err)
-              setTimeout(()=>{location.href = location.href}, 2000)
+              setState({loaded: true})
             }
             setState({loaded: true})
             onOpenKeysModal()
@@ -775,9 +736,10 @@ export default function Nft2() {
   }
 
   const handleClaim = async () => {
-    let allowedContracts = curatedContracts.filter(contract=>{return contract[chainId] == targetContract[chainId]}) 
-    if (targetContract[chainId]) {
-      vaultHandlerContract.claim(targetContract[chainId], allowedContracts[0].collectionType == 'ERC721a'? tokenId: targetContract.tokenId).then(({ hash }: { hash: string }) => {
+    let allowedContracts: any = targetContract
+    if (allowedContracts[chainId]) {
+      // alert(vaultHandlerContract.address)
+      vaultHandlerContract.claim(targetContract[chainId], allowedContracts.collectionType == 'ERC721a'? tokenId: allowedContracts.tokenId).then(({ hash }: { hash: string }) => {
         setClaiming(true)
         setTimeout(() => {
           setHash(hash)
@@ -838,12 +800,31 @@ export default function Nft2() {
   }
 
   useEffect(() => {
-    getVault()
+    let allowedContract: any = targetContract
+    if (!vaultPrivacy && !loadedValues && state.loaded && allowedContract.showBalance && !live) {
+      getAllBalancesLive([], tokenId, (v)=>{
+        if (v) {
+          setVaultValues(v)
+        }        
+      })
+    } else if (!vaultPrivacy && !loadedValues && state.loaded && allowedContract.collectionType == "ERC1155" && live && isCuratedMaster) {
+      console.log("Not balance check, but instead backing vaults")
+      getAllBackingVaults([], tokenId, (vaults)=>{
+        setBackingValues(vaults)
+        console.log("backing vault info", vaults)
+      })
+    }
+  })
+
+  useEffect(() => {
+    account? getVault(): null
   }, [])
 
   useEffect(() => {
     (account && chainId && vaultChainId && chainId == vaultChainId) || ((query.noLayout && query.noLayout == 'true') || (query.slideshowOnly && query.slideshowOnly == 'true')) ? getContractStates() : null
   })
+
+
 
   function splitDescription(words) {
     var desc = words? words.split('\n\n\n\n'): [" "]
@@ -865,11 +846,10 @@ export default function Nft2() {
       setVaultAddresses(decryptAddresses(key))
       let ethAddress = vaultAddresses.filter((item) => {return item.coin === 'ETH'})[0].address
       let btcAddress = vaultAddresses.filter((item) => {return item.coin === 'BTC'})[0].address
-      console.log("SUCCESS", vaultAddresses)
       getAllBalancesByAddress([], ethAddress, btcAddress, (values)=>{
         setVaultValues(values)
       })
-    } catch (err) {console.log('WTF', err)}
+    } catch (err) {console.log('err', err)}
   }
 
   function decryptAddresses(key) {
@@ -889,6 +869,7 @@ export default function Nft2() {
   }
 
   function visitOpenSeaLink() {
+    let allowedContract: any = targetContract
     window.open(
       'https://' +
       (vaultChainId == 4 ? 'rinkeby.' : vaultChainId == 5 ? 'testnets.': '') +
@@ -896,11 +877,12 @@ export default function Nft2() {
       (vaultChainId == 137 ? 'matic/' : vaultChainId == 5 ? 'goerli/': 'ethereum/') +
       (alternateContractAddress? alternateContractAddress : targetContract[chainId]? targetContract[chainId]: contractAddresses.emblemVault[vaultChainId]) +
       '/' +
-      (targetContract? targetContract.tokenId: tokenId)
+      (targetContract? allowedContract.tokenId: tokenId)
     , '_blank')
   }
 
   function visitLooksRareLink() {
+    let allowedContract: any = targetContract
     window.open(
       'https://' +
       (vaultChainId == 4 ? 'rinkeby.' :vaultChainId == 5 ? 'goerli.' : '') +
@@ -908,7 +890,7 @@ export default function Nft2() {
       (vaultChainId == 137 ? 'matic/' : '') +
       (alternateContractAddress? alternateContractAddress : targetContract? targetContract[chainId]: contractAddresses.emblemVault[vaultChainId]) +
       '/' +
-      (targetContract? targetContract.tokenId: tokenId) 
+      (targetContract? allowedContract.tokenId: tokenId) 
     , '_blank')
   }
 
@@ -1036,7 +1018,7 @@ export default function Nft2() {
                   </Box>                    
                 </Stack>
                 <Box p="6">
-                {(!isCuratedMaster && !live)  || (curatedContract && curatedContract.showBalance) ? (
+                {(!isCuratedMaster) || (curatedContract && curatedContract.showBalance) ? (
                     <Tabs isFitted variant='enclosed'>
                       <TabList mb='1em'>
                         <Tab>Balances</Tab>
@@ -1098,7 +1080,28 @@ export default function Nft2() {
                           </TabPanel>
                         </TabPanels>
                     </Tabs>
-                  ) : null}   
+                ) : null}
+                {(isCuratedMaster) && backingValues.length > 0 ? (
+                    <Tabs isFitted variant='enclosed'>
+                      <TabList mb='1em'>
+                        <Tab>Backing Vaults</Tab>
+                        <Tab>Offers</Tab>
+                      </TabList>
+                      <TabPanels>                        
+                        <TabPanel>
+                          <Text fontSize={'.8em'} >This vault is backed by {backingValues.length} {targetAsset.name} </Text>
+                          {backingValues.map(backing=>{
+                            return (
+                              <HStack width={'100%'}>
+                                <Text width={'60%'} >Vault: <Link href={backing.internalVault} target="_blank">{backing.tokenId}</Link></Text>
+                                <Text float={'right'} width={'30%'} ><Link href={backing.explorer} target="_blank">Explorer</Link></Text>
+                              </HStack>                              
+                            )
+                          })}
+                          </TabPanel>
+                        </TabPanels>
+                    </Tabs>
+                ) : null}
                   {(!isCuratedMaster && !vaultPrivacy && !live) || (curatedContract && curatedContract.showBalance)? (
                     <Box display="flex" alignItems="baseline" justifyContent="space-between" mt="4">
                     <ButtonGroup justifyContent="space-between" spacing={6}>
@@ -1170,21 +1173,7 @@ export default function Nft2() {
                     </Box>
                   ) : null}
 
-                  {/* {mine && !acceptable && !approved ? (<>
-                    <Box display="flex" alignItems="baseline" justifyContent="space-between" mt="4">
-                      <Button 
-                        backgroundColor={"#02b402"}
-                        color={"black !important"}
-                        fontWeight={"bold !important"}
-                        className="nft_button"
-                        width="100%" onClick={() => {
-                          return handleApproveForall()
-                        }
-                    }> Approve Claiming</Button>
-                    </Box>
-                  </>) : null } */}
-
-                  {mine ? (
+                  {/* {mine ? (
                     <ApprovalButton
                       handler={{address: targetContract[chainId]? contractAddresses.vaultHandlerV8[chainId] : contractAddresses.vaultHandler[chainId], abi: targetContract[chainId]? contractAddresses.vaultHandlerV8Abi : contractAddresses.vaultHandlerAbi}} 
                       spending={{address: targetContract[chainId]? targetContract[chainId] : contractAddresses.emblemVault[chainId], abi: targetContract[chainId]? contractAddresses.erc1155Abi: contractAddresses.emblemAbi}}
@@ -1192,21 +1181,13 @@ export default function Nft2() {
                       label = "Approve Creating / Burning Vaults"
                       watcher={setHash}
                     />
-                  ): null}
+                  ): null} */}
                   
-                  {/* {!isCovalApproved && approved && !approving && mine ? (
-                    <Approval
-                      handler={{address: targetContract[chainId]? contractAddresses.vaultHandlerV8[chainId] : contractAddresses.vaultHandler[chainId], abi: targetContract[chainId]? contractAddresses.vaultHandlerV8Abi : contractAddresses.vaultHandlerAbi}} 
-                      spending={{address: targetContract[chainId]? targetContract[chainId] : contractAddresses.emblemVault[chainId], abi: targetContract[chainId]? contractAddresses.erc1155Abi: contractAddresses.emblemAbi}}
-                      amount={0}
-                      label = "Approve Creating / Burning Vaults"
-                      watcher={setHash}
-                    />
-                  ):null} */}
 
                   {!live && !approving && mine && vaultChainId == chainId && status !== 'claimed' && !showMakingVaultMsg ? (
                       <>
-                        { targetContract.name ? (
+                        {                          
+                          targetContract[vaultChainId] ? (
                           <Button width="100%" mt={5} onClick={chooseMintPath} isDisabled = {!canCuratedMint || mintLockedForever}>{mintLockedForever? 'Mint Locked - keys accessed before mint': !canCuratedMint? 'Please load vault to mint':' Mint Vault'} </Button>
                         ) : null}
                       </>
@@ -1221,7 +1202,7 @@ export default function Nft2() {
                         }}
                         isDisabled={claiming}
                       >
-                        {claiming ? 'Claiming ...' : 'Unlock Vault (Get Private Keys)'}
+                        {claiming ? 'Claiming ...' : `Unlock Vault (Get Private Keys) ${mine}`}
                       </Button>
                     </Box>
                   ) : (vaultChainId === chainId && ((status == 'claimed' || mintLockedForever) && (claimedBy === account || mine))) ? (
@@ -1262,7 +1243,7 @@ export default function Nft2() {
                               
                 
                 </Box>
-                {vaultIPFS ? (
+                {!isCuratedMaster && vaultIPFS ? (
                     <HStack align="center">
                       <Link target='new' mb={2} ml={35} href={'https://gateway.ipfs.io/ipfs/'+vaultIPFS} isExternal>View Metadata on IPFS </Link>
                       {vaultImageIPFS? (

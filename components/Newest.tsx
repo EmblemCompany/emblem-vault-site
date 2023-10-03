@@ -38,7 +38,7 @@ export default function Newest() {
       let jsonData = await response.json()
       if (jsonData) {
         jsonData = jsonData.filter(item=>{return item.live && !item.claimedBy})
-      }      
+      }
       setVaults(vaults.concat(jsonData))
       setState({ loaded: true })
       setLoadingApi(false)
@@ -57,8 +57,6 @@ export default function Newest() {
     } else {
       location.href = location.href + '?start='+(pagePosition + PAGE_SIZE)
     }
-    // setPagePosition(pagePosition + PAGE_SIZE)
-    // getVaults()
   }
 
   const less = ()=>{
@@ -70,8 +68,6 @@ export default function Newest() {
     } else {
       location.href = location.href + '?start='+(pagePosition - PAGE_SIZE)
     }
-    // setPagePosition(pagePosition + 3)
-    // getVaults()
   }
 
   const loadCache = () => {
@@ -112,13 +108,6 @@ export default function Newest() {
       getVaults()
     }
   }, [chainId, chain])
-
-  // useEffect(() => {
-  //   if (!state.loaded) {
-  //     console.log("load fires how many times")
-  //     vaults.length < 1 ? getVaults() : setState({ loaded: true })
-  //   }
-  // }, [])
 
   useEffect(() => {
     if (shouldFetchData) {

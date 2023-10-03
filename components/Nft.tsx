@@ -493,7 +493,7 @@ export default function Nft() {
       let project = jsonData.attributes.filter(item=>{return item.value == jsonData.values[0].name})
       if (project.length > 0) {
           let projectName = project[0].trait_type
-          let _qualifiedCollection = curatedContracts.filter(item=>{return item.name == projectName})
+          let _qualifiedCollection:any = curatedContracts.filter(item=>{return item.name == projectName})
           if (_qualifiedCollection.length > 0) {            
               setQualifiedCollection(_qualifiedCollection[0])
           }
@@ -772,7 +772,7 @@ export default function Nft() {
               })
             } catch(err){
               alert(err)
-              setTimeout(()=>{location.href = location.href}, 2000)
+              setState({loaded: true})
             }
             setState({loaded: true})
             onOpenKeysModal()
@@ -1175,7 +1175,7 @@ export default function Nft() {
                       ) : (
                         <Box display="flex" backgroundColor={colorMode == "light"? "gray.100": "gray.700"} alignItems="baseline" className="coin-balance-content">
                           <Box color="gray.500" letterSpacing="wide" fontSize="sm" ml="2">
-                            <Text as="h4" mt={2} fontWeight="semibold">
+                            <Text as="div" mt={2} fontWeight="semibold">
                             
                               Current Contents:  <button
                               onClick={() =>{
@@ -1548,13 +1548,13 @@ export default function Nft() {
             onComplete={() => {
               if(moving) {
                 setMoving(false)
-                location.href = location.origin + '/nft2?id=' + tokenId + '&cc=t';
+                location.href = location.origin + '/nft2?id=' + tokenId ;
             } else if (claiming && !accepting && !preTransfering) {
                 setHash(null)
                 setStatus('claimed')
                 setClaiming(false)
                 setClaimedBy(account)
-                location.href = location.origin + '/nft?id=' + tokenId + '&cc=t';
+                location.href = location.origin + '/nft?id=' + tokenId ;
               } else if (preTransfering) {
                 savePasswordToLocalStorage()
                 setShowTransferPassword(true)
@@ -1577,7 +1577,7 @@ export default function Nft() {
                 checkLiveliness(tokenId, ()=>{
                   setMinting(false)
                   setLive(true)
-                  location.href = location.origin + '/nft?id=' + tokenId + '&cc=t';
+                  location.href = location.origin + '/nft?id=' + tokenId ;
                 })
               } 
               else {

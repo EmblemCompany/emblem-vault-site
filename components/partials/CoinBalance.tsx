@@ -41,7 +41,7 @@ export class CoinBalance extends Component<CoinBalanceProps> {
     let onRenew = this.props.onRenew
     let hideAsset = this.props.hideAsset
     return (
-      <HStack key={coin.name} w="300px" p={2} >
+      <HStack className='img-stack' key={coin.name} w="300px" p={2} >
           <Box className="coin-image-container" w="100%" min-width="40px">                                
             {
             coin.image ? (
@@ -60,7 +60,7 @@ export class CoinBalance extends Component<CoinBalanceProps> {
           
           <VStack p="10px" w="100%">
             <HStack w="300px">
-              <Text float="left" width="50%" fontWeight="bold" color={this.props.colorMode=="dark"? "white": "black"} isTruncated={true}>
+              <Text float="left" width="50%" fontWeight="bold" color={this.props.colorMode=="dark"? "white": "black"} isTruncated={true} mb={'unset'}>
                 {coin.name}
               </Text>
               <Text float="right" width="40%" textAlign="right" fontWeight="bold" color={this.props.colorMode=="dark"? "lightgreen": "forestgreen"} >
@@ -78,7 +78,7 @@ export class CoinBalance extends Component<CoinBalanceProps> {
             </HStack>
             <HStack width="100%">
               {coin.type == 'nft' && coin.external_url ? (
-                  <Link className="view-nft-link" color={this.props.colorMode=="dark" ? "navajowhite": "gray"} href={coin.external_url} isExternal>
+                  <Link className="view-nft-link" color={this.props.colorMode=="dark" ? "navajowhite": "gray"} href={coin.external_url} isExternal mb={'unset'}>
                     View NFT
                   </Link>
                 ) : null}
