@@ -451,10 +451,11 @@ export default function Nft() {
     jsonData.move_targetContract? setMoveTargetContract(jsonData.move_targetContract) : null
     jsonData.move_targetAsset? setMoveTargetAsset(jsonData.move_targetAsset) : null
     
-    if (jsonData.targetContract && jsonData.targetContract[chainId]){
-      setTimeout(() => {
-        location.href = location.origin + '/nft2?id=' + jsonData.targetContract.tokenId
-      }, 500)
+    if (jsonData.name == "Migrated Vault" || (jsonData.targetContract && jsonData.targetContract[chainId])){
+      // setTimeout(() => {
+        location.href = location.origin + '/nft2?id=' + tokenId
+        return false
+      // }, 500)
     }    
     setLive(jsonData.live == false ? false : true)
     setNonce(jsonData.nonce)
@@ -1221,7 +1222,7 @@ export default function Nft() {
                         <Stack>
                           <Text>Deposit Addresses</Text>
                           <Flex w="340px" justify="center" flexWrap="wrap">
-                            {vaultAddresses.map((addr) => {
+                            {vaultAddresses && vaultAddresses.length > 0? vaultAddresses.map((addr) => {
                               return (
                                 <Button
                                   className="address_nft_button"
@@ -1239,7 +1240,7 @@ export default function Nft() {
                                   {addr.coin == 'ETH' ? addr.coin + '/EVM' : addr.coin == 'BTC' ? addr.coin + '/XCP/OMNI' : addr.coin == 'BCH' ? addr.coin + '/SLP': addr.coin == 'TAP'? 'TAPROOT': addr.coin}
                                 </Button>
                               )
-                            })}
+                            }) : null}
                           </Flex>
                         {(mine || status === 'claimed') && vaultAddresses.length < 12 ? (
                           <>
@@ -1282,46 +1283,7 @@ export default function Nft() {
                     </Box>
                   ) : null}
 
-                  {!(status === 'claimed') && live && (vaultChainId === 1 || vaultChainId === 137 )? (
-                    <Box display="flex" alignItems="baseline" justifyContent="space-between" mt="4">
-                      {/* <Stack d="flex" width="100%"> */}
-                        <Button
-                          className="nft_button"
-                          width={mine && vaultChainId == 1? "33%" : vaultChainId == 137? "100%": "50%"}
-                          m={2.5}
-                          mb={5}
-                          onClick={() => {visitOpenSeaLink()}}>
-                            Opensea
-                        </Button>
-
-                        { vaultChainId == 1 ?(
-                          <Button
-                          className="nft_button"
-                          width={mine? "33%" : "50%"}
-                          m={2.5}
-                          mb={5}
-                          onClick={() => {visitLooksRareLink()}}
-                        >
-                          LooksRare
-                        </Button>
-                        ) : null}
-                        
-                        { mine && vaultChainId == 1? (
-                           <Button
-                           className="nft_button"
-                           width="33%"
-                           m={2.5}
-                           mb={5}
-                           onClick={() => {visitArcadeLink()}}
-                         >
-                           Arcade
-                         </Button>
-                        ): null}                       
-                        {/* {showOffer? (
-                          <Button className="" onClick={() => { onOpenOfferModal() }}>{mine? ('My Offers') : ('Make an Offer')} (NFT²NFT)</Button>
-                        ) : null}                         */}
-                    </Box>
-                  ) : null}
+                  
                   
                   {isCovalApproved && !live ? (
                     <Stack direction="row" align="flex-start" spacing="0rem" flexWrap="wrap" shouldWrapChildren>

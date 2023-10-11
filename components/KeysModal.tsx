@@ -164,7 +164,7 @@ export default function KeysModal({
             ) : null}
 
             
-            {addresses.length > 0 ? addresses.map((item: any, index) => {
+            {addresses && addresses.length > 0 ? addresses.map((item: any, index) => {
               // if (item.coin == "BCH")
               if (item.coin !== "TEZOS")
               return (

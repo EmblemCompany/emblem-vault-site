@@ -76,6 +76,7 @@ export default function Nft2() {
   const [showOffer, setShowOffer] = useState(query.offer || false)
   const [framed, setFramed] = useState(query.framed || true)
   const [tokenId, setTokenId] = useState(query.id)
+  const [internalTokenId, setInternalTokenId] = useState()
   const [slideshowOnly, setSlideshowOnly] = useState(query.slideshowOnly || false)
   const [enableLegacy, setEnableLegacy] = useState(query.legacy || false)
   const [vaultName, setVaultName] = useState('')
@@ -383,7 +384,7 @@ export default function Nft2() {
     jsonData.move_targetContract? setMoveTargetContract(jsonData.move_targetContract) : null
  
     setLive(jsonData.live == false ? false : true)
-    
+    setInternalTokenId(jsonData.tokenId)
     setNonce(jsonData.nonce)
     setMintSignature(jsonData.signature)
     setTo(jsonData.to)
@@ -1202,7 +1203,7 @@ export default function Nft2() {
                         }}
                         isDisabled={claiming}
                       >
-                        {claiming ? 'Claiming ...' : `Unlock Vault (Get Private Keys) ${mine}`}
+                        {claiming ? 'Claiming ...' : `Unlock Vault (Get Private Keys)`}
                       </Button>
                     </Box>
                   ) : (vaultChainId === chainId && ((status == 'claimed' || mintLockedForever) && (claimedBy === account || mine))) ? (
@@ -1295,7 +1296,7 @@ export default function Nft2() {
                 setStatus('claimed')
                 setClaiming(false)
                 setClaimedBy(account)
-                location.href = location.origin + '/nft2?id=' + tokenId
+                location.href = location.origin + '/nft2?id=' + (internalTokenId || tokenId)
               } else if (preTransfering) {
                 savePasswordToLocalStorage()
                 setShowTransferPassword(true)
@@ -1317,9 +1318,9 @@ export default function Nft2() {
                   setMinting(false)
                   setHash(null)
                   setShowMakingVaultMsg(false)
-                  location.href = location.origin + '/nft2?id=' + tokenId
+                  location.href = location.origin + '/nft2?id=' + (internalTokenId || tokenId)
               } else {     
-                location.href = location.origin + '/nft2?id=' + tokenId 
+                location.href = location.origin + '/nft2?id=' + (internalTokenId || tokenId) 
               }
             }}
           />

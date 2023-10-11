@@ -65,8 +65,10 @@ export default function MyVaults() {
   const contractInfo = (vaultData) => {
     if (vaultData.ownership && vaultData.ownership.category == 'erc721Legacy') {
       return "Legacy Vault"
-    } else {
+    } else if (vaultData.targetContract && vaultData.targetContract.name) {
       return vaultData.targetContract.name
+    } else {
+      return "Unknown"
     }
   }
 
