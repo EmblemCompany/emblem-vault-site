@@ -2,7 +2,10 @@ import { JSBI, Fraction, Percent, Price, Token, WETH, ChainId } from '@uniswap/s
 import { UrlObject } from 'url'
 import { isAddress, toWei, fromWei } from 'web3-utils'
 
-import { isIPFS } from './constants'
+import { EMBLEM_V2_API, isIPFS } from './constants'
+import xcpJson from './curated/xcp.json'
+let NFT_DATA = {}
+Object.keys(xcpJson).forEach(item=>{xcpJson[item].forEach(i=>{i.projectName = item; NFT_DATA[i.name] = i})}) // convert json to match server
 
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions#Escaping
 export function escapeRegExp(string: string): string {
@@ -170,4 +173,250 @@ export function toContractValue(amount, decimal) {
 
 export function fromContractValue(amount, decimal) : number {
   return Number(fromWei(amount, decimal))
+}
+
+let asyncCuratedContracts = setupCuratedTemplates()
+export let newCuratedContracts: any[]
+(async () => { newCuratedContracts = await asyncCuratedContracts })()
+
+async function setupCuratedTemplates() {
+  let records = await getCuratedCollectionDataFromDB()
+  return records.map((record: any) => {
+      let template: any = generateTemplate(record);
+      Object.keys(template).forEach(key => {
+          if (key != 'id' && key != 'created_at' && key != 'contracts' && key != 'imageHandler' && key != 'placeholderImages' && key != 'loadingImages' )
+          record[key] = template[key];
+      });
+      return record;
+  });
+}
+
+function generateTemplate(record: any) {
+  let addressChain = record.addressChain
+  let attributes = generateAttributeTemplate(record)
+  let imageMethods = generateImageTemplate(record)
+  let recordName = record.name
+  let balanceQty = record.balanceQty
+  let template: any = {
+      attributes,
+      allowed: (data: any, _this: any, msgCallback: any = null) => {
+          let allowed = false
+          if (recordName == "Cursed Ordinal") {
+              allowed = data ? data.content_type != "application/json" : false
+          } else if(recordName == "Ethscription") {
+              allowed = data? true: false
+          } else if(recordName == "$OXBT" || recordName == "$ORDI") {
+              if (data.balance == balanceQty) {
+                  msgCallback ? msgCallback("") : null
+                  allowed = true
+              } else if (data.balance != balanceQty && msgCallback) {
+                  msgCallback ? msgCallback(`Load vault with exactly ${balanceQty} ${recordName}`) : null
+                  allowed = false
+              }
+          } else if (recordName == "Counterparty") {
+              allowed = record.nativeAssets.includes(data.coin)
+          } else { // XCP
+              allowed = data.project == _this.name && data.balance == 1;
+          }
+          return allowed
+      },
+      allowedName: (asset: any, msgCallback: any = null) => {
+          let allowedName = false
+          if (recordName == "Cursed Ordinal") {
+              let pieces = asset.split(' ')
+              allowedName = asset.includes(recordName) && pieces.length === 3 && Number(pieces.reverse()[0]) < 0
+          } else if(recordName == "Ethscription") {
+              if (asset) {
+                  allowedName = true
+              }
+          } else if(recordName == "$OXBT" || recordName == "$ORDI") {
+              if (asset == `${balanceQty} ${recordName}`) {
+                  allowedName = true
+              } else {
+                  msgCallback ? msgCallback("Incorrect Asset Or Qty In Vault") : null
+                  allowedName = false
+              }
+          } else if (recordName == "Counterparty") {
+            allowedName = asset? true: false
+          } else { // XCP
+              let curatedItemFound = NFT_DATA[asset];
+              allowedName = asset && curatedItemFound;
+          }
+          
+          return allowedName
+      },
+      allowedJump: (ownership_balances: any, _this: any): boolean => {
+          let hasAnyBalance = ownership_balances && ownership_balances.status != "claimed"
+          let allowedJump = false
+          if (hasAnyBalance && recordName != "Rinkeby") {
+              let filteredBalances = _this.filterNativeBalances(ownership_balances, _this)
+              // single
+              if (filteredBalances.length == 1) {
+                  allowedJump = _this.allowed(filteredBalances[0], _this)
+              } else {
+                  allowedJump = false
+              }
+          }
+          return allowedJump
+      },
+      allowedNetwork: (fromNetwork: any, toNetwork: any, msgCallback: any = null) => {
+          return fromNetwork == toNetwork // don't allow cross chain
+      },
+      filterNativeBalances: (balance: any, _this: any): any => {
+          return balance.balances.filter((item: { name: any; }) => !_this.nativeAssets.includes(item.name));
+      },
+      address: (addresses: any[]) => {
+          return addresses.filter(item => { return item.coin === addressChain })[0].address
+      },
+      addresses: (addresses: any[], _this: any) => {
+          return addresses.filter(item => _this.nativeAssets.includes(item.coin));
+      },
+      balanceExplorer(address: string) {
+          return `https://xchain.io/address/${address}`
+      }
+  }
+  Object.keys(record.contracts).forEach(key => {
+      template[key] = record.contracts[key]
+  })
+  Object.keys(imageMethods).forEach(key => {
+      template[key] = imageMethods[key]
+  })
+  return template
+}
+
+function generateAttributeTemplate(record: any) {
+  let template: any = []
+  if (record.name == "Rare Pepe" || 
+      record.name == "Fake Rares" || 
+      record.name == "Dank Rares" || 
+      record.name == "Fake Commons" || 
+      record.name == "Age of Rust" || 
+      record.name == "Age of Chains" || 
+      record.name == "Bitcorn Crops" || 
+      record.name == "Bitgirls" || 
+      record.name == "Force of Will" || 
+      record.name == "Memorychain" || 
+      record.name == "Oasis Mining" || 
+      record.name == "Sarutobi Island" || 
+      record.name == "Spells of Genesis"
+  ) {
+      template = [
+          {
+              "trait_type": "Series",
+              "value": (metadata: any) => {
+                  return pad(NFT_DATA[metadata.targetAsset.name].series, 2).toString()
+              }
+          },
+          {
+              "trait_type": "Card",
+              "value": (metadata: any) => {
+                  return pad(NFT_DATA[metadata.targetAsset.name].order, 2).toString()
+              }
+          },
+          {
+              "trait_type": "Total Supply",
+              "value": (metadata: any) => {
+                  return pad(NFT_DATA[metadata.targetAsset.name].remaining || NFT_DATA[metadata.targetAsset.name].raw.supply, 2).toString()
+              }
+          },
+          {
+              "trait_type": "Artist",
+              "value": (metadata: any) => {
+                  return pad(NFT_DATA[metadata.targetAsset.name].raw.artist.name, 2).toString();
+              }
+          }
+      ]
+      if (record.name == "Rare Pepe") {
+          template.push({
+              "trait_type": "Year",
+              "value": (metadata: any) => {
+                  return (
+                      NFT_DATA[metadata.targetAsset.name].series < 10 ? '2016' :
+                          NFT_DATA[metadata.targetAsset.name].series > 9 &&
+                              NFT_DATA[metadata.targetAsset.name].series < 31 ? '2017' :
+                              '2018'
+                  )
+              }
+          })
+      }
+  } else if (record.name == "Cursed Ordinal") {
+      template = [
+          {
+              "trait_type": "Content Type",
+              "value": (metadata: any) => {
+                  return metadata.values[0].content_type
+              }
+          },
+          {
+              "trait_type": "Ordinal Number",
+              "value": (metadata: any) => {
+                  return metadata.values[0].name.includes("Cursed Ordinal") ? metadata.values[0].name.replace('Cursed Ordinal', '').trim() : false;
+              }
+          },
+          {
+              "trait_type": "Collection",
+              "value": (metadata: any) => {
+                  return metadata.values[0].name.includes("Cursed Ordinal") ? false : `All:${metadata.values[0].project}`;
+              }
+          },
+          {
+              "trait_type": "Artist",
+              "value": (metadata: any) => {
+                  let foundArtistTrait = metadata.values.length > 0 && metadata.values[0].traits ? metadata.values[0].traits.filter((item: { trait_type: string; }) => { return item.trait_type === "artist"; }) : [];
+                  return foundArtistTrait.length > 0 ? foundArtistTrait[0].value : false;
+              }
+          }
+      ]
+  } else if (record.name == "Ethscription") {
+      template = [
+          {
+              "trait_type": "Collection",
+              "value": (metadata: any) => {
+                  return metadata.values[0].project ? `${metadata.values[0].project}` : false;
+              }
+          },
+          {
+              "trait_type": "Ethscriptions",
+              "value": (metadata: any) => {
+                  let foundTrait = metadata.values && metadata.values.length > 0 && metadata.values[0].traits && metadata.values[0].traits.length > 0 && metadata.values[0].traits.filter((item: { trait_type: string; }) => { return item.trait_type == "Ethscriptions" }).length > 0 ? metadata.values[0].traits.filter((item: { trait_type: string; }) => { return item.trait_type == "Ethscriptions" })[0].value : false
+                  return foundTrait
+              }
+          }
+      ]
+  }
+  return template
+}
+
+function generateImageTemplate(record: any) {
+  let template: any = {}
+  if (record.imageHandler) {
+      template.image = (data: any) => {
+          return `${record.image}`
+      }
+  }
+  if (record.loadingImages) {
+      template.loading = () => {
+          let images = record.loadingImages
+          return images[Math.floor(Math.random() * images.length)] // Random image
+      }
+  } if (record.placeholderImages) {
+      template.placeholder = () => {
+          let images = record.placeholderImages
+          return images[Math.floor(Math.random() * images.length)] // Random image
+      }
+  }
+  return template
+}
+
+function pad(num: string | any[], size: number) { num = num.toString(); while (num.length < size) num = "0" + num; return num; }
+
+async function getCuratedCollectionDataFromDB() {
+  const response = await fetch(EMBLEM_V2_API + '/curated' , {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+  })  
+  const jsonData = await response.json()
+  return jsonData
 }

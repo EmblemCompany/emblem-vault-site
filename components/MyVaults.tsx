@@ -7,6 +7,7 @@ import { useEffect, useState } from 'react'
 import { EMBLEM_API, curatedContracts } from '../constants'
 import InfiniteScroll from 'react-infinite-scroll-component';
 import Embed from './Embed'
+import { newCuratedContracts } from '../utils'
 
 export default function MyVaults() {
   const { query } = useRouter()
@@ -56,7 +57,7 @@ export default function MyVaults() {
   }
 
   const allowedJumpContracts = (vaultData) => {
-    let foundContracts = curatedContracts.filter(contract => 
+    let foundContracts = newCuratedContracts.filter(contract => 
       contract.allowedJump && contract.allowedJump(vaultData.ownership, [])
     );
     return foundContracts;

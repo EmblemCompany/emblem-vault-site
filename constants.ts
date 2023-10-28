@@ -13,7 +13,6 @@ import { abi as ERC1155 } from './abi/ERC1155Upgradable.json'
 import { abi as ERC721a } from './abi/erc721aAbi.json'
 import { abi as mintVaultQuoteAbi } from './abi/mintVaultQuoteAbi.json'
 import xcpJson from './curated/xcp.json'
-
 export const BG = { light: 'gray.50', dark: 'gray.900' }
 export const COLOR = { light: 'black', dark: 'white' }
 
@@ -722,6 +721,7 @@ export const curatedContracts = [
   }
 ]
 
+
 export const contractAddresses = {
   salesFactory: {
     1: '0xfb51bcd2644c20d87e17106c27355732fd485e4e'
@@ -878,3 +878,5 @@ export const ERC20_BYTES32 = [
     type: 'function',
   },
 ]
+
+

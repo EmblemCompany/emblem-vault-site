@@ -34,7 +34,7 @@ import { Contract } from '@ethersproject/contracts'
 import { TransactionToast } from './TransactionToast'
 import { EMBLEM_API, contractAddresses, SIG_API, EMBLEM_V2_API, curatedContracts } from '../constants'
 import { useContract } from '../hooks'
-import { CHAIN_ID_NAMES, fromContractValue, toContractValue } from '../utils'
+import { CHAIN_ID_NAMES, fromContractValue, newCuratedContracts, toContractValue } from '../utils'
 import CryptoJS from 'crypto-js'
 import ReactMarkdown from 'react-markdown'
 import gfm from 'remark-gfm'
@@ -374,7 +374,7 @@ export default function Nft2() {
     jsonData.targetContract && jsonData.targetContract.tokenId == tokenId && jsonData.targetContract.serialNumber? setIsCuratedMaster(true): null
     jsonData.targetAsset? setTargetAsset(jsonData.targetAsset) : null
     if (jsonData.targetContract) {
-      let contract: any = curatedContracts.find(contract=>{return contract[chainId] == jsonData.targetContract[chainId]})
+      let contract: any = newCuratedContracts.find(contract=>{return contract[chainId] == jsonData.targetContract[chainId]})
       contract.tokenId = jsonData.targetContract.tokenId
       contract.serialNumber = jsonData.targetContract.serialNumber
       jsonData.targetContract? setTargetContract(contract) : null
@@ -535,12 +535,11 @@ export default function Nft2() {
     let _owner
     try {
       
-      if (targetContract[chainId]) {        
+      if (targetContract[chainId]) {
         let allowedContracts: any = targetContract
         if (allowedContracts.allowedName && allowedContracts.allowed && vaultValues && vaultValues.length > 0){
-          setCanCuratedMint(            
-            allowedContracts.allowedName(vaultValues[0].name, allowedContracts, targetAsset, setVaultMsg) && allowedContracts.allowed(vaultValues[0], allowedContracts, setVaultMsg)
-          )
+          let allowed = allowedContracts.allowedName(vaultValues[0].name, allowedContracts, targetAsset, setVaultMsg) && allowedContracts.allowed(vaultValues[0], allowedContracts, setVaultMsg)
+          setCanCuratedMint(allowed)
         } else {
           setCanCuratedMint(false)
         }
@@ -1094,8 +1093,8 @@ export default function Nft2() {
                           {backingValues.map(backing=>{
                             return (
                               <HStack width={'100%'}>
-                                <Text width={'60%'} >Vault: <Link href={backing.internalVault} target="_blank">{backing.tokenId}</Link></Text>
-                                <Text float={'right'} width={'30%'} ><Link href={backing.explorer} target="_blank">Explorer</Link></Text>
+                                <Text color={backing.owner == account? "green":""} fontSize={'small'} width={'60%'} >{ backing.owner == account? 'My': '' } Vault: <Link href={backing.internalVault} target="_blank">{backing.tokenId}</Link></Text>
+                                <Text fontSize={'small'} float={'right'} width={'30%'} ><Link href={backing.explorer} target="_blank">Explorer</Link></Text>
                               </HStack>                              
                             )
                           })}
@@ -1296,7 +1295,8 @@ export default function Nft2() {
                 setStatus('claimed')
                 setClaiming(false)
                 setClaimedBy(account)
-                location.href = location.origin + '/nft2?id=' + (internalTokenId || tokenId)
+                let myCuratedRecord = backingValues.length > 0 ? backingValues.find(item=>{return item.owner == account}): {tokenId : (internalTokenId || tokenId)}
+                location.href = location.origin + '/nft2?id=' + (myCuratedRecord.tokenId)
               } else if (preTransfering) {
                 savePasswordToLocalStorage()
                 setShowTransferPassword(true)

@@ -13,7 +13,7 @@ import {
 } from '@chakra-ui/react'
 import copy from 'copy-to-clipboard'
 import { COLOR } from '../constants'
-import { address } from 'bitcoinjs-lib'
+// import { address } from 'bitcoinjs-lib'
 interface DataValues {
   key: string
   value: string

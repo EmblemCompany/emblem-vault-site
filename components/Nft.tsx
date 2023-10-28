@@ -32,7 +32,7 @@ import { Contract } from '@ethersproject/contracts'
 import { TransactionToast } from './TransactionToast'
 import { EMBLEM_API, contractAddresses, curatedContracts, SIG_API, EMBLEM_V2_API, ZERO_ADDRESS } from '../constants'
 import { useContract } from '../hooks'
-import { CHAIN_ID_NAMES } from '../utils'
+import { CHAIN_ID_NAMES, newCuratedContracts } from '../utils'
 import CryptoJS from 'crypto-js'
 import ReactMarkdown from 'react-markdown'
 import gfm from 'remark-gfm'
@@ -494,7 +494,7 @@ export default function Nft() {
       let project = jsonData.attributes.filter(item=>{return item.value == jsonData.values[0].name})
       if (project.length > 0) {
           let projectName = project[0].trait_type
-          let _qualifiedCollection:any = curatedContracts.filter(item=>{return item.name == projectName})
+          let _qualifiedCollection:any = newCuratedContracts.filter(item=>{return item.name == projectName})
           if (_qualifiedCollection.length > 0) {            
               setQualifiedCollection(_qualifiedCollection[0])
           }

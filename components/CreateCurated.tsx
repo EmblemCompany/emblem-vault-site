@@ -21,8 +21,9 @@ import { useRouter } from 'next/router'
 import Loader from 'react-loader'
 import { useWeb3React } from '@web3-react/core'
 import { useEffect, useState } from 'react'
-import { EMBLEM_API, curatedContracts, curatedAssets, EMBLEM_V2_API, ORD_API } from '../constants'
+import { EMBLEM_API, curatedAssets, EMBLEM_V2_API, ORD_API } from '../constants'
 import { Checkbox } from '@material-ui/core'
+import { newCuratedContracts } from '../utils'
 
 let tokenId = null
 
@@ -31,7 +32,7 @@ export default function CreateCurated(props: any) {
   const [tabIndex, setTabIndex] = useState(0)
   const {account, chainId } = useWeb3React()
   const [vaultAddress, setVaultAddress] = useState(account || '')
-  const [state, setState] = useState({ loaded: true, private: false })
+  const [state, setState] = useState({ loaded: false, private: false })
   const [targetAsset, setTargetAsset] = useState({name: '', image: ''})
   const [targetContract, setTargetContract] = useState({name: '', collectionChain: '', image:(data)=>{return ''}, allowed: (data)=>{return false}, allowedName: (data)=>{return false}, placeholder: ()=>{return ''}, loading: ()=>{return ''}, loadTypes: []})
   const [enableAllCurated, setEnableCurated] = useState(query.curated == 't')
@@ -41,6 +42,7 @@ export default function CreateCurated(props: any) {
   const [checked, setChecked] = useState(false) // blank vault
   const [acceptedTos, setAcceptedTos] = useState(false) // ToS
   const [showTos, setShowTos] = useState(true) // ToS
+  const [curatedContracts, setCuratedContracts] = useState(newCuratedContracts) // curatedContracts
 
   const checkTOS = ()=>{
     let tosMemory = localStorage.getItem('tos') == 'true'
@@ -59,7 +61,7 @@ export default function CreateCurated(props: any) {
   }
 
   const checkMintDisabled = ()=>{
-    console.log('disable me', !acceptedTos, mintDisabled, !acceptedTos || mintDisabled)
+    // console.log('disable me', !acceptedTos, mintDisabled, !acceptedTos || mintDisabled)
     return !acceptedTos || mintDisabled
   }
   
@@ -104,13 +106,21 @@ export default function CreateCurated(props: any) {
 
   const [acct, setAcct] = useState('')
 
+  // useEffect(() => {
+  //   if(newCuratedContracts && newCuratedContracts.length > 0) {
+  //     setState({ loaded: true, private: state.private })
+  //   } else {console.log('hook 1')}
+  // })
+
   useEffect(() => {
-    if (account && acct != account) {
+    if (account && acct != account && !state.loaded && newCuratedContracts.length > 0) {
       setAcct(account)
       setVaultAddress(account)
       checkTOS()
-    }
-  }, [account, acct])
+      setState({ loaded: true, private: state.private })
+      setCuratedContracts(curatedContracts)
+    } //else {console.log('hook ')}
+  })
 
   let typingTimer;
 
@@ -144,7 +154,7 @@ export default function CreateCurated(props: any) {
   }
 
   return (
-    <Loader loaded={state.loaded}>
+    <Loader loaded={state.loaded && curatedContracts.length > 0}>
       <Flex width="full" align="center" justifyContent="center">
         <Box maxW="sm" borderWidth="1px" rounded="lg" overflow="hidden">
           <Tabs defaultIndex={0} index={tabIndex} onChange={(index) => setTabIndex(index)}>
@@ -173,18 +183,18 @@ export default function CreateCurated(props: any) {
                           <FormLabel htmlFor="project-selector">Choose Curated Collection</FormLabel>
                           <Select id="project-selector" w="100%" value={targetContract.name}
                             onChange={(e)=>{
-                              let contractData:any = curatedContracts.filter(item=>{return item.name == e.target.value})[0]
+                              let contractData:any = newCuratedContracts.filter(item=>{return item.name == e.target.value})[0]
                               console.log('------', contractData)
                               setTargetContract(contractData)
                             }}
                           >
                             <option value="" >---Choose Project---</option>
-                            {curatedContracts.map(project=>{
+                            {state.loaded? curatedContracts.map(project=>{
                               
                               return enableAllCurated || project.mintable? (
                                 <option value={project.name} >{project.name}</option>
                               ) : null
-                            })}
+                            }): null}
                             
                           </Select>
                           {targetContract.name && targetContract["collectionType"] !== 'ERC721' && targetContract["collectionType"] !== 'ERC721a' ? (
