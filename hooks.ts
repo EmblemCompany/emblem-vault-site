@@ -100,9 +100,9 @@ export function useEagerConnect(): boolean {
   useEffect(() => {
     injected.isAuthorized().then((isAuthorized: boolean) => {
       if (isAuthorized) {
-        activate(injected, undefined, true).catch(() => {
+        setTimeout(() => activate(injected, undefined, true).catch(() => {
           setTried(true)
-        })
+        }), 500)
       } else {
         setTried(true)
       }

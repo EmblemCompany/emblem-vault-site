@@ -215,6 +215,8 @@ function generateTemplate(record: any) {
               }
           } else if (recordName == "Counterparty") {
               allowed = record.nativeAssets.includes(data.coin)
+          } else if (recordName == "Stamps") {
+            allowed = record.nativeAssets.includes(data.coin) && recordName.toLowerCase() == data.project.toLowerCase()
           } else { // XCP
               allowed = data.project == _this.name && data.balance == 1;
           }
@@ -238,9 +240,11 @@ function generateTemplate(record: any) {
               }
           } else if (recordName == "Counterparty") {
             allowedName = asset? true: false
+          } else if (recordName == "Stamps") {
+            allowedName = asset && asset.includes("Stamp")? true: false
           } else { // XCP
               let curatedItemFound = NFT_DATA[asset];
-              allowedName = asset && curatedItemFound;
+              allowedName = asset && curatedItemFound? true: false;
           }
           
           return allowedName
@@ -269,7 +273,7 @@ function generateTemplate(record: any) {
           return addresses.filter(item => { return item.coin === addressChain })[0].address
       },
       addresses: (addresses: any[], _this: any) => {
-          return addresses.filter(item => _this.nativeAssets.includes(item.coin));
+          return addresses.filter(item=> { return item.coin === addressChain})
       },
       balanceExplorer(address: string) {
           return `https://xchain.io/address/${address}`
@@ -408,7 +412,13 @@ function generateImageTemplate(record: any) {
   return template
 }
 
-function pad(num: string | any[], size: number) { num = num.toString(); while (num.length < size) num = "0" + num; return num; }
+function pad(num: string | any[], size: number) { 
+  if (!num)
+        return '';
+  num = num.toString(); 
+  while (num.length < size) num = "0" + num; 
+  return num; 
+}
 
 async function getCuratedCollectionDataFromDB() {
   const response = await fetch(EMBLEM_V2_API + '/curated' , {

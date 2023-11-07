@@ -20,6 +20,7 @@ import {
   Button,
   Link,
   Switch,
+  Input
 } from '@chakra-ui/react'
 import copy from 'copy-to-clipboard'
 
@@ -32,7 +33,7 @@ export default function Settings({ isOpen, onClose }: { isOpen: boolean; onClose
   const { colorMode, toggleColorMode } = useColorMode()
   const { pathname } = useRouter()
 
-  useBodyKeyDown('d', toggleColorMode)
+  // useBodyKeyDown('d', toggleColorMode)
 
   const [approveMax, toggleApproveMax] = useApproveMax()
   const [deadline, setDeadline] = useDeadline()
@@ -93,6 +94,17 @@ export default function Settings({ isOpen, onClose }: { isOpen: boolean; onClose
             <Stack direction="row" justify="space-between">
               <Text>Dark Mode</Text>
               <Switch isChecked={colorMode === 'dark'} onChange={toggleColorMode} />
+            </Stack>
+            <Stack direction="row" justify="space-between">
+              <Text>API-Key</Text>
+              <Input 
+                placeholder="API Key" 
+                defaultValue={localStorage.getItem('apiKey') || ''}
+                onChange={(e) => {
+                  localStorage.setItem('apiKey', e.target.value);
+                }}
+                width="80%"
+              />
             </Stack>
             {/* <Stack direction="row" justify="space-between">
               <Text>Approve Max</Text>
@@ -177,14 +189,14 @@ export default function Settings({ isOpen, onClose }: { isOpen: boolean; onClose
             Based on Hypertext.
           </Link>
 
-          <Link
+          {/* <Link
             href={`https://github.com/EmblemCompany/emblem-vault-site/tree/${process.env.COMMIT_SHA}`}
             target="_blank"
             rel="noopener noreferrer"
             color="blue.500"
           >
             {process.env.COMMIT_SHA?.slice(0, 7)}
-          </Link>
+          </Link> */}
         </ModalFooter>
       </ModalContent>
     </Modal>

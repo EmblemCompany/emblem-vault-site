@@ -113,7 +113,7 @@ export default function CreateCurated(props: any) {
   // })
 
   useEffect(() => {
-    if (account && acct != account && !state.loaded && newCuratedContracts.length > 0) {
+    if (account && acct != account && !state.loaded && newCuratedContracts && newCuratedContracts.length > 0) {
       setAcct(account)
       setVaultAddress(account)
       checkTOS()
@@ -156,7 +156,7 @@ export default function CreateCurated(props: any) {
   return (
     <Loader loaded={state.loaded && curatedContracts.length > 0}>
       <Flex width="full" align="center" justifyContent="center">
-        <Box maxW="sm" borderWidth="1px" rounded="lg" overflow="hidden">
+        <Box borderWidth="1px" rounded="lg" overflow="hidden">
           <Tabs defaultIndex={0} index={tabIndex} onChange={(index) => setTabIndex(index)}>
             <TabList>
               <Tab>Create Curated Vault</Tab>
@@ -189,10 +189,10 @@ export default function CreateCurated(props: any) {
                             }}
                           >
                             <option value="" >---Choose Project---</option>
-                            {state.loaded? curatedContracts.map(project=>{
+                            {state.loaded? curatedContracts.map((project, index)=>{
                               
                               return enableAllCurated || project.mintable? (
-                                <option value={project.name} >{project.name}</option>
+                                <option key={`select-${index}`} value={project.name} >{project.name}</option>
                               ) : null
                             }): null}
                             
@@ -205,9 +205,9 @@ export default function CreateCurated(props: any) {
                                 }}
                               >
                                 <option value="" >---Choose One---</option>
-                                {curatedAssets[targetContract.collectionChain][targetContract.name] ? curatedAssets[targetContract.collectionChain][targetContract.name].sort((a, b) => {if (a.name < b.name) return -1;if (a.name > b.name) return 1;return 0;}).map(asset=>{
+                                {curatedAssets[targetContract.collectionChain][targetContract.name] ? curatedAssets[targetContract.collectionChain][targetContract.name].sort((a, b) => {if (a.name < b.name) return -1;if (a.name > b.name) return 1;return 0;}).map((asset, i)=>{
                                   return (
-                                    <option value={asset.name} >{asset.name}</option>
+                                    <option key={`choose-${i}`} value={asset.name} >{asset.name}</option>
                                   )
                                 }): null}
                                 

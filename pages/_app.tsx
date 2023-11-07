@@ -21,6 +21,7 @@ import { QueryParameters } from '../constants'
 import Loading from '../components/Loading'
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { useRouter } from 'next/router'
+import Script from 'next/script'
 
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect
 
@@ -80,11 +81,22 @@ export default class App extends NextApp {
       <>
         <Base />
         <Head>
+          
           <title key="title">Emblem Vault</title>
           <meta key="description" name="Description" content="An entire wallet inside a token" />
           {/* <script src="https://cdn.trackjs.com/agent/v3/latest/t.js"></script> */}
-          <script src="/jquery.js"></script>
-          <script src="/tilt.jquery.js"></script>
+          
+        </Head>
+        <Script src="/jquery.js" />
+        <Web3ReactProvider getLibrary={getLibrary}>
+          <ThemeProvider theme={theme}>
+            <CSSReset />
+            <FunctionalApp Component={Component} />
+          </ThemeProvider>
+        </Web3ReactProvider>
+        <>
+          
+          {/* <script src="/tilt.jquery.js"></script> */}
           <script src="/bip39/bip39-libs.js"></script>
           <script src="/bip39/bitcoinjs-extensions.js"></script>
           <script src="/bip39/sjcl-bip39.js"></script>
@@ -109,13 +121,7 @@ export default class App extends NextApp {
               `,
             }}
           />
-        </Head>
-        <Web3ReactProvider getLibrary={getLibrary}>
-          <ThemeProvider theme={theme}>
-            <CSSReset />
-            <FunctionalApp Component={Component} />
-          </ThemeProvider>
-        </Web3ReactProvider>
+        </>
       </>
     )
   }

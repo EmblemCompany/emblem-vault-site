@@ -30,13 +30,13 @@ export default function WalletConnect(): JSX.Element | null {
         // if (walletconnect?.walletConnectProvider) {
         //   walletconnect.walletConnectProvider = undefined
         // }
-        activate(walletconnect, undefined, true).catch((error) => {
+        setTimeout(() => activate(walletconnect, undefined, true).catch((error) => {
           if (error instanceof UserRejectedRequestError) {
             setConnecting(false)
           } else {
             setError(error)
           }
-        })
+        }), 1500)
       }}
     >
       WalletConnect

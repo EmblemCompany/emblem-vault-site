@@ -355,7 +355,7 @@ export default function Nft2() {
     if (!jsonData.targetAsset && !jsonData.move_targetAsset && !enableLegacy) {
       location.href = location.origin + '/nft?id=' + tokenId
     }
-    framed && jsonData.image && !jsonData.image.includes('framed=') && !jsonData.image.includes('http') ? jsonData.image = jsonData.image + "&framed="+framed : null
+    // framed && jsonData.image && !jsonData.image.includes('framed=') && !jsonData.image.includes('http') ? jsonData.image = jsonData.image + "&framed="+framed : null
     if (jsonData.ciphertextV2) {
       setVaultCiphertextV2(jsonData.ciphertextV2)
     }

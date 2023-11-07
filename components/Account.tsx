@@ -99,14 +99,14 @@ export default function Account({ triedToEagerConnect }: { triedToEagerConnect: 
             // leftIcon={MetaMaskOnboarding.isMetaMaskInstalled() ? ('metamask' as 'edit') : undefined}
             onClick={(): void => {
               setConnecting(true)
-              activate(injected, undefined, true).catch((error) => {
+              setTimeout(() =>activate(injected, undefined, true).catch((error) => {
                 // ignore the error if it's a user rejected request
                 if (error instanceof UserRejectedRequestError) {
                   setConnecting(false)
                 } else {
                   setError(error)
                 }
-              })
+              }), 500)
             }}
           >
             {MetaMaskOnboarding.isMetaMaskInstalled() ? 'Connect to MetaMask' : 'Connect to Wallet'}
