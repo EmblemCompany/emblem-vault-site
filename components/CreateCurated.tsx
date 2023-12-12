@@ -23,7 +23,9 @@ import { useWeb3React } from '@web3-react/core'
 import { useEffect, useState } from 'react'
 import { EMBLEM_API, curatedAssets, EMBLEM_V2_API, ORD_API } from '../constants'
 import { Checkbox } from '@material-ui/core'
-import { newCuratedContracts } from '../utils'
+import { initCuratedContracts } from '../utils'
+import DetailedCreate from './partials/DetailedCreate'
+import Embed from './Embed'
 
 let tokenId = null
 
@@ -33,7 +35,9 @@ export default function CreateCurated(props: any) {
   const {account, chainId } = useWeb3React()
   const [vaultAddress, setVaultAddress] = useState(account || '')
   const [state, setState] = useState({ loaded: false, private: false })
-  const [targetAsset, setTargetAsset] = useState({name: '', image: ''})
+  const [targetAsset, setTargetAsset] = useState({name: '', image: '', description: '', ownedImage: ''})
+  const [imageDisplayType, setImageDisplayType] = useState(query.image? 'embed':"upload")
+  const [vaultPubPriv, setVaultPubPriv] = useState(query.public == 'f'? 'Private': 'Public')
   const [targetContract, setTargetContract] = useState({name: '', collectionChain: '', image:(data)=>{return ''}, allowed: (data)=>{return false}, allowedName: (data)=>{return false}, placeholder: ()=>{return ''}, loading: ()=>{return ''}, loadTypes: []})
   const [enableAllCurated, setEnableCurated] = useState(query.curated == 't')
   const [mintDisabled, setMintDisabled] = useState(true)
@@ -42,7 +46,8 @@ export default function CreateCurated(props: any) {
   const [checked, setChecked] = useState(false) // blank vault
   const [acceptedTos, setAcceptedTos] = useState(false) // ToS
   const [showTos, setShowTos] = useState(true) // ToS
-  const [curatedContracts, setCuratedContracts] = useState(newCuratedContracts) // curatedContracts
+  const [curatedContracts, setCuratedContracts] = useState([]) // curatedContracts]
+  const [vaultPassword, setVaultPassword] = useState('')
 
   const checkTOS = ()=>{
     let tosMemory = localStorage.getItem('tos') == 'true'
@@ -75,7 +80,10 @@ export default function CreateCurated(props: any) {
       chainId: chainId,
       experimental: true,
       targetContract: targetContract,
-      targetAsset: targetAsset
+      targetAsset: targetAsset,
+      imageDisplayType: imageDisplayType,
+      isPrivate: vaultPubPriv == 'Private',
+      vaultPassword: vaultPassword,
     }
     let apiSuffix = '/create-curated'
     fetch(EMBLEM_V2_API + apiSuffix, {
@@ -106,20 +114,16 @@ export default function CreateCurated(props: any) {
 
   const [acct, setAcct] = useState('')
 
-  // useEffect(() => {
-  //   if(newCuratedContracts && newCuratedContracts.length > 0) {
-  //     setState({ loaded: true, private: state.private })
-  //   } else {console.log('hook 1')}
-  // })
-
   useEffect(() => {
-    if (account && acct != account && !state.loaded && newCuratedContracts && newCuratedContracts.length > 0) {
+    if (account && acct != account && !state.loaded && curatedContracts && curatedContracts.length > 0) {
       setAcct(account)
       setVaultAddress(account)
       checkTOS()
       setState({ loaded: true, private: state.private })
-      setCuratedContracts(curatedContracts)
-    } //else {console.log('hook ')}
+    } else if (!curatedContracts || curatedContracts.length == 0) {
+      initCuratedContracts().then((data)=>{
+      setCuratedContracts(data)
+    })}
   })
 
   let typingTimer;
@@ -136,19 +140,19 @@ export default function CreateCurated(props: any) {
           if (targetContract.allowed(ordRecord)){
             setCuratedError('')            
             setMintDisabled(false)
-            setTargetAsset({name: name, image: targetContract.image(ordRecord)})
+            setTargetAsset({name: name, image: targetContract.image(ordRecord), description: '', ownedImage: ''})
           } else {
             setCuratedContentType("")
             setCuratedError(ordRecord? `JSON/BRC-20 inscriptions not allowed`: 'Not a valid #')
             setMintDisabled(true)
-            setTargetAsset({name: '', image: targetContract.placeholder()})
+            setTargetAsset({name: '', image: targetContract.placeholder(), description: '', ownedImage: ''})
           }
         })        
       } else {
         setCuratedContentType("")
         setCuratedError('Invalid format: example (-1337)')
         setMintDisabled(true)
-        setTargetAsset({name: '', image: ''})
+        setTargetAsset({name: '', image: '', description: '', ownedImage: ''})
       }      
     }, 1000)
   }
@@ -183,7 +187,7 @@ export default function CreateCurated(props: any) {
                           <FormLabel htmlFor="project-selector">Choose Curated Collection</FormLabel>
                           <Select id="project-selector" w="100%" value={targetContract.name}
                             onChange={(e)=>{
-                              let contractData:any = newCuratedContracts.filter(item=>{return item.name == e.target.value})[0]
+                              let contractData:any = curatedContracts.filter(item=>{return item.name == e.target.value})[0]
                               console.log('------', contractData)
                               setTargetContract(contractData)
                             }}
@@ -223,13 +227,13 @@ export default function CreateCurated(props: any) {
                                       checked={checked}
                                       onChange={(e)=>{
                                         if (e.target.checked) {
-                                        setTargetAsset({name: "Loading...", image: targetContract.loading()})
+                                        setTargetAsset({name: "Loading...", image: targetContract.loading(), description: '', ownedImage: ''})
                                         setCuratedError('')
                                         setCuratedContentType('')
                                         setMintDisabled(false)
                                         setChecked(true)
                                         } else {
-                                          setTargetAsset({name: '', image: ''})
+                                          setTargetAsset({name: '', image: '', description: '', ownedImage: ''})
                                           setMintDisabled(true)
                                           setChecked(false)
                                         }
@@ -238,12 +242,25 @@ export default function CreateCurated(props: any) {
                                     Empty Vault.
                                   </Box>
                                 ): null}
+                                {targetContract.loadTypes.includes('detailed')? (
+                                  <DetailedCreate experimental={false} overrides={query} account={account} handleSubmit={
+                                    (vaultAddress, pubOrPriv, vaultName, vaultDesc, image, ownedImage, vaultKey, vaultValue, displayType, password)=>{
+                                      setVaultAddress(vaultAddress)
+                                      setTargetAsset({name: vaultName, image: image, description: vaultDesc, ownedImage: ownedImage})
+                                      setCuratedError('')
+                                      setImageDisplayType(displayType)
+                                      setVaultPubPriv(pubOrPriv)
+                                      setVaultPassword(password)
+                                      setMintDisabled(false)
+                                    }
+                                  }></DetailedCreate>
+                                ): null}
                                 <>{curatedError}</>
                                 <>{curatedContentType}</>
                               </>
                             ):null}
                             
-                            {targetAsset.image? (
+                            {/* {targetAsset.image? (
                                   <Image
                                     p={"20px"}
                                     h={"100%"}
@@ -251,6 +268,15 @@ export default function CreateCurated(props: any) {
                                     src={curatedContentType == 'text/plain;charset=utf-8'? targetContract.placeholder() : targetAsset.image}
                                     width="250px !important"
                                   />
+                                ): null} */}
+                                {targetAsset.name? (
+                                  <Text>Name: {targetAsset.name}</Text>
+                                ):null}
+                                {targetAsset.description? (
+                                  <Text>Description: {targetAsset.description}</Text>
+                                ):null}
+                                {targetAsset.image? (
+                                  <Embed url={curatedContentType == 'text/plain;charset=utf-8'? targetContract.placeholder() : targetAsset.image.toString()}/>
                                 ): null}
                         </Stack>
                       </Box>

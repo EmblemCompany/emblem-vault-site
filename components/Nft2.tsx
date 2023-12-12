@@ -34,7 +34,7 @@ import { Contract } from '@ethersproject/contracts'
 import { TransactionToast } from './TransactionToast'
 import { EMBLEM_API, contractAddresses, SIG_API, EMBLEM_V2_API, curatedContracts } from '../constants'
 import { useContract } from '../hooks'
-import { CHAIN_ID_NAMES, fromContractValue, newCuratedContracts, toContractValue } from '../utils'
+import { CHAIN_ID_NAMES, fromContractValue, initCuratedContracts, toContractValue } from '../utils'
 import CryptoJS from 'crypto-js'
 import ReactMarkdown from 'react-markdown'
 import gfm from 'remark-gfm'
@@ -49,6 +49,7 @@ import JsonDownloadLink from './JsonDownloadLink'
 import ApprovalButton from './partials/ApprovalButton'
 import { parseEther } from '@ethersproject/units'
 import { stat } from 'fs'
+import { getCachedVault, saveVaultToDatabase } from '../db'
 
 const API_VERSION = '/v2'
 
@@ -85,6 +86,7 @@ export default function Nft2() {
   const [vaultCiphertextV2, setVaultCiphertextV2] = useState('')
   const [vaultDesc, setVaultDesc] = useState('')
   const [vaultImage, setVaultImage] = useState('')
+  const [vaultEmbed, setVaultEmbed] = useState('')
   const [ownedImage, setOwnedImage] = useState('')
   const [vaultValues, setVaultValues] = useState([])
   const [backingValues, setBackingValues] = useState([])
@@ -115,6 +117,7 @@ export default function Nft2() {
   const [decryptedEffectRunning, setDecryptedEffectRunning] = useState(false)
   const [decryptPassword, setDecryptPassword] = useState('')
   const [invalidVault, setInvalidVault] = useState(false)
+  const [offlineError, setOfflineError] = useState(false)
   const [accepting, setAccepting] = useState(false)
   const [approving, setApproving] = useState(false)
   const [acceptable, setAcceptable] = useState(false)
@@ -150,7 +153,8 @@ export default function Nft2() {
   // const { isOpen: isOpenOfferModal, onOpen: onOpenOfferModal, onClose: onCloseOfferModal } = useDisclosure()  
   const { isOpen: isAdvancedOpen, onToggle: onAdvancedToggle } = useDisclosure()
   const { colorMode } = useColorMode()
-  const [vaultMsg, setVaultMsg] = useState('ONLY SEND ONE NFT TO THIS VAULT') 
+  const [vaultMsg, setVaultMsg] = useState('') 
+  const [dbStale, setDbStale] = useState(true)
 
   interface ErrorWithCode extends Error {
     code?: number
@@ -335,23 +339,21 @@ export default function Nft2() {
     })
     const jsonData = await response.json()
     setRawMetadata(jsonData)
+    setOfflineError(false)
+    await saveVaultToDatabase(jsonData)    
+    setStates(jsonData)
+    setLoadingApi(false)
+    setInvalidVault(false)
+    
+  }
+
+  const setStates = (jsonData) => {   
     if (jsonData.collectionAddress){
       setIsCrowdSale(true)
       setAlternateContractAddress(jsonData.collectionAddress)
     }
 
-    if (!jsonData.name) {
-      setState({ loaded: true })
-      setInvalidVault(true)
-    } else {
-      console.log("--------------- states -", jsonData)
-      setStates(jsonData)
-      setLoadingApi(false)
-      setInvalidVault(false)
-    }    
-  }
-
-  const setStates = (jsonData) => {    
+    
     if (!jsonData.targetAsset && !jsonData.move_targetAsset && !enableLegacy) {
       location.href = location.origin + '/nft?id=' + tokenId
     }
@@ -362,6 +364,7 @@ export default function Nft2() {
     setMintLockedForever(jsonData.mintLocked && jsonData.mintLockBlock == 0)
     setVaultName(jsonData.name)
     setVaultImage(jsonData.image)
+    jsonData.animation_url? setVaultEmbed(jsonData.animation_url): null
     setOwnedImage(jsonData.ownedImage || null)
     setVaultDesc(jsonData.description)
     setVaultTotalValue(jsonData.totalValue || 0)
@@ -374,10 +377,12 @@ export default function Nft2() {
     jsonData.targetContract && jsonData.targetContract.tokenId == tokenId && jsonData.targetContract.serialNumber? setIsCuratedMaster(true): null
     jsonData.targetAsset? setTargetAsset(jsonData.targetAsset) : null
     if (jsonData.targetContract) {
-      let contract: any = newCuratedContracts.find(contract=>{return contract[chainId] == jsonData.targetContract[chainId]})
-      contract.tokenId = jsonData.targetContract.tokenId
-      contract.serialNumber = jsonData.targetContract.serialNumber
-      jsonData.targetContract? setTargetContract(contract) : null
+      initCuratedContracts().then((data)=>{
+        let contract: any = data.find(contract=>{return contract[chainId] == jsonData.targetContract[chainId]})
+        contract.tokenId = jsonData.targetContract.tokenId
+        contract.serialNumber = jsonData.targetContract.serialNumber
+        jsonData.targetContract? setTargetContract(contract) : null
+      })      
     }
     
     jsonData.move_targetAsset? setMoveTargetAsset(jsonData.move_targetAsset) : null
@@ -538,7 +543,7 @@ export default function Nft2() {
       if (targetContract[chainId]) {
         let allowedContracts: any = targetContract
         if (allowedContracts.allowedName && allowedContracts.allowed && vaultValues && vaultValues.length > 0){
-          let allowed = allowedContracts.allowedName(vaultValues[0].name, allowedContracts, targetAsset, setVaultMsg) && allowedContracts.allowed(vaultValues[0], allowedContracts, setVaultMsg)
+          let allowed = allowedContracts.allowedName(vaultValues[0].name, allowedContracts, targetAsset, setVaultMsg) && allowedContracts.allowed(vaultValues, allowedContracts, setVaultMsg)
           setCanCuratedMint(allowed)
         } else {
           setCanCuratedMint(false)
@@ -817,12 +822,38 @@ export default function Nft2() {
   })
 
   useEffect(() => {
-    account? getVault(): null
+    if((!localStorage.getItem('offline') || localStorage.getItem('offline') === 'false') && account) {
+      getVault()
+    }
   }, [])
+
+  useEffect(() => {    
+    if (dbStale) {
+      setDbStale(false)
+      loadFromDatabase();
+    }
+  }, [dbStale]);
 
   useEffect(() => {
     (account && chainId && vaultChainId && chainId == vaultChainId) || ((query.noLayout && query.noLayout == 'true') || (query.slideshowOnly && query.slideshowOnly == 'true')) ? getContractStates() : null
   })
+
+  const loadFromDatabase = async () => {
+    // setVaults([]);
+    let jsonData: any = await getCachedVault(tokenId);
+    if (jsonData && jsonData.addresses && jsonData.addresses.length > 0) {
+      setRawMetadata(jsonData)
+      setStates(jsonData)
+      setLoadingApi(false)
+      setInvalidVault(false)
+      setState({ loaded: true })
+    } else {
+      if(localStorage.getItem('offline') === 'true') {
+        setOfflineError(true)
+      }
+      // setState({ loaded: true })
+    }
+  }
 
 
 
@@ -949,7 +980,7 @@ export default function Nft2() {
       <Loader loaded={state.loaded}>
         <Box height="40px"></Box>
         {loadingApi ? <Refreshing /> : ''}
-        {!invalidVault && !slideshowOnly ? (
+        {!invalidVault && !slideshowOnly && !offlineError ? (
             <Flex width="full" align="center" justifyContent="center">
               <Box
                 className="NFT" 
@@ -990,17 +1021,14 @@ export default function Nft2() {
                   {!vaultPrivacy && vaultTotalValue > 0 ? ': ~$' + vaultTotalValue.toLocaleString() : null}
                 </Box>
                 <Stack className="NFT-content" align="center">                  
-                  <Embed className="d-block NFT-image-v3" url={vaultImage}/>
+                  <Embed className="d-block NFT-image-v3" url={vaultEmbed || vaultImage}/>
                   {mine && ownedImage ? (
                     <Button onClick={() => {handleOwnedEmbed()}}>(OWNED) Show Full Embed</Button>
                   ): null}
                 </Stack>
                 <Stack align="center">
                   <Box mt="2" ml="4" lineHeight="tight">
-                    <Stack>
-                    {!live && mine? (
-                       <Text className='warning' color={"red"} fontSize="s">{vaultMsg}</Text>
-                    ): null}
+                    <Stack>                    
                     { mine && vaultChainId == chainId ? (
                         <Text fontSize="xs">
                         
@@ -1101,6 +1129,9 @@ export default function Nft2() {
                           </TabPanel>
                         </TabPanels>
                     </Tabs>
+                ) : null}
+                {!live && mine ? (
+                  <Text className='warning' color={"red"} fontSize="s">{vaultMsg}</Text>
                 ) : null}
                   {(!isCuratedMaster && !vaultPrivacy && !live) || (curatedContract && curatedContract.showBalance)? (
                     <Box display="flex" alignItems="baseline" justifyContent="space-between" mt="4">
@@ -1272,16 +1303,18 @@ export default function Nft2() {
               </Box>
             </Flex>
         ) : invalidVault ? (
-          <Stack align="center">
-            <Image
-              width="md"
-              src="https://starwarsblog.starwars.com/wp-content/uploads/2017/06/25-star-wars-quotes-obi-wan-kenobi-identification-tall.jpg"
-            ></Image>
+          <Stack align="center">            
             <Text>
               THESE ARE NOT THE VAULTS YOU ARE LOOKING FOR{' '}
               <Link color="#638cd8" href="../create">
                 CREATE ONE HERE!
               </Link>
+            </Text>
+          </Stack>
+        ): offlineError? (
+          <Stack align="center"> 
+            <Text>
+              You are offline and this vault is not cached
             </Text>
           </Stack>
         ): null}

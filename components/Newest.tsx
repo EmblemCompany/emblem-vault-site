@@ -4,7 +4,7 @@ import Refreshing from './Refreshing'
 import { useRouter } from 'next/router'
 import { useWeb3React } from '@web3-react/core'
 import { useEffect, useState } from 'react'
-import { EMBLEM_API } from '../constants'
+import { EMBLEM_API, EMBLEM_V3_API } from '../constants'
 import InfiniteScroll from 'react-infinite-scroll-component';
 import Embed from './Embed'
 
@@ -27,7 +27,7 @@ export default function Newest() {
   const getVaults = async () => {    
     console.log('getting vaults')
     try {
-      const response = await fetch(EMBLEM_API + '/newest/?start='+offset+'&size='+PAGE_SIZE+'&reverse='+reverse, {
+      const response = await fetch(EMBLEM_V3_API + '/newest/?start='+offset+'&size='+PAGE_SIZE+'&reverse='+reverse, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -35,13 +35,11 @@ export default function Newest() {
           chainId: chainId.toString(),
         },
       })
-      let jsonData = await response.json()
-      if (jsonData) {
-        jsonData = jsonData.filter(item=>{return item.live && !item.claimedBy})
-      }
-      setVaults(vaults.concat(jsonData))
+      let jsonData = await response.json()      
+      setVaults(vaults.concat(jsonData.filter(item => item !== null)))
       setState({ loaded: true })
       setLoadingApi(false)
+      setHasMore(false)
     } catch (error) {}
   }
 
@@ -141,7 +139,7 @@ export default function Newest() {
             let pieces = location.pathname.split('/')
             pieces.pop()
             console.log("vault", vault)
-            let url = location.origin + pieces.join('/') + '/nft?id=' + (!vault.targetAsset? vault.tokenId: vault.targetContract.tokenId)
+            let url = location.origin + pieces.join('/') + '/nft2?id=' + (vault.tokenId)
             const flexSettings = {
               flex: '1',
               minW: '200px',

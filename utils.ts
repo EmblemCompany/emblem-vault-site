@@ -175,9 +175,13 @@ export function fromContractValue(amount, decimal) : number {
   return Number(fromWei(amount, decimal))
 }
 
-let asyncCuratedContracts = setupCuratedTemplates()
-export let newCuratedContracts: any[]
-(async () => { newCuratedContracts = await asyncCuratedContracts })()
+
+export let newCuratedContracts = [] //: any[]
+
+export async function initCuratedContracts() {
+  newCuratedContracts = await setupCuratedTemplates()
+  return newCuratedContracts
+}
 
 async function setupCuratedTemplates() {
   let records = await getCuratedCollectionDataFromDB()
@@ -199,26 +203,32 @@ function generateTemplate(record: any) {
   let balanceQty = record.balanceQty
   let template: any = {
       attributes,
-      allowed: (data: any, _this: any, msgCallback: any = null) => {
+      allowed: (data: any[], _this: any, msgCallback: any = null) => {
           let allowed = false
           if (recordName == "Cursed Ordinal") {
-              allowed = data ? data.content_type != "application/json" : false
+              allowed = data ? data[0].content_type != "application/json" : false
           } else if(recordName == "Ethscription") {
               allowed = data? true: false
           } else if(recordName == "$OXBT" || recordName == "$ORDI") {
-              if (data.balance == balanceQty) {
+              if (data[0].balance == balanceQty) {
                   msgCallback ? msgCallback("") : null
                   allowed = true
-              } else if (data.balance != balanceQty && msgCallback) {
+              } else if (data[0].balance != balanceQty && msgCallback) {
                   msgCallback ? msgCallback(`Load vault with exactly ${balanceQty} ${recordName}`) : null
                   allowed = false
               }
           } else if (recordName == "Counterparty") {
-              allowed = record.nativeAssets.includes(data.coin)
+            let facts = [
+              { eval: record.nativeAssets.includes(data[0]?.coin), msg: `Vaults should only contain assets native to ${recordName}` },
+              { eval: data.length == 1, msg: `Vaults should only contain a single item` }
+            ]
+            allowed = evaluateFacts(allowed, facts, msgCallback)
           } else if (recordName == "Stamps") {
-            allowed = record.nativeAssets.includes(data.coin) && recordName.toLowerCase() == data.project.toLowerCase()
+            allowed = record.nativeAssets.includes(data[0].coin) && (recordName.toLowerCase() == data[0].project.toLowerCase() || data[0].project.toLowerCase() == "stampunks")
+          } else if (recordName == "EmblemOpen") {
+            allowed = data? true: false
           } else { // XCP
-              allowed = data.project == _this.name && data.balance == 1;
+            allowed = data[0].project == _this.name && data[0].balance == 1;
           }
           return allowed
       },
@@ -241,7 +251,9 @@ function generateTemplate(record: any) {
           } else if (recordName == "Counterparty") {
             allowedName = asset? true: false
           } else if (recordName == "Stamps") {
-            allowedName = asset && asset.includes("Stamp")? true: false
+            allowedName = asset && asset.toLowerCase().includes("stamp")? true: false
+          } else if (recordName == "EmblemOpen") {
+            allowedName = asset? true: false
           } else { // XCP
               let curatedItemFound = NFT_DATA[asset];
               allowedName = asset && curatedItemFound? true: false;
@@ -273,7 +285,7 @@ function generateTemplate(record: any) {
           return addresses.filter(item => { return item.coin === addressChain })[0].address
       },
       addresses: (addresses: any[], _this: any) => {
-          return addresses.filter(item=> { return item.coin === addressChain})
+          return _this.nativeAssets.includes("*")? addresses: addresses.filter(item=> { return item.coin === addressChain})
       },
       balanceExplorer(address: string) {
           return `https://xchain.io/address/${address}`
@@ -286,6 +298,20 @@ function generateTemplate(record: any) {
       template[key] = imageMethods[key]
   })
   return template
+
+  function evaluateFacts(allowed: boolean, facts: { eval: any; msg: string }[], msgCallback: any) {
+    let reasons = []
+    allowed = facts.every(fact => {
+      if (!fact.eval) {
+        reasons.push(fact.msg)
+      }
+      return fact.eval
+    })
+    if (reasons.length > 0 && msgCallback) {
+      msgCallback(reasons.join(' '))
+    }
+    return allowed
+  }
 }
 
 function generateAttributeTemplate(record: any) {
@@ -426,6 +452,7 @@ async function getCuratedCollectionDataFromDB() {
     headers: {
       'Content-Type': 'application/json'
     },
+    next: { revalidate: 13600 }
   })  
   const jsonData = await response.json()
   return jsonData

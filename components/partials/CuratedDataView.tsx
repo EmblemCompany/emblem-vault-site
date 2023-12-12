@@ -3,12 +3,13 @@ import { useEffect, useState } from 'react';
 import CuratedCrudForm from "./CuratedCrudForm";
 import { EMBLEM_V2_API } from "../../constants";
 import VaultTools from "./VaultTools";
+import MetadataTools from "./MetadataTools";
 
 export default function CuratedDataView({ data, callback }) {
   const [show, setShow] = useState(Array(data.length).fill(false));
   const [tabIndex, setTabIndex] = useState(0)
   const [assetChains, setAssetChains] = useState([]);
-  const [mintEntries, setMintEntries] = useState([]);
+  const [mintEntries, setMintEntries] = useState({});
 
   useEffect(() => {
     fetch(`${EMBLEM_V2_API}/assetChains`)
@@ -17,12 +18,6 @@ export default function CuratedDataView({ data, callback }) {
         setAssetChains(data);
       });
   }, []);
-
-   useEffect(() => {
-     if (data.length > 0) {
-      setTimeout(()=>{checkAllContractsForMintRights()}, 5)
-     }
-   }, [data]);
    
 
   const handleToggle = (index) => {
@@ -90,7 +85,7 @@ export default function CuratedDataView({ data, callback }) {
 
   return (
     <VStack spacing={4} padding={4}>
-      {mintEntries.length && data.map((item, index) => {        
+      { data.map((item, index) => {        
         return (
           <Box border="1px" borderColor="gray.200" padding={4} borderRadius="md" key={item.id} width="80vw">
             <Box display="flex" justifyContent="space-between" alignItems="center">
@@ -104,10 +99,11 @@ export default function CuratedDataView({ data, callback }) {
                             <Tab>Details</Tab>
                             <Tab>Edit</Tab>
                             <Tab>Tools</Tab>
+                            <Tab>Metadata</Tab>
                         </TabList>
                         <TabPanels>
                             <TabPanel mt={5}>
-                                <Text><strong>Handler can delegate mint:</strong> {mintEntries.find(entry=>{return entry.name == item.name} )?.canMint?.toString()}</Text>
+                                <Text onClick={async ()=>{let canMint = await checkHandlerCanMint(item.collectionType, item.contracts["1"]); item.canMint = canMint; mintEntries[item.name] = canMint; setMintEntries(mintEntries); setTabIndex(tabIndex) }} ><strong>Handler can delegate mint:</strong> {mintEntries[item.name]?.toString()}</Text>
                                 <Text><strong>Contracts:</strong> {JSON.stringify(item.contracts)}</Text>
                                 <Text><strong>Native Assets:</strong> {item.nativeAssets.join(", ")}</Text>
                                 <Text><strong>Mintable:</strong> {item.mintable ? "Yes" : "No"}</Text>
@@ -134,7 +130,10 @@ export default function CuratedDataView({ data, callback }) {
                                 </Flex>
                             }</TabPanel>
                             <TabPanel>
-                                <VaultTools/>                                
+                                <VaultTools targetContract={item}/>                                
+                            </TabPanel>
+                            <TabPanel>
+                                <MetadataTools targetContract={item}/>
                             </TabPanel>
                         </TabPanels>
                     </Tabs>

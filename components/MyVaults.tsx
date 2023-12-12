@@ -7,7 +7,8 @@ import { useEffect, useState } from 'react'
 import { EMBLEM_API, curatedContracts } from '../constants'
 import InfiniteScroll from 'react-infinite-scroll-component';
 import Embed from './Embed'
-import { newCuratedContracts } from '../utils'
+import { initCuratedContracts } from '../utils'
+import { getCachedVaults, saveVaultsToDatabase } from '../db'
 
 export default function MyVaults() {
   const { query } = useRouter()
@@ -31,7 +32,9 @@ export default function MyVaults() {
   const [liveCollections, setLiveCollections] = useState([])
   const [unMintedCollections, setUnMintedCollections] = useState([])
   const [claimedCollections, setClaimedCollections] = useState([])
+  const [curatedContracts, setCuratedContracts] = useState([])
   const [showJump, setShowHJump] = useState(query.jump == "true")
+  const [dbStale, setDbStale] = useState(true)
   
   const PAGE_SIZE = 20
 
@@ -57,10 +60,12 @@ export default function MyVaults() {
   }
 
   const allowedJumpContracts = (vaultData) => {
-    let foundContracts = newCuratedContracts.filter(contract => 
-      contract.allowedJump && contract.allowedJump(vaultData.ownership, [])
-    );
-    return foundContracts;
+    // return initCuratedContracts().then((data)=>{
+      let foundContracts = curatedContracts.filter(contract => 
+        contract.allowedJump && contract.allowedJump(vaultData.ownership, [])
+      );
+      return foundContracts;
+    // })
   }
 
   const contractInfo = (vaultData) => {
@@ -86,8 +91,10 @@ export default function MyVaults() {
         },
       })
       let jsonData = await response.json()
+      
       if (vaultType.toString() != 'curated') {
         setVaults(vaults.concat(jsonData))
+        await saveVaultsToDatabase(jsonData);
         setState({ loaded: true })
         setLoadingApi(false)
         console.log("Records received", jsonData.length)
@@ -139,59 +146,51 @@ export default function MyVaults() {
     return items;
   }
 
-  // const more = ()=>{
-  //   if (location.href.includes('start')) {
-  //     location.href = location.href.replace('start='+pagePosition, 'start='+(pagePosition + PAGE_SIZE))
-  //   } else {
-  //     location.href = location.href + '?start='+(pagePosition + PAGE_SIZE)
-  //   }
-  //   // setPagePosition(pagePosition + PAGE_SIZE)
-  //   // getVaults()
-  // }
-
-  // const less = ()=>{
-  //   if (pagePosition - PAGE_SIZE < 0) {
-  //     setPagePosition(PAGE_SIZE)
-  //   }
-  //   if (location.href.includes('start')) {
-  //     location.href = location.href.replace('start='+pagePosition, 'start='+(pagePosition - PAGE_SIZE))
-  //   } else {
-  //     location.href = location.href + '?start='+(pagePosition - PAGE_SIZE)
-  //   }
-  //   // setPagePosition(pagePosition + 3)
-  //   // getVaults()
-  // }
-
-  // const loadCache = () => {
-  //   let vaults = JSON.parse(localStorage.getItem((address ? address : account) + '_' + chainId + '_newest')) // Load vaults from storage before updating from server!
-  //   if (vaults) {
-  //     setState({ loaded: true })
-  //     setVaults(vaults)
-  //     setLoadingApi(true)
-  //   }
-  // }
-
-  // const saveCache = (vaults) => {
-  //   localStorage.setItem((address ? address : account) + '_' + chainId + '_newest', JSON.stringify(vaults)) // Save new state for later
-  // }
-
   const [acct, setAcct] = useState('')
   useEffect(() => {
     if (account && acct != account) {
       setAcct(account)
       setState({ loaded: false })
-      getVaults()
+      loadFromDatabase();
+      if(!localStorage.getItem('offline') || localStorage.getItem('offline') === 'false') {
+        getVaults();
+      }
+      // getVaults()
     }
   }, [account, acct])
 
-  const [chain, setChain] = useState(chainId)
-  useEffect(() => {
-    if (chainId && chain != chainId) {
-      setChain(chainId)
-      setState({ loaded: false })
-      getVaults()
+  // const [chain, setChain] = useState(chainId)
+  // useEffect(() => {
+  //   if (chainId && chain != chainId) {
+  //     setChain(chainId)
+  //     setState({ loaded: false })
+  //     getVaults()
+  //   }
+  // }, [chainId, chain])
+
+  useEffect(() => {    
+    if (dbStale) {
+      setDbStale(false)
+      loadFromDatabase();
     }
-  }, [chainId, chain])
+  }, [dbStale]);
+
+  // const saveVaultsCache = async (loadedVaults) => {
+  //   try {
+  //     // await deleteDB();
+  //     await saveVaults(loadedVaults);
+  //     console.log('Data saved successfully');
+  //   } catch (error) {
+  //     console.error('Error saving data', error);
+  //   }
+  // };
+
+  const loadFromDatabase = async () => {
+    // setVaults([]);
+    let cachedVaults: any = await getCachedVaults(vaultType == "unclaimed"? "minted": vaultType, address? address: account);
+    setVaults(cachedVaults);
+    setState({ loaded: true })
+  }
 
   const showOrHideNavLink = (path: string)=> {
     return vaultType == path ? true: false
@@ -217,6 +216,9 @@ export default function MyVaults() {
     if (shouldFetchData) {
       setShouldFetchData(false)
       getVaults()
+      initCuratedContracts().then((data)=>{
+        setCuratedContracts(data)
+      })
     } else {
     }
   }, [shouldFetchData])
@@ -290,7 +292,6 @@ export default function MyVaults() {
     ): null}
     <Loader loaded={state.loaded}>
       {loadingApi ? <Refreshing /> : ''}
-        
         <InfiniteScroll                
           className="infinite-scroll"
           scrollableTarget="shannon-container"

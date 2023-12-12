@@ -27,6 +27,7 @@ import copy from 'copy-to-clipboard'
 import { COLOR, DEFAULT_DEADLINE, DEFAULT_SLIPPAGE, QueryParameters } from '../constants'
 import { useBodyKeyDown } from '../hooks'
 import { useApproveMax, useDeadline, useSlippage, useFirstToken, useSecondToken } from '../context'
+import { deleteDB } from '../db'
 
 export default function Settings({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }): JSX.Element {
   const { chainId } = useWeb3React()
@@ -38,6 +39,7 @@ export default function Settings({ isOpen, onClose }: { isOpen: boolean; onClose
   const [approveMax, toggleApproveMax] = useApproveMax()
   const [deadline, setDeadline] = useDeadline()
   const [slippage, setSlippage] = useSlippage()
+  const [offlineMode, setOfflineMode] = useState(localStorage.getItem('offline') == 'true')
 
   const [firstToken] = useFirstToken()
   const [secondToken] = useSecondToken()
@@ -98,6 +100,7 @@ export default function Settings({ isOpen, onClose }: { isOpen: boolean; onClose
             <Stack direction="row" justify="space-between">
               <Text>API-Key</Text>
               <Input 
+                type="password"
                 placeholder="API Key" 
                 defaultValue={localStorage.getItem('apiKey') || ''}
                 onChange={(e) => {
@@ -105,6 +108,20 @@ export default function Settings({ isOpen, onClose }: { isOpen: boolean; onClose
                 }}
                 width="80%"
               />
+            </Stack>
+            <Stack direction="row" justify="space-between">
+              <Link textAlign="left"isTruncated={true} onClick={async ()=>{await deleteDB()}} > Reset Cache </Link>
+            </Stack>
+            <Stack direction="row" justify="space-between">
+                <Text>Offline Mode</Text>
+                <Switch 
+                  isChecked={offlineMode}
+                  onChange={(e) => {
+                    const isOffline = String(e.target.checked);
+                    localStorage.setItem('offline', isOffline);
+                    setOfflineMode(e.target.checked);
+                  }} 
+                />
             </Stack>
             {/* <Stack direction="row" justify="space-between">
               <Text>Approve Max</Text>
