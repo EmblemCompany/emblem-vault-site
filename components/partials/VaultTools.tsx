@@ -43,7 +43,7 @@ function VaultTools({ targetContract }) {
            setResults(data)
           })
           .catch(err => {
-            console.error(err);
+            setResults(err);
           });
       };
 
@@ -62,37 +62,64 @@ function VaultTools({ targetContract }) {
            setResults(data)
           })
           .catch(err => {
-            console.error(err);
+            setResults(err);
+          });
+      };
+
+      const clearCache = (tokenId) => {
+        const options = {
+          method: 'POST',
+          headers: {
+            'x-api-key': localStorage.getItem('apiKey') || '',
+            'Content-Type': 'application/json'
+          }, body: JSON.stringify({
+            "tokenIds": [tokenId],
+          })
+        };
+   
+        fetch(`${EMBLEM_V3_API}/v3/cache/${targetContract.contracts["1"]}/refresh`, options)
+          .then(response => response.json())
+          .then(data => {
+           setResults(data)
+          })
+          .catch(err => {
+            setResults(err);
           });
       };
 
   return (
     <Flex direction="row" justify="space-between">
-        <FormControl id="tokenId" width="50%" margin="15px">
+        <FormControl id={`tokenId`} width="50%" margin="15px">
             <FormLabel>Token ID</FormLabel>
             <InputGroup>
-                <Input type="text" name="tokenId" />                                            
+                <Input type="text" name={`${targetContract.name}-tokenId`} />
             </InputGroup>
             <Button h="1.75rem" size="sm" m="5px">Get Balance</Button>
             <Button h="1.75rem" size="sm" m="5px">Get Custom Balance</Button>
             <Button h="1.75rem" size="sm" m="5px" onClick={() => {
-              let tokenId = document.getElementsByName('tokenId')[0] as HTMLInputElement
+              let tokenId = document.getElementsByName(`${targetContract.name}-tokenId`)[0] as HTMLInputElement
               if (tokenId) {
                 fetchBalanceForTokenId(tokenId.value)
               }
             }}>Get Ownership</Button>
             <Button h="1.75rem" size="sm" m="5px" onClick={()=>{
-              let tokenId = document.getElementsByName('tokenId')[0] as HTMLInputElement
+              let tokenId = document.getElementsByName(`${targetContract.name}-tokenId`)[0] as HTMLInputElement
               if (tokenId) {
                 refreshMarketplaceMetadata(tokenId.value)
               }
             }}>Refresh Marketplace Metadata</Button>
             <Button onClick={()=>{
-              let tokenId = document.getElementsByName('tokenId')[0] as HTMLInputElement
+              let tokenId = document.getElementsByName(`${targetContract.name}-tokenId`)[0] as HTMLInputElement
               if (tokenId) {
                 checkCanMint(tokenId.value)
               }
             }} h="1.75rem" size="sm" m="5px">Can Mint?</Button>
+            <Button onClick={()=>{
+              let tokenId = document.getElementsByName(`${targetContract.name}-tokenId`)[0] as HTMLInputElement
+              if (tokenId) {
+                clearCache(tokenId.value)
+              }
+            }} h="1.75rem" size="sm" m="5px">Clear Cache</Button>
         </FormControl>
         <FormControl id="results" width="50%" margin="15px">
             <FormLabel>Results</FormLabel>

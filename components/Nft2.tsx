@@ -428,7 +428,7 @@ export default function Nft2() {
       setSealed(true)
     } else {
       setSealed(false)
-    }    
+    }
   }
 
   const getAllBackingVaults = async (values, tokenId, cb) => {
@@ -1249,7 +1249,6 @@ export default function Nft2() {
                     <button className="nft_button" onClick={() => { onAdvancedToggle() }}>Advanced Operations</button>
                     <Flex w="100%" justify="center" flexWrap="wrap">
                       <Collapse width={"100%"} isOpen={isAdvancedOpen}>
-
                         {(vaultChainId === chainId && mineUnMinted && status != 'claimed' && !mintLockedForever ) ? (
                           <Box display="flex" alignItems="baseline" justifyContent="space-between" mt="4">
                             <Button width="100%" onClick={handleSign}>
