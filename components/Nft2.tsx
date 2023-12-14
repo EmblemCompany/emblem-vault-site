@@ -843,7 +843,7 @@ export default function Nft2() {
   useEffect(() => {
     if (account && chainId && vaultChainId && debugMode && owner) {
       let debugInfo = `DEBUG Report for ${tokenId}:\n\n`
-      debugInfo += `Props:\n   owner: ${owner}\n   mine: ${mine}\n   created by: ${to}\n   account: ${account}\n   vaultChainId: ${vaultChainId}\n   chainId: ${chainId}\n   mineUnMinted: ${mineUnMinted}\n   status: ${status}\n   mintLockedForever: ${mintLockedForever}\n`
+      debugInfo += `Props:\n   owner: ${owner}\n   mine: ${mine}\n   created by: ${to}\n   account: ${account}\n   vaultChainId: ${vaultChainId}\n   chainId: ${chainId}\n   sealed: ${sealed}\n   approved: ${approved}\n   live: ${live}\n   mineUnMinted: ${mineUnMinted}\n   status: ${status}\n   mintLockedForever: ${mintLockedForever}\n`
       debugInfo += `Can Unlock Before Mint: ${vaultChainId === chainId && mineUnMinted && status != 'claimed' && !mintLockedForever}\n`
       debugInfo += `Can Curated Mint: ${canCuratedMint}\n`
       setDebugMode(false)

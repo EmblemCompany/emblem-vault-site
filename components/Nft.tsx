@@ -67,6 +67,8 @@ export default function Nft() {
   
   const [mintPassword, setMintPassword] = useState(query.key)
   const [showOffer, setShowOffer] = useState(query.offer || false)
+  const [debugMode, setDebugMode] = useState(query.debug == "true")
+  const [debugFeedback, setDebugFeedback] = useState(null)
   const [framed, setFramed] = useState(query.framed || true)
   const [tokenId, setTokenId] = useState(query.id)
   const [slideshowOnly, setSlideshowOnly] = useState(query.slideshowOnly || false)
@@ -709,6 +711,18 @@ export default function Nft() {
     console.log("owner",owner)
   })
 
+  useEffect(() => {
+    if (account && chainId && vaultChainId && debugMode && owner) {
+      let debugInfo = `DEBUG Report for ${tokenId}:\n\n`
+      debugInfo += `Props:\n   owner: ${owner}\n   mine: ${mine}\n   created by: ${to}\n   account: ${account}\n   vaultChainId: ${vaultChainId}\n   chainId: ${chainId}\n   sealed: ${sealed}\n   approved: ${approved}\n   live: ${live}\n   mineUnMinted: ${mineUnMinted}\n   status: ${status}\n   mintLockedForever: ${mintLockedForever}\n`
+      debugInfo += `Can Unlock Before Mint: ${vaultChainId === chainId && mineUnMinted && status != 'claimed' && !mintLockedForever}\n`
+      debugInfo += `Can Claim: ${!(status === 'claimed') && account && vaultChainId === chainId && mine && !sealed && approved && live}\n`
+      setDebugMode(false)
+      setDebugFeedback(debugInfo)
+      // alert(debugInfo)
+    }
+  }, [account, chainId, vaultChainId, debugMode, owner])
+
   const hasAddress = (coin: string)=>{
     console.log(coin, vaultAddresses.filter(address=>{ return address.coin == coin}).length > 0)
     return vaultAddresses.filter(address=>{ return address.coin == coin}).length > 0
@@ -1089,398 +1103,402 @@ export default function Nft() {
         {loadingApi ? <Refreshing /> : ''}
         {!invalidVault && !slideshowOnly ? (
             <Flex width="full" align="center" justifyContent="center">
-              <Box
-                className="NFT" 
-                maxW="sm"
-                borderWidth="1px"
-                borderColor={vaultChainId != chainId ? 'orange.500' : status == 'claimed' ? 'green.500' : null}
-                rounded="lg"
-                overflow="hidden"
-                alignItems="center"
-                minW={390}
-              >
-                
-                <Box
-                  mt="1"
-                  fontWeight="semibold"
-                  as="h3"
-                  lineHeight="tight"
-                  p={2}
-                  textAlign="center"
-                  textTransform="uppercase"
-                  alignItems="center"
-                  color="blue.500"
-                >
-                  Vault Network: {CHAIN_ID_NAMES[vaultChainId]}
-                </Box>
-                
-                <Box
-                  mt="1"
-                  fontWeight="semibold"
-                  as="h3"
-                  lineHeight="tight"
-                  p={2}
-                  textAlign="center"
-                  // textTransform="uppercase"
-                  alignItems="center"
-                >
-                  {vaultName}
-                  {!vaultPrivacy && vaultTotalValue > 0 ? ': ~$' + vaultTotalValue.toLocaleString() : null}
-                </Box>
-                <Stack className="NFT-content" align="center">
-                  { vaultValues.length && vaultValues.filter(item=> {return item.type == "nft"}).length > 0 ? (
-                      <NFTSlideshow name={vaultName} image={vaultImage} items={vaultValues.map(value=>{return {image: value.image, description: value.description, name: value.name, type: value.type}})} properties = {{'duration': 3000, canSwipe: false}}/>
-                    ) : (
-                      <Embed className="d-block w-100 NFT-image" url={vaultImage}/>
-                    )
-                  }
-                  {mine && ownedImage ? (
-                    <Button onClick={() => {handleOwnedEmbed()}}>(OWNED) Show Full Embed</Button>
-                  ): null}
-                </Stack>
-                <Stack align="center" maxWidth="400px">
-                  <Box mt="2" ml="4" lineHeight="tight" maxWidth="400px">
-                    <Stack>
-                      <Text fontSize="xs">
-                      { vaultChainId == chainId ? (
-                        <Link href={"./vaults?address="+owner}>
-                          Owner: {owner}
-                        </Link>
-                      ) : null }
-                      </Text>
-                      <Text overflowWrap="anywhere" mt={2} as="h4" ml="4" mr="4" fontSize="xs" fontStyle="italic" className="md">
-                        <ReactMarkdown plugins={[gfm]} children={splitDescription(vaultDesc)} />
-                      </Text>
-                      
-                    </Stack>                    
-                  </Box>                    
-                </Stack>
-                <Box p="6">
-                <Tabs isFitted variant='enclosed'>
-                  <TabList mb='1em'>
-                    <Tab>Balances</Tab>
-                    <Tab>Attributes</Tab>
-                  </TabList>
-                  <TabPanels>
-                    <TabPanel>
-                      {vaultPrivacy ? (
-                        <Box mb={5}>
-                          <Text pb={2} color={decryptedEffect ? 'green.500' : null}>
-                            {decryptedEffect ? decryptedEffect : 'Contents hidden. Enter password to unlock.'}
-                          </Text>
-                          <Input
-                            type="password"
-                            id="vault-password"
-                            onChange={(e) => tryDecrypt(e.target.value)}
-                            aria-describedby="password-helper-text"
-                          />
-                        </Box>
-                      ) : (
-                        <Box display="flex" backgroundColor={colorMode == "light"? "gray.100": "gray.700"} alignItems="baseline" className="coin-balance-content">
-                          <Box color="gray.500" letterSpacing="wide" fontSize="sm" ml="2">
-                            <Text as="div" mt={2} fontWeight="semibold">
-                            
-                              Current Contents:  <button
-                              onClick={() =>{
-                                getAllBalancesLive([], tokenId, (v)=>{
-                                  setLoadedValues(false)
-                                  setVaultValues(v)
-                                })
-                              }}
-                            > [Refresh Balances]</button>
-                            </Text>
-                            <Text as="p" color={colorMode=="dark"? "lightgreen": "forestgreen"}>${Number(vaultTotalValue.toFixed(4)).toLocaleString()}</Text>
-                            { vaultValues.length ? (
-                              vaultValues.map((coin) => {
-                                return (  
-                                  <Stack> 
-                                    <CoinBalance colorMode={colorMode} coin={coin} mine={(status === 'claimed' && claimedBy === account) || mine} onRenew={onRenew} hideAsset={handleHideAsset}/>
-                                  </Stack>
-                                )
-                              })
-                            ) : (<Refreshing /> ) } 
-                            { vaultDataValues.length ? (
-                              vaultDataValues.map((data) => {
-                                return (
-                                  <Text>Data: {data.attribute_key}</Text>
-                                )                        
-                              })
-                            ) : !vaultDataValues.length && !vaultValues.length ? (
-                              <Text>Nothing in here! Fill 'er up!</Text>
-                            ) : null}
-                          </Box>
-                        </Box>
-                      )}
-                  </TabPanel>
-                    <TabPanel>
-                      <Attributes colorMode={colorMode} attributes={attributes}/>
-                      </TabPanel>
-                    </TabPanels>
-                  </Tabs>
-                  
-                  {!vaultPrivacy ? (
-                    <Box display="flex" alignItems="baseline" justifyContent="space-between" mt="4">
-                      <ButtonGroup justifyContent="space-between" spacing={6}>
-                        <Stack>
-                          <Text>Deposit Addresses</Text>
-                          <Flex w="340px" justify="center" flexWrap="wrap">
-                            {vaultAddresses && vaultAddresses.length > 0? vaultAddresses.map((addr) => {
-                              return (
-                                <Button
-                                  className="address_nft_button"
-                                  
-                                  ml={2}
-                                  mt={2}
-                                  font-weight="100 !important"
-                                  key={addr.address}
-                                  onClick={() => {
-                                    setCurrCoin(addr.coin)
-                                    setCurrAddr(addr.address)
-                                    onOpenAddrModal()
-                                  }}
-                                >
-                                  {addr.coin == 'ETH' ? addr.coin + '/EVM' : addr.coin == 'BTC' ? addr.coin + '/XCP/OMNI' : addr.coin == 'BCH' ? addr.coin + '/SLP': addr.coin == 'TAP'? 'TAPROOT': addr.coin}
-                                </Button>
-                              )
-                            }) : null}
-                          </Flex>
-                        {(mine || status === 'claimed') && vaultAddresses.length < 12 ? (
-                          <>
-                            <button className="nft_button" onClick={()=>{onManageAddressToggle()}}>Manage Addresses</button>
-                            <Flex w="340px" justify="center" flexWrap="wrap">
-                              <Collapse isOpen={isManageAddressOpen}>
-                                { !hasAddress('DOGE') ? (
-                                  <Button className="nft_button" mr={2} mt={2} onClick={()=>{ handleAddressSign('DOGE') }}>Add DOGE</Button>
-                                ) : null }
-                                { !hasAddress('DGB') ? (
-                                  <Button className="nft_button" mr={2} mt={2} onClick={()=>{ handleAddressSign('DGB') }}>Add Digibyte</Button>
-                                ) : null }
-                                { !hasAddress('NMC') ? (
-                                  <Button className="nft_button" mr={2} mt={2} onClick={()=>{ handleAddressSign('NMC') }}>Add Namecoin</Button>
-                                ) : null }
-                                { !hasAddress('LTC') ? (
-                                  <Button className="nft_button" mr={2} mt={2} onClick={()=>{ handleAddressSign('LTC') }}>Add Litecoin</Button>
-                                ) : null }
-                                { !hasAddress('MONA') ? (
-                                  <Button className="nft_button" mr={2} mt={2} onClick={()=>{ handleAddressSign('MONA') }}>Add Mona</Button>
-                                ) : null }
-                                { !hasAddress('TEZOS') ? (
-                                  <Button className="nft_button" mr={2} mt={2} onClick={()=>{ handleAddressSign('TEZOS') }}>Add Tezos</Button>
-                                ) : null }
-                                { !hasAddress('SOLANA') ? (
-                                  <Button className="nft_button" mr={2} mt={2} onClick={()=>{ handleAddressSign('SOLANA') }}>Add Solana</Button>
-                                ) : null }
-                                { !hasAddress('STX') ? (
-                                  <Button className="nft_button" mr={2} mt={2} onClick={()=>{ handleAddressSign('STX') }}>Add Stacks</Button>
-                                ) : null }
-                                { !hasAddress('TAP') ? (
-                                  <Button className="nft_button" mr={2} mt={2} onClick={()=>{ handleAddressSign('TAP') }}>Add Taproot</Button>
-                                ) : null }
-                              </Collapse>
-                            </Flex>
-                          </>
-                        ) : null}
-                        </Stack>
-                      </ButtonGroup>
+              {debugFeedback? (
+                  <Box as="pre" style={{ color: 'white', opacity: 1 }}>{debugFeedback}</Box>
+                ): (
+                  <Box
+                    className="NFT" 
+                    maxW="sm"
+                    borderWidth="1px"
+                    borderColor={vaultChainId != chainId ? 'orange.500' : status == 'claimed' ? 'green.500' : null}
+                    rounded="lg"
+                    overflow="hidden"
+                    alignItems="center"
+                    minW={390}
+                  >
+                    
+                    <Box
+                      mt="1"
+                      fontWeight="semibold"
+                      as="h3"
+                      lineHeight="tight"
+                      p={2}
+                      textAlign="center"
+                      textTransform="uppercase"
+                      alignItems="center"
+                      color="blue.500"
+                    >
+                      Vault Network: {CHAIN_ID_NAMES[vaultChainId]}
                     </Box>
-                  ) : null}
-
-                  
-                  
-                  {isCovalApproved && !live ? (
-                    <Stack direction="row" align="flex-start" spacing="0rem" flexWrap="wrap" shouldWrapChildren>
-                      <Box maxW="sm" borderWidth="1px" p={1} rounded="lg" overflow="hidden">
-                        <Text>Creating a vault spends {price * Math.pow(10, -decimals)} Coval from your wallet</Text>
-                        {/* <Text>48 hour Free minting - sponsored by the team at MegaPunks <Link href="https://megapunks.com">https://megapunks.com</Link></Text> */}
-                      </Box>
-                    </Stack>
-                  ) : null}
-
-                {/* {mine && !approved ? (<>
-                  <Box d="flex" alignItems="baseline" justifyContent="space-between" mt="4">
-                    <Button
-                      backgroundColor={"#02b402"}
-                      color={"black !important"}
-                      fontWeight={"bold !important"}
-                      className="nft_button"
-                      width="100%" onClick={() => {
-                        return handleApproveForall()
+                    
+                    <Box
+                      mt="1"
+                      fontWeight="semibold"
+                      as="h3"
+                      lineHeight="tight"
+                      p={2}
+                      textAlign="center"
+                      // textTransform="uppercase"
+                      alignItems="center"
+                    >
+                      {vaultName}
+                      {!vaultPrivacy && vaultTotalValue > 0 ? ': ~$' + vaultTotalValue.toLocaleString() : null}
+                    </Box>
+                    <Stack className="NFT-content" align="center">
+                      { vaultValues.length && vaultValues.filter(item=> {return item.type == "nft"}).length > 0 ? (
+                          <NFTSlideshow name={vaultName} image={vaultImage} items={vaultValues.map(value=>{return {image: value.image, description: value.description, name: value.name, type: value.type}})} properties = {{'duration': 3000, canSwipe: false}}/>
+                        ) : (
+                          <Embed className="d-block w-100 NFT-image" url={vaultImage}/>
+                        )
                       }
-                      }> Approve Minting</Button>
-                  </Box>
-                </>) : null}
-
-                {!live && mine && vaultChainId == chainId && status !== 'claimed' && !showMakingVaultMsg && approved && !isCovalApproved ? (
-                  <>
-                    <Button backgroundColor={"#02b402"}
-                      color={"black !important"}
-                      fontWeight={"bold !important"}
-                      width="100%" mt={5} onClick={approveCovalFlow}>
-                      Approve Spending Coval
-                    </Button>
-                  </>
-                ) : null} */}
-
-                  {(showTransferPassword || mintPassword) && acceptable ? (
-                      <Box>
-                        <Link href={location.protocol +'//'+ location.host + '/nft?id=' + tokenId + '&key=' + (transferPassword || mintPassword)}>Copy Gift Link</Link>
-                        <Text>Password: {(transferPassword || mintPassword)}</Text>
-                      </Box>
-                  ) : null}
-                  
-                  {acceptable && claimedBy !== account ? (
-                    <>
-                        <Button mt={2} width="100%" onClick={()=>{fireMetaMask()}}>Accept</Button>
-                        <Input
-                          mt={2}
-                          type="password"
-                          id="mintPassword"
-                          minLength={3}
-                          maxLength={200}
-                          value={mintPassword || ''}
-                          onChange={(e) => {
-                            console.log('grrr', e.target.value, mintPassword)
-                            setMintPassword(e.target.value)}
-                          }
-                          autoComplete="off"
-                        />
-                    </>
-                  ) : null}
-
-                  {!live && mine && vaultChainId == chainId && status !== 'claimed' && !showMakingVaultMsg && approved && isCovalApproved ? (
-                      <>                      
-                        <Button width="100%" mt={5} isDisabled={(!vaultPrivacy && vaultValues.length < 1)|| mintLockedForever} onClick={lazyMint}>{mintLockedForever? 'Mint Locked - keys accessed before mint' : !vaultPrivacy && vaultValues.length < 1? 'Please load the vault to mint': 'Mint Vault'}</Button>
-                      </>
-                  ) : null}
-
-                  {!(status === 'claimed') && account && vaultChainId === chainId && mine && !sealed && approved && live ? (
-                    <Box display="flex" alignItems="baseline" justifyContent="space-between" mt="4">
-                      <Button
-                        width="100%"
-                        onClick={() => {
-                          handleClaim()
-                        }}
-                        isDisabled={claiming}
-                      >
-                        {claiming ? 'Claiming ...' : 'Unlock Vault (Get Private Keys)'}
-                      </Button>
-                    </Box>
-                  ) : (vaultChainId === chainId && ((status == 'claimed' || mintLockedForever) && (claimedBy === account || mine))) ? (
-                    <Box display="flex" alignItems="baseline" justifyContent="space-between" mt="4">
-                      <Button width="100%" onClick={handleSign}>
-                      Get Keys
-                      </Button>
-                    </Box>
-                  ) : null}
-
-                <Stack mt={5}>
-                  <>
-                  {mine? (
-                    <>
-                    {!isCovalApproved ?(
-                    <ApprovalButton
-                      handler={{address: contractAddresses.vaultHandler[chainId], abi: contractAddresses.vaultHandlerAbi}} 
-                      spending={{address: contractAddresses.coval[chainId], abi: contractAddresses.covalAbi}} 
-                      amount={1000} 
-                      label = "Approve Spending Coval"
-                      watcher={setHash}
-                    />): null}
-                    {!approved ?(
-                    <ApprovalButton
-                      handler={{address:  contractAddresses.vaultHandler[chainId], abi: contractAddresses.vaultHandlerAbi}} 
-                      spending={{address: contractAddresses.emblemVault[chainId], abi: contractAddresses.emblemAbi}}
-                      amount={0}
-                      label = "Approve Creating / Burning Vaults"
-                      watcher={setHash}
-                    />): null}
-                  </>
-                  ): null}
-                    
-                    
-                    <button className="nft_button" onClick={() => { onAdvancedToggle() }}>Advanced Operations</button>
-                    <Flex w="100%" justify="center" flexWrap="wrap">
-                      <Collapse width={"100%"} isOpen={isAdvancedOpen}>
-                        {vaultChainId === chainId && mineUnMinted && status != "claimed" && !mintLockedForever ? (
-                          <Box display="flex" alignItems="baseline" justifyContent="space-between" mt="4">
-                            <Button width="100%" onClick={handleSign}>
-                              Get Keys (Unlocking will prevent minting)
-                            </Button>
-                          </Box>
-                        ) : null}
-
-                        {mine && showMove && qualifiedCollection && qualifiedCollection[chainId] && qualifiedCollection.name && qualifiedCollection.chain ? (
-                          <>
-                            <ApprovalButton
-                              handler={{address: contractAddresses.vaultHandlerV8[chainId] , abi: contractAddresses.vaultHandlerV8Abi }} 
-                              spending={{address: contractAddresses.emblemVault[chainId], abi: contractAddresses.emblemAbi}}
-                              amount={0}
-                              label = "Approve Moving (part 1)"
-                              watcher={setHash}
-                            />
-                            <ApprovalButton
-                              handler={{address: contractAddresses.vaultHandlerV8[chainId] , abi: contractAddresses.vaultHandlerV8Abi }} 
-                              spending={{address: qualifiedCollection[chainId], abi: contractAddresses.erc1155Abi}}
-                              amount={0}
-                              label = "Approve Moving (part 2)"
-                              watcher={setHash}
-                            />
-
-                            <Box display="flex" alignItems="baseline" justifyContent="space-between" mt="4">
-                              
-                              <Button
-                                width="100%"
-                                onClick={() => {
-                                  setMoving(true)
-                                  handleMove()
-                                }}
-                                isDisabled={moving}
-                              >
-                                {moving ? 'Moving ...' : 'Move Vault'}
-                              </Button>
+                      {mine && ownedImage ? (
+                        <Button onClick={() => {handleOwnedEmbed()}}>(OWNED) Show Full Embed</Button>
+                      ): null}
+                    </Stack>
+                    <Stack align="center" maxWidth="400px">
+                      <Box mt="2" ml="4" lineHeight="tight" maxWidth="400px">
+                        <Stack>
+                          <Text fontSize="xs">
+                          { vaultChainId == chainId ? (
+                            <Link href={"./vaults?address="+owner}>
+                              Owner: {owner}
+                            </Link>
+                          ) : null }
+                          </Text>
+                          <Text overflowWrap="anywhere" mt={2} as="h4" ml="4" mr="4" fontSize="xs" fontStyle="italic" className="md">
+                            <ReactMarkdown plugins={[gfm]} children={splitDescription(vaultDesc)} />
+                          </Text>
+                          
+                        </Stack>                    
+                      </Box>                    
+                    </Stack>
+                    <Box p="6">
+                    <Tabs isFitted variant='enclosed'>
+                      <TabList mb='1em'>
+                        <Tab>Balances</Tab>
+                        <Tab>Attributes</Tab>
+                      </TabList>
+                      <TabPanels>
+                        <TabPanel>
+                          {vaultPrivacy ? (
+                            <Box mb={5}>
+                              <Text pb={2} color={decryptedEffect ? 'green.500' : null}>
+                                {decryptedEffect ? decryptedEffect : 'Contents hidden. Enter password to unlock.'}
+                              </Text>
+                              <Input
+                                type="password"
+                                id="vault-password"
+                                onChange={(e) => tryDecrypt(e.target.value)}
+                                aria-describedby="password-helper-text"
+                              />
                             </Box>
+                          ) : (
+                            <Box display="flex" backgroundColor={colorMode == "light"? "gray.100": "gray.700"} alignItems="baseline" className="coin-balance-content">
+                              <Box color="gray.500" letterSpacing="wide" fontSize="sm" ml="2">
+                                <Text as="div" mt={2} fontWeight="semibold">
+                                
+                                  Current Contents:  <button
+                                  onClick={() =>{
+                                    getAllBalancesLive([], tokenId, (v)=>{
+                                      setLoadedValues(false)
+                                      setVaultValues(v)
+                                    })
+                                  }}
+                                > [Refresh Balances]</button>
+                                </Text>
+                                <Text as="p" color={colorMode=="dark"? "lightgreen": "forestgreen"}>${Number(vaultTotalValue.toFixed(4)).toLocaleString()}</Text>
+                                { vaultValues.length ? (
+                                  vaultValues.map((coin) => {
+                                    return (  
+                                      <Stack> 
+                                        <CoinBalance colorMode={colorMode} coin={coin} mine={(status === 'claimed' && claimedBy === account) || mine} onRenew={onRenew} hideAsset={handleHideAsset}/>
+                                      </Stack>
+                                    )
+                                  })
+                                ) : (<Refreshing /> ) } 
+                                { vaultDataValues.length ? (
+                                  vaultDataValues.map((data) => {
+                                    return (
+                                      <Text>Data: {data.attribute_key}</Text>
+                                    )                        
+                                  })
+                                ) : !vaultDataValues.length && !vaultValues.length ? (
+                                  <Text>Nothing in here! Fill 'er up!</Text>
+                                ) : null}
+                              </Box>
+                            </Box>
+                          )}
+                      </TabPanel>
+                        <TabPanel>
+                          <Attributes colorMode={colorMode} attributes={attributes}/>
+                          </TabPanel>
+                        </TabPanels>
+                      </Tabs>
+                      
+                      {!vaultPrivacy ? (
+                        <Box display="flex" alignItems="baseline" justifyContent="space-between" mt="4">
+                          <ButtonGroup justifyContent="space-between" spacing={6}>
+                            <Stack>
+                              <Text>Deposit Addresses</Text>
+                              <Flex w="340px" justify="center" flexWrap="wrap">
+                                {vaultAddresses && vaultAddresses.length > 0? vaultAddresses.map((addr) => {
+                                  return (
+                                    <Button
+                                      className="address_nft_button"
+                                      
+                                      ml={2}
+                                      mt={2}
+                                      font-weight="100 !important"
+                                      key={addr.address}
+                                      onClick={() => {
+                                        setCurrCoin(addr.coin)
+                                        setCurrAddr(addr.address)
+                                        onOpenAddrModal()
+                                      }}
+                                    >
+                                      {addr.coin == 'ETH' ? addr.coin + '/EVM' : addr.coin == 'BTC' ? addr.coin + '/XCP/OMNI' : addr.coin == 'BCH' ? addr.coin + '/SLP': addr.coin == 'TAP'? 'TAPROOT': addr.coin}
+                                    </Button>
+                                  )
+                                }) : null}
+                              </Flex>
+                            {(mine || status === 'claimed') && vaultAddresses.length < 12 ? (
+                              <>
+                                <button className="nft_button" onClick={()=>{onManageAddressToggle()}}>Manage Addresses</button>
+                                <Flex w="340px" justify="center" flexWrap="wrap">
+                                  <Collapse isOpen={isManageAddressOpen}>
+                                    { !hasAddress('DOGE') ? (
+                                      <Button className="nft_button" mr={2} mt={2} onClick={()=>{ handleAddressSign('DOGE') }}>Add DOGE</Button>
+                                    ) : null }
+                                    { !hasAddress('DGB') ? (
+                                      <Button className="nft_button" mr={2} mt={2} onClick={()=>{ handleAddressSign('DGB') }}>Add Digibyte</Button>
+                                    ) : null }
+                                    { !hasAddress('NMC') ? (
+                                      <Button className="nft_button" mr={2} mt={2} onClick={()=>{ handleAddressSign('NMC') }}>Add Namecoin</Button>
+                                    ) : null }
+                                    { !hasAddress('LTC') ? (
+                                      <Button className="nft_button" mr={2} mt={2} onClick={()=>{ handleAddressSign('LTC') }}>Add Litecoin</Button>
+                                    ) : null }
+                                    { !hasAddress('MONA') ? (
+                                      <Button className="nft_button" mr={2} mt={2} onClick={()=>{ handleAddressSign('MONA') }}>Add Mona</Button>
+                                    ) : null }
+                                    { !hasAddress('TEZOS') ? (
+                                      <Button className="nft_button" mr={2} mt={2} onClick={()=>{ handleAddressSign('TEZOS') }}>Add Tezos</Button>
+                                    ) : null }
+                                    { !hasAddress('SOLANA') ? (
+                                      <Button className="nft_button" mr={2} mt={2} onClick={()=>{ handleAddressSign('SOLANA') }}>Add Solana</Button>
+                                    ) : null }
+                                    { !hasAddress('STX') ? (
+                                      <Button className="nft_button" mr={2} mt={2} onClick={()=>{ handleAddressSign('STX') }}>Add Stacks</Button>
+                                    ) : null }
+                                    { !hasAddress('TAP') ? (
+                                      <Button className="nft_button" mr={2} mt={2} onClick={()=>{ handleAddressSign('TAP') }}>Add Taproot</Button>
+                                    ) : null }
+                                  </Collapse>
+                                </Flex>
+                              </>
+                            ) : null}
+                            </Stack>
+                          </ButtonGroup>
+                        </Box>
+                      ) : null}
+
+                      
+                      
+                      {isCovalApproved && !live ? (
+                        <Stack direction="row" align="flex-start" spacing="0rem" flexWrap="wrap" shouldWrapChildren>
+                          <Box maxW="sm" borderWidth="1px" p={1} rounded="lg" overflow="hidden">
+                            <Text>Creating a vault spends {price * Math.pow(10, -decimals)} Coval from your wallet</Text>
+                            {/* <Text>48 hour Free minting - sponsored by the team at MegaPunks <Link href="https://megapunks.com">https://megapunks.com</Link></Text> */}
+                          </Box>
+                        </Stack>
+                      ) : null}
+
+                    {/* {mine && !approved ? (<>
+                      <Box d="flex" alignItems="baseline" justifyContent="space-between" mt="4">
+                        <Button
+                          backgroundColor={"#02b402"}
+                          color={"black !important"}
+                          fontWeight={"bold !important"}
+                          className="nft_button"
+                          width="100%" onClick={() => {
+                            return handleApproveForall()
+                          }
+                          }> Approve Minting</Button>
+                      </Box>
+                    </>) : null}
+
+                    {!live && mine && vaultChainId == chainId && status !== 'claimed' && !showMakingVaultMsg && approved && !isCovalApproved ? (
+                      <>
+                        <Button backgroundColor={"#02b402"}
+                          color={"black !important"}
+                          fontWeight={"bold !important"}
+                          width="100%" mt={5} onClick={approveCovalFlow}>
+                          Approve Spending Coval
+                        </Button>
+                      </>
+                    ) : null} */}
+
+                      {(showTransferPassword || mintPassword) && acceptable ? (
+                          <Box>
+                            <Link href={location.protocol +'//'+ location.host + '/nft?id=' + tokenId + '&key=' + (transferPassword || mintPassword)}>Copy Gift Link</Link>
+                            <Text>Password: {(transferPassword || mintPassword)}</Text>
+                          </Box>
+                      ) : null}
+                      
+                      {acceptable && claimedBy !== account ? (
+                        <>
+                            <Button mt={2} width="100%" onClick={()=>{fireMetaMask()}}>Accept</Button>
+                            <Input
+                              mt={2}
+                              type="password"
+                              id="mintPassword"
+                              minLength={3}
+                              maxLength={200}
+                              value={mintPassword || ''}
+                              onChange={(e) => {
+                                console.log('grrr', e.target.value, mintPassword)
+                                setMintPassword(e.target.value)}
+                              }
+                              autoComplete="off"
+                            />
+                        </>
+                      ) : null}
+
+                      {!live && mine && vaultChainId == chainId && status !== 'claimed' && !showMakingVaultMsg && approved && isCovalApproved ? (
+                          <>                      
+                            <Button width="100%" mt={5} isDisabled={(!vaultPrivacy && vaultValues.length < 1)|| mintLockedForever} onClick={lazyMint}>{mintLockedForever? 'Mint Locked - keys accessed before mint' : !vaultPrivacy && vaultValues.length < 1? 'Please load the vault to mint': 'Mint Vault'}</Button>
                           </>
-                        ) : null}
+                      ) : null}
 
-                        {mine || claimedBy == account ? (
-                          <JsonDownloadLink data={rawMetadata} filename={`EmblemVault-${tokenId}.json`} />
-                        ) : null}
+                      {!(status === 'claimed') && account && vaultChainId === chainId && mine && !sealed && approved && live ? (
+                        <Box display="flex" alignItems="baseline" justifyContent="space-between" mt="4">
+                          <Button
+                            width="100%"
+                            onClick={() => {
+                              handleClaim()
+                            }}
+                            isDisabled={claiming}
+                          >
+                            {claiming ? 'Claiming ...' : 'Unlock Vault (Get Private Keys)'}
+                          </Button>
+                        </Box>
+                      ) : (vaultChainId === chainId && ((status == 'claimed' || mintLockedForever) && (claimedBy === account || mine))) ? (
+                        <Box display="flex" alignItems="baseline" justifyContent="space-between" mt="4">
+                          <Button width="100%" onClick={handleSign}>
+                          Get Keys
+                          </Button>
+                        </Box>
+                      ) : null}
 
-                        {(!live || status == 'claimed') && to == account && vaultChainId == chainId && !showMakingVaultMsg && vaultValues.length < 1 ? (
-                          <Button width="100%" mt={5} onClick={deleteVault}>Delete Vault </Button>
-                        ) : null}
-                      </Collapse>
-                    </Flex>
-                  </>
-                </Stack>
+                    <Stack mt={5}>
+                      <>
+                      {mine? (
+                        <>
+                        {!isCovalApproved ?(
+                        <ApprovalButton
+                          handler={{address: contractAddresses.vaultHandler[chainId], abi: contractAddresses.vaultHandlerAbi}} 
+                          spending={{address: contractAddresses.coval[chainId], abi: contractAddresses.covalAbi}} 
+                          amount={1000} 
+                          label = "Approve Spending Coval"
+                          watcher={setHash}
+                        />): null}
+                        {!approved ?(
+                        <ApprovalButton
+                          handler={{address:  contractAddresses.vaultHandler[chainId], abi: contractAddresses.vaultHandlerAbi}} 
+                          spending={{address: contractAddresses.emblemVault[chainId], abi: contractAddresses.emblemAbi}}
+                          amount={0}
+                          label = "Approve Creating / Burning Vaults"
+                          watcher={setHash}
+                        />): null}
+                      </>
+                      ): null}
+                        
+                        
+                        <button className="nft_button" onClick={() => { onAdvancedToggle() }}>Advanced Operations</button>
+                        <Flex w="100%" justify="center" flexWrap="wrap">
+                          <Collapse width={"100%"} isOpen={isAdvancedOpen}>
+                            {vaultChainId === chainId && mineUnMinted && status != "claimed" && !mintLockedForever ? (
+                              <Box display="flex" alignItems="baseline" justifyContent="space-between" mt="4">
+                                <Button width="100%" onClick={handleSign}>
+                                  Get Keys (Unlocking will prevent minting)
+                                </Button>
+                              </Box>
+                            ) : null}
 
-                </Box>
-                {vaultIPFS ? (
-                    <HStack align="center">
-                      <Link target='new' mb={2} ml={35} href={'https://gateway.ipfs.io/ipfs/'+vaultIPFS} isExternal>View Metadata on IPFS </Link>
-                      {vaultImageIPFS? (
-                        <Link mb={2} href={'https://gateway.ipfs.io/ipfs/'+vaultImageIPFS} isExternal>View Image on IPFS </Link>
-                      ) : null}                      
-                    </HStack> 
-                ) : null }
+                            {mine && showMove && qualifiedCollection && qualifiedCollection[chainId] && qualifiedCollection.name && qualifiedCollection.chain ? (
+                              <>
+                                <ApprovalButton
+                                  handler={{address: contractAddresses.vaultHandlerV8[chainId] , abi: contractAddresses.vaultHandlerV8Abi }} 
+                                  spending={{address: contractAddresses.emblemVault[chainId], abi: contractAddresses.emblemAbi}}
+                                  amount={0}
+                                  label = "Approve Moving (part 1)"
+                                  watcher={setHash}
+                                />
+                                <ApprovalButton
+                                  handler={{address: contractAddresses.vaultHandlerV8[chainId] , abi: contractAddresses.vaultHandlerV8Abi }} 
+                                  spending={{address: qualifiedCollection[chainId], abi: contractAddresses.erc1155Abi}}
+                                  amount={0}
+                                  label = "Approve Moving (part 2)"
+                                  watcher={setHash}
+                                />
 
-                {sealed ? (
-                    <Box display="flex" mb={2} ml={35} alignItems="baseline" justifyContent="space-between" mt="4">
-                      <Text>*This vault is sealed forever.</Text>
+                                <Box display="flex" alignItems="baseline" justifyContent="space-between" mt="4">
+                                  
+                                  <Button
+                                    width="100%"
+                                    onClick={() => {
+                                      setMoving(true)
+                                      handleMove()
+                                    }}
+                                    isDisabled={moving}
+                                  >
+                                    {moving ? 'Moving ...' : 'Move Vault'}
+                                  </Button>
+                                </Box>
+                              </>
+                            ) : null}
+
+                            {mine || claimedBy == account ? (
+                              <JsonDownloadLink data={rawMetadata} filename={`EmblemVault-${tokenId}.json`} />
+                            ) : null}
+
+                            {(!live || status == 'claimed') && to == account && vaultChainId == chainId && !showMakingVaultMsg && vaultValues.length < 1 ? (
+                              <Button width="100%" mt={5} onClick={deleteVault}>Delete Vault </Button>
+                            ) : null}
+                          </Collapse>
+                        </Flex>
+                      </>
+                    </Stack>
+
                     </Box>
-                  ) : null}
+                    {vaultIPFS ? (
+                        <HStack align="center">
+                          <Link target='new' mb={2} ml={35} href={'https://gateway.ipfs.io/ipfs/'+vaultIPFS} isExternal>View Metadata on IPFS </Link>
+                          {vaultImageIPFS? (
+                            <Link mb={2} href={'https://gateway.ipfs.io/ipfs/'+vaultImageIPFS} isExternal>View Image on IPFS </Link>
+                          ) : null}                      
+                        </HStack> 
+                    ) : null }
 
-                <Stack direction="column" align="center">
-                  {status == 'claimed' ? <Text color="green.500">CLAIMED</Text> : null}
-                </Stack>
+                    {sealed ? (
+                        <Box display="flex" mb={2} ml={35} alignItems="baseline" justifyContent="space-between" mt="4">
+                          <Text>*This vault is sealed forever.</Text>
+                        </Box>
+                      ) : null}
 
-                {hash ? (
-                  <Alert status="info">
-                    <AlertIcon />
-                    { accepting ? "Accepting Your Gift Vault" : claiming ? "Claiming your Vault ..." : approving? "Handling Approval Flow ..." : transfering? "Transfering Vault ...":  minting? "Minting Vault" : "Validating transaction"}
-                  </Alert>
-                ) : null}
+                    <Stack direction="column" align="center">
+                      {status == 'claimed' ? <Text color="green.500">CLAIMED</Text> : null}
+                    </Stack>
 
-              </Box>
+                    {hash ? (
+                      <Alert status="info">
+                        <AlertIcon />
+                        { accepting ? "Accepting Your Gift Vault" : claiming ? "Claiming your Vault ..." : approving? "Handling Approval Flow ..." : transfering? "Transfering Vault ...":  minting? "Minting Vault" : "Validating transaction"}
+                      </Alert>
+                    ) : null}
+
+                  </Box>
+                )}
             </Flex>
         ) : vaultValues.length > 0 && slideshowOnly? (
           <Stack className="NFT-content" align="center">
