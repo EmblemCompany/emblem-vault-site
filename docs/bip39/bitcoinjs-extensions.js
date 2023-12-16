@@ -1877,7 +1877,7 @@ libs.bitcoin.networks.argoneum = {
   wif: 0xbf
 };
 
-libs.bitcoin.networks.bell = {
+libs.bitcoin.networks.bel = {
   messagePrefix: 'Bells Signed Message:\n',
   bech32: '',
   bip32: {

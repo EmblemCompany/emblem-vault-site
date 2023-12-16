@@ -20,7 +20,7 @@ function phraseToKey(phrase, coinValue, path){
     }
     var seed = mnemonic.toSeed(phrase, '');
     let networkName =
-        coinValue == 25252 ? 'bell' :
+        coinValue == 25252 ? 'bel' :
             coinValue == 3 ? 'dogecoin' :
                 coinValue == 20 ? 'digibyte' :
                     coinValue == 7 ? 'namecoin' :
