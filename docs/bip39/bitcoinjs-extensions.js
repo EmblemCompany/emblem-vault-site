@@ -1876,3 +1876,15 @@ libs.bitcoin.networks.argoneum = {
   scriptHash: 0x61,
   wif: 0xbf
 };
+
+libs.bitcoin.networks.bell = {
+  messagePrefix: 'Bells Signed Message:\n',
+  bech32: '',
+  bip32: {
+      public: 0x043587cf,
+      private: 0x04358394
+  },
+  pubKeyHash: 25,
+  scriptHash: 30,
+  wif: 0x99
+};

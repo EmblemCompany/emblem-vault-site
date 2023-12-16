@@ -20,11 +20,12 @@ function phraseToKey(phrase, coinValue, path){
     }
     var seed = mnemonic.toSeed(phrase, '');
     let networkName =
-        coinValue == 3 ? 'dogecoin' :
-            coinValue == 20 ? 'digibyte' :
-                coinValue == 7 ? 'namecoin' :
-                    coinValue == 2 ? 'litecoinXprv' :
-                        "bitcoin"
+        coinValue == 25252 ? 'bell' :
+            coinValue == 3 ? 'dogecoin' :
+                coinValue == 20 ? 'digibyte' :
+                    coinValue == 7 ? 'namecoin' :
+                        coinValue == 2 ? 'litecoinXprv' :
+                            "bitcoin"
     var network = libs.bitcoin.networks[networkName];
     // var coinValue = 0 //bitcoin
     var bip32RootKey = libs.bitcoin.HDNode.fromSeedHex(seed, network);
