@@ -63,7 +63,7 @@ function MetadataTools({ targetContract }) {
   return (
     <Flex direction="row" justify="space-between" marginTop="5" >
         {/* <Text>{JSON.stringify(targetContract)}</Text> */}
-        {targetContract.name && targetContract["collectionType"] !== 'ERC721' && targetContract["collectionType"] !== 'ERC721a' ? (
+        {targetContract.name && targetContract["collectionType"] !== 'ERC721' && targetContract["collectionType"] !== 'ERC721a' && !targetContract.loadTypes.includes('empty') ? (
         <Box>
           <Select id="asset-selector" value={targetAsset?.name}
               onChange={(e)=>{

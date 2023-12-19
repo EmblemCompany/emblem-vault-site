@@ -201,7 +201,7 @@ export default function CreateCurated(props: any) {
                             }): null}
                             
                           </Select>
-                          {targetContract.name && targetContract["collectionType"] !== 'ERC721' && targetContract["collectionType"] !== 'ERC721a' ? (
+                          {targetContract.loadTypes.includes('select') ? (
                               <Select id="asset-selector" w="100%" value={targetAsset.name}
                                 onChange={(e)=>{
                                   setMintDisabled(false)
@@ -209,18 +209,21 @@ export default function CreateCurated(props: any) {
                                 }}
                               >
                                 <option value="" >---Choose One---</option>
-                                {curatedAssets[targetContract.collectionChain][targetContract.name] ? curatedAssets[targetContract.collectionChain][targetContract.name].sort((a, b) => {if (a.name < b.name) return -1;if (a.name > b.name) return 1;return 0;}).map((asset, i)=>{
+                                {curatedAssets[targetContract.collectionChain] && curatedAssets[targetContract.collectionChain][targetContract.name] ? curatedAssets[targetContract.collectionChain][targetContract.name].sort((a, b) => {if (a.name < b.name) return -1;if (a.name > b.name) return 1;return 0;}).map((asset, i)=>{
                                   return (
                                     <option key={`choose-${i}`} value={asset.name} >{asset.name}</option>
                                   )
                                 }): null}
                                 
                               </Select>
-                            ) : targetContract.name && (targetContract["collectionType"] == 'ERC721' || targetContract["collectionType"] == 'ERC721a') ? (
+                            ):  null }
+
+                            {/* { targetContract.name && (targetContract["collectionType"] == 'ERC721' || targetContract["collectionType"] == 'ERC721a') ? ( */}
                               <>
                                 {targetContract.loadTypes.includes('input')? ( 
                                   <Input isDisabled={checked} onKeyUp={(e)=>{ handleKeyUpNameInput(e)}}  w="100%" placeholder={`${targetContract.name} Number (-1337)`} ></Input>
                                 ): null}
+                                
                                 {targetContract.loadTypes.includes('empty')? ( 
                                   <Box my={3}>
                                     <Checkbox 
@@ -242,6 +245,7 @@ export default function CreateCurated(props: any) {
                                     Empty Vault.
                                   </Box>
                                 ): null}
+
                                 {targetContract.loadTypes.includes('detailed')? (
                                   <DetailedCreate experimental={false} overrides={query} account={account} handleSubmit={
                                     (vaultAddress, pubOrPriv, vaultName, vaultDesc, image, ownedImage, vaultKey, vaultValue, displayType, password)=>{
@@ -258,7 +262,7 @@ export default function CreateCurated(props: any) {
                                 <>{curatedError}</>
                                 <>{curatedContentType}</>
                               </>
-                            ):null}
+                            {/* ):null} */}
                             
                             {/* {targetAsset.image? (
                                   <Image

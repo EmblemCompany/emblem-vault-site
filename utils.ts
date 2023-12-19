@@ -227,6 +227,8 @@ function generateTemplate(record: any) {
             allowed = record.nativeAssets.includes(data[0].coin) && (recordName.toLowerCase() == data[0].project.toLowerCase() || data[0].project.toLowerCase() == "stampunks")
           } else if (recordName == "EmblemOpen") {
             allowed = data? true: false
+          } else if (recordName == "Bells") {
+            allowed = data[0].name == "Bel" && data[0].balance > 0 && Number.isInteger(data[0].balance)
           } else { // XCP
             allowed = data[0].project == _this.name && data[0].balance == 1;
           }
@@ -253,6 +255,8 @@ function generateTemplate(record: any) {
           } else if (recordName == "Stamps") {
             allowedName = asset && asset.toLowerCase().includes("stamp")? true: false
           } else if (recordName == "EmblemOpen") {
+            allowedName = asset? true: false
+          } else if (recordName == "Bells") {
             allowedName = asset? true: false
           } else { // XCP
               let curatedItemFound = NFT_DATA[asset];

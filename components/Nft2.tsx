@@ -412,7 +412,12 @@ export default function Nft2() {
     if (!jsonData.live) {
       console.log("check liveliness start")
       checkLiveliness(tokenId, jsonData.targetContract || jsonData.move_targetContract, (isLive)=>{
-        setLive(isLive)        
+        setLive(isLive)
+        setTimeout(() => {
+          checkLiveliness(tokenId, jsonData.targetContract || jsonData.move_targetContract, (isLive)=>{
+            setLive(isLive)
+          })
+        }, 30000)
       })
     }
     setStatus(jsonData.status)
