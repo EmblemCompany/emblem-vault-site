@@ -229,6 +229,8 @@ function generateTemplate(record: any) {
             allowed = data? true: false
           } else if (recordName == "Bells") {
             allowed = data[0].name == "Bel" && data[0].balance > 0 && Number.isInteger(data[0].balance)
+          } else if (recordName == "Namecoin") {
+            allowed = data && record.nativeAssets.includes(data[0].coin) ? true: false
           } else { // XCP
             allowed = data[0].project == _this.name && data[0].balance == 1;
           }
@@ -257,10 +259,12 @@ function generateTemplate(record: any) {
           } else if (recordName == "EmblemOpen") {
             allowedName = asset? true: false
           } else if (recordName == "Bells") {
-            allowedName = asset? true: false
+            allowedName = asset ? true : false
+          } else if (recordName == "Namecoin") {
+            allowedName = asset ? true : false
           } else { // XCP
-              let curatedItemFound = NFT_DATA[asset];
-              allowedName = asset && curatedItemFound? true: false;
+            let curatedItemFound = NFT_DATA[asset];
+            allowedName = asset && curatedItemFound ? true : false;
           }
           
           return allowedName
@@ -283,7 +287,8 @@ function generateTemplate(record: any) {
           return fromNetwork == toNetwork // don't allow cross chain
       },
       filterNativeBalances: (balance: any, _this: any): any => {
-          return balance.balances.filter((item: { name: any; }) => !_this.nativeAssets.includes(item.name));
+          let filtered =  balance.balances.filter((item: { name: any; }) => !_this.nativeAssets.includes(item.name));
+          return filtered
       },
       address: (addresses: any[]) => {
           return addresses.filter(item => { return item.coin === addressChain })[0].address
@@ -293,6 +298,10 @@ function generateTemplate(record: any) {
       },
       balanceExplorer(address: string) {
           return `https://xchain.io/address/${address}`
+      },
+      generateName: (balance: any, _this: any, msgCallback: any) => {
+          let name = balance&& balance.length > 0 && _this.filterNativeBalances? _this.filterNativeBalances({balances: balance}, _this)[0].name: ()=>{msgCallback("No Minting Asset Found (Loading...)"); return false}
+          return name
       }
   }
   Object.keys(record.contracts).forEach(key => {

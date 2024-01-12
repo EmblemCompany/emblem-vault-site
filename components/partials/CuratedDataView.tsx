@@ -1,44 +1,20 @@
 import { Box, Text, VStack, Collapse, Button, TabPanels, TabPanel, Tabs, TabList, Tab, Flex, FormControl, FormLabel, Input, InputGroup, InputRightElement, Textarea } from "@chakra-ui/react";
 import { useEffect, useState } from 'react';
 import CuratedCrudForm from "./CuratedCrudForm";
-import { EMBLEM_V2_API } from "../../constants";
 import VaultTools from "./VaultTools";
 import MetadataTools from "./MetadataTools";
 
-export default function CuratedDataView({ data, callback }) {
+
+export default function CuratedDataView({ data, assetChains, deployments, callback = null }) {
   const [show, setShow] = useState(Array(data.length).fill(false));
   const [tabIndex, setTabIndex] = useState(0)
-  const [assetChains, setAssetChains] = useState([]);
   const [mintEntries, setMintEntries] = useState({});
-
-  useEffect(() => {
-    fetch(`${EMBLEM_V2_API}/assetChains`)
-      .then(response => response.json())
-      .then(data => {
-        setAssetChains(data);
-      });
-  }, []);
-   
 
   const handleToggle = (index) => {
     const newShow = [...show];
     newShow[index] = !newShow[index];
     setShow(newShow);
   }
-
-   const checkAllContractsForMintRights = async () => {
-    let canMintEntries = []
-     const mintRightsRecursively = async (index = 0) => {
-       if (index >= data.length) {
-        setMintEntries(canMintEntries);
-        return;
-       }
-       const canMint = await checkHandlerCanMint(data[index].collectionType, data[index].contracts[1]);
-       canMintEntries.push({name: data[index].name, canMint: canMint});
-       return mintRightsRecursively(index + 1);
-     }
-     mintRightsRecursively();
-   }
 
   const checkHandlerCanMint = async (contractType, contractAddress) =>{
     let paramData = ""
@@ -103,7 +79,11 @@ export default function CuratedDataView({ data, callback }) {
                         </TabList>
                         <TabPanels>
                             <TabPanel mt={5}>
-                                <Text onClick={async ()=>{let canMint = await checkHandlerCanMint(item.collectionType, item.contracts["1"]); item.canMint = canMint; mintEntries[item.name] = canMint; setMintEntries(mintEntries); setTabIndex(tabIndex) }} ><strong>Handler can delegate mint:</strong> {mintEntries[item.name]?.toString()}</Text>
+                                {/* <Text onClick={async ()=>{let canMint = await checkHandlerCanMint(item.collectionType, item.contracts["1"]); item.canMint = canMint; mintEntries[item.name] = canMint; setMintEntries(mintEntries); setTabIndex(tabIndex) }} ><strong>Handler can delegate mint:</strong> {mintEntries[item.name]?.toString()}</Text> */}
+                                {callback && 
+                                  <Button mb={3} onClick={() => callback(item)}>Clone</Button>
+                                }
+
                                 <Text><strong>Contracts:</strong> {JSON.stringify(item.contracts)}</Text>
                                 <Text><strong>Native Assets:</strong> {item.nativeAssets.join(", ")}</Text>
                                 <Text><strong>Mintable:</strong> {item.mintable ? "Yes" : "No"}</Text>
@@ -125,7 +105,7 @@ export default function CuratedDataView({ data, callback }) {
                             <TabPanel>{item && assetChains &&
                                 <Flex ml={12}>
                                 <VStack spacing={4} padding={4} align="left" >
-                                    <CuratedCrudForm initialFormData={item} assetChains={assetChains} />
+                                    <CuratedCrudForm initialFormData={item} assetChains={assetChains} deployments={deployments} />
                                 </VStack>
                                 </Flex>
                             }</TabPanel>

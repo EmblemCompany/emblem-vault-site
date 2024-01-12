@@ -1,12 +1,16 @@
 import { Button, Flex, FormControl, FormLabel, Input, InputGroup, Textarea } from '@chakra-ui/react';
 import { useState } from 'react';
-import { EMBLEM_V2_API, EMBLEM_V3_API } from '../../constants';
-
+import { EMBLEM_V2_API, EMBLEM_V3_API, contractAddresses } from '../../constants';
+import { useWeb3React } from '@web3-react/core';
+import { Contract } from '@ethersproject/contracts'
 
 function VaultTools({ targetContract }) {
+    const { account, chainId, library } = useWeb3React()
     const [results, setResults] = useState(null);
 
-    const fetchBalanceForTokenId = (tokenId) => {
+
+
+      const fetchBalanceForTokenId = (tokenId) => {
         const options = {
           method: 'POST',
           headers: {
@@ -87,6 +91,44 @@ function VaultTools({ targetContract }) {
           });
       };
 
+      const bypassOn = async () => {
+        let contractInstance = createCuratedContractInstance()
+        let isByPassable = await contractInstance.byPassable()
+        console.log("byPassable", isByPassable)
+        if (!isByPassable) {
+          await contractInstance.toggleBypassability()
+          console.log("setting byPassable")
+        } else {
+          alert("Already Bypassable")
+        }        
+      }
+
+      const delegateMint = async () => {
+        let contractInstance = createCuratedContractInstance()
+        let functionId = targetContract.collectionType == 'ERC721a' || targetContract.collectionType == 'ERC721'? "0x40c10f19": "0x8bcef78e"
+        let canDelegateMint = await contractInstance.byPassableFunction("0x23859b51117dbFBcdEf5b757028B18d7759a4460", functionId)
+        if (!canDelegateMint) {
+          await contractInstance.addBypassRule("0x23859b51117dbFBcdEf5b757028B18d7759a4460", functionId, 0)
+        } else {
+          alert("Handler Can Already Mint")
+        }
+      }
+
+      const delegateBurn = async () => {
+        let contractInstance = createCuratedContractInstance()
+        let functionId = targetContract.collectionType == 'ERC721a' || targetContract.collectionType == 'ERC721'? "0x42966c68": "0xf5298aca"
+        let canDelegateBurn = await contractInstance.byPassableFunction("0x23859b51117dbFBcdEf5b757028B18d7759a4460", functionId)
+        if (!canDelegateBurn) {
+          await contractInstance.addBypassRule("0x23859b51117dbFBcdEf5b757028B18d7759a4460", functionId, 0)
+        } else {
+          alert("Handler Can Already Burn")
+        }
+      }
+
+      const createCuratedContractInstance = () =>{
+        return new Contract(targetContract.contracts[chainId], targetContract.collectionType == 'ERC1155'? contractAddresses.erc1155Abi:  targetContract.collectionType == 'ERC721a'? contractAddresses.erc721aAbi: contractAddresses.erc721Abi, library.getSigner(account).connectUnchecked())
+      }
+
   return (
     <Flex direction="row" justify="space-between">
         <FormControl id={`tokenId`} width="50%" margin="15px">
@@ -120,6 +162,14 @@ function VaultTools({ targetContract }) {
                 clearCache(tokenId.value)
               }
             }} h="1.75rem" size="sm" m="5px">Clear Cache</Button>
+
+            <hr/>Contract
+            <div></div>
+
+            <Button h="1.75rem" size="sm" m="5px" onClick={bypassOn}>Turn on Bypassability</Button>
+            <Button h="1.75rem" size="sm" m="5px" onClick={delegateMint}>Delegate Handler to Mint</Button>
+            <Button h="1.75rem" size="sm" m="5px" onClick={delegateBurn}>Delegate Handler to Burn</Button>
+
         </FormControl>
         <FormControl id="results" width="50%" margin="15px">
             <FormLabel>Results</FormLabel>

@@ -246,7 +246,7 @@
             "inputs": [
                 {
                     "internalType": "address",
-                    "name": "to",
+                    "name": "operator",
                     "type": "address"
                 },
                 {
@@ -290,6 +290,43 @@
             "name": "burn",
             "outputs": [],
             "stateMutability": "nonpayable",
+            "type": "function"
+        },
+        {
+            "inputs": [],
+            "name": "byPassable",
+            "outputs": [
+                {
+                    "internalType": "bool",
+                    "name": "",
+                    "type": "bool"
+                }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "inputs": [
+                {
+                    "internalType": "address",
+                    "name": "",
+                    "type": "address"
+                },
+                {
+                    "internalType": "bytes4",
+                    "name": "",
+                    "type": "bytes4"
+                }
+            ],
+            "name": "byPassableFunction",
+            "outputs": [
+                {
+                    "internalType": "bool",
+                    "name": "",
+                    "type": "bool"
+                }
+            ],
+            "stateMutability": "view",
             "type": "function"
         },
         {
@@ -542,6 +579,24 @@
             "type": "function"
         },
         {
+            "inputs": [
+                {
+                    "internalType": "address[]",
+                    "name": "to",
+                    "type": "address[]"
+                },
+                {
+                    "internalType": "uint256[]",
+                    "name": "externalTokenId",
+                    "type": "uint256[]"
+                }
+            ],
+            "name": "mintMany",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+        },
+        {
             "inputs": [],
             "name": "name",
             "outputs": [
@@ -724,7 +779,7 @@
                 },
                 {
                     "internalType": "bytes",
-                    "name": "_data",
+                    "name": "data",
                     "type": "bytes"
                 }
             ],
