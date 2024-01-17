@@ -65,7 +65,7 @@ export default function CuratedDataView({ data, assetChains, deployments, callba
         return (
           <Box border="1px" borderColor="gray.200" padding={4} borderRadius="md" key={item.id} width="80vw">
             <Box display="flex" justifyContent="space-between" alignItems="center">
-              <Text onClick={() => handleToggle(index)} style={{cursor: "pointer"}}><strong>Name:</strong> {item.name}</Text>
+              <Text onClick={() => handleToggle(index)} style={{cursor: "pointer"}}>{item.mintable ? "🟢" : "🔴"}<strong> Name:</strong> {item.name}</Text>
               <Button onClick={() => handleToggle(index)} style={{cursor: "pointer"}}>{show[index] ? "▼" : "▲"}</Button>
             </Box>
             <Collapse in={show[index]}>
