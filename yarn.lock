@@ -5829,10 +5829,10 @@ elliptic@^6.5.3, elliptic@6.5.3:
     minimalistic-assert "^1.0.0"
     minimalistic-crypto-utils "^1.0.0"
 
-emblem-vault-sdk@^1.4.4:
-  version "1.4.4"
-  resolved "https://registry.npmjs.org/emblem-vault-sdk/-/emblem-vault-sdk-1.4.4.tgz"
-  integrity sha512-LYQdukxNBkUarAly0qjFNZ0NCynoK9j8tIPXyUfaPOd7R77s0CmohyKiVIu7kUmjF2PkfB96hMGr9RCvdXOdfw==
+emblem-vault-sdk@^1.5.0:
+  version "1.5.0"
+  resolved "https://registry.npmjs.org/emblem-vault-sdk/-/emblem-vault-sdk-1.5.0.tgz"
+  integrity sha512-Py5lUlXm4YIUex55340kZt+AJLPZ3rTUA2skS2ZD9irIENBJluqoeuEuGGGWuDgAKqW6qDh7Kyz+ountWriKRw==
   dependencies:
     node-fetch "^2.6.6"
     web3 "^4.4.0"

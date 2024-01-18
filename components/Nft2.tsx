@@ -549,8 +549,8 @@ export default function Nft2() {
       
       if (targetContract[chainId]) {
         let allowedContracts: any = targetContract
-        if (allowedContracts.allowedName && allowedContracts.allowed && vaultValues && vaultValues.length > 0){
-          let allowed = allowedContracts.allowedName(vaultValues[0].name, allowedContracts, targetAsset, setVaultMsg) && allowedContracts.allowed(vaultValues, allowedContracts, setVaultMsg)
+        if (allowedContracts.allowedName && allowedContracts.allowed){
+          let allowed = allowedContracts.allowedName(vaultValues && vaultValues.length > 0 ? vaultValues[0].name: '', allowedContracts, targetAsset, setVaultMsg) && allowedContracts.allowed(vaultValues, allowedContracts, setVaultMsg)
           setCanCuratedMint(allowed)
         } else {
           setCanCuratedMint(false)

@@ -201,7 +201,7 @@ export default function CreateCurated(props: any) {
                             }): null}
                             
                           </Select>
-                          {targetContract.loadTypes.includes('select') ? (
+                          {targetContract.loadTypes.includes('select') && targetContract.name != "Embels" ? (
                               <Select id="asset-selector" w="100%" value={targetAsset.name}
                                 onChange={(e)=>{
                                   setMintDisabled(false)
