@@ -7,7 +7,7 @@ import xcpJson from './curated/xcp.json'
 import EmblemVaultSDK from 'emblem-vault-sdk'
 let NFT_DATA = {}
 
-const sdk = new EmblemVaultSDK('demo');  
+export const sdk: any = new EmblemVaultSDK('demo');  
 
 Object.keys(xcpJson).forEach(item=>{xcpJson[item].forEach(i=>{i.projectName = item; NFT_DATA[i.name] = i})}) // convert json to match server
 

@@ -103,6 +103,15 @@ export class Embed extends Component<EmbedProps> {
                 width="250px"
                 maxWidth={"250px"}
               />
+        ) : url.includes('STAMP') ? (
+          <Image
+            p={"20px"}
+            h={"100%"}
+            className={this.props.className || "d-block w-100"}
+            src={url.replace('STAMP:','data:image/png;base64,')}
+            width="250px"
+            height="300px"
+          />
         ) : (
           <Generic
             url={url}

@@ -1436,16 +1436,7 @@
     "@ethersproject/logger" "^5.0.8"
     bn.js "^4.4.0"
 
-"@ethersproject/bignumber@^5.0.5", "@ethersproject/bignumber@^5.5.0":
-  version "5.5.0"
-  resolved "https://registry.npmjs.org/@ethersproject/bignumber/-/bignumber-5.5.0.tgz"
-  integrity sha512-6Xytlwvy6Rn3U3gKEc1vP7nR92frHkv6wtVr95LFR3jREXiCPzdWxKQ1cx4JGQBXxcguAwjA8murlYN2TSiEbg==
-  dependencies:
-    "@ethersproject/bytes" "^5.5.0"
-    "@ethersproject/logger" "^5.5.0"
-    bn.js "^4.11.9"
-
-"@ethersproject/bignumber@^5.7.0":
+"@ethersproject/bignumber@^5.0.5", "@ethersproject/bignumber@^5.5.0", "@ethersproject/bignumber@^5.7.0":
   version "5.7.0"
   resolved "https://registry.npmjs.org/@ethersproject/bignumber/-/bignumber-5.7.0.tgz"
   integrity sha512-n1CAdIHRWjSucQO3MC1zPSVgV/6dy/fjL9pMrPP9peL+QxEg9wOsVqwD4+818B6LUEtaXzVHQiuivzRoxPxUGw==
@@ -1454,12 +1445,12 @@
     "@ethersproject/logger" "^5.7.0"
     bn.js "^5.2.1"
 
-"@ethersproject/bytes@^5.0.3", "@ethersproject/bytes@^5.5.0":
-  version "5.5.0"
-  resolved "https://registry.npmjs.org/@ethersproject/bytes/-/bytes-5.5.0.tgz"
-  integrity sha512-ABvc7BHWhZU9PNM/tANm/Qx4ostPGadAuQzWTr3doklZOhDlmcBqclrQe/ZXUIj3K8wC28oYeuRa+A37tX9kog==
+"@ethersproject/bytes@^5.0.3", "@ethersproject/bytes@^5.5.0", "@ethersproject/bytes@^5.7.0":
+  version "5.7.0"
+  resolved "https://registry.npmjs.org/@ethersproject/bytes/-/bytes-5.7.0.tgz"
+  integrity sha512-nsbxwgFXWh9NyYWo+U8atvmMsSdKJprTcICAkvbBffT75qDocbuggBU0SJiVK2MuTrp0q+xvLkTnGMPK1+uA9A==
   dependencies:
-    "@ethersproject/logger" "^5.5.0"
+    "@ethersproject/logger" "^5.7.0"
 
 "@ethersproject/bytes@^5.0.9", "@ethersproject/bytes@>=5.0.0-beta.129":
   version "5.0.9"
@@ -1467,13 +1458,6 @@
   integrity sha512-k+17ZViDtAugC0s7HM6rdsTWEdIYII4RPCDkPEuxKc6i40Bs+m6tjRAtCECX06wKZnrEoR9pjOJRXHJ/VLoOcA==
   dependencies:
     "@ethersproject/logger" "^5.0.8"
-
-"@ethersproject/bytes@^5.7.0":
-  version "5.7.0"
-  resolved "https://registry.npmjs.org/@ethersproject/bytes/-/bytes-5.7.0.tgz"
-  integrity sha512-nsbxwgFXWh9NyYWo+U8atvmMsSdKJprTcICAkvbBffT75qDocbuggBU0SJiVK2MuTrp0q+xvLkTnGMPK1+uA9A==
-  dependencies:
-    "@ethersproject/logger" "^5.7.0"
 
 "@ethersproject/constants@^5.0.8", "@ethersproject/constants@>=5.0.0-beta.128":
   version "5.0.8"
@@ -1584,12 +1568,7 @@
   resolved "https://registry.npmjs.org/@ethersproject/logger/-/logger-5.0.8.tgz"
   integrity sha512-SkJCTaVTnaZ3/ieLF5pVftxGEFX56pTH+f2Slrpv7cU0TNpUZNib84QQdukd++sWUp/S7j5t5NW+WegbXd4U/A==
 
-"@ethersproject/logger@^5.5.0":
-  version "5.5.0"
-  resolved "https://registry.npmjs.org/@ethersproject/logger/-/logger-5.5.0.tgz"
-  integrity sha512-rIY/6WPm7T8n3qS2vuHTUBPdXHl+rGxWxW5okDfo9J4Z0+gRRZT0msvUdIJkE4/HS29GUMziwGaaKO2bWONBrg==
-
-"@ethersproject/logger@^5.7.0":
+"@ethersproject/logger@^5.5.0", "@ethersproject/logger@^5.7.0":
   version "5.7.0"
   resolved "https://registry.npmjs.org/@ethersproject/logger/-/logger-5.7.0.tgz"
   integrity sha512-0odtFdXu/XHtjQXJYA3u9G0G8btm0ND5Cu8M7i5vhEcE8/HmF4Lbdqanwyv4uQTr2tx6b7fQRmgLrsnpQlmnig==
@@ -5829,12 +5808,12 @@ elliptic@^6.5.3, elliptic@6.5.3:
     minimalistic-assert "^1.0.0"
     minimalistic-crypto-utils "^1.0.0"
 
-emblem-vault-sdk@^1.5.0:
-  version "1.5.0"
-  resolved "https://registry.npmjs.org/emblem-vault-sdk/-/emblem-vault-sdk-1.5.0.tgz"
-  integrity sha512-Py5lUlXm4YIUex55340kZt+AJLPZ3rTUA2skS2ZD9irIENBJluqoeuEuGGGWuDgAKqW6qDh7Kyz+ountWriKRw==
+emblem-vault-sdk@^1.7.13:
+  version "1.7.13"
+  resolved "https://registry.npmjs.org/emblem-vault-sdk/-/emblem-vault-sdk-1.7.13.tgz"
+  integrity sha512-MIaLiWZRq6bXmCXEh3b93JipLPdDeD8LkY2Q3kUupryg5TvQYLR7Z4LcbD2ihxoqOcjVY0oQEQjXR2rlg8YIbg==
   dependencies:
-    node-fetch "^2.6.6"
+    "@ethersproject/bignumber" "^5.7.0"
     web3 "^4.4.0"
 
 emoji-regex@^7.0.1:
@@ -9764,13 +9743,6 @@ node-fetch@^1.0.1, node-fetch@~1.7.1:
     is-stream "^1.0.1"
 
 node-fetch@^2.6.12:
-  version "2.7.0"
-  resolved "https://registry.npmjs.org/node-fetch/-/node-fetch-2.7.0.tgz"
-  integrity sha512-c4FRfUm/dbcWZ7U+1Wq0AwCyFL+3nt2bEw05wfxSz+DWpWsitgmSgYmy2dQdWyKC1694ELPqMs/YzUSNozLt8A==
-  dependencies:
-    whatwg-url "^5.0.0"
-
-node-fetch@^2.6.6:
   version "2.7.0"
   resolved "https://registry.npmjs.org/node-fetch/-/node-fetch-2.7.0.tgz"
   integrity sha512-c4FRfUm/dbcWZ7U+1Wq0AwCyFL+3nt2bEw05wfxSz+DWpWsitgmSgYmy2dQdWyKC1694ELPqMs/YzUSNozLt8A==

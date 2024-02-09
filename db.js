@@ -61,13 +61,13 @@ export const getCachedVaults = async (vaultType, account) => {
             })
                 .filter(record => { 
                     if (vaultType == "claimed") {
-                        return (account === record.ownership?.claimedBy || account === record.ownershipInfo.claimedBy);
+                        return (account === record.ownership?.claimedBy || account === record.ownershipInfo?.claimedBy);
                     }  
                     else if (vaultType == "unminted") {
-                        return (account === record.ownership?.createdBy || account === record.ownershipInfo.createdBy);
+                        return (record.ownership?.createdBy === account || account === record.ownershipInfo?.createdBy);
                     }
                     else {
-                        return (account === record.ownership?.owner || account === record.ownershipInfo.owner);
+                        return (account === record.ownership?.owner || account === record.ownershipInfo?.owner);
                     }
                 });
             resolve(filteredVaults);
@@ -195,8 +195,46 @@ export const saveVaultToDatabase = async (jsonData) => {
 };
 
 
+export const deleteVaultFromDatabase = async (tokenId) => {
+    console.log("deleteVaultFromDatabase - start");
+    const db = await openDB();
+    if (!db) {
+        console.error('Failed to open database');
+        throw new Error('Failed to open database');
+    }
+
+    const transaction = db.transaction(['vaults'], 'readwrite');
+    const store = transaction.objectStore('vaults');
+
+    return new Promise((resolve, reject) => {
+        deleteItem(store, tokenId, tokenId, reject);
+
+        transaction.oncomplete = () => {
+            console.log("Transaction complete");
+            db.close();
+            resolve(true);
+        };
+
+        transaction.onerror = (event) => {
+            console.error('Transaction error:', event.target.error);
+            db.close();
+            reject(event.target.error);
+        };
+    });
+}
 
 
+export function deleteItem(store, item, index, reject) {
+    const request = store.delete(item);
+    request.onsuccess = () => {
+        console.log(`Item ${index} successfully deleted from store`);
+    };
+    request.onerror = (event) => {
+        console.error(`Error deleting item ${index} from store:`, event.target.error);
+        reject(event.target.error);
+    };
+    return request;
+}
 
 
 

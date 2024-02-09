@@ -9,13 +9,13 @@ export class Generic extends Component<GenericProps> {
   render() {
     return (
       <>
-        {/* <iframe frameBorder="0" scrolling="no" src=width="100%" height="400" allow="encrypted-media"></iframe> */}
-        <IframeResizer
+        <iframe frameBorder="0" scrolling="no" src={this.props.url}   height="400" allow="encrypted-media" sandbox="allow-encrypted-media"></iframe>
+        {/* <IframeResizer
           log
           src={this.props.url}        
           scrolling={true}
           width="100%" height="400" allow="encrypted-media"
-        />
+        /> */}
       </>
     )
   }

@@ -34,7 +34,7 @@ import { Contract } from '@ethersproject/contracts'
 import { TransactionToast } from './TransactionToast'
 import { EMBLEM_API, contractAddresses, SIG_API, EMBLEM_V2_API, curatedContracts } from '../constants'
 import { useContract } from '../hooks'
-import { CHAIN_ID_NAMES, fromContractValue, initCuratedContracts, toContractValue } from '../utils'
+import { CHAIN_ID_NAMES, fromContractValue, initCuratedContracts, sdk, toContractValue } from '../utils'
 import CryptoJS from 'crypto-js'
 import ReactMarkdown from 'react-markdown'
 import gfm from 'remark-gfm'
@@ -340,6 +340,12 @@ export default function Nft2() {
       },
     })
     const jsonData = await response.json()
+    let jumpable = await sdk.generateJumpReport(account, true)
+    jumpable = Object.keys(jumpable).map(item => ({
+      ...jumpable[item],
+      tokenId: item
+    }))
+    // jumpable = Object.keys(jumpable).filter(item=>{return jumpable[item].tokenId == tokenId})
     setRawMetadata(jsonData)
     setOfflineError(false)
     await saveVaultToDatabase(jsonData)    
@@ -1282,6 +1288,9 @@ export default function Nft2() {
                             {mine || claimedBy == account ? (
                               <JsonDownloadLink data={rawMetadata} filename={`EmblemVault-${tokenId}.json`} />
                             ) : null}
+                            {/* {mine || claimedBy != account ? (
+                              <Button width="100%" mt={5} >Migrate</Button>
+                            ) : null} */}
 
                             {(!live || status == 'claimed') && to == account && vaultChainId == chainId && !showMakingVaultMsg && vaultValues.length < 1 ? (
                               <Button width="100%" mt={5} onClick={deleteVault}>Delete Vault </Button>

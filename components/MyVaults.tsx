@@ -1,4 +1,4 @@
-import { Box, Flex, Text, Link, Image, Stack, Spinner, useColorMode, Button } from '@chakra-ui/react'
+import { Box, Flex, Text, Link, Image, Stack, Spinner, useColorMode, Button, Checkbox, Tooltip } from '@chakra-ui/react'
 import Loader from 'react-loader'
 import Refreshing from './Refreshing'
 import { useRouter } from 'next/router'
@@ -7,15 +7,20 @@ import { useEffect, useState } from 'react'
 import { EMBLEM_API, curatedContracts } from '../constants'
 import InfiniteScroll from 'react-infinite-scroll-component';
 import Embed from './Embed'
-import { initCuratedContracts } from '../utils'
+import { initCuratedContracts, sdk } from '../utils'
 import { getCachedVaults, saveVaultsToDatabase } from '../db'
 
 export default function MyVaults() {
   const { query } = useRouter()
+  // const [ townHall, setTownHall] = useState(query.townHall || false)
+  const [showMigratable, setIsShowMigratable] = useState(false);
+  const [showJumpable, setIsShowJumpable] = useState(false);
+  const [showMintable, setIsShowMintable] = useState(false);
   const [pagePosition, setPagePosition] = useState(Number(query.start) || 0)
   const [curatedType, setCuratedType] = useState('live')
   const { account, chainId } = useWeb3React()
   const [vaults, setVaults] = useState([])
+  const [vaultsCache, setVaultsCache] = useState([])
   const [liveVaults, setLiveVaults] = useState([])
   const [unMintedVaults, setUnMintedVaults] = useState([])
   const [claimedVaults, setClaimedVaults] = useState([])
@@ -33,7 +38,7 @@ export default function MyVaults() {
   const [unMintedCollections, setUnMintedCollections] = useState([])
   const [claimedCollections, setClaimedCollections] = useState([])
   const [curatedContracts, setCuratedContracts] = useState([])
-  const [showJump, setShowHJump] = useState(query.jump == "true")
+  // const [showJump, setShowHJump] = useState(query.jump == "true")
   const [dbStale, setDbStale] = useState(true)
   
   const PAGE_SIZE = 20
@@ -59,14 +64,14 @@ export default function MyVaults() {
     return vaultData.image
   }
 
-  const allowedJumpContracts = (vaultData) => {
-    // return initCuratedContracts().then((data)=>{
-      let foundContracts = curatedContracts.filter(contract => 
-        contract.allowedJump && contract.allowedJump(vaultData.ownership, [])
-      );
-      return foundContracts;
-    // })
-  }
+  // const allowedJumpContracts = (vaultData) => {
+  //   // return initCuratedContracts().then((data)=>{
+  //     let foundContracts = curatedContracts.filter(contract => 
+  //       contract.allowedJump && contract.allowedJump(vaultData.ownership, [])
+  //     );
+  //     return foundContracts;
+  //   // })
+  // }
 
   const contractInfo = (vaultData) => {
     if (vaultData.ownership && vaultData.ownership.category == 'erc721Legacy') {
@@ -198,9 +203,9 @@ export default function MyVaults() {
 
   const handleNewNavigationClick = (path)=>{
     if (!address) {
-      location.href = location.origin + location.pathname + "?type=" + path + (showJump? '&jump=true': '')
+      location.href = location.origin + location.pathname + "?type=" + path
     } else {
-      location.href = location.origin + location.pathname + "?address=" + address + "&type=" + path + (showJump? '&jump=true': '')
+      location.href = location.origin + location.pathname + "?address=" + address + "&type=" + path
     }
   }
 
@@ -238,6 +243,115 @@ export default function MyVaults() {
       <Button isDisabled={showOrHideNavLink('unminted')} m={2} variant="ghost" onClick={()=>{handleNewNavigationClick('unminted')}}>
           Not Minted
       </Button>
+      {
+        account && showOrHideNavLink('unclaimed') ? (
+          <>
+            <Button colorScheme={!showMigratable ? "gray" : "blue"} m={2} variant="ghost" onClick={async ()=>{
+              setIsShowMigratable(true);
+              let migratable = await sdk.generateMigrateReport(address || account, true)
+              migratable = Object.keys(migratable).map(item => ({
+                tokenId: item,
+                info: migratable[item]
+              }))
+              // const migratableVaults: any = (vaultsCache.length > 0? vaultsCache: vaults).filter(vault => migratable.some(mig => mig.tokenId === vault.tokenId && mig.info.to.length > 0));
+              const migratableVaults: any = (vaultsCache.length > 0 ? vaultsCache : vaults).filter(vault => {
+                return (
+                  migratable.some(mig => {
+                    if(mig.tokenId === vault.tokenId && mig.info.to.length > 0 && vault.network == "mainnet" && mig.info.to != "Embels") {                     
+                      vault.move = mig.info;
+                      return true;
+                    }
+                    return false;
+                  })                
+                )                  
+              });
+              if (!showMigratable) {              
+                vaultsCache.length == 0 ? setVaultsCache(vaults) : null
+                setVaults(migratableVaults)
+                setIsShowMigratable(true)
+                setIsShowJumpable(false)
+              } else if (migratableVaults.length > 0) {
+                setVaults(vaultsCache)
+                setVaultsCache([])
+                setIsShowMigratable(false)
+              }
+            }}>
+              Migrate
+            </Button>
+            <Button colorScheme={!showJumpable ? "gray" : "blue"} m={2} variant="ghost" onClick={async ()=>{
+              setIsShowJumpable(true);
+              let jumpable = await sdk.generateJumpReport(address || account, true)
+              jumpable = Object.keys(jumpable).map(item => ({
+                tokenId: item,
+                info: jumpable[item]
+              }))
+              // const jumpableVaults: any = (vaultsCache.length > 0 ? vaultsCache: vaults).filter(vault => jumpable.some(mig => mig.tokenId === vault.tokenId && mig.info.to.length > 0));
+              const jumpableVaults: any = (vaultsCache.length > 0 ? vaultsCache : vaults).filter(vault => {
+                return (
+                  jumpable.some(mig => {
+                    if(mig.tokenId === vault.tokenId && mig.info.to.length > 0) {
+                      vault.move = mig.info;
+                      return true;
+                    }
+                    return false;
+                  })                
+                )                  
+              });
+              if (!showJumpable) {              
+                vaultsCache.length == 0 ? setVaultsCache(vaults) : null
+                setVaults(jumpableVaults)
+                setIsShowJumpable(true)
+                setIsShowMigratable(false)
+              } else if (jumpableVaults.length > 0) {
+                setVaults(vaultsCache)
+                setVaultsCache([])
+                setIsShowJumpable(false)
+              }
+            }}>
+              Jump
+            </Button>
+          </>
+        ) : null
+      }
+      {
+        account && showOrHideNavLink('unminted') ? (
+          <>
+            <Button colorScheme={!showMintable ? "gray" : "blue"} m={2} variant="ghost" onClick={async ()=>{
+              setIsShowMintable(true);
+              let mintable = await sdk.generateMintReport(address || account, true)
+              mintable = Object.keys(mintable).map(item => ({
+                tokenId: item,
+                info: mintable[item]
+              })).map(item => ({...item, info: {...item.info, to: [item.info.to]}})); // make single mintable to, into arr
+              const mintableVaults: any = (vaultsCache.length > 0 ? vaultsCache : vaults).filter(vault => {
+                return (
+                  mintable.some(mig => {
+                    if(mig.tokenId === vault.tokenId && mig.info.to.length > 0) {
+                      vault.move = mig.info;
+                      return true;
+                    }
+                    return false;
+                  })                
+                )                  
+              });
+
+              if (!showMintable) {              
+                vaultsCache.length == 0 ? setVaultsCache(vaults) : null
+                setVaults(mintableVaults)
+                setIsShowMintable(true)
+                setIsShowJumpable(false)
+                setIsShowMigratable(false)
+              } else if (mintableVaults.length > 0) {
+                setVaults(vaultsCache)
+                setVaultsCache([])
+                setIsShowMintable(false)
+              }
+            }}>
+              Bulk Mint
+              </Button>
+          </>
+        ): null
+      }
       {/* <Button isDisabled={showOrHideNavLink('created')} m={2} variant="ghost" onClick={()=>{handleNewNavigationClick('created')}}>
           Created by me
       </Button>
@@ -314,7 +428,7 @@ export default function MyVaults() {
             pieces.pop()
             let isERC721a = vault.items && vault.items[0].targetContract && vault.items[0].targetContract.collectionType == 'ERC721a'? true : false
             let isLiveCurated = curatedType == 'live' && vaultType == 'curated'
-            let url = location.origin + pieces.join('/') + '/nft'+(vaultType == 'curated' || vault.targetContract ? '2': '')+'?id=' + (isLiveCurated? (isERC721a ? vault.items[0].tokenId: vault.targetTokenId) : vault.tokenId) 
+            let url = location.origin + pieces.join('/') + '/nft'+(vaultType == 'curated' || vault.targetContract ? '2': '')+'?id=' + (isLiveCurated? (isERC721a ? vault.items[0].tokenId: vault.targetTokenId) : vault.tokenId)
             const vaultContainerSettings = {
               flex: '1',
               minW: '200px',
@@ -364,22 +478,26 @@ export default function MyVaults() {
                     </Stack>
                   </Box>                
                 </Link>
-                
+                <Tooltip label="Bulk Coming Soon" fontSize="md">
                   <Box className="NFT newest" key={index} {...infoContainerSettings} >
-                  <Text fontSize={'small'} fontWeight="semibold" textAlign="left" pl={2} isTruncated={true}> Network: {vault.network == "mainnet"? "Ethereum": vault.network == "matic"? "Polygon": vault.network} </Text>
-                  <Text fontSize={'small'} fontWeight="semibold" textAlign="left" pl={2} isTruncated={true}> Contract: {contractInfo(vault)} </Text>
-                  {showJump && allowedJumpContracts(vault).length > 0 ? (
-                    <>                      
-                      {allowedJumpContracts(vault).map((contract, index) => {
-                        return (
-                          <Link fontSize={'x-small'} textAlign="left" pl={2}> Circuit jump to: {contract.name} Collection</Link>
-                        )
-                      })}
-                    </>
-                  ) : null}
+                    
+                      <Text fontSize={'small'} fontWeight="semibold" textAlign="left" pl={2} isTruncated={true}> Network: {vault.network == "mainnet"? "Ethereum": vault.network == "matic"? "Polygon": vault.network} </Text>
+                      
+                      <Text fontSize={'small'} fontWeight="semibold" textAlign="left" pl={2} isTruncated={true}> Contract: {contractInfo(vault)} </Text>
+                      {
+                        vault.move && (showMintable || showMigratable || showJumpable) ? (
+                          
+                          vault.move.to.map((to, index) => (
+                            
+                              <Checkbox mt={2} ml={2} isChecked={true} size="sm">
+                                <Text fontSize={'small'} fontWeight="semibold" textAlign="left" pl={2} isTruncated={true}> {showOrHideNavLink('unminted') ? 'Mint To: ' : showJumpable? 'Jump To: ': 'Migrate To: '} {to} </Text>
+                              </Checkbox>
+                            
+                          ))
+                        ): null}
                   
-                </Box>
-                
+                  </Box>
+                </Tooltip>
                 
               </Box>
             )

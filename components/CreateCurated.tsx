@@ -21,14 +21,25 @@ import { useRouter } from 'next/router'
 import Loader from 'react-loader'
 import { useWeb3React } from '@web3-react/core'
 import { useEffect, useState } from 'react'
-import { EMBLEM_API, curatedAssets, EMBLEM_V2_API, ORD_API } from '../constants'
+import { EMBLEM_API, EMBLEM_V2_API, ORD_API } from '../constants'
 import { Checkbox } from '@material-ui/core'
-import { initCuratedContracts } from '../utils'
+import { initCuratedContracts, sdk } from '../utils'
 import DetailedCreate from './partials/DetailedCreate'
 import Embed from './Embed'
 
 let tokenId = null
-
+let curatedAssets = {xcp:[]}
+let NFT_DATA = sdk.getAllAssetMetadata()
+NFT_DATA.forEach(item=>{
+  item.name = item.assetName
+  if (!curatedAssets.xcp[item.projectName]) {
+    curatedAssets.xcp[item.projectName] = [];
+  }
+  if (!curatedAssets.xcp[item.projectName].includes(item)) {
+    curatedAssets.xcp[item.projectName].push(item);
+  }
+})
+console.log('NFT_DATA', NFT_DATA)
 export default function CreateCurated(props: any) {
   const { query } = useRouter()
   const [tabIndex, setTabIndex] = useState(0)
@@ -203,9 +214,14 @@ export default function CreateCurated(props: any) {
                           </Select>
                           {targetContract.loadTypes.includes('select') && targetContract.name != "Embels" ? (
                               <Select id="asset-selector" w="100%" value={targetAsset.name}
-                                onChange={(e)=>{
+                                onChange={async (e)=>{
                                   setMintDisabled(false)
-                                  setTargetAsset(curatedAssets[targetContract.collectionChain][targetContract.name].filter(item=>{return item.name == e.target.value})[0])
+                                  let targetAsset = curatedAssets[targetContract.collectionChain][targetContract.name].filter(item=>{return item.name == e.target.value})[0]
+                                  let urlReport: any = await sdk.contentTypeReport(targetAsset.image)
+                                  if (!urlReport.valid) {
+                                    targetAsset.image = `https://xchain.io/img/cards/${targetAsset.image}`
+                                  }
+                                  setTargetAsset(targetAsset) 
                                 }}
                               >
                                 <option value="" >---Choose One---</option>
