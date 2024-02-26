@@ -87,7 +87,7 @@ export default class App extends NextApp {
           {/* <script src="https://cdn.trackjs.com/agent/v3/latest/t.js"></script> */}
           
         </Head>
-        <Script src="/jquery.js" />
+        <Script src="/jquery.js" strategy={'beforeInteractive'}/>
         <Web3ReactProvider getLibrary={getLibrary}>
           <ThemeProvider theme={theme}>
             <CSSReset />
