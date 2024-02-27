@@ -200,6 +200,11 @@ export default function CreateCurated(props: any) {
                             onChange={(e)=>{
                               let contractData:any = curatedContracts.filter(item=>{return item.name == e.target.value})[0]
                               console.log('------', contractData)
+                              if (chainId == 5) {
+                                delete contractData["1"]
+                              } else {
+                                delete contractData["5"]
+                              }
                               setTargetContract(contractData)
                             }}
                           >

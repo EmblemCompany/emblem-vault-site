@@ -73,6 +73,7 @@ export default function Nft2() {
   const [price, setPrice] = useState(null)
   const [isCovalApproved, setIsCovalApproved] = useState(false)
   const [approved, setApproved] = useState(false)
+  const [accountOverride, setAccountOverride] = useState(query.address || false)
   const [mintPassword, setMintPassword] = useState(query.key)
   const [debugMode, setDebugMode] = useState(query.debug == "true")
   const [debugFeedback, setDebugFeedback] = useState(null)
@@ -163,7 +164,7 @@ export default function Nft2() {
   }
 
   const getVaultContract = (address = null) =>{
-    return new Contract(address || contractAddresses.emblemVault[chainId], contractAddresses.emblemAbi, library.getSigner(account).connectUnchecked())
+    return new Contract(address || contractAddresses.emblemVault[chainId], contractAddresses.emblemAbi, library.getSigner((accountOverride || account)).connectUnchecked())
   }
 
   const getCuratedContract = (address = null) =>{
@@ -193,7 +194,7 @@ export default function Nft2() {
   }
 
   const deleteVault = () =>{
-    library.getSigner(account)
+    library.getSigner((accountOverride || account))
       .signMessage('Delete: ' + tokenId)
       .then((signature) => {
         console.log("sig", signature)
@@ -221,7 +222,7 @@ export default function Nft2() {
 
   const lazyMintCurated = () =>{
     setState({ loaded: false })
-    library.getSigner(account)
+    library.getSigner((accountOverride || account))
       .signMessage('Curated Minting: ' + tokenId)
       .then((signature) => {
         console.log("sig", signature)
@@ -263,7 +264,7 @@ export default function Nft2() {
   
   const lazyMintCuratedWithEth = () =>{
     setState({ loaded: false })
-    library.getSigner(account)
+    library.getSigner((accountOverride || account))
       .signMessage(`Curated Minting: ${tokenId.toString()}`)
       .then((signature) => {
         fetch(EMBLEM_V2_API + '/mint-curated', {
@@ -281,8 +282,9 @@ export default function Nft2() {
           } else {
             setCuratedMintingParameters(data)
             // alert(data._price)
-            ;(quoteContract as Contract)
-              .quoteExternalPrice(account, data._price/1000000).then((ethPrice)=>{
+            
+            // ;(quoteContract as Contract).quoteExternalPrice((accountOverride || account), data._price/1000000).then((ethPrice)=>{
+                let ethPrice = chainId == 1? await (quoteContract as Contract).quoteExternalPrice((accountOverride || account), data._price/1000000): BigNumber.from(0)
                 let ethToSend = ethPrice.mul(BigNumber.from(10).pow(6))
                 console.log("--------   ------", data._nftAddress, data._price, data._to, data._tokenId, data._nonce, data._signature, data.serialNumber, 1, {value: ethToSend})
                 ;(vaultHandlerContract as Contract)
@@ -301,7 +303,7 @@ export default function Nft2() {
                       setMinting(false)
                       setState({ loaded: true })
                   })  
-            })
+            // })
           }
         })
       }).catch((error: ErrorWithCode) => {
@@ -340,7 +342,7 @@ export default function Nft2() {
       },
     })
     const jsonData = await response.json()
-    let jumpable = await sdk.generateJumpReport(account, true)
+    let jumpable = await sdk.generateJumpReport((accountOverride || account), true)
     jumpable = Object.keys(jumpable).map(item => ({
       ...jumpable[item],
       tokenId: item
@@ -498,11 +500,11 @@ export default function Nft2() {
   }
 
   const savePasswordToLocalStorage = () => {
-    localStorage.setItem(account + '_' + chainId + '_' + tokenId + '_mintPassword', transferPassword) // Save new state for later
+    localStorage.setItem((accountOverride || account) + '_' + chainId + '_' + tokenId + '_mintPassword', transferPassword) // Save new state for later
   }
 
   const loadPasswordFromLocalStorage = () => {
-    let storedPw = localStorage.getItem(account + '_' + chainId + '_' + tokenId + '_mintPassword')
+    let storedPw = localStorage.getItem((accountOverride || account) + '_' + chainId + '_' + tokenId + '_mintPassword')
     storedPw && acceptable ? setMintPassword(storedPw) : null //setMintPassword(null)
   }
 
@@ -567,10 +569,10 @@ export default function Nft2() {
         setPrice(250 * Math.pow(10, decimals))
         setAllowance(
           await covalContract
-            .allowance(account, contractAddresses.vaultHandlerV8[chainId])
+            .allowance((accountOverride || account), contractAddresses.vaultHandlerV8[chainId])
             .then((balance: { toString: () => string }) => balance.toString())
         )
-        setBalance(await covalContract.balanceOf(account).then((balance: { toString: () => string }) => balance.toString()))
+        setBalance(await covalContract.balanceOf((accountOverride || account)).then((balance: { toString: () => string }) => balance.toString()))
         
         if (Number(allowance) >= Number(price)) {
           setIsCovalApproved(true)
@@ -580,9 +582,9 @@ export default function Nft2() {
         if (allowedContracts.name) {
           if (allowedContracts.collectionType == 'ERC1155') {
             
-            let balanceOf = await emblemContract.balanceOf(account, allowedContracts.tokenId).then((balance: { toString: () => string }) => balance.toString())
+            let balanceOf = await emblemContract.balanceOf((accountOverride || account), allowedContracts.tokenId).then((balance: { toString: () => string }) => balance.toString())
             
-            _owner = Number(balanceOf) > 0 ? account : "0x0000000000000000000000000000000000000000"            
+            _owner = Number(balanceOf) > 0 ? (accountOverride || account) : "0x0000000000000000000000000000000000000000"            
             if (Number(balanceOf) > 0) {
               setOwnedCuratedBalance(balanceOf)
             }
@@ -608,18 +610,18 @@ export default function Nft2() {
       
       let isApproved
       // if (targetContract[chainId]) {
-      //   isApproved = await emblemContract.isApprovedForAll(account, contractAddresses.vaultHandlerV8[chainId])
+      //   isApproved = await emblemContract.isApprovedForAll((accountOverride || account), contractAddresses.vaultHandlerV8[chainId])
       //   setApproved(isApproved)
       // } else {
-      //   isApproved = await emblemContract.isApprovedForAll(account, contractAddresses.vaultHandler[chainId])
+      //   isApproved = await emblemContract.isApprovedForAll((accountOverride || account), contractAddresses.vaultHandler[chainId])
       //   setApproved(isApproved)
       // }
       // if (targetContract.collectionType == 'ERC721a'){
         setApproved(true)
       // }
       setOwner(_owner)
-      setMine(_owner === account || (to === account && _owner === "0x0000000000000000000000000000000000000000"))
-      setMineUnMinted(to === account && _owner === "0x0000000000000000000000000000000000000000")
+      setMine(_owner === (accountOverride || account) || (to === (accountOverride || account) && _owner === "0x0000000000000000000000000000000000000000"))
+      setMineUnMinted(to === (accountOverride || account) && _owner === "0x0000000000000000000000000000000000000000")
       loadPasswordFromLocalStorage()
     }
     
@@ -627,7 +629,7 @@ export default function Nft2() {
 
   const onRenew = async (name) => { 
     library
-      .getSigner(account)
+      .getSigner((accountOverride || account))
       .signMessage('Renew: ' + tokenId)
       .then((signature) => {
         let address = vaultAddresses.filter(address=>{ return address.coin == 'NMC'})[0].address
@@ -661,7 +663,7 @@ export default function Nft2() {
     }
 
     library
-      .getSigner(account)
+      .getSigner((accountOverride || account))
       .signMessage('Claim: ' + (targetContract[chainId]? serialNumber: tokenId))
       .then((signature) => {
         setState({loaded: false})
@@ -700,8 +702,8 @@ export default function Nft2() {
     //   secretKey: phrase,
     //   password: '',
     // })
-    // console.log('------ stacks account -', wallet.accounts[0])
-    // const account = wallet.accounts[0];
+    // console.log('------ stacks (accountOverride || account) -', wallet.(accountOverride || account)s[0])
+    // const (accountOverride || account) = wallet.accounts[0];
     // address.key = account.stxPrivateKey
     // return address.key
     return 'contact emblem with this error'
@@ -709,7 +711,7 @@ export default function Nft2() {
 
   const handleHideAsset = async (coin) => {
     library
-      .getSigner(account)
+      .getSigner((accountOverride || account))
       .signMessage('HideAsset: ' + tokenId)
       .then((signature) => {
         hideAsset(tokenId, coin.coin, coin.address, coin.name, signature, ()=>{
@@ -744,7 +746,7 @@ export default function Nft2() {
 
   const handleOwnedEmbed = async () => {
     library
-      .getSigner(account)
+      .getSigner((accountOverride || account))
       .signMessage('Embed: ' + tokenId)
       .then((signature) => {
         decryptEmbed(signature, tokenId, (result) => {
@@ -835,7 +837,7 @@ export default function Nft2() {
   })
 
   useEffect(() => {
-    if((!localStorage.getItem('offline') || localStorage.getItem('offline') === 'false') && account) {
+    if((!localStorage.getItem('offline') || localStorage.getItem('offline') === 'false') && (accountOverride || account)) {
       getVault()
     }
   }, [])
@@ -848,13 +850,13 @@ export default function Nft2() {
   }, [dbStale]);
 
   useEffect(() => {
-    (account && chainId && vaultChainId && chainId == vaultChainId) || ((query.noLayout && query.noLayout == 'true') || (query.slideshowOnly && query.slideshowOnly == 'true')) ? getContractStates() : null
+    ((accountOverride || account) && chainId && vaultChainId && chainId == vaultChainId) || ((query.noLayout && query.noLayout == 'true') || (query.slideshowOnly && query.slideshowOnly == 'true')) ? getContractStates() : null
   })
 
   useEffect(() => {
-    if (account && chainId && vaultChainId && debugMode && owner) {
+    if ((accountOverride || account) && chainId && vaultChainId && debugMode && owner) {
       let debugInfo = `DEBUG Report for ${tokenId}:\n\n`
-      debugInfo += `Props:\n   owner: ${owner}\n   mine: ${mine}\n   created by: ${to}\n   account: ${account}\n   vaultChainId: ${vaultChainId}\n   chainId: ${chainId}\n   sealed: ${sealed}\n   approved: ${approved}\n   live: ${live}\n   mineUnMinted: ${mineUnMinted}\n   status: ${status}\n   mintLockedForever: ${mintLockedForever}\n`
+      debugInfo += `Props:\n   owner: ${owner}\n   mine: ${mine}\n   created by: ${to}\n   account: ${(accountOverride || account)}\n   vaultChainId: ${vaultChainId}\n   chainId: ${chainId}\n   sealed: ${sealed}\n   approved: ${approved}\n   live: ${live}\n   mineUnMinted: ${mineUnMinted}\n   status: ${status}\n   mintLockedForever: ${mintLockedForever}\n`
       debugInfo += `Can Unlock Before Mint: ${vaultChainId === chainId && mineUnMinted && status != 'claimed' && !mintLockedForever}\n`
       debugInfo += `Can Curated Mint: ${canCuratedMint}\n`
       setDebugMode(false)
@@ -1057,7 +1059,7 @@ export default function Nft2() {
                     <Stack align="center">
                       <Box mt="2" ml="4" lineHeight="tight">
                         <Stack>                    
-                        { mine && vaultChainId == chainId ? (
+                        { vaultChainId == chainId ? (
                             <Text fontSize="xs">
                             
                               <Link href={"./vaults?address="+owner}>
@@ -1113,7 +1115,7 @@ export default function Nft2() {
                                       vaultValues.map((coin) => {
                                         return (  
                                           <Stack> 
-                                            <CoinBalance colorMode={colorMode} coin={coin} mine={(status === 'claimed' && claimedBy === account) || mine} onRenew={onRenew} hideAsset={targetAsset.name? false: handleHideAsset}/>
+                                            <CoinBalance colorMode={colorMode} coin={coin} mine={(status === 'claimed' && claimedBy === (accountOverride || account)) || mine} onRenew={onRenew} hideAsset={targetAsset.name? false: handleHideAsset}/>
                                           </Stack>
                                         )
                                       })
@@ -1149,7 +1151,7 @@ export default function Nft2() {
                               {backingValues.map(backing=>{
                                 return (
                                   <HStack width={'100%'}>
-                                    <Text color={backing.owner == account? "green":""} fontSize={'small'} width={'60%'} >{ backing.owner == account? 'My': '' } Vault: <Link href={backing.internalVault} target="_blank">{backing.tokenId}</Link></Text>
+                                    <Text color={backing.owner == (accountOverride || account)? "green":""} fontSize={'small'} width={'60%'} >{ backing.owner == (accountOverride || account)? 'My': '' } Vault: <Link href={backing.internalVault} target="_blank">{backing.tokenId}</Link></Text>
                                     <Text fontSize={'small'} float={'right'} width={'30%'} ><Link href={backing.explorer} target="_blank">Explorer</Link></Text>
                                   </HStack>                              
                                 )
@@ -1252,7 +1254,7 @@ export default function Nft2() {
                           </>
                       ) : null}
                       
-                      {live && !(status === 'claimed') && account && vaultChainId === chainId && mine && !sealed && approved ? (
+                      {live && !(status === 'claimed') && (accountOverride || account) && vaultChainId === chainId && mine && !sealed && approved ? (
                         <Box display="flex" alignItems="baseline" justifyContent="space-between" mt="4">
                           <Button
                             width="100%"
@@ -1264,7 +1266,7 @@ export default function Nft2() {
                             {claiming ? 'Claiming ...' : `Unlock Vault (Get Private Keys)`}
                           </Button>
                         </Box>
-                      ) : (vaultChainId === chainId && ((status == 'claimed' || mintLockedForever) && (claimedBy === account || mine))) ? (
+                      ) : (vaultChainId === chainId && ((status == 'claimed' || mintLockedForever) && (claimedBy === (accountOverride || account) || mine))) ? (
                         <Box display="flex" alignItems="baseline" justifyContent="space-between" mt="4">
                           <Button width="100%" onClick={handleSign}>
                           Get Keys
@@ -1285,14 +1287,14 @@ export default function Nft2() {
                               </Box>
                             ) : null}
 
-                            {mine || claimedBy == account ? (
+                            {mine || claimedBy == (accountOverride || account) ? (
                               <JsonDownloadLink data={rawMetadata} filename={`EmblemVault-${tokenId}.json`} />
                             ) : null}
-                            {/* {mine || claimedBy != account ? (
+                            {/* {mine || claimedBy != (accountOverride || account) ? (
                               <Button width="100%" mt={5} >Migrate</Button>
                             ) : null} */}
 
-                            {(!live || status == 'claimed') && to == account && vaultChainId == chainId && !showMakingVaultMsg && vaultValues.length < 1 ? (
+                            {(!live || status == 'claimed') && to == (accountOverride || account) && vaultChainId == chainId && !showMakingVaultMsg && vaultValues.length < 1 ? (
                               <Button width="100%" mt={5} onClick={deleteVault}>Delete Vault </Button>
                             ) : null}
 
@@ -1359,8 +1361,8 @@ export default function Nft2() {
                 setHash(null)
                 setStatus('claimed')
                 setClaiming(false)
-                setClaimedBy(account)
-                let myCuratedRecord = backingValues.length > 0 ? backingValues.find(item=>{return item.owner == account}): {tokenId : (internalTokenId || tokenId)}
+                setClaimedBy((accountOverride || account))
+                let myCuratedRecord = backingValues.length > 0 ? backingValues.find(item=>{return item.owner == (accountOverride || account)}): {tokenId : (internalTokenId || tokenId)}
                 location.href = location.origin + '/nft2?id=' + (myCuratedRecord.tokenId)
               } else if (preTransfering) {
                 savePasswordToLocalStorage()

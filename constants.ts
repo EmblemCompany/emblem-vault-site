@@ -780,7 +780,7 @@ export const contractAddresses = {
   vaultHandlerV8: {
     1: "0x23859b51117dbFBcdEf5b757028B18d7759a4460",
     4: "0xF2eCdFa77C3c8Cabf913529D95081DCB2DE314ec",
-    5: '0xc15235d210c1b1CdA8643a5eA37687E241B031b0',
+    5: '0xfa0C5380c53d3428c66DbD8F09036D7b13FB7130',
     1337: "0xfc3A4BBfD522668342bCaDf273a94A46DCe25439",
     1313161554: '0xeDb2AC2BfD8d026E4d6C75a04548423936512135',
   },
@@ -790,7 +790,8 @@ export const contractAddresses = {
   erc721Abi: ERC721,
   erc1155Abi: ERC1155,
   mintVaultQuote: {
-    1: "0xE5dec92911c78069d727a67C85936EDDbc9B02Cf"
+    1: "0xE5dec92911c78069d727a67C85936EDDbc9B02Cf",
+    5: "0x35A6BD061cF2d3BA63c2a6B5ca515B9167e50502"
   },
   mintVaultQuoteAbi: mintVaultQuoteAbi,
   erc721aAbi: ERC721a,

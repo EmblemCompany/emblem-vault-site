@@ -28,9 +28,10 @@ import { COLOR, DEFAULT_DEADLINE, DEFAULT_SLIPPAGE, QueryParameters } from '../c
 import { useBodyKeyDown } from '../hooks'
 import { useApproveMax, useDeadline, useSlippage, useFirstToken, useSecondToken } from '../context'
 import { deleteDB } from '../db'
+import { sdk } from '../utils'
 
 export default function Settings({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }): JSX.Element {
-  const { chainId } = useWeb3React()
+  const { chainId, account } = useWeb3React()
   const { colorMode, toggleColorMode } = useColorMode()
   const { pathname } = useRouter()
 
@@ -45,7 +46,12 @@ export default function Settings({ isOpen, onClose }: { isOpen: boolean; onClose
   const [secondToken] = useSecondToken()
 
   let permalink: string | null = null
-  
+  async function refreshLegacy() {
+    if (account) {
+      await sdk.loadWeb3()
+      await sdk.refreshLegacyOwnership(window.web3, account)
+    }
+  }
   if (typeof chainId === 'number' && (firstToken || secondToken) && (pathname === '/buy' || pathname === '/sell')) {
     const permalinkParameters = {
       [QueryParameters.CHAIN]: chainId,
@@ -110,7 +116,7 @@ export default function Settings({ isOpen, onClose }: { isOpen: boolean; onClose
               />
             </Stack>
             <Stack direction="row" justify="space-between">
-              <Link textAlign="left"isTruncated={true} onClick={async ()=>{await deleteDB()}} > Reset Cache </Link>
+              <Link textAlign="left"isTruncated={true} onClick={async ()=>{await deleteDB(); await refreshLegacy()}} > Reset Cache </Link>
             </Stack>
             <Stack direction="row" justify="space-between">
                 <Text>Offline Mode</Text>

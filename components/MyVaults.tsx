@@ -1,14 +1,17 @@
-import { Box, Flex, Text, Link, Image, Stack, Spinner, useColorMode, Button, Checkbox, Tooltip } from '@chakra-ui/react'
+import { Box, Flex, Text, Link, Image, Stack, Spinner, useColorMode, Button, Checkbox, Tooltip, Input } from '@chakra-ui/react'
 import Loader from 'react-loader'
 import Refreshing from './Refreshing'
 import { useRouter } from 'next/router'
 import { useWeb3React } from '@web3-react/core'
 import { useEffect, useState } from 'react'
-import { EMBLEM_API, curatedContracts } from '../constants'
+import { EMBLEM_API, EMBLEM_V2_API, contractAddresses, curatedContracts } from '../constants'
 import InfiniteScroll from 'react-infinite-scroll-component';
 import Embed from './Embed'
 import { initCuratedContracts, sdk } from '../utils'
 import { getCachedVaults, saveVaultsToDatabase } from '../db'
+import { useContract } from '../hooks'
+import { Contract } from '@ethersproject/contracts'
+
 
 export default function MyVaults() {
   const { query } = useRouter()
@@ -16,9 +19,10 @@ export default function MyVaults() {
   const [showMigratable, setIsShowMigratable] = useState(false);
   const [showJumpable, setIsShowJumpable] = useState(false);
   const [showMintable, setIsShowMintable] = useState(false);
+  const [bulk, setBulk] = useState(query.bulk == 'true')
   const [pagePosition, setPagePosition] = useState(Number(query.start) || 0)
   const [curatedType, setCuratedType] = useState('live')
-  const { account, chainId } = useWeb3React()
+  const { account, chainId, library } = useWeb3React()
   const [vaults, setVaults] = useState([])
   const [vaultsCache, setVaultsCache] = useState([])
   const [liveVaults, setLiveVaults] = useState([])
@@ -38,9 +42,11 @@ export default function MyVaults() {
   const [unMintedCollections, setUnMintedCollections] = useState([])
   const [claimedCollections, setClaimedCollections] = useState([])
   const [curatedContracts, setCuratedContracts] = useState([])
+  const [selectedVaults, setSelectedVaults] = useState(new Set());
+  const vaultHandlerContract = useContract(contractAddresses.vaultHandlerV8[chainId], contractAddresses.vaultHandlerV8Abi, true)
   // const [showJump, setShowHJump] = useState(query.jump == "true")
   const [dbStale, setDbStale] = useState(true)
-  
+  const [vaultNumber, setVaultNumber] = useState('')  
   const PAGE_SIZE = 20
 
   const isAllowedJump = (vaultData) => {
@@ -53,7 +59,6 @@ export default function MyVaults() {
   }
 
   const selectVaultImage = (vaultData) => {
-    // curatedType == 'live' && vaultType == 'curated'? vault.items[0].image : vault.image
     if (vaultData.ownership && vaultData.ownership.balances && vaultData.ownership.balances.length > 0 && vaultData.ownership.category == 'erc721') {
       return vaultData.ownership.balances[0].image
     } else if (vaultData.ownership && vaultData.ownership.category == 'erc721a' && vaultData.ownership.balances && vaultData.ownership.balances.length > 0) {
@@ -64,15 +69,6 @@ export default function MyVaults() {
     return vaultData.image
   }
 
-  // const allowedJumpContracts = (vaultData) => {
-  //   // return initCuratedContracts().then((data)=>{
-  //     let foundContracts = curatedContracts.filter(contract => 
-  //       contract.allowedJump && contract.allowedJump(vaultData.ownership, [])
-  //     );
-  //     return foundContracts;
-  //   // })
-  // }
-
   const contractInfo = (vaultData) => {
     if (vaultData.ownership && vaultData.ownership.category == 'erc721Legacy') {
       return "Legacy Vault"
@@ -82,6 +78,64 @@ export default function MyVaults() {
       return "Unknown"
     }
   }
+
+  const bulkMintSelected = () => {
+    let tokenIds = Array.from(selectedVaults)
+    let contracts = tokenIds.map(tokenId => vaults.find(vault => vault.tokenId === tokenId).targetContract.name);
+    library.getSigner(account)
+      .signMessage('Curated Bulk Minting: ' + tokenIds.sort().join(','))
+      .then((signature) => {
+        console.log('Signature:', signature)
+        fetch(EMBLEM_V2_API + '/mint-curated-bulk', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({method: 'buyWithSignedPrice', tokenIds: tokenIds, contracts: contracts, signature: signature, chainId: chainId.toString()}),
+        }).then(async function (response: any){
+          let data = await response.json()
+          ;(vaultHandlerContract as Contract)
+          .buyWithQuoteBulk(data.contractAddresses[0], 0, data.payloads.map(item=>{return item._to}), data.payloads.map(item=>{return item._tokenId}).sort(), data.nonce, data.sig, 0, data.payloads.length, {value: 0})
+          .then(({ hash }: { hash: string }) => {
+
+          })
+        })
+      })
+  }
+
+  // Function to handle individual vault selection toggle
+  const toggleVaultSelection = (tokenId) => {
+    setSelectedVaults(prevSelected => {
+      const newSelected = new Set(prevSelected);
+      if (newSelected.has(tokenId)) {
+        newSelected.delete(tokenId);
+      } else {
+        newSelected.add(tokenId);
+      }
+      return newSelected;
+    });
+  };
+
+  // Function to select/deselect all vaults
+  const toggleSelectAll = () => {
+    if (selectedVaults.size < vaults.length) {
+      setSelectedVaults(new Set(vaults.map(vault => vault.tokenId)));
+    } else {
+      setSelectedVaults(new Set());
+    }
+  };
+
+  // Function to handle vault amount selection
+  const selectVaultAmount = (amount) => {
+    setSelectedVaults(() => {
+      const newSelected = new Set();
+      const vaultsToSelect = vaults.slice(0, amount);
+      vaultsToSelect.forEach(vault => {
+        newSelected.add(vault.tokenId);
+      });
+      return newSelected;
+    });
+  };
 
   const getVaults = async () => {
     try {
@@ -164,15 +218,6 @@ export default function MyVaults() {
     }
   }, [account, acct])
 
-  // const [chain, setChain] = useState(chainId)
-  // useEffect(() => {
-  //   if (chainId && chain != chainId) {
-  //     setChain(chainId)
-  //     setState({ loaded: false })
-  //     getVaults()
-  //   }
-  // }, [chainId, chain])
-
   useEffect(() => {    
     if (dbStale) {
       setDbStale(false)
@@ -180,15 +225,11 @@ export default function MyVaults() {
     }
   }, [dbStale]);
 
-  // const saveVaultsCache = async (loadedVaults) => {
-  //   try {
-  //     // await deleteDB();
-  //     await saveVaults(loadedVaults);
-  //     console.log('Data saved successfully');
-  //   } catch (error) {
-  //     console.error('Error saving data', error);
-  //   }
-  // };
+  // Update effect for version or vaultType changes
+  useEffect(() => {
+    // When vaultType or version changes, clear selections
+    setSelectedVaults(new Set());
+  }, [version, vaultType, showMintable]);
 
   const loadFromDatabase = async () => {
     // setVaults([]);
@@ -348,7 +389,7 @@ export default function MyVaults() {
               }
             }}>
               Bulk Mint
-              </Button>
+            </Button>
           </>
         ): null
       }
@@ -406,6 +447,22 @@ export default function MyVaults() {
     ): null}
     <Loader loaded={state.loaded}>
       {loadingApi ? <Refreshing /> : ''}
+      {showMintable && bulk ? (
+        <Box pl={20}>
+          <Checkbox onChange={toggleSelectAll} isChecked={selectedVaults.size === vaults.length && vaults.length > 0}>
+            Select All
+          </Checkbox>
+          <Input
+            type="number"
+            id="vault-amount"
+            aria-describedby="vault-amount-helper-text"
+            onChange={(e) => selectVaultAmount(e.target.value)}
+          />
+          <Button ml={5} onClick={bulkMintSelected} isDisabled={selectedVaults.size === 0}>
+            Mint {selectedVaults.size} Selected
+          </Button>
+        </Box>
+      ): null}
         <InfiniteScroll                
           className="infinite-scroll"
           scrollableTarget="shannon-container"
@@ -489,10 +546,9 @@ export default function MyVaults() {
                           
                           vault.move.to.map((to, index) => (
                             
-                              <Checkbox mt={2} ml={2} isChecked={true} size="sm">
+                              <Checkbox mt={2} ml={2} size="sm" isChecked={selectedVaults.has(vault.tokenId)} onChange={() => toggleVaultSelection(vault.tokenId)}>
                                 <Text fontSize={'small'} fontWeight="semibold" textAlign="left" pl={2} isTruncated={true}> {showOrHideNavLink('unminted') ? 'Mint To: ' : showJumpable? 'Jump To: ': 'Migrate To: '} {to} </Text>
-                              </Checkbox>
-                            
+                              </Checkbox>                            
                           ))
                         ): null}
                   

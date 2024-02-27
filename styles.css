@@ -82,12 +82,30 @@ body {
   border-radius: 5px;
 }
 
+.NFT-image-small-embed {
+  min-width: 40px;
+  max-width: 40px;
+  min-height: 40px;
+  max-height: 40px;
+  width: auto; /* Allow width to auto-adjust according to aspect ratio */
+  height: auto; /* Allow height to auto-adjust according to aspect ratio */
+  object-fit: contain; /* This will ensure the image is scaled correctly */
+  object-position: left center; /* Align the image to the left, vertically centered */
+  padding: 0px !important;
+}
+
+
 .NFT.newest {
   cursor: pointer;
 }
 
 .NFT-content {
-  transform: translateZ(20px)
+  transform: translateZ(20px);
+  min-width: 250px !important;
+}
+
+.NFT-content img {
+  min-height: 250px !important;
 }
 
 .coin-display-row {

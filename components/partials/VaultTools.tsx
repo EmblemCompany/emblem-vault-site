@@ -41,7 +41,7 @@ function VaultTools({ targetContract }) {
           }
         };
    
-        fetch(`${EMBLEM_V2_API}/refreshMarketplaceMetadata/${targetContract.contracts[1]}/${tokenId}`, options)
+        fetch(`${EMBLEM_V2_API}/refreshMarketplaceMetadata/${targetContract.contracts[chainId]}/${tokenId}`, options)
           .then(response => response.json())
           .then(data => {
            setResults(data)
@@ -81,7 +81,7 @@ function VaultTools({ targetContract }) {
           })
         };
    
-        fetch(`${EMBLEM_V3_API}/v3/cache/${targetContract.contracts["1"]}/refresh`, options)
+        fetch(`${EMBLEM_V3_API}/v3/cache/${targetContract.contracts[tokenId]}/refresh`, options)
           .then(response => response.json())
           .then(data => {
            setResults(data)
@@ -106,9 +106,20 @@ function VaultTools({ targetContract }) {
       const delegateMint = async () => {
         let contractInstance = createCuratedContractInstance()
         let functionId = targetContract.collectionType == 'ERC721a' || targetContract.collectionType == 'ERC721'? "0x40c10f19": "0x8bcef78e"
-        let canDelegateMint = await contractInstance.byPassableFunction("0x23859b51117dbFBcdEf5b757028B18d7759a4460", functionId)
+        let canDelegateMint = await contractInstance.byPassableFunction(contractAddresses.vaultHandlerV8[chainId], functionId)
         if (!canDelegateMint) {
-          await contractInstance.addBypassRule("0x23859b51117dbFBcdEf5b757028B18d7759a4460", functionId, 0)
+          await contractInstance.addBypassRule(contractAddresses.vaultHandlerV8[chainId], functionId, 0)
+        } else {
+          alert("Handler Can Already Mint")
+        }
+      }
+
+      const delegateMintBulk = async () => {
+        let contractInstance = createCuratedContractInstance()
+        let functionId = targetContract.collectionType == 'ERC721a' || targetContract.collectionType == 'ERC721'? "0x4029a3ce": "0x8bcef78e"
+        let canDelegateMint = await contractInstance.byPassableFunction(contractAddresses.vaultHandlerV8[chainId], functionId)
+        if (!canDelegateMint) {
+          await contractInstance.addBypassRule(contractAddresses.vaultHandlerV8[chainId], functionId, 0)
         } else {
           alert("Handler Can Already Mint")
         }
@@ -117,9 +128,9 @@ function VaultTools({ targetContract }) {
       const delegateBurn = async () => {
         let contractInstance = createCuratedContractInstance()
         let functionId = targetContract.collectionType == 'ERC721a' || targetContract.collectionType == 'ERC721'? "0x42966c68": "0xf5298aca"
-        let canDelegateBurn = await contractInstance.byPassableFunction("0x23859b51117dbFBcdEf5b757028B18d7759a4460", functionId)
+        let canDelegateBurn = await contractInstance.byPassableFunction(contractAddresses.vaultHandlerV8[chainId], functionId)
         if (!canDelegateBurn) {
-          await contractInstance.addBypassRule("0x23859b51117dbFBcdEf5b757028B18d7759a4460", functionId, 0)
+          await contractInstance.addBypassRule(contractAddresses.vaultHandlerV8[chainId], functionId, 0)
         } else {
           alert("Handler Can Already Burn")
         }
@@ -169,6 +180,7 @@ function VaultTools({ targetContract }) {
             <Button h="1.75rem" size="sm" m="5px" onClick={bypassOn}>Turn on Bypassability</Button>
             <Button h="1.75rem" size="sm" m="5px" onClick={delegateMint}>Delegate Handler to Mint</Button>
             <Button h="1.75rem" size="sm" m="5px" onClick={delegateBurn}>Delegate Handler to Burn</Button>
+            <Button h="1.75rem" size="sm" m="5px" onClick={delegateMintBulk}>Delegate Handler to Mint Bulk</Button>
 
         </FormControl>
         <FormControl id="results" width="50%" margin="15px">

@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { validImage } from '../utils'
+import { sdk, validImage } from '../utils'
 import { Image } from '@chakra-ui/react'
 import SketchFab from './embed/SketchFab'
 import ShaderToy from './embed/ShaderToy'
@@ -20,9 +20,28 @@ type EmbedProps = {
 }
 
 export class Embed extends Component<EmbedProps> {
+
+  state = {
+    contentType: null,
+    loading: true,
+  };
+
+  async componentDidMount() {
+    try {
+      const contentType = await sdk.contentTypeReport(this.props.url);
+      this.setState({ contentType, loading: false });
+    } catch (error) {
+      console.error("Error fetching content type:", error);
+      this.setState({ loading: false });
+      // Handle error appropriately
+    }
+  }
+
   render() {
     let url = this.props.url || ""
+    const { contentType, loading } = this.state;
     let hash = url.replace("ipfs://","").split("?")[0].split("&")[0]
+    let base64 = url.toLocaleLowerCase().includes("stamp:")? toDataUri(url.split(':')[1]): false
     if (url.includes("ipfs://")) {
       url =  "https://gateway.ipfs.io/ipfs/" + hash
       getIPFSImage(hash)
@@ -32,7 +51,12 @@ export class Embed extends Component<EmbedProps> {
     }
     return (
       <>
-        {url.includes('sketchfab.com/') ? (
+        { contentType && contentType.contentType == "video/mp4" ? (
+          <video
+            src={url}
+            controls
+          />
+        ) : url.includes('sketchfab.com/') ? (
           <SketchFab
             url={url}
           />
@@ -103,12 +127,20 @@ export class Embed extends Component<EmbedProps> {
                 width="250px"
                 maxWidth={"250px"}
               />
-        ) : url.includes('STAMP') ? (
+        ) : base64 ? (
+          <Image
+            h={"100%"}
+            className={this.props.className || "d-block w-100"}
+            src={base64}
+            width="250px"
+            height="300px"
+          />
+        ) : contentType && contentType.valid ? (
           <Image
             p={"20px"}
             h={"100%"}
             className={this.props.className || "d-block w-100"}
-            src={url.replace('STAMP:','data:image/png;base64,')}
+            src={url}
             width="250px"
             height="300px"
           />
@@ -133,6 +165,44 @@ const getIPFSImage = async function(hash){
     preview.src = jsonData
     console.log(jsonData)
   }
+}
+
+function toDataUri(base64Data) {
+  // Decode the base64 string to raw data
+  const raw = atob(base64Data);
+  
+  // Convert the first few bytes to their hexadecimal representation for binary signatures
+  const hexSignature = raw.slice(0, 4).split('').map(c => c.charCodeAt(0).toString(16).padStart(2, '0')).join('');
+
+  let mimeType = 'unknown'; // Default MIME type if unknown
+
+  // Check for binary file types
+  switch (hexSignature.toUpperCase()) {
+      case '89504E47': mimeType = 'image/png'; break;
+      case 'FFD8FFDB':
+      case 'FFD8FFE0':
+      case 'FFD8FFE1': mimeType = 'image/jpeg'; break;
+      case '47494638': mimeType = 'image/gif'; break;
+      case '25504446': mimeType = 'application/pdf'; break;
+      case '66747970': mimeType = 'video/mp4'; break; // "ftyp" in ASCII to hex
+      // Add more binary signatures as needed
+  }
+
+  // Check for text-based file types by examining the start of the text content
+  if (mimeType === 'unknown') {
+      if (raw.startsWith('<svg') || raw.startsWith('<?xml')) {
+          mimeType = 'image/svg+xml';
+      } else if (raw.startsWith('<!DOCTYPE html>') || raw.startsWith('<html')) {
+          mimeType = 'text/html';
+      } else {
+          // Default to plain text if it's not HTML/SVG but the content is text-based
+          mimeType = 'text/plain';
+      }
+  }
+
+  // Construct the data URI
+  const dataUri = `data:${mimeType};base64,${base64Data}`;
+  return dataUri;
 }
 
 export default Embed

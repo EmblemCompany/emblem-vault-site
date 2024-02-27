@@ -141,7 +141,7 @@ export default function Nft() {
   const [rawMetadata, setRawMetadata] = useState({})
   
   const handlerContract = useContract(contractAddresses.vaultHandler[chainId], contractAddresses.vaultHandlerAbi, true)
-  const vaultHandlerContract = useContract(contractAddresses.vaultHandlerV8[chainId], contractAddresses.vaultHandlerV8Abi, true)
+  const vaultHandlerContract = useContract(chainId == 137? contractAddresses.vaultHandler[chainId]: contractAddresses.vaultHandlerV8[chainId], chainId == 137? contractAddresses.vaultHandlerAbi: contractAddresses.vaultHandlerV8Abi, true)
   let emblemContract = useContract(contractAddresses.emblemVault[chainId], contractAddresses.emblemAbi, true)
   const covalContract = useContract(contractAddresses.coval[chainId], contractAddresses.covalAbi, true)
 
@@ -300,7 +300,7 @@ export default function Nft() {
   const handleApproveForall = () => {
     setApproving(true)
     ;(emblemContract as Contract)
-      .setApprovalForAll("0x23859b51117dbFBcdEf5b757028B18d7759a4460"/*contractAddresses.vaultHandler[chainId]*/, true)
+      .setApprovalForAll(contractAddresses.vaultHandler[chainId], true)
       .then(({ hash }: { hash: string }) => {
         setTimeout(() => {
           setHash(hash)
@@ -682,7 +682,7 @@ export default function Nft() {
     async function finish(){
      
       let acceptable = await handlerContract.getPreTransfer(tokenId)
-      let isApproved = await emblemContract.isApprovedForAll(account, contractAddresses.vaultHandlerV8[chainId])
+      let isApproved = await emblemContract.isApprovedForAll(account, chainId == 137? contractAddresses.vaultHandler[chainId]: contractAddresses.vaultHandlerV8[chainId])
       // } else {
       //   isApproved = await emblemContract.isApprovedForAll(account, contractAddresses.vaultHandler[chainId])
       // }
@@ -1260,12 +1260,12 @@ export default function Nft() {
                               </Box>
                             </Box>
                           )}
-                      </TabPanel>
+                        </TabPanel>
                         <TabPanel>
                           <Attributes colorMode={colorMode} attributes={attributes}/>
-                          </TabPanel>
-                        </TabPanels>
-                      </Tabs>
+                        </TabPanel>
+                      </TabPanels>
+                    </Tabs>
                       
                       {!vaultPrivacy ? (
                         <Box display="flex" alignItems="baseline" justifyContent="space-between" mt="4">
@@ -1425,24 +1425,31 @@ export default function Nft() {
                     <Stack mt={5}>
                       <>
                        {mine && state.loaded? (
-                        <>
-                        {!isCovalApproved ?(
                         <ApprovalButton
-                          handler={{address: contractAddresses.vaultHandler[chainId], abi: contractAddresses.vaultHandlerAbi}} 
-                          spending={{address: contractAddresses.coval[chainId], abi: contractAddresses.covalAbi}} 
-                          amount={1000} 
-                          label = "Approve Spending Coval"
-                          watcher={setHash}
-                        />): null}
-                        {!approved ?(
-                        <ApprovalButton
-                          handler={{address:  contractAddresses.vaultHandler[chainId], abi: contractAddresses.vaultHandlerAbi}} 
-                          spending={{address: contractAddresses.emblemVault[chainId], abi: contractAddresses.emblemAbi}}
-                          amount={0}
-                          label = "Approve Creating / Burning Vaults"
-                          watcher={setHash}
-                        />): null}
-                      </>
+                        handler={{address:  contractAddresses.vaultHandler[chainId], abi: contractAddresses.vaultHandlerAbi}} 
+                        spending={{address: contractAddresses.emblemVault[chainId], abi: contractAddresses.emblemAbi}}
+                        amount={0}
+                        label = "Approve Creating / Burning Vaults"
+                        watcher={setHash}
+                      />
+                      //   <>
+                      //   {!isCovalApproved ?(
+                      //   <ApprovalButton
+                      //     handler={{address: contractAddresses.vaultHandler[chainId], abi: contractAddresses.vaultHandlerAbi}} 
+                      //     spending={{address: contractAddresses.coval[chainId], abi: contractAddresses.covalAbi}} 
+                      //     amount={1000} 
+                      //     label = "Approve Spending Coval"
+                      //     watcher={setHash}
+                      //   />): null}
+                      //   {!approved ?(
+                      //   <ApprovalButton
+                      //     handler={{address:  contractAddresses.vaultHandler[chainId], abi: contractAddresses.vaultHandlerAbi}} 
+                      //     spending={{address: contractAddresses.emblemVault[chainId], abi: contractAddresses.emblemAbi}}
+                      //     amount={0}
+                      //     label = "Approve Creating / Burning Vaults"
+                      //     watcher={setHash}
+                      //   />): null}
+                      // </>
                       ): null}
                         
                       {account && state.loaded? (

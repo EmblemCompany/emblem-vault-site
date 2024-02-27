@@ -10,6 +10,7 @@ import {
 
 import {HStack, VStack, Circle } from '@chakra-ui/react'
 import {validImage } from '../../utils'
+import Embed from '../Embed'
 
 type CoinDetails = {
   address: string,
@@ -42,7 +43,7 @@ export class CoinBalance extends Component<CoinBalanceProps> {
     let hideAsset = this.props.hideAsset
     return (
       <HStack className='img-stack' key={coin.name} w="300px" p={2} >
-          <Box className="coin-image-container" w="100%" min-width="40px">                                
+          {/* <Box className="coin-image-container" w="100%" min-width="40px">                                
             {
             coin.image ? (
               <Image className="NFT-image-small" width="40px" src={coin.image}></Image>
@@ -52,10 +53,12 @@ export class CoinBalance extends Component<CoinBalanceProps> {
             ) : coin.coin && validImage("https://s3.amazonaws.com/token-icons/"+coin.coin.toLowerCase()+".png")? (
               <Image width="40px" src={"https://s3.amazonaws.com/token-icons/"+coin.coin.toLowerCase()+".png"}></Image>
             ) : (
-              <Circle size="40px" bg="gray" color="white" isTruncated>
-                {coin.symbol? coin.symbol.toLowerCase(): coin.name}
-              </Circle>
+              <Image width="40px" src={"https://s3.amazonaws.com/token-icons/eth.png"}></Image>
             )}
+          </Box> */}
+
+          <Box className="coin-image-container" w="100%" min-width="40px">
+            <Embed className="NFT-image-small-embed" url={coin.image? coin.image : ''}/>
           </Box>
           
           <VStack p="10px" w="100%">
