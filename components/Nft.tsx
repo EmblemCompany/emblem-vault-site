@@ -1162,6 +1162,10 @@ export default function Nft() {
                     >
                       Vault Network: {CHAIN_ID_NAMES[vaultChainId]}
                     </Box>
+
+                    {vaultChainId != chainId ? (
+                    <Box>NOTE: You are not on the same network as this vault</Box>
+                    ): null}
                     
                     <Box
                       mt="1"
