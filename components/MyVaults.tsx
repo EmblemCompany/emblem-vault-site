@@ -545,10 +545,10 @@ export default function MyVaults() {
                         vault.move && (showMintable || showMigratable || showJumpable) ? (
                           
                           vault.move.to.map((to, index) => (
-                            
+                            to != "Embels"?
                               <Checkbox mt={2} ml={2} size="sm" isChecked={selectedVaults.has(vault.tokenId)} onChange={() => toggleVaultSelection(vault.tokenId)}>
                                 <Text fontSize={'small'} fontWeight="semibold" textAlign="left" pl={2} isTruncated={true}> {showOrHideNavLink('unminted') ? 'Mint To: ' : showJumpable? 'Jump To: ': 'Migrate To: '} {to} </Text>
-                              </Checkbox>                            
+                              </Checkbox>:null                         
                           ))
                         ): null}
                   

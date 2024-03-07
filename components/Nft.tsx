@@ -141,7 +141,7 @@ export default function Nft() {
   const [rawMetadata, setRawMetadata] = useState({})
   
   const handlerContract = useContract(contractAddresses.vaultHandler[chainId], contractAddresses.vaultHandlerAbi, true)
-  const vaultHandlerContract = useContract(chainId == 137? contractAddresses.vaultHandler[chainId]: contractAddresses.vaultHandlerV8[chainId], chainId == 137? contractAddresses.vaultHandlerAbi: contractAddresses.vaultHandlerV8Abi, true)
+  const vaultHandlerContract = useContract(contractAddresses.vaultHandlerV8[chainId], contractAddresses.vaultHandlerV8Abi, true)
   let emblemContract = useContract(contractAddresses.emblemVault[chainId], contractAddresses.emblemAbi, true)
   const covalContract = useContract(contractAddresses.coval[chainId], contractAddresses.covalAbi, true)
 
@@ -300,7 +300,7 @@ export default function Nft() {
   const handleApproveForall = () => {
     setApproving(true)
     ;(emblemContract as Contract)
-      .setApprovalForAll(contractAddresses.vaultHandler[chainId], true)
+      .setApprovalForAll(contractAddresses.vaultHandlerV8[chainId], true)
       .then(({ hash }: { hash: string }) => {
         setTimeout(() => {
           setHash(hash)
@@ -379,7 +379,7 @@ export default function Nft() {
     })
     const jsonData = await response.json()
     let migratable = await sdk.generateMigrateReport(account, true)
-    migratable = Object.fromEntries(Object.entries(migratable).filter(([_, value]: [string, any]) => !value.to.includes('Embels')));
+    // migratable = Object.fromEntries(Object.entries(migratable).filter(([_, value]: [string, any]) => !value.to.includes('Embels')));
     migratable = Object.keys(migratable).map(item => ({
       ...migratable[item],
       tokenId: item
@@ -682,7 +682,7 @@ export default function Nft() {
     async function finish(){
      
       let acceptable = await handlerContract.getPreTransfer(tokenId)
-      let isApproved = await emblemContract.isApprovedForAll(account, chainId == 137? contractAddresses.vaultHandler[chainId]: contractAddresses.vaultHandlerV8[chainId])
+      let isApproved = await emblemContract.isApprovedForAll(account, contractAddresses.vaultHandlerV8[chainId])
       // } else {
       //   isApproved = await emblemContract.isApprovedForAll(account, contractAddresses.vaultHandler[chainId])
       // }
@@ -728,6 +728,7 @@ export default function Nft() {
       debugInfo += `Props:\n   owner: ${owner}\n   mine: ${mine}\n   created by: ${to}\n   account: ${account}\n   vaultChainId: ${vaultChainId}\n   chainId: ${chainId}\n   sealed: ${sealed}\n   approved: ${approved}\n   live: ${live}\n   mineUnMinted: ${mineUnMinted}\n   status: ${status}\n   mintLockedForever: ${mintLockedForever}\n`
       debugInfo += `Can Unlock Before Mint: ${vaultChainId === chainId && mineUnMinted && status != 'claimed' && !mintLockedForever}\n`
       debugInfo += `Can Claim: ${!(status === 'claimed') && account && vaultChainId === chainId && mine && !sealed && approved && live}\n`
+      debugInfo += `Can Migrate To: ${JSON.stringify(qualifiedCollections)}\n`
       setDebugMode(false)
       setDebugFeedback(debugInfo)
       // alert(debugInfo)
@@ -883,6 +884,7 @@ export default function Nft() {
     await deleteVaultFromDatabase(tokenId)
     let collectionDestinationName = qualifiedCollections.to[index]
     let collectionDestination = await sdk.fetchCuratedContractByName(collectionDestinationName)
+    let filteredBalances = collectionDestination.filterNativeBalances({balances: vaultValues}, collectionDestination)
       library.getSigner(account)
       .signMessage('Move Vault: ' + tokenId)
       .then((signature: any) => {
@@ -901,7 +903,7 @@ export default function Nft() {
             },
             "targetContract":  collectionDestination,
             "targetAsset": {
-                "name": vaultValues[0].name
+                "name": filteredBalances[0].name,
             },
             "amount": 1,
             "tokenId": tokenId,
@@ -1163,8 +1165,10 @@ export default function Nft() {
                       Vault Network: {CHAIN_ID_NAMES[vaultChainId]}
                     </Box>
 
-                    {vaultChainId != chainId ? (
-                    <Box>NOTE: You are not on the same network as this vault</Box>
+                    {vaultChainId != chainId ? (                    
+                    <Box style={{ color: 'white', backgroundColor: 'red', textAlign: 'center', fontWeight: 'bold' }}>
+                      NOTE: Please switch to {CHAIN_ID_NAMES[vaultChainId]} to interact
+                    </Box>
                     ): null}
                     
                     <Box
@@ -1489,7 +1493,8 @@ export default function Nft() {
                                 
                                 { 
                                   qualifiedCollections.to.map((collection, index) => (
-                                    <Box display="flex" alignItems="baseline" justifyContent="space-between" mt="4">
+                                    collection != "Embels"?
+                                    <Box display="flex" id={index.toString()} alignItems="baseline" justifyContent="space-between" mt="4">
                                       <Button
                                         width="100%"
                                         onClick={() => {                                        
@@ -1499,7 +1504,7 @@ export default function Nft() {
                                       >
                                         {moving ? 'Migrating ...' : `Migrate Vault to ${collection}`}
                                       </Button>
-                                    </Box>                                  
+                                    </Box>: null
                                   ))
                                 }
                                 
@@ -1515,7 +1520,7 @@ export default function Nft() {
                             ) : null}
 
                         <ApprovalButton
-                          handler={{address:  contractAddresses.vaultHandler[chainId], abi: contractAddresses.vaultHandlerAbi}} 
+                          handler={{address:  contractAddresses.vaultHandlerV8[chainId], abi: contractAddresses.vaultHandlerV8Abi}} 
                           spending={{address: contractAddresses.emblemVault[chainId], abi: contractAddresses.emblemAbi}}
                           amount={0}
                           label = "Approve Creating / Burning Vaults"

@@ -1,4 +1,4 @@
-const debug = process.env.NODE_ENV !== 'production'
+// const debug = process.env.NODE_ENV !== 'production'
 const withTM = require('next-transpile-modules')([
   // 'doka', 
   // 'react-doka', 
@@ -18,6 +18,7 @@ const withTM = require('next-transpile-modules')([
 
 module.exports = withTM({
   reactStrictMode: false,
+  output: 'export',
   assetPrefix: '/',
   env: {
     IPFS: process.env.IPFS === 'true' ? 'true' : 'false',
