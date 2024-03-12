@@ -11,6 +11,7 @@ import CoinBalance from './partials/CoinBalance'
 import Embed from './Embed'
 import CuratedCrudForm from './partials/CuratedCrudForm'
 import CuratedDataView from './partials/CuratedDataView'
+import ReservoirAdmin from './ReservoirAdmin'
 
 export default function CuratedAdmin() {
   const { query } = useRouter()
@@ -90,6 +91,7 @@ export default function CuratedAdmin() {
           <CuratedCrudForm initialFormData={cloneData || {}} assetChains={assetChains} deployments={deployments} callback={()=>{setShowAddNew(false); setCloneData(null); setFilteredData(curatedData);}} isNew={true} />
         </Box>
       }
+      <ReservoirAdmin />
 
     </Loader>
   )
