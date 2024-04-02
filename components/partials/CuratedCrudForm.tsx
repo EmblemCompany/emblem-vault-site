@@ -33,7 +33,9 @@ function CuratedCrudForm({ initialFormData, assetChains, deployments, callback =
     balanceQty: '',
     imageHandler: '',
     loadingImages: [],
-    placeholderImages: []
+    placeholderImages: [],
+    launch_ready: false,
+    marketplace_ready: false
   };
 
   const [formData, setFormData] = useState({ ...defaultFormData, ...initialFormData });
@@ -195,6 +197,14 @@ function CuratedCrudForm({ initialFormData, assetChains, deployments, callback =
                 <FormLabel>Placeholder Images</FormLabel>
                 <ArrayInput name="placeholderImages" value={formData.placeholderImages} onChange={handleChange}  type={"image"} />
             </FormControl>
+          <FormControl id="launch_ready">
+            <FormLabel>Launch Ready? (Enabling will cause the collection to be included in stats)</FormLabel>
+            <Checkbox name="launch_ready" isChecked={formData.launch_ready} onChange={e => setFormData({ ...formData, launch_ready: e.target.checked })} />
+          </FormControl>
+          <FormControl id="marketplace_ready">
+            <FormLabel>Marketplace Ready? (Enabling will cause the collection to be included in the marketplace, after collection set ID is updated)</FormLabel>
+            <Checkbox name="marketplace_ready" isChecked={formData.marketplace_ready} onChange={e => setFormData({ ...formData, marketplace_ready: e.target.checked })} />
+          </FormControl>
             <Button type="submit">Submit</Button>
             {!isNew && <Button ml={5} type="button" onClick={handleDelete}>Delete</Button>}
             {callback && 
