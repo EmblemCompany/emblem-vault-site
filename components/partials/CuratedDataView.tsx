@@ -101,6 +101,8 @@ export default function CuratedDataView({ data, assetChains, deployments, callba
                                 <Text><strong>Image Handler:</strong> {item.imageHandler}</Text>
                                 <Text><strong>Loading Images:</strong> {item.loadingImages.join(", ")}</Text>
                                 <Text><strong>Placeholder Images:</strong> {JSON.stringify(item.placeholderImages)}</Text>
+                                <Text><strong>Launch Ready?</strong> {JSON.stringify(item.launch_ready)}</Text>
+                                <Text><strong>Marketplace Ready?</strong> {JSON.stringify(item.marketplace_ready)}</Text>
                             </TabPanel>
                             <TabPanel>{item && assetChains &&
                                 <Flex ml={12}>
