@@ -30,7 +30,7 @@ import Loader from 'react-loader'
 import dynamic from 'next/dynamic'
 import { Contract } from '@ethersproject/contracts'
 import { TransactionToast } from './TransactionToast'
-import { EMBLEM_API, contractAddresses, SIG_API, EMBLEM_V2_API, ZERO_ADDRESS } from '../constants'
+import { EMBLEM_API, contractAddresses, SIG_API, EMBLEM_V2_API, ZERO_ADDRESS, EMBLEM_V3_API } from '../constants'
 import { useContract } from '../hooks'
 import { CHAIN_ID_NAMES, initCuratedContracts, sdk } from '../utils'
 import CryptoJS from 'crypto-js'
@@ -132,6 +132,7 @@ export default function Nft() {
   const [move_targetContract, setMoveTargetContract] = useState({name: '', chain: '', 4: '', 1: '', tokenId: {}, serialNumber: {'hex':''} })
   const [isCovalApproved, setIsCovalApproved] = useState(false)
   const [approved, setApproved] = useState(false)
+  const [migrateApproved, setMigrateApproved] = useState(false)
   const [decimals, setDecimals] = useState(null)
   const [allowance, setAllowance] = useState(null)
   const [balance, setBalance] = useState(null)
@@ -406,14 +407,14 @@ export default function Nft() {
       setLoadingApi(false)
       setInvalidVault(false)
     }
-    {
-      !vaultPrivacy && !loadedValues ?    
-      getAllBalancesLive([], tokenId, (v)=>{
-        if (v) {
-          setVaultValues(v)
-        }        
-      }) : null
-    }
+    // {
+    //   !vaultPrivacy && !loadedValues ?    
+    //   getAllBalancesLive([], tokenId, (v)=>{
+    //     if (v) {
+    //       setVaultValues(v)
+    //     }        
+    //   }) : null
+    // }
     // { if (jsonData.targetContract) {
     //   setTimeout(() => {
     //     location.href = location.origin + '/nft2?id=' + jsonData.tokenId
@@ -521,7 +522,7 @@ export default function Nft() {
 
   const getAllBalances = async (values: string | any[], tokenId: string, cb: { (values: any): any; (arg0: any): any }) => {
     // console.log(address)
-    const response = await fetch(EMBLEM_API + '/vault/balance/' + tokenId , {
+    const response = await fetch(EMBLEM_V3_API + '/vault/balance/' + tokenId , {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -530,9 +531,8 @@ export default function Nft() {
     })
     
     const jsonData = await response.json()
-    console.log('response', response, jsonData)
-    if (jsonData.balances.length > 0) {      
-      return cb(values.concat(jsonData.balances))
+    if (jsonData.values.length > 0) {      
+      return cb(values.concat(jsonData.values))
     } else {
       return cb(values)
     }
@@ -543,7 +543,7 @@ export default function Nft() {
       return cb(false)
     }
     setLoadedValues(true)
-    const response = await fetch(EMBLEM_API + '/vault/balance/' + tokenId + '?live=true&_vercel_no_cache=1' , {
+    const response = await fetch(EMBLEM_V3_API + '/vault/balance/' + tokenId + '?live=true&_vercel_no_cache=1' , {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -552,9 +552,8 @@ export default function Nft() {
     })
     
     const jsonData = await response.json()
-    console.log('response', response, jsonData)
-    if (jsonData.balances.length > 0) {      
-      return cb(values.concat(jsonData.balances))
+    if (jsonData.values.length > 0) {      
+      return cb(values.concat(jsonData.values))
     } else {
       return cb(values)
     }
@@ -660,19 +659,19 @@ export default function Nft() {
       } else {
         _owner  = live || targetContract.migrating? await emblemContract.ownerOf(tokenId): "0x0000000000000000000000000000000000000000"
       }
-      setDecimals(await covalContract.decimals())
-      setAllowance(
-        await covalContract
-          .allowance(account, contractAddresses.vaultHandler[chainId])
-          .then((balance: { toString: () => string }) => balance.toString())
-      )
-      setBalance(await covalContract.balanceOf(account).then((balance: { toString: () => string }) => balance.toString()))
-      setPrice(await handlerContract.price().then((balance: { toString: () => string }) => balance.toString()))
-      if (Number(allowance) >= Number(price)) {
-        setIsCovalApproved(true)
-      } else {
-        setIsCovalApproved(false)
-      }
+      // setDecimals(await covalContract.decimals())
+      // setAllowance(
+      //   await covalContract
+      //     .allowance(account, contractAddresses.vaultHandler[chainId])
+      //     .then((balance: { toString: () => string }) => balance.toString())
+      // )
+      // setBalance(await covalContract.balanceOf(account).then((balance: { toString: () => string }) => balance.toString()))
+      // setPrice(await handlerContract.price().then((balance: { toString: () => string }) => balance.toString()))
+      // if (Number(allowance) >= Number(price)) {
+      //   setIsCovalApproved(true)
+      // } else {
+      //   setIsCovalApproved(false)
+      // }
       finish()
     } catch(err){      
       _owner = "0x0000000000000000000000000000000000000000"
@@ -681,13 +680,16 @@ export default function Nft() {
 
     async function finish(){
      
-      let acceptable = await handlerContract.getPreTransfer(tokenId)
-      let isApproved = await emblemContract.isApprovedForAll(account, contractAddresses.vaultHandlerV8[chainId])
+      // let acceptable = await handlerContract.getPreTransfer(tokenId)
+      // console.log("-----", account, contractAddresses.vaultHandlerV8[chainId] ||  contractAddresses.vaultHandler[chainId])
+      let isClaimApproved = await emblemContract.isApprovedForAll(account, contractAddresses.vaultHandler[chainId])
+      let isMigrateApproved = contractAddresses.vaultHandlerV8[chainId]? await emblemContract.isApprovedForAll(account, contractAddresses.vaultHandlerV8[chainId]): false
       // } else {
       //   isApproved = await emblemContract.isApprovedForAll(account, contractAddresses.vaultHandler[chainId])
       // }
-      setApproved(isApproved)
-      setAcceptable(acceptable._from !== "0x0000000000000000000000000000000000000000")
+      setApproved(isClaimApproved)
+      setMigrateApproved(isMigrateApproved)
+      // setAcceptable(acceptable._from !== "0x0000000000000000000000000000000000000000")
       setOwner(_owner)
       setMine(_owner === account || (to === account && _owner === "0x0000000000000000000000000000000000000000"))
       setMineUnMinted(to === account && _owner === "0x0000000000000000000000000000000000000000")
@@ -903,13 +905,14 @@ export default function Nft() {
             },
             "targetContract":  collectionDestination,
             "targetAsset": {
-                "name": filteredBalances[0].name,
+                "name": filteredBalances[0]?.name || "Unknown",
             },
             "amount": 1,
             "tokenId": tokenId,
             "signature": signature
         })
         }).then(async function (response: any) {
+          console.log("Got mint signature")
           let data = await response.json()
           
           if (data.sig) {
@@ -1353,7 +1356,7 @@ export default function Nft() {
                         </Stack>
                       ) : null} */}
 
-                    {mine && !approved ? (<>
+                    {/* {mine && !approved ? (<>
                       <Box display="flex" alignItems="baseline" justifyContent="space-between" mt="4">
                         <Button
                           backgroundColor={"#02b402"}
@@ -1365,7 +1368,7 @@ export default function Nft() {
                           }
                           }> Approve Minting</Button>
                       </Box>
-                    </>) : null}
+                    </>) : null} */}
 
                     {/* {!live && mine && vaultChainId == chainId && status !== 'claimed' && !showMakingVaultMsg && approved && !isCovalApproved ? (
                       <>
@@ -1437,7 +1440,7 @@ export default function Nft() {
                         handler={{address:  contractAddresses.vaultHandler[chainId], abi: contractAddresses.vaultHandlerAbi}} 
                         spending={{address: contractAddresses.emblemVault[chainId], abi: contractAddresses.emblemAbi}}
                         amount={0}
-                        label = "Approve Creating / Burning Vaults"
+                        label = "Claim Step 1: Approve Vault Claiming"
                         watcher={setHash}
                       />
                       //   <>
@@ -1475,25 +1478,26 @@ export default function Nft() {
 
                             {mine && qualifiedCollections && qualifiedCollections.to.length > 0 ? (
                               <>
-                                {/* <ApprovalButton
+                                 {!migrateApproved && contractAddresses.vaultHandlerV8[chainId] ? (<ApprovalButton
                                   handler={{address: contractAddresses.vaultHandlerV8[chainId] , abi: contractAddresses.vaultHandlerV8Abi }} 
                                   spending={{address: contractAddresses.emblemVault[chainId], abi: contractAddresses.emblemAbi}}
                                   amount={0}
-                                  label = "Approve Migration (part 1)"
+                                  label = "Migrate Step 1: Approve Migration"
                                   watcher={setHash}
                                 />
+                                /*
                                 <ApprovalButton
                                   handler={{address: contractAddresses.vaultHandlerV8[chainId] , abi: contractAddresses.vaultHandlerV8Abi }} 
                                   spending={{address: "0x0", abi: contractAddresses.erc1155Abi}}
                                   amount={0}
                                   label = "Approve Migration (part 2)"
                                   watcher={setHash}
-                                /> */}
+                                /> */): null}
 
                                 
                                 { 
                                   qualifiedCollections.to.map((collection, index) => (
-                                    collection != "Embels"?
+                                    collection != "Embels" && migrateApproved?
                                     <Box display="flex" id={index.toString()} alignItems="baseline" justifyContent="space-between" mt="4">
                                       <Button
                                         width="100%"
@@ -1519,13 +1523,17 @@ export default function Nft() {
                               <Button width="100%" mt={5} onClick={deleteVault}>Delete Vault </Button>
                             ) : null}
 
-                        <ApprovalButton
-                          handler={{address:  contractAddresses.vaultHandlerV8[chainId], abi: contractAddresses.vaultHandlerV8Abi}} 
-                          spending={{address: contractAddresses.emblemVault[chainId], abi: contractAddresses.emblemAbi}}
-                          amount={0}
-                          label = "Approve Creating / Burning Vaults"
-                          watcher={setHash}
-                        />
+                            {/* {chainId && chainId != 137? (
+                              <ApprovalButton
+                                handler={{address:  contractAddresses.vaultHandlerV8[chainId], abi: contractAddresses.vaultHandlerV8Abi}} 
+                                spending={{address: contractAddresses.emblemVault[chainId], abi: contractAddresses.emblemAbi}}
+                                amount={0}
+                                label = "Approve Creating / Burning Vaults"
+                                watcher={setHash}
+                              />
+                            ): null} */}
+
+                        
                           </Collapse>
                         </Flex>
                         </>

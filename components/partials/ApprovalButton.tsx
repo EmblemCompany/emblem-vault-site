@@ -47,7 +47,7 @@ export default function ApprovalButton(props: AttributesProps) {
         {props.label}
       </Button>
     </Flex>
-  ):null
+  ):(<>Approved</>)
 
   function createSpendingContract(spending){
     let _contract = getContract(spending.address, spending.abi, library, account)

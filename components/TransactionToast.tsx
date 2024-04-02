@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
-import { Spinner, ButtonGroup } from '@chakra-ui/react'
+import { Spinner, ButtonGroup, Circle } from '@chakra-ui/react'
+import { CheckCircleIcon, ExternalLinkIcon, WarningIcon } from '@chakra-ui/icons'
 import {Button, IconButton} from '@chakra-ui/react'
 import { useWeb3React } from '@web3-react/core'
 
@@ -35,15 +36,15 @@ export function TransactionToast({ hash, onComplete }: { hash: string; onComplet
     <ButtonGroup spacing={0}>
       <Button
         as="a"
-        // variantColor={typeof confirmed === 'boolean' ? (confirmed ? 'green' : 'red') : 'blue'}
-        // leftIcon={
-        //   typeof confirmed === 'boolean'
-        //     ? confirmed
-        //       ? 'check-circle'
-        //       : 'warning'
-        //     : (): JSX.Element => <Spinner size="sm" mr="0.5rem" ml="-0.25rem" />
-        // }
-        // rightIcon="external-link"
+        colorScheme={typeof confirmed === 'boolean' ? (confirmed ? 'green' : 'red') : 'blue'}
+        leftIcon={
+          typeof confirmed === 'boolean'
+            ? confirmed
+              ? <CheckCircleIcon />
+              : <WarningIcon />
+            : <Spinner size="sm" mr="0.5rem" ml="-0.25rem" />
+        }
+        rightIcon={<ExternalLinkIcon />}
         style={{ borderTopRightRadius: 0, borderBottomRightRadius: 0 }}
         {...{
           href: formatEtherscanLink(ExplorerTXType.Transaction, [chainId as number, hash]),

@@ -32,7 +32,7 @@ import Loader from 'react-loader'
 import dynamic from 'next/dynamic'
 import { Contract } from '@ethersproject/contracts'
 import { TransactionToast } from './TransactionToast'
-import { EMBLEM_API, contractAddresses, SIG_API, EMBLEM_V2_API, curatedContracts } from '../constants'
+import { EMBLEM_API, contractAddresses, SIG_API, EMBLEM_V2_API, curatedContracts, EMBLEM_V3_API } from '../constants'
 import { useContract } from '../hooks'
 import { CHAIN_ID_NAMES, fromContractValue, initCuratedContracts, sdk, toContractValue } from '../utils'
 import CryptoJS from 'crypto-js'
@@ -314,23 +314,7 @@ export default function Nft2() {
       })
   }
 
-  const getAllBalances = async (values, tokenId, cb) => {
-    const response = await fetch(EMBLEM_API + '/vault/balance/' + tokenId , {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        service: 'evmetadata',
-      },
-    })
-    
-    const jsonData = await response.json()
-    console.log('response', response, jsonData)
-    if (jsonData.balances.length > 0) {
-      return cb(jsonData.balances)
-    } else {
-      return cb(values)
-    }
-  }
+  
 
   const getVault = async () => {
     console.log('getvault')
@@ -463,12 +447,8 @@ export default function Nft2() {
       return cb(jsonData)
   }
 
-  const getAllBalancesLive = async (values, tokenId, cb) => {
-    if (loadedValues) {
-      return cb(false)
-    }
-    setLoadedValues(true)
-    const response = await fetch(EMBLEM_API + '/vault/balance/' + tokenId + '?live=true' , {
+  const getAllBalances = async (values, tokenId, cb) => {
+    const response = await fetch(EMBLEM_V3_API + '/vault/balance/' + tokenId , {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -478,7 +458,28 @@ export default function Nft2() {
     
     const jsonData = await response.json()
     console.log('response', response, jsonData)
-      return cb(jsonData.balances)
+    if (jsonData.values?.length > 0) {
+      return cb(jsonData.values)
+    } else {
+      return cb(values)
+    }
+  }
+
+  const getAllBalancesLive = async (values, tokenId, cb) => {
+    if (loadedValues) {
+      return cb(false)
+    }
+    setLoadedValues(true)
+    const response = await fetch(EMBLEM_V3_API + '/vault/balance/' + tokenId + '?live=true' , {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        service: 'evmetadata',
+      },
+    })
+    
+    const jsonData = await response.json()
+      return cb(jsonData.values)
   }
 
   const getAllBalancesByAddress = async (values, ethAddress, btcAddress, cb) => {
@@ -1111,7 +1112,7 @@ export default function Nft2() {
                                     > [Refresh Balances]</button>
                                     </Text>
                                     <Text as="p" color={colorMode=="dark"? "lightgreen": "forestgreen"}>${Number(vaultTotalValue.toFixed(4)).toLocaleString()}</Text>
-                                    { vaultValues.length ? (
+                                    { vaultValues && vaultValues.length ? (
                                       vaultValues.map((coin) => {
                                         return (  
                                           <Stack> 
@@ -1126,7 +1127,7 @@ export default function Nft2() {
                                           <Text>Data: {data.attribute_key}</Text>
                                         )                        
                                       })
-                                    ) : !vaultDataValues.length && !vaultValues.length ? (
+                                    ) : !vaultDataValues && !vaultValues ? (
                                       <Text>Nothing in here! Fill 'er up!</Text>
                                     ) : null}
                                   </Box>

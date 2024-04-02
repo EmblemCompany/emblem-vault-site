@@ -11,6 +11,7 @@ import { initCuratedContracts, sdk } from '../utils'
 import { getCachedVaults, saveVaultsToDatabase } from '../db'
 import { useContract } from '../hooks'
 import { Contract } from '@ethersproject/contracts'
+import { TransactionToast } from './TransactionToast'
 
 
 export default function MyVaults() {
@@ -43,6 +44,7 @@ export default function MyVaults() {
   const [claimedCollections, setClaimedCollections] = useState([])
   const [curatedContracts, setCuratedContracts] = useState([])
   const [selectedVaults, setSelectedVaults] = useState(new Set());
+  const [hash, setHash] = useState(null)
   const vaultHandlerContract = useContract(contractAddresses.vaultHandlerV8[chainId], contractAddresses.vaultHandlerV8Abi, true)
   // const [showJump, setShowHJump] = useState(query.jump == "true")
   const [dbStale, setDbStale] = useState(true)
@@ -96,9 +98,15 @@ export default function MyVaults() {
           let data = await response.json()
           ;(vaultHandlerContract as Contract)
           .buyWithQuoteBulk(data.contractAddresses[0], 0, data.payloads.map(item=>{return item._to}), data.payloads.map(item=>{return item._tokenId}).sort(), data.nonce, data.sig, 0, data.payloads.length, {value: 0})
-          .then(({ hash }: { hash: string }) => {
-
+          .then((hash) => {
+            setHash(hash?.hash)
           })
+          // .then(async () => {
+          //   setTimeout(asyn await sdk.checkLivelinessBulk(tokenIds.sort(), chainId)
+          //     location.href = location.hrefc () => {
+          //    
+          //   }, 1000)
+          // })
         })
       })
   }
@@ -117,9 +125,9 @@ export default function MyVaults() {
   };
 
   // Function to select/deselect all vaults
-  const toggleSelectAll = () => {
-    if (selectedVaults.size < vaults.length) {
-      setSelectedVaults(new Set(vaults.map(vault => vault.tokenId)));
+  const toggleSelectMax = () => {
+    if (selectedVaults.size < 30) {
+      setSelectedVaults(new Set(vaults.slice(0, 30).map(vault => vault.tokenId)));
     } else {
       setSelectedVaults(new Set());
     }
@@ -136,6 +144,24 @@ export default function MyVaults() {
       return newSelected;
     });
   };
+
+  const checkLiveliness = (tokenIds: any[], cb: any)=>{
+    // alert(`here ${owner}, ${move_targetAsset} ${move_targetContract}`)
+    fetch(EMBLEM_V2_API + '/batch_liveliness', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        chainid: chainId.toString(),
+        'x-api-key': 'demo'
+      },
+      // We convert the React state to JSON and send it as the POST body
+      body: JSON.stringify({tokenIds: tokenIds}),
+    }).then(async function (response) {      
+      location.href = location.href
+    })
+    alert("Click okay to finish minting. (Page will refresh after a few minutes)")
+    
+  }
 
   const getVaults = async () => {
     try {
@@ -358,12 +384,13 @@ export default function MyVaults() {
         account && showOrHideNavLink('unminted') ? (
           <>
             <Button colorScheme={!showMintable ? "gray" : "blue"} m={2} variant="ghost" onClick={async ()=>{
-              setIsShowMintable(true);
+              
               let mintable = await sdk.generateMintReport(address || account, true)
               mintable = Object.keys(mintable).map(item => ({
                 tokenId: item,
                 info: mintable[item]
               })).map(item => ({...item, info: {...item.info, to: [item.info.to]}})); // make single mintable to, into arr
+              setIsShowMintable(true);
               const mintableVaults: any = (vaultsCache.length > 0 ? vaultsCache : vaults).filter(vault => {
                 return (
                   mintable.some(mig => {
@@ -449,20 +476,39 @@ export default function MyVaults() {
       {loadingApi ? <Refreshing /> : ''}
       {showMintable && bulk ? (
         <Box pl={20}>
-          <Checkbox onChange={toggleSelectAll} isChecked={selectedVaults.size === vaults.length && vaults.length > 0}>
-            Select All
-          </Checkbox>
-          <Input
-            type="number"
-            id="vault-amount"
-            aria-describedby="vault-amount-helper-text"
-            onChange={(e) => selectVaultAmount(e.target.value)}
-          />
+          <Flex direction="row" align="center">
+            <Checkbox onChange={toggleSelectMax} isChecked={(selectedVaults.size === vaults.length || selectedVaults.size == 30) && vaults.length > 0}>
+              Select Max
+            </Checkbox>
+            <Input
+              type="number"
+              id="vault-amount"
+              aria-describedby="vault-amount-helper-text"
+              onChange={(e) => selectVaultAmount(e.target.value)}
+              ml={5}
+              maxW={150}
+            />
+          </Flex>
           <Button ml={5} onClick={bulkMintSelected} isDisabled={selectedVaults.size === 0}>
             Mint {selectedVaults.size} Selected
           </Button>
         </Box>
       ): null}
+      {hash ? (
+          <Flex justifyContent="center" alignItems="center">
+            <TransactionToast
+              hash={hash}
+              onComplete={async () => {
+                setHash(null)
+                let tokenIds = Array.from(selectedVaults)
+                
+                checkLiveliness(tokenIds, (data) => {
+
+                }) 
+              }}
+            />
+          </Flex>
+      ) : null}
         <InfiniteScroll                
           className="infinite-scroll"
           scrollableTarget="shannon-container"
