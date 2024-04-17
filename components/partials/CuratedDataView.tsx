@@ -1,7 +1,7 @@
 import { Box, Text, VStack, Collapse, Button, TabPanels, TabPanel, Tabs, TabList, Tab, Flex, FormControl, FormLabel, Input, InputGroup, InputRightElement, Textarea } from "@chakra-ui/react";
 import { useEffect, useState } from 'react';
 import CuratedCrudForm from "./CuratedCrudForm";
-import VaultTools from "./VaultTools";
+import ContractTools from "./ContractTools";
 import MetadataTools from "./MetadataTools";
 
 
@@ -79,32 +79,32 @@ export default function CuratedDataView({ data, assetChains, deployments, callba
                         </TabList>
                         <TabPanels>
                             <TabPanel mt={5}>
-                                {/* <Text onClick={async ()=>{let canMint = await checkHandlerCanMint(item.collectionType, item.contracts["1"]); item.canMint = canMint; mintEntries[item.name] = canMint; setMintEntries(mintEntries); setTabIndex(tabIndex) }} ><strong>Handler can delegate mint:</strong> {mintEntries[item.name]?.toString()}</Text> */}
-                                {callback && 
-                                  <Button mb={3} onClick={() => callback(item)}>Clone</Button>
-                                }
-
-                                <Text><strong>Contracts:</strong> {JSON.stringify(item.contracts)}</Text>
-                                <Text><strong>Native Assets:</strong> {item.nativeAssets.join(", ")}</Text>
-                                <Text><strong>Mintable:</strong> {item.mintable ? "Yes" : "No"}</Text>
-                                <Text><strong>Auto Load:</strong> {item.autoLoad ? "Yes" : "No"}</Text>
-                                <Text><strong>Address Chain:</strong> {item.addressChain}</Text>
-                                <Text><strong>Collection Type:</strong> {item.collectionType}</Text>
-                                <Text><strong>Load Types:</strong> {item.loadTypes.join(", ")}</Text>
-                                <Text isTruncated><strong>Description:</strong> {item.description}</Text>                
-                                <Text><strong>Purchase Method:</strong> {item.purchaseMethod}</Text>
-                                <Text><strong>Show Balance:</strong> {item.showBalance ? "Yes" : "No"}</Text>
-                                <Text><strong>Balance URL:</strong> {item.balanceUrl}</Text>
-                                <Text><strong>Price:</strong> {item.price}</Text>
-                                <Text><strong>Collection Chain:</strong> {item.collectionChain}</Text>
-                                <Text><strong>Balance Quantity:</strong> {item.balanceQty}</Text>
-                                <Text><strong>Image Handler:</strong> {item.imageHandler}</Text>
-                                <Text><strong>Loading Images:</strong> {item.loadingImages.join(", ")}</Text>
-                                <Text><strong>Placeholder Images:</strong> {JSON.stringify(item.placeholderImages)}</Text>
-                                <Text><strong>Launch Ready?</strong> {JSON.stringify(item.launch_ready)}</Text>
-                                <Text><strong>Marketplace Ready?</strong> {JSON.stringify(item.marketplace_ready)}</Text>
+                              {tabIndex === 0 && (
+                                <>
+                                  <Button style={{visibility: callback ? 'visible' : 'hidden'}} mb={3} onClick={() => callback(item)}>Clone</Button>
+                                  <Text><strong>Contracts:</strong> {JSON.stringify(item.contracts)}</Text>
+                                  <Text><strong>Native Assets:</strong> {item.nativeAssets.join(", ")}</Text>
+                                  <Text><strong>Mintable:</strong> {item.mintable ? "Yes" : "No"}</Text>
+                                  <Text><strong>Auto Load:</strong> {item.autoLoad ? "Yes" : "No"}</Text>
+                                  <Text><strong>Address Chain:</strong> {item.addressChain}</Text>
+                                  <Text><strong>Collection Type:</strong> {item.collectionType}</Text>
+                                  <Text><strong>Load Types:</strong> {item.loadTypes.join(", ")}</Text>
+                                  <Text isTruncated><strong>Description:</strong> {item.description}</Text>                
+                                  <Text><strong>Purchase Method:</strong> {item.purchaseMethod}</Text>
+                                  <Text><strong>Show Balance:</strong> {item.showBalance ? "Yes" : "No"}</Text>
+                                  <Text><strong>Balance URL:</strong> {item.balanceUrl}</Text>
+                                  <Text><strong>Price:</strong> {item.price}</Text>
+                                  <Text><strong>Collection Chain:</strong> {item.collectionChain}</Text>
+                                  <Text><strong>Balance Quantity:</strong> {item.balanceQty}</Text>
+                                  <Text><strong>Image Handler:</strong> {item.imageHandler}</Text>
+                                  <Text><strong>Loading Images:</strong> {item.loadingImages.join(", ")}</Text>
+                                  <Text><strong>Placeholder Images:</strong> {JSON.stringify(item.placeholderImages)}</Text>
+                                  <Text><strong>Launch Ready?</strong> {JSON.stringify(item.launch_ready)}</Text>
+                                  <Text><strong>Marketplace Ready?</strong> {JSON.stringify(item.marketplace_ready)}</Text>
+                                </>
+                              )}
                             </TabPanel>
-                            <TabPanel>{item && assetChains &&
+                            <TabPanel>{item && assetChains && tabIndex === 1 &&
                                 <Flex ml={12}>
                                 <VStack spacing={4} padding={4} align="left" >
                                     <CuratedCrudForm initialFormData={item} assetChains={assetChains} deployments={deployments} />
@@ -112,10 +112,14 @@ export default function CuratedDataView({ data, assetChains, deployments, callba
                                 </Flex>
                             }</TabPanel>
                             <TabPanel>
-                                <VaultTools targetContract={item}/>                                
+                              {tabIndex === 2 && (
+                                  <ContractTools targetContract={item}/> 
+                              )}                               
                             </TabPanel>
                             <TabPanel>
-                                <MetadataTools targetContract={item}/>
+                              {tabIndex === 3 && (
+                                  <MetadataTools targetContract={item}/>
+                              )}
                             </TabPanel>
                         </TabPanels>
                     </Tabs>

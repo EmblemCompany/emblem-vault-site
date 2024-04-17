@@ -75,15 +75,16 @@ export default function CuratedAdmin() {
           </Flex>
         </Flex>
       }
-      {!cloneData && !showAddNew && filteredData && assetChains && <CuratedDataView data={filteredData} assetChains={assetChains} deployments={deployments} callback={
-        (data) => {
-          data = JSON.parse(JSON.stringify(data))
-          delete data.name
-          delete data.contracts
-          delete data.id
-          setCloneData(data)
-          setShowAddNew(true)          
-          }
+      {!cloneData && !showAddNew && filteredData && assetChains && 
+        <CuratedDataView data={filteredData} assetChains={assetChains} deployments={deployments} callback= {
+          (data) => {
+            data = JSON.parse(JSON.stringify(data))
+            delete data.name
+            delete data.contracts
+            delete data.id
+            setCloneData(data)
+            setShowAddNew(true)          
+            }
         } />
       }
       {showAddNew && assetChains && 
