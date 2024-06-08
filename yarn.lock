@@ -6112,10 +6112,10 @@ elliptic@6.5.3:
     minimalistic-assert "^1.0.0"
     minimalistic-crypto-utils "^1.0.0"
 
-emblem-vault-sdk@^1.9.16:
-  version "1.9.16"
-  resolved "https://registry.npmjs.org/emblem-vault-sdk/-/emblem-vault-sdk-1.9.16.tgz"
-  integrity sha512-yCmQU98xJDtkHtXMdM6s0jgwlAoCr6RH3chTklp7x/txZBvoOxw6tMwYV/mrFqqqUbJn9clAoYYuTjhe+BihBw==
+emblem-vault-sdk@^1.9.21:
+  version "1.9.21"
+  resolved "https://registry.npmjs.org/emblem-vault-sdk/-/emblem-vault-sdk-1.9.21.tgz"
+  integrity sha512-6qrM+fgK7Z+BXL125E1b8inVIDvA290m719rKYn0OYeJbwgrb3NPAuWQLEp4GeSj8jkWCwQ1OZGZTAvWY8P8jQ==
   dependencies:
     "@bitcoin-js/tiny-secp256k1-asmjs" "^2.2.3"
     "@ethersproject/bignumber" "^5.7.0"

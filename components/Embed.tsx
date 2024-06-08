@@ -135,7 +135,7 @@ export class Embed extends Component<EmbedProps> {
             width="250px"
             height="300px"
           />
-        ) : contentType && contentType.valid ? (
+        ) : contentType && contentType.valid && !contentType.contentType.includes('text/') ? (
           <Image
             p={"20px"}
             h={"100%"}

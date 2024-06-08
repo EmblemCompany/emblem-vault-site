@@ -9,7 +9,7 @@ export class Generic extends Component<GenericProps> {
   render() {
     return (
       <>
-        <iframe frameBorder="0" scrolling="no" src={this.props.url}   height="400" allow="encrypted-media" sandbox="allow-encrypted-media"></iframe>
+        <iframe frameBorder="0" src={this.props.url} width="350" height="650" allow="encrypted-media" sandbox="allow-scripts allow-same-origin"></iframe>
         {/* <IframeResizer
           log
           src={this.props.url}        

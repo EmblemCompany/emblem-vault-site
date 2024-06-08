@@ -48,7 +48,7 @@
     "bootstrap": "^4.6.0",
     "crypto-js": "^4.0.0",
     "doka": "file:local_modules/doka",
-    "emblem-vault-sdk": "^1.9.16",
+    "emblem-vault-sdk": "^1.9.21",
     "emotion-theming": "^10.0.27",
     "eslint-plugin-react": "^7.33.2",
     "eslint-plugin-react-hooks": "^4.6.0",

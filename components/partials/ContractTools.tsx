@@ -81,7 +81,26 @@ function ContractTools({ targetContract }) {
           })
         };
    
-        fetch(`${EMBLEM_V3_API}/v3/cache/${targetContract.contracts[tokenId]}/refresh`, options)
+        fetch(`${EMBLEM_V3_API}/v3/cache/${targetContract.contracts[chainId]}/refresh`, options)
+          .then(response => response.json())
+          .then(data => {
+           setResults(data)
+          })
+          .catch(err => {
+            setResults(err);
+          });
+      };
+
+      const refreshReservoirCollection = () => {
+        const options = {
+          method: 'POST',
+          headers: {
+            'x-api-key': localStorage.getItem('apiKey') || '',
+            'Content-Type': 'application/json'
+          }
+        };
+   
+        fetch(`${EMBLEM_V3_API}/reservoir/refresh-collection/${targetContract.contracts[chainId]}`, options)
           .then(response => response.json())
           .then(data => {
            setResults(data)
@@ -218,10 +237,22 @@ function ContractTools({ targetContract }) {
               <Button h="1.75rem" size="sm" m="5px" onClick={()=>{
                 let tokenId = document.getElementsByName(`${targetContract.name}-tokenId`)[0] as HTMLInputElement
                 if (tokenId) {
-                  console.log(targetContract)
                   window.open(`https://opensea.io/assets/ethereum/${targetContract.contracts[chainId]}/${tokenId.value}`, "_blank");
                 }
               }}>Opensea</Button>
+
+              <Button h="1.75rem" size="sm" m="5px" onClick={()=>{
+                let tokenId = document.getElementsByName(`${targetContract.name}-tokenId`)[0] as HTMLInputElement
+                if (tokenId.value) {
+                  window.open(`https://ev-market.vercel.app/ethereum/asset/${targetContract.contracts[chainId]}:${tokenId.value}?tab=info`, "_blank");
+                } else {
+                  window.open(`https://ev-market.vercel.app/ethereum/collection/${targetContract.contracts[chainId]}`, "_blank");
+                }
+              }}>Emblem Markets</Button>
+
+            <hr/>Reservoir
+            <div></div>
+            <Button h="1.75rem" size="sm" m="5px" onClick={()=>{refreshReservoirCollection()}}>Refresh collection on Reservoir</Button>
 
             <hr/>Contract
             <div></div>
