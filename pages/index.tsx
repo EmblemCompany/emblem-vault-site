@@ -8,7 +8,7 @@ export default function Redirect(): null {
 
   const debug = process.env.NODE_ENV !== 'production'
   const maintenance = !debug && process.env.MAINTENANCE
-  const { href, as } = modifyUrlObjectForIPFS( maintenance ? '/maintenance': !debug ? '/featured' : '/featured' )
+  const { href, as } = modifyUrlObjectForIPFS( maintenance ? '/maintenance': !debug ? '/createcurated' : '/createcurated' )
 
   useEffect(() => {
     console.log("ENV", debug, maintenance)

@@ -28,6 +28,7 @@ export class Embed extends Component<EmbedProps> {
 
   async componentDidMount() {
     try {
+      console.log(sdk.contentTypeReport)
       const contentType = await sdk.contentTypeReport(this.props.url);
       this.setState({ contentType, loading: false });
     } catch (error) {

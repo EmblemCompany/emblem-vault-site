@@ -154,12 +154,15 @@ export default function Layout({ children }: { children: ReactNode}): JSX.Elemen
               <Button display={showOrHideNavLink('vaults')} m={2} variant="ghost" onClick={()=>{handleNewNavigationClick('vaults')}}>
                 My Vaults
               </Button>
-              <Button display={showOrHideNavLink('featured')} m={2} variant="ghost" onClick={()=>{handleNewNavigationClick('featured')}}>
+                <Button m={2} variant="ghost"  onClick={()=>{location.href="https://emblem.markets"}}>
+                  Emblem.Markets
+                </Button>
+              {/* <Button display={showOrHideNavLink('featured')} m={2} variant="ghost" onClick={()=>{handleNewNavigationClick('featured')}}>
                 Featured
               </Button>
               <Button display={showOrHideNavLink('newest')} m={2} variant="ghost" onClick={()=>{handleNewNavigationClick('newest')}}>
                 Newest
-              </Button>
+              </Button> */}
               <Button m={2} variant="ghost" onClick={()=>{location.href = "https://emblem-vault.gitbook.io/docs/"}}>
                 Info
               </Button>
