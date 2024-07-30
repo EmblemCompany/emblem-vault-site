@@ -19,8 +19,12 @@
             "skipFiles": [
                 "<node_internals>/**"
             ],
-            "program": "${workspaceFolder}/public/bip39/node-derive.js",
-            
-        }
+            "program": "${workspaceFolder}/public/bip39/node-derive.js",            
+          }, {
+            "name": "debug Emblem Finance",
+            "type": "pwa-chrome",
+            "request": "launch",
+            "url": "http://localhost:3000"
+          }
     ]
 }

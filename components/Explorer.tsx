@@ -1,14 +1,18 @@
-import { Flex, Text, Link, Image, Stack, Spinner, useColorMode, Input, VStack, Button, Tabs, TabList, Tab, TabPanels, TabPanel, Modal, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton, ModalBody, useDisclosure, Select } from '@chakra-ui/react'
+import { Flex, Text, Link, Image, Stack, Spinner, useColorMode, Input, VStack, Button, Tabs, TabList, Tab, TabPanels, TabPanel, Modal, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton, ModalBody, useDisclosure, Select, Checkbox } from '@chakra-ui/react'
 import { Box } from '@chakra-ui/react'
 import Loader from 'react-loader'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
-import { EMBLEM_API, EMBLEM_V2_API, EMBLEM_V3_API } from '../constants'
+import { EMBLEM_API, EMBLEM_V2_API, EMBLEM_V3_API, contractAddresses } from '../constants'
 import { DataGrid } from '@material-ui/data-grid';
 import { initCuratedContracts, sdk } from '../utils'
+import { Contract } from '@ethersproject/contracts'
+import { useWeb3React } from '@web3-react/core'
+
 
 export default function Explorer() {
   const router = useRouter()
+  const { account, chainId, library } = useWeb3React()
   const { asPath } = router
   const urlParams = new URLSearchParams(window.location.search);
   const tabIndexFromUrl = urlParams.get('tab') ? Number(urlParams.get('tab')) : 0
@@ -22,6 +26,7 @@ export default function Explorer() {
   const [assetChains, setAssetChains] = useState([]);
   const [deployments, setDeployments] = useState([]);
   const [threadCount, setThreadCount] = useState(1)
+  const [showUnqualifiedVaults, setShowUnqualifiedVaults] = useState(false)
   const [curatedContracts, setCuratedContracts] = useState(null)
   const [targetContract, setTargetContract] = useState(null)
   const [assetMetadataVaultedProjects, setAssetMetadataVaultedProjects] = useState([]);
@@ -29,12 +34,15 @@ export default function Explorer() {
   const [assetMetadataProjectAssets, setAssetMetadataProjectAssets] = useState([]);
   const [vaultProject, setVaultProject] = useState(null);
   const [balanceProgress, setBalanceProgress] = useState(null);
+  const [livelinessProgress, setLivelinessProgress] = useState(null);
   const [vaults, setVaults] = useState([]);
+  const [nonFilteredVaults, setNonFilteredVaults] = useState([]);
   const DataTable = DataGrid;
   const [tabIndex, setTabIndex] = useState(tabIndexFromUrl);
   const { isOpen, onOpen, onClose } = useDisclosure()
   const [modalImage, setModalImage] = useState(null)
   const { colorMode } = useColorMode();
+  const [testOnly, setTestOnly] = useState(true);
   const isDark = colorMode === 'dark';
 
   const handleTabsChange = (index) => {
@@ -43,6 +51,12 @@ export default function Explorer() {
     urlParams.set('tab', index);
     router.push(`${router.pathname}?${urlParams.toString()}`);
   };
+
+  useEffect(() => {
+    if (targetContract) {
+      filterMigratable({ target: { value: targetContract } });
+    }
+  }, [showUnqualifiedVaults]);
 
   useEffect(() => {
     if(filterValueFromUrl && !vaultProject) {
@@ -107,6 +121,24 @@ export default function Explorer() {
         setAssetMetadataProjects(data);
       });
   }, []);
+
+async function getGasPrice() {
+  const url = `https://api.etherscan.io/api?module=gastracker&action=gasoracle&apikey=TMWK7RK9YTQ8VYWD8Q8GFAZS6UZ8MTH57E`;
+
+  return fetch(url)
+    .then(response => response.json())
+    .then(data => {
+      if (data.status === '1') {
+        return data.result.ProposeGasPrice
+      } else {
+        throw new Error('Failed to fetch gas prices');
+      }
+    })
+    .catch(error => {
+      console.error('Error fetching gas prices:', error);
+      return null;
+    });
+}
 
   function getProjectAssets(project) {
     setVaultProject(project)
@@ -202,17 +234,247 @@ export default function Explorer() {
     }
   }
 
-  function handleSelectedData(keyField: string) {
+async function estimateMigrateMany(toMigrate: any) {
+    let targetContractObject = curatedData.find(item=>{return item.name == targetContract})
+    if (!targetContract || !targetContractObject) {
+      return alert('Target contract address not found')      
+    } else if (toMigrate.length == 0) {
+      return migrationConsole.log('No vaults to migrate')
+    }
+
+    try {
+      
+      let abi: any = targetContractObject.collectionType == 'ERC1155'? contractAddresses.erc1155Abi : contractAddresses.erc721aAbi;
+      const contract = new Contract(targetContractObject.contracts[chainId], abi);
+      const contractWithSigner = contract.connect(library.getSigner());
+      let gasPrice = await getGasPrice()
+      let gasEstimate: any;
+      if (targetContractObject.collectionType === 'ERC721a') {
+        gasEstimate = await contractWithSigner.estimateGas.mintMany(
+          toMigrate.map(item => item.to),
+          toMigrate.map(item => item.tokenId)
+        );
+      } else if (targetContractObject.collectionType === 'ERC1155') {
+        gasEstimate = await contractWithSigner.estimateGas.migrationMintMany(
+          toMigrate.map(item => item.serial),
+          toMigrate.map(item => item.to),
+          toMigrate.map(item => item.tokenId)
+        );
+      } else {
+        throw new Error('Unsupported contract collection type');
+      }
+      let gasEstimateFormatted =  gasEstimate * gasPrice * 1e-9; 
+      migrationConsole.log(`Estimated gas for mintMany: ${gasEstimateFormatted}`);
+    } catch (error) {
+      migrationConsole.log('Error estimating gas for mintMany:', error);
+    }
+}
+async function performMigrateMany(toMigrate: any) {
+    let targetContractObject = curatedData.find(item=>{return item.name == targetContract})
+    if (!targetContract || !targetContractObject) {
+      return alert('Target contract address not found')      
+    } else if (toMigrate.length == 0) {
+      return alert('No vaults to migrate')
+    }
+
+    try {
+      let abi: any = targetContractObject.collectionType == 'ERC1155'? contractAddresses.erc1155Abi : contractAddresses.erc721aAbi;
+      const contract = new Contract(targetContractObject.contracts[chainId], abi);
+      const contractWithSigner = contract.connect(library.getSigner());
+      let tx;
+      if (targetContractObject.collectionType === 'ERC721a') {
+        tx = await contractWithSigner.mintMany(
+          toMigrate.map(item => item.to),
+          toMigrate.map(item => item.tokenId)
+        );
+      } else if (targetContractObject.collectionType === 'ERC1155') {
+        tx = await contractWithSigner.migrationMintMany(
+          toMigrate.map(item => item.serial),
+          toMigrate.map(item => item.to),
+          toMigrate.map(item => item.tokenId)
+        );
+      } else {
+        throw new Error('Unsupported contract collection type');
+      }
+      await tx.wait();
+      alert(`TX hash: ${tx.hash}`);
+      migrationConsole.log('Minted vaults:', toMigrate.length);
+      migrationConsole.log('refreshing')
+      await Promise.all(toMigrate.map(item => {
+        if (targetContractObject.collectionType === 'ERC721a') {
+          return sdk.fetchMetadata(item.tokenId);
+        } else if (targetContractObject.collectionType === 'ERC1155') {
+          sdk.fetchMetadata(`${Number(item.serial)}`);
+          return sdk.fetchMetadata(`${Number(item.serial)}1`);
+        } else {
+          throw new Error('Unsupported contract collection type');
+        }
+      }));
+      if (targetContractObject.collectionType === 'ERC721a') {
+        await sdk.checkLivelinessBulk(toMigrate.map(item => item.tokenId), chainId);
+      } else if (targetContractObject.collectionType === 'ERC1155') {
+        await sdk.checkLivelinessBulk(toMigrate.map(item => `${Number(item.serial)}1`), chainId);
+        await sdk.checkLivelinessBulk(toMigrate.map(item => `${Number(item.serial)}`), chainId);
+      }
+      migrationConsole.log('Refreshed metadata and liveliness for migrated vaults')
+    } catch (error) {
+      migrationConsole.log('Error minting vaults:', error);
+    }
+}
+
+let migrationConsole = {
+  log: (...toLog) => {
+    const migrationUpdatesElement = document.getElementById('migrationUpdates');
+    if (migrationUpdatesElement) {
+      const updateMessage = document.createElement('p');
+      updateMessage.textContent = toLog.join(' ');
+      migrationUpdatesElement.appendChild(updateMessage);
+    }
+  }
+};
+
+function handleMigration(keyField: string) {
+    if (!targetContract) {
+      return alert('Target contract is not defined');
+    }
     const selectedRows = document.querySelectorAll('.MuiDataGrid-row.Mui-selected');
-    selectedRows.forEach((row) => {
+    let toMigrate = [];
+    function processSelectedRows(index, attempts = 0) {
+      if (index >= selectedRows.length) {
+        migrationConsole.log('Migratable vaults:', toMigrate.length);
+        return testOnly? estimateMigrateMany(toMigrate) : performMigrateMany(toMigrate);
+      }
+
+      const row = selectedRows[index];
       const vaultIdCell = Array.from(row.children).find(cell => cell.getAttribute('data-field') === keyField);
       const vaultId = vaultIdCell ? vaultIdCell.getAttribute('data-value') : null;
       const rowData = vaults.find((vault) => vault.tokenid === vaultId);
+
       if (rowData) {
-        console.log('Selected row data:', rowData);
+        migrationConsole.log('Migrating vault:', rowData.tokenid);
+        fetch(`http://localhost:3001/jump/${rowData.tokenid}/${targetContract}/${rowData.network == "mainnet" ? 1 : 99999999999}?testOnly=${testOnly}`, {
+          method: 'GET',
+          headers: {
+            'content-type': 'application/json',
+            'x-api-key': localStorage.apiKey
+          }
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.error) {
+            migrationConsole.log('Error migrating vault:', data.msg);
+          } else {
+            migrationConsole.log('Successfully migrated vault:', rowData.tokenid);
+            toMigrate.push(data);
+          }
+          processSelectedRows(index + 1);
+        })
+        .catch(error => {
+          alert(`Error making API call:', ${error}`);
+          processSelectedRows(index + 1);
+        });
+      } else {
+        processSelectedRows(index + 1);
       }
-    });
+    }
+    processSelectedRows(0);
   }
+
+  function exportSelectedRecords() {
+    const selectedRows = document.querySelectorAll('.MuiDataGrid-row.Mui-selected');
+    let recordsToExport;
+
+    if (selectedRows.length > 0) {
+      const selectedTokenIds = Array.from(selectedRows).map(row => {
+        const vaultIdCell = Array.from(row.children).find(cell => cell.getAttribute('data-field') === 'tokenid');
+        return vaultIdCell ? vaultIdCell.getAttribute('data-value') : null;
+      }).filter(tokenid => tokenid !== null);
+
+      recordsToExport = vaults.filter(vault => selectedTokenIds.includes(vault.tokenid));
+    } else {
+      recordsToExport = vaults;
+    }
+
+    const json = JSON.stringify(recordsToExport, null, 2);
+    const blob = new Blob([json], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'exported_records.json';
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function handleLivelinessRefresh() {
+    let threadsFinished = 0
+    // let targetContractObject = curatedData.find(item=>{return item.name == targetContract})
+    const nonClaimedVaults = vaults.reverse().filter((vault, index, self) =>
+        index === self.findIndex((v) => v.tokenid === vault.tokenid && v.status !== 'claimed' && v.status !== 'deleted')
+    );
+
+    // let completedRequests = 0;
+    const totalVaults = nonClaimedVaults.length;
+    const vaultsPerThread = Math.ceil(totalVaults / threadCount);
+
+    const checkLivelinessRecursively = async (index, threadIndex, retryCount = 0) => {
+      const currentIndex = index + threadIndex * vaultsPerThread;
+      if (currentIndex >= totalVaults) {
+        // bulk update emblem.markets
+        
+        // Finally finish
+        return;
+      }
+
+      const vault = nonClaimedVaults[currentIndex];
+      if (vault && vault.tokenid) {        
+        migrationConsole.log('Refreshing liveliness for vault', vault.tokenid, 'at index', currentIndex, 'of', totalVaults, 'vaults', 'thread #', threadIndex);
+        setLivelinessProgress(`${threadsFinished} of ${totalVaults} vaults * ${threadCount} threads`);
+
+        try {
+          // The Work Goes Here
+          let metadata
+          if (vault.category === 'ERC721a') {
+            metadata = await sdk.fetchMetadata(vault.tokenid);
+          } else if (vault.category === 'ERC1155') {
+            metadata = await sdk.fetchMetadata(vault.tokenid);
+            metadata = await sdk.fetchMetadata(`${vault.tokenid}1 `);       
+          } else {
+            metadata = await sdk.fetchMetadata(vault.tokenid);
+            if (vault.serialNumber) {
+              await sdk.fetchMetadata(`${Number(vault.serialNumber)}`);
+              await sdk.fetchMetadata(`${Number(vault.serialNumber)}1`);
+            }
+          }         
+          // --Done
+          threadsFinished = threadsFinished+1
+          setTimeout(() => checkLivelinessRecursively(index + 1, threadIndex), 5000);
+        } catch (error) {
+          migrationConsole.log('Error refreshing liveliness:', error);
+          if (retryCount < 7) {
+            const retryDelay = Math.pow(2, retryCount) * 1000;
+            migrationConsole.log('Retrying in', retryDelay, 'ms');
+            setTimeout(() => checkLivelinessRecursively(index, threadIndex, retryCount + 1), retryDelay);
+          } else {
+            migrationConsole.log('Failed to refresh liveliness after 7 attempts, moving to next index');
+            setTimeout(() => checkLivelinessRecursively(index + 1, threadIndex), 5000);
+          }
+        }
+      } else {
+        setTimeout(() => checkLivelinessRecursively(index + 1, threadIndex), 0);
+      }
+
+      if (threadsFinished >= totalVaults) {
+        setLivelinessProgress("complete");
+      }
+    };
+
+    for (let i = 0; i < threadCount; i++) {
+        const initialIndex = i * vaultsPerThread;
+        if (initialIndex < totalVaults) {
+          checkLivelinessRecursively(0, i);
+        }
+    }    
+}
 
   function handleBalanceRefresh() {
     let threadsFinished = 0
@@ -268,8 +530,63 @@ export default function Explorer() {
         if (initialIndex < totalVaults) {
             refreshBalanceRecursively(0, i);
         }
-    }
+    }    
 }
+
+async function filterMigratable(e) {
+  if (e.target.value === '' || (targetContract && e.target.value !== targetContract)) {
+    setVaults(nonFilteredVaults);
+    if (e.target.value === '') {
+      setTargetContract(null);
+    }
+    return;
+  } else {
+    setTargetContract(e.target.value);
+  }
+
+  let contractRules = await sdk.fetchCuratedContractByName(e.target.value, curatedContracts);
+
+  // Store the original list of vaults if nonFilteredVaults is empty
+  if (nonFilteredVaults.length === 0) {
+    setNonFilteredVaults(vaults);
+  }
+
+  // Use nonFilteredVaults as the source list for filtering
+  const vaultList = nonFilteredVaults.length > 0 ? nonFilteredVaults : vaults;
+
+  const eligibleVaults = vaultList.filter(vault => {
+    const isNotFlagged = !vault.fraud;
+    const isLegacyContract = vault.category === "erc721Legacy";
+    const hasPositiveBalance = vault.balance >= 1;
+    const isNotJumped = vault.jumps_count === 0;
+    const isNotClaimed = vault.status !== 'claimed';
+    const isMinted = vault.status == 'minted';
+    const isMainnet = vault.network === 'mainnet'
+
+    // Assuming allowed is a function within contractRules
+    const isAllowed = contractRules.allowed(vault.balances, contractRules);
+
+    return isNotFlagged && isLegacyContract && hasPositiveBalance && isNotJumped && isNotClaimed && isAllowed && isMainnet && isMinted;
+  });
+
+  const unqualifiedVaults = vaultList.filter(vault => {
+    const isNotFlagged = !vault.fraud;
+    const isLegacyContract = vault.category === "erc721Legacy";
+    const hasPositiveBalance = vault.balance >= 1;
+    const isNotJumped = vault.jumps_count === 0;
+    const isNotClaimed = vault.status !== 'claimed';
+    const isMinted = vault.status == 'minted';
+    const isMainnet = vault.network === 'mainnet'
+
+    // Assuming allowed is a function within contractRules
+    const isAllowed = contractRules.allowed(vault.balances, contractRules);
+
+    return !(isNotFlagged && isLegacyContract && hasPositiveBalance && isNotJumped && isNotClaimed && isAllowed && isMainnet && isMinted);
+  });
+
+  setVaults(showUnqualifiedVaults ? unqualifiedVaults : eligibleVaults);
+}
+
 
 
 
@@ -412,7 +729,7 @@ export default function Explorer() {
             }
           </TabPanel>
           <TabPanel>
-          {vaults?.length> 0 && (
+          {(vaults?.length> 0 || targetContract) ? (
             <>
               <Flex direction="row" align="center">
                 <Input
@@ -428,18 +745,62 @@ export default function Explorer() {
                       Refresh Internal Balances {balanceProgress}
                     </div>
                 </Button>
-                <Button margin={5} onClick={()=>{handleSelectedData('tokenid')}}>
+                |
+                <Button isDisabled={!targetContract} margin={5} onClick={()=>{handleMigration('tokenid')}}>
                     <div>
-                      Migrate
+                     Migrate
                     </div>
                 </Button>
-                <Select placeholder="Select contract" onChange={(e) => setTargetContract(e.target.value)} width="350px">
+                <Button margin={5} onClick={() => handleLivelinessRefresh()}>
+                    <div>
+                      Refresh Liveliness {livelinessProgress}
+                    </div>
+                </Button>
+                <Checkbox
+                  ml={5}
+                  isChecked={testOnly}
+                  onChange={(e) => {
+                    setTestOnly(e.target.checked);
+                  }}
+                >
+                  Test Only
+                </Checkbox>
+                <Select margin={5} placeholder="Select contract" onChange={async (e) => await filterMigratable(e)} width="350px">
                   {curatedContracts.map((contract, index) => (
                     <option key={index} value={contract.name}>
                       {contract.name}
                     </option>
                   ))}
                 </Select>
+                |
+              <Input
+                placeholder="Search for Asset Name"
+                onChange={(e) => {
+                  const searchValue = e.target.value.toLowerCase();
+                  const filteredVaults = nonFilteredVaults.filter(vault =>
+                    vault.asset_name.toLowerCase().includes(searchValue)
+                  );
+                  setVaults(filteredVaults);
+                }}
+                width="300px"
+                ml={5}
+              />
+              <Checkbox
+                ml={5}
+                onChange={async (e) => {
+                  setShowUnqualifiedVaults(e.target.checked)                  
+                }}
+              >
+                Show Unqualified Vaults
+              </Checkbox>
+              </Flex>
+              <Flex alignItems="center">
+                <Button margin={5} onClick={() => exportSelectedRecords()}>
+                  Export Selected Records
+                </Button>
+                  <Box id="migrationUpdates" marginLeft={5} padding={5} borderWidth={1} borderRadius="lg" maxHeight="200px" overflowY="auto">
+                    <Text fontSize="lg" fontWeight="bold">{testOnly? 'TEST MODE: updates' : 'Updates'}</Text>                    
+                  </Box>
               </Flex>
               <DataTable
                 style={{ backgroundColor: 'var(--background-color)', color: 'var(--text-color)', margin: '20px', borderRadius: '10px' }}
@@ -468,7 +829,18 @@ export default function Explorer() {
                       <a href="#" onClick={(e) => {e.preventDefault(); getAssetChainVaults(params.value);}}>{params.value}</a>
                     ),
                   },
+                  { 
+                    field: 'network', 
+                    headerName: 'Network', 
+                    width: 150,
+                    renderCell: (params) => (
+                      <span>{params.value}</span>
+                    ),
+                  },
                   { field: 'balance', headerName: 'Balance', width: 100 },
+                  { field: 'balances', headerName: 'Inside Balances', width: 200, renderCell: (params) => (
+                    <span>{Array.isArray(params.value) ? params.value.length : 0}</span>
+                  ) },
                   { field: 'image', headerName: 'Image', width: 100, renderCell: (params) => (
                     <Box position="relative" zIndex="docked">
                       <Image 
@@ -534,21 +906,22 @@ export default function Explorer() {
                   asset_name: asset.asset_name,
                   project: asset.project,
                   asset_chain: asset.asset_chain,
+                  network: asset.network,
                   balance: asset.balance,
+                  balances: asset.balances,
                   image: asset.image,
                   tokenid: asset.tokenid,
                   category: asset.category,
                   status: asset.status,
                   contract: asset.contract,
                   fraud: asset.fraud,
-                  network: asset.network,
                   jumps_count: asset.jumps_count,
                 }))}
                 autoHeight={true}
                 checkboxSelection
-              />
+              />                
          </>
-          )}
+          ): null}
           </TabPanel>
           <TabPanel>
             {curatedData && (

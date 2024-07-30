@@ -882,6 +882,8 @@ export default function Nft() {
   }
 
   const handleMove = async (index: number) => {
+    alert("Mode disabled")
+    return false
     setMoving(true)
     await deleteVaultFromDatabase(tokenId)
     let collectionDestinationName = qualifiedCollections.to[index]
@@ -1476,7 +1478,7 @@ export default function Nft() {
                               </Box>
                             ) : null}
 
-                            {mine && qualifiedCollections && qualifiedCollections.to.length > 0 ? (
+                            {false && mine && qualifiedCollections && qualifiedCollections.to.length > 0 ? (
                               <>
                                  {!migrateApproved && contractAddresses.vaultHandlerV8[chainId] ? (<ApprovalButton
                                   handler={{address: contractAddresses.vaultHandlerV8[chainId] , abi: contractAddresses.vaultHandlerV8Abi }} 
