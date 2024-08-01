@@ -380,6 +380,31 @@ function handleMigration(keyField: string) {
     processSelectedRows(0);
   }
 
+  function refreshEmblemMarkets() {
+    const selectedRows = document.querySelectorAll('.MuiDataGrid-row.Mui-selected');
+    let selectedTokenIds = [];
+
+    if (selectedRows.length > 0) {
+      selectedTokenIds = Array.from(selectedRows).map(row => {
+        const vaultIdCell = Array.from(row.children).find(cell => cell.getAttribute('data-field') === 'tokenid');
+        return vaultIdCell ? vaultIdCell.getAttribute('data-value') : null;
+      }).filter(tokenid => tokenid !== null);
+    } else {
+      selectedTokenIds = vaults.map(vault => vault.tokenid);
+    }
+    let filteredVaults = vaults.filter(vault => selectedTokenIds.includes(vault.tokenid) && vault.status == "minted" && vault.category !== "erc721Legacy").map(f=>{ return `${f.contract}:${f.externalTokenId}`});
+
+    const refreshReservoirInBatches = async (vaults, startIndex = 0, batchSize = 50) => {
+      const batch = vaults.slice(startIndex, startIndex + batchSize);
+      if (batch.length === 0) return;
+
+      await refreshReservoir(batch);
+      refreshReservoirInBatches(vaults, startIndex + batchSize, batchSize);
+    };
+
+    refreshReservoirInBatches(filteredVaults);
+  }
+
   function exportSelectedRecords() {
     const selectedRows = document.querySelectorAll('.MuiDataGrid-row.Mui-selected');
     let recordsToExport;
@@ -521,6 +546,7 @@ function handleMigration(keyField: string) {
       }
 
       if (threadsFinished >= totalVaults) {
+
         setBalanceProgress("complete");
       }
     };
@@ -532,6 +558,34 @@ function handleMigration(keyField: string) {
         }
     }    
 }
+
+const refreshReservoir = async (tokens) => {
+  const myHeaders = new Headers();
+  myHeaders.append("content-type", "application/json");
+
+  const raw = JSON.stringify({
+    "tokens": tokens
+  });
+
+  const requestOptions: any = {
+    method: "POST",
+    headers: myHeaders,
+    body: raw,
+    redirect: "follow"
+  };
+
+  try {
+    const response = await fetch("https://api.reservoir.tools/tokens/refresh/v2", requestOptions);
+    const result = await response.json();
+    alert("Marketplace Refreshed")
+    console.log(result);
+    return result
+  } catch (error) {
+    console.error(error);
+    return error
+  }
+};
+
 
 async function filterMigratable(e) {
   if (e.target.value === '' || (targetContract && e.target.value !== targetContract)) {
@@ -562,11 +616,16 @@ async function filterMigratable(e) {
     const isNotClaimed = vault.status !== 'claimed';
     const isMinted = vault.status == 'minted';
     const isMainnet = vault.network === 'mainnet'
-
-    // Assuming allowed is a function within contractRules
+    const isExpired = vault.balances.some(item => 
+      item.traits && item.traits.some(trait => 
+        trait.value === "Expired"
+      )
+    )//vault.attributes.find(item=> item.trait_type == 'registration_status' && item.value == "Expired")
+    // Add way to toggle unminted
+    // Check for existence of value.attributes.find(item=> item.trait_type == 'registration_status' && item.value == "Expired")
     const isAllowed = contractRules.allowed(vault.balances, contractRules);
 
-    return isNotFlagged && isLegacyContract && hasPositiveBalance && isNotJumped && isNotClaimed && isAllowed && isMainnet && isMinted;
+    return isNotFlagged && isLegacyContract && hasPositiveBalance && isNotJumped && isNotClaimed && isAllowed && isMainnet && isMinted && isExpired;
   });
 
   const unqualifiedVaults = vaultList.filter(vault => {
@@ -795,6 +854,9 @@ async function filterMigratable(e) {
               </Checkbox>
               </Flex>
               <Flex alignItems="center">
+                <Button margin={5} onClick={() => refreshEmblemMarkets()}>
+                  Marketplace Refresh Selected Records
+                </Button>
                 <Button margin={5} onClick={() => exportSelectedRecords()}>
                   Export Selected Records
                 </Button>
