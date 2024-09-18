@@ -174,7 +174,7 @@ export default function Nft2() {
 
   const checkLiveliness = (tokenId, targetContract, cb)=>{
     console.log("check liveliness next", targetContract )
-    let endpoint = (targetContract && targetContract.name)  ? EMBLEM_V2_API + '/liveliness-curated' : EMBLEM_API + '/liveliness'
+    let endpoint = EMBLEM_V2_API + '/liveliness-curated'
     fetch(endpoint, {
       method: 'POST',
       headers: {
@@ -882,8 +882,6 @@ export default function Nft2() {
       // setState({ loaded: true })
     }
   }
-
-
 
   function splitDescription(words) {
     var desc = words? words.split('\n\n\n\n'): [" "]

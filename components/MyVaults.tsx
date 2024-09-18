@@ -4,7 +4,7 @@ import Refreshing from './Refreshing'
 import { useRouter } from 'next/router'
 import { useWeb3React } from '@web3-react/core'
 import { useEffect, useState } from 'react'
-import { EMBLEM_API, EMBLEM_V2_API, contractAddresses, curatedContracts } from '../constants'
+import { EMBLEM_V2_API, contractAddresses, curatedContracts } from '../constants'
 import InfiniteScroll from 'react-infinite-scroll-component';
 import Embed from './Embed'
 import { initCuratedContracts, sdk } from '../utils'

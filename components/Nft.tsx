@@ -191,145 +191,6 @@ export default function Nft() {
     
   }
 
-  // const lazyMint = () =>{
-  //   library.getSigner(account)
-  //   .signMessage('Delayed Minting: ' + tokenId)
-  //   .then((signature: any) => {
-  //     console.log("sig", signature)
-  //     fetch(EMBLEM_API + '/lazyMint', {
-  //       method: 'POST',
-  //       headers: {
-  //         'Content-Type': 'application/json',
-  //         service: 'evmetadata',
-  //         chainid: chainId.toString()
-  //       },
-  //       body: JSON.stringify({tokenId: tokenId, signature: signature}),
-  //     }).then(async function (response) {
-  //         let data = await response.json()
-  //         if (!data.error && data.data) {
-  //           setMintSignature(data.data.signature)
-  //           setNonce(data.data.nonce)
-  //           setBlock(data.data.block)
-  //           setShowVerifyingSignature(true)
-  //           // setCreating(true)
-  //           setTimeout(()=>{
-  //             delayedMint(data.data.nonce, data.data.block, data.data.signature)
-  //           }, 1500)
-  //         } else {
-  //           alert(data.error? data.msg: 'unknown error' )
-  //         }            
-  //     })
-  //   })
-  // }
-
-  // const delayedMint = (nonce, block, sig) => {
-  //   // setCreating(true)
-  //     console.log("Delayed Minting")
-  //     setShowVerifyingSignature(false)
-  //     setShowMakingVaultMsg(true)
-  //     setMinting(true)
-  //     let cipherTextHash = vaultAddresses.filter(address=>{ return address.coin == "ETH"})[0].address
-  //     console.log("--------------------------------------------------------Delayed Minting", account, tokenId, cipherTextHash, nonce, block, sig)
-  //     ;(handlerContract as Contract)
-  //     .buyWithSignature2(account, tokenId, cipherTextHash, nonce, block, sig)
-  //     .then(({ hash }: { hash: string }) => {
-  //       setTimeout(() => {
-  //         setHash(hash)
-  //         setShowMakingVaultMsg(false)
-          
-  //       }, 100) // Solving State race condition where transaction watcher wouldn't notice we were creating
-  //     })
-  //     .catch((error: ErrorWithCode) => {
-  //         console.log("AAAAAHHHHHH", error)
-  //         setShowMakingVaultMsg(false)
-  //         // setMinting(false)
-  //     })    
-  // }
-
-  // const fireMetaMask = () => {
-  //   console.log(mintPassword)
-  //   setAccepting(true)
-  //   getWitness((witness)=>{
-  //     // console.log(tokenId, mintPassword, witness.nonce, witness.signature, account)
-  //     ;(handlerContract as Contract)
-  //     .transferWithCode(tokenId, mintPassword, account, witness.nonce, witness.signature)
-  //     .then(({ hash }: { hash: string }) => {
-  //       setTimeout(() => {
-  //         setHash(hash)          
-  //         // setShowMakingVaultMsg(true)
-  //       }, 100) // Solving State race condition where transaction watcher wouldn't notice we were creating
-  //     })
-  //     .catch((error: ErrorWithCode) => {
-  //       setAccepting(false)
-  //       if (error?.code !== 4001) {
-  //         console.log(`tx failed.`, error)
-  //       } else {
-  //         // setAccepting(false)
-  //         // setShowPreVaultMsg(false)
-  //       }
-  //     })
-  //   })
-    
-  // }
-
-  // const addPreTransfer = () => {
-  //   console.log('transferImage', "0x"+transferImage)
-  //   setPreTransfering(true)
-  //   ;(handlerContract as Contract)
-  //     .addPreTransfer(tokenId, "0x"+transferImage)
-  //     .then(({ hash }: { hash: string }) => {
-  //       // setTimeout(() => {
-  //         setHash(hash)
-  //         console.log("Set Pre Transfering True", preTransfering)
-  //         // setShowMakingVaultMsg(true)
-  //       // }, 100) // Solving State race condition where transaction watcher wouldn't notice we were creating
-  //     })
-  //     .catch((error: ErrorWithCode) => {
-  //       if (error?.code){   
-  //           console.log("Error?")       
-  //           setPreTransfering(false)
-  //           setShowTransferPassword(false)
-  //           setTransferPassword('')
-  //       } else {
-  //         // setShowTransferPassword(!showTransferPassword? true : false)
-  //         // setPreTransfering(false)
-  //         // setShowPreVaultMsg(false)
-  //       }
-  //     })
-  // }
-
-  const handleApproveForall = () => {
-    setApproving(true)
-    ;(emblemContract as Contract)
-      .setApprovalForAll(contractAddresses.vaultHandlerV8[chainId], true)
-      .then(({ hash }: { hash: string }) => {
-        setTimeout(() => {
-          setHash(hash)
-        }, 100) // Solving State race condition where transaction watcher wouldn't notice we were creating
-      })
-      .catch((error: ErrorWithCode) => {
-        if (error?.code !== 4001) {
-          console.log(`tx failed.`, error)
-        } else {
-          setApproving(false)
-        }
-      })
-  }
-
-  const approveCovalFlow = () => {
-    setApproving(true)
-    ;(covalContract as Contract)
-      .approve(contractAddresses.vaultHandler[chainId], '100000000000000')
-      .then(({ hash }: { hash: string }) => {
-        setHash(hash)
-      })
-      .catch((error: ErrorWithCode) => {
-        if (error?.code == 4001) {
-          setApproving(false)
-        }
-      })
-  }
-
   const deleteVault = () =>{
     library.getSigner(account)
       .signMessage('Delete: ' + tokenId)
@@ -346,28 +207,7 @@ export default function Nft() {
           location.href = location.href.split("/")[0] + "/vaults"
         })
       })
-  }
-
-  const syncAccount = () =>{
-    
-        let synched = localStorage.getItem(tokenId+'-v')
-        if (!synched) {
-          fetch(EMBLEM_API + '/sync/'+tokenId, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              service: 'evmetadata'
-            }          
-          }).then(async function (response){
-              localStorage.setItem(tokenId+'-v', '1')
-              return true
-          }).catch(()=>{
-            return false
-          })
-      }
-  }
-
-  
+  }  
 
   const getVault = async () => {
     const response = await fetch(EMBLEM_V2_API + '/meta/' + tokenId + '?experimental=true'+(clearCache ? '&_vercel_no_cache=1' : ''), {
@@ -406,40 +246,6 @@ export default function Nft() {
       // !slideshowOnly? saveCache(jsonData) : null
       setLoadingApi(false)
       setInvalidVault(false)
-    }
-    // {
-    //   !vaultPrivacy && !loadedValues ?    
-    //   getAllBalancesLive([], tokenId, (v)=>{
-    //     if (v) {
-    //       setVaultValues(v)
-    //     }        
-    //   }) : null
-    // }
-    // { if (jsonData.targetContract) {
-    //   setTimeout(() => {
-    //     location.href = location.origin + '/nft2?id=' + jsonData.tokenId
-    //   }, 500)
-    // }}
-  }
-
-  
-
-  const getWitness = async (cb: { (witness: any): void; (arg0: boolean): any }) => {
-    const response = await fetch(EMBLEM_API + '/witness/' + tokenId, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        cc: 't',
-        service: 'evmetadata',
-        chainid: chainId.toString()
-      },
-    })
-    const jsonData = await response.json()
-    if (jsonData.signature) {
-      console.log('witness', jsonData)
-      return cb(jsonData)
-    } else {
-      return cb(false)
     }
   }
 
@@ -609,23 +415,6 @@ export default function Nft() {
     const { torusNodeEndpoints, torusIndexes } = await fetchNodeDetails.getNodeDetails({ verifier: 'tor-us-signer-vercel', verifierId });
     const { privKey } = await torusUtils.retrieveShares(torusNodeEndpoints, torusIndexes, 'tor-us-signer-vercel', { verifier_id: verifierId }, idToken);
     return cb({privateKey: privKey});
-  }
-
-  const addAddress = async (signature: any, tokenId: string | string[], coin: string, cb: { (result: any): void; (arg0: any): any }) => {
-    var myHeaders = new Headers()
-    myHeaders.append('chainId', chainId.toString())
-    myHeaders.append('service', 'evmetadata')
-    myHeaders.append('Content-Type', 'application/json')
-
-    var raw = JSON.stringify({ signature: signature, coin: coin })
-    const response = await fetch(EMBLEM_API + '/address/' + tokenId, {
-      method: 'POST',
-      headers: myHeaders,
-      body: raw,
-      redirect: 'follow',
-    })
-    const jsonData = await response.json()
-    return cb(jsonData)
   }
 
   const decryptEmbed = async (signature: any, tokenId: string | string[], cb: { (result: any): void; (arg0: any): any }) => {
@@ -858,18 +647,6 @@ export default function Nft() {
       })
     }) 
   }
-
-  const handleAddressSign = async (coin: string) => {
-    library
-      .getSigner(account)
-      .signMessage('Address: ' + tokenId)
-      .then((signature: any) => {
-        addAddress(signature, tokenId, coin, (result: any) => {
-          getVault()
-        })
-      })
-  }
-
   const handleOwnedEmbed = async () => {
     library
       .getSigner(account)
@@ -1305,83 +1082,11 @@ export default function Nft() {
                                     </Button>
                                   )
                                 }) : null}
-                              </Flex>
-                            {(mine || status === 'claimed') && vaultAddresses.length < 12 ? (
-                              <>
-                                <button className="nft_button" onClick={()=>{onManageAddressToggle()}}>Manage Addresses</button>
-                                <Flex w="340px" justify="center" flexWrap="wrap">
-                                  <Collapse isOpen={isManageAddressOpen}>
-                                    { !hasAddress('DOGE') ? (
-                                      <Button className="nft_button" mr={2} mt={2} onClick={()=>{ handleAddressSign('DOGE') }}>Add DOGE</Button>
-                                    ) : null }
-                                    { !hasAddress('DGB') ? (
-                                      <Button className="nft_button" mr={2} mt={2} onClick={()=>{ handleAddressSign('DGB') }}>Add Digibyte</Button>
-                                    ) : null }
-                                    { !hasAddress('NMC') ? (
-                                      <Button className="nft_button" mr={2} mt={2} onClick={()=>{ handleAddressSign('NMC') }}>Add Namecoin</Button>
-                                    ) : null }
-                                    { !hasAddress('LTC') ? (
-                                      <Button className="nft_button" mr={2} mt={2} onClick={()=>{ handleAddressSign('LTC') }}>Add Litecoin</Button>
-                                    ) : null }
-                                    { !hasAddress('MONA') ? (
-                                      <Button className="nft_button" mr={2} mt={2} onClick={()=>{ handleAddressSign('MONA') }}>Add Mona</Button>
-                                    ) : null }
-                                    { !hasAddress('TEZOS') ? (
-                                      <Button className="nft_button" mr={2} mt={2} onClick={()=>{ handleAddressSign('TEZOS') }}>Add Tezos</Button>
-                                    ) : null }
-                                    { !hasAddress('SOLANA') ? (
-                                      <Button className="nft_button" mr={2} mt={2} onClick={()=>{ handleAddressSign('SOLANA') }}>Add Solana</Button>
-                                    ) : null }
-                                    { !hasAddress('STX') ? (
-                                      <Button className="nft_button" mr={2} mt={2} onClick={()=>{ handleAddressSign('STX') }}>Add Stacks</Button>
-                                    ) : null }
-                                    { !hasAddress('TAP') ? (
-                                      <Button className="nft_button" mr={2} mt={2} onClick={()=>{ handleAddressSign('TAP') }}>Add Taproot</Button>
-                                    ) : null }
-                                  </Collapse>
-                                </Flex>
-                              </>
-                            ) : null}
+                              </Flex>                            
                             </Stack>
                           </ButtonGroup>
                         </Box>
                       ) : null}
-
-                      
-                      
-                      {/* {isCovalApproved && !live ? (
-                        <Stack direction="row" align="flex-start" spacing="0rem" flexWrap="wrap" shouldWrapChildren>
-                          <Box maxW="sm" borderWidth="1px" p={1} rounded="lg" overflow="hidden">
-                            <Text>Creating a vault spends {price * Math.pow(10, -decimals)} Coval from your wallet</Text>
-                           
-                          </Box>
-                        </Stack>
-                      ) : null} */}
-
-                    {/* {mine && !approved ? (<>
-                      <Box display="flex" alignItems="baseline" justifyContent="space-between" mt="4">
-                        <Button
-                          backgroundColor={"#02b402"}
-                          color={"black !important"}
-                          fontWeight={"bold !important"}
-                          className="nft_button"
-                          width="100%" onClick={() => {
-                            return handleApproveForall()
-                          }
-                          }> Approve Minting</Button>
-                      </Box>
-                    </>) : null} */}
-
-                    {/* {!live && mine && vaultChainId == chainId && status !== 'claimed' && !showMakingVaultMsg && approved && !isCovalApproved ? (
-                      <>
-                        <Button backgroundColor={"#02b402"}
-                          color={"black !important"}
-                          fontWeight={"bold !important"}
-                          width="100%" mt={5} onClick={approveCovalFlow}>
-                          Approve Spending Coval
-                        </Button>
-                      </>
-                    ) : null} */}
 
                       {(showTransferPassword || mintPassword) && acceptable ? (
                           <Box>
@@ -1389,31 +1094,6 @@ export default function Nft() {
                             <Text>Password: {(transferPassword || mintPassword)}</Text>
                           </Box>
                       ) : null}
-                      
-                      {/* {acceptable && claimedBy !== account ? (
-                        <>
-                            <Button mt={2} width="100%" onClick={()=>{fireMetaMask()}}>Accept</Button>
-                            <Input
-                              mt={2}
-                              type="password"
-                              id="mintPassword"
-                              minLength={3}
-                              maxLength={200}
-                              value={mintPassword || ''}
-                              onChange={(e) => {
-                                console.log('grrr', e.target.value, mintPassword)
-                                setMintPassword(e.target.value)}
-                              }
-                              autoComplete="off"
-                            />
-                        </>
-                      ) : null} */}
-
-                      {/* {!live && mine && vaultChainId == chainId && status !== 'claimed' && !showMakingVaultMsg && approved && isCovalApproved ? (
-                          <>                      
-                            <Button width="100%" mt={5} isDisabled={(!vaultPrivacy && vaultValues.length < 1)|| mintLockedForever} onClick={lazyMint}>{mintLockedForever? 'Mint Locked - keys accessed before mint' : !vaultPrivacy && vaultValues.length < 1? 'Please load the vault to mint': 'Mint Vault'}</Button>
-                          </>
-                      ) : null} */}
 
                       {!(status === 'claimed') && account && vaultChainId === chainId && mine && !sealed && approved && live ? (
                         <Box display="flex" alignItems="baseline" justifyContent="space-between" mt="4">

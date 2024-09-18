@@ -6,12 +6,13 @@ import { useRouter } from 'next/router'
 import { useWeb3React } from '@web3-react/core'
 import { useEffect, useState } from 'react'
 import { validImage } from '../utils'
-import { EMBLEM_API, EMBLEM_V2_API, EMBLEM_V3_API } from '../constants'
+import { EMBLEM_V2_API, EMBLEM_V3_API } from '../constants'
 import CoinBalance from './partials/CoinBalance'
 import Embed from './Embed'
 import CuratedCrudForm from './partials/CuratedCrudForm'
 import CuratedDataView from './partials/CuratedDataView'
 import ReservoirAdmin from './ReservoirAdmin'
+import AlchemyAdmin from './AlchemyAdmin'
 
 export default function CuratedAdmin() {
   const { query } = useRouter()
@@ -93,6 +94,7 @@ export default function CuratedAdmin() {
         </Box>
       }
       <ReservoirAdmin />
+      <AlchemyAdmin />
 
     </Loader>
   )
