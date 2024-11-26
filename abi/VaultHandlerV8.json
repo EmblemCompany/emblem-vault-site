@@ -154,6 +154,43 @@
         {
           "indexed": true,
           "internalType": "address",
+          "name": "nftAddress",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "to",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes",
+          "name": "serialNumber",
+          "type": "bytes"
+        }
+      ],
+      "name": "MintVault",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
           "name": "previousOwner",
           "type": "address"
         },
@@ -259,19 +296,24 @@
           "type": "address"
         },
         {
+          "internalType": "address",
+          "name": "_payment",
+          "type": "address"
+        },
+        {
           "internalType": "uint256",
           "name": "_price",
           "type": "uint256"
         },
         {
-          "internalType": "address[]",
-          "name": "to",
-          "type": "address[]"
+          "internalType": "address",
+          "name": "_to",
+          "type": "address"
         },
         {
-          "internalType": "uint256[]",
-          "name": "tokenIds",
-          "type": "uint256[]"
+          "internalType": "uint256",
+          "name": "_tokenId",
+          "type": "uint256"
         },
         {
           "internalType": "uint256",
@@ -294,7 +336,7 @@
           "type": "uint256"
         }
       ],
-      "name": "buyWithQuoteBulk",
+      "name": "buyWithSignedPrice",
       "outputs": [],
       "stateMutability": "payable",
       "type": "function"
@@ -941,13 +983,6 @@
     {
       "inputs": [],
       "name": "toggleClaimable",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "toggleShouldBurn",
       "outputs": [],
       "stateMutability": "nonpayable",
       "type": "function"

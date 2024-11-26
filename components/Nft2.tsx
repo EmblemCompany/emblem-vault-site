@@ -32,7 +32,7 @@ import Loader from 'react-loader'
 import dynamic from 'next/dynamic'
 import { Contract } from '@ethersproject/contracts'
 import { TransactionToast } from './TransactionToast'
-import { EMBLEM_API, contractAddresses, SIG_API, EMBLEM_V2_API, curatedContracts, EMBLEM_V3_API } from '../constants'
+import { EMBLEM_API, contractAddresses, SIG_API, EMBLEM_V2_API, curatedContracts, EMBLEM_V3_API, ZERO_ADDRESS } from '../constants'
 import { useContract } from '../hooks'
 import { CHAIN_ID_NAMES, fromContractValue, initCuratedContracts, sdk, toContractValue } from '../utils'
 import CryptoJS from 'crypto-js'
@@ -237,7 +237,7 @@ export default function Nft2() {
           let data = await response.json()
           setCuratedMintingParameters(data)
           ;(vaultHandlerContract as Contract)
-            .buyWithSignedPrice(data._nftAddress, data._payment, data._price, data._to, data._tokenId, data._nonce, data._signature, data.serialNumber, 1)
+            .buyWithSignedPrice(data._nftAddress, '0x0000000000000000000000000000000000000000', data._price, data._to, data._tokenId, data._nonce, data._signature, data.serialNumber, 1, {value: data._price})
             .then(({ hash }: { hash: string }) => {
               setTimeout(() => {
                 setHash(hash)
@@ -247,7 +247,7 @@ export default function Nft2() {
               }, 100) // Solving State race condition where transaction watcher wouldn't notice we were creating
             })
             .catch((error: ErrorWithCode) => {
-              // toast.notify( "Sup" )
+              // toast.notify( "Something went wrong" )
               console.log('ERROR', error)
               setShowMakingVaultMsg(false)
               setMinting(false)
@@ -373,9 +373,11 @@ export default function Nft2() {
     if (jsonData.targetContract) {
       initCuratedContracts().then((data)=>{
         let contract: any = data.find(contract=>{return contract[chainId] == jsonData.targetContract[chainId]})
-        contract.tokenId = jsonData.targetContract.tokenId
-        contract.serialNumber = jsonData.targetContract.serialNumber
-        jsonData.targetContract? setTargetContract(contract) : null
+        if (contract) {
+          contract.tokenId = jsonData.targetContract.tokenId
+          contract.serialNumber = jsonData.targetContract.serialNumber
+          jsonData.targetContract? setTargetContract(contract) : null
+        }
       })      
     }
     
@@ -399,6 +401,7 @@ export default function Nft2() {
       jsonData.network == "fantom" ? 250 : 
       jsonData.network == "bitcoin" ? 0 : 
       jsonData.network == "aurora" ? 1313161554 : 
+      jsonData.network == "solana" ? 900 : 
       97
     )
     if (!jsonData.live) {
@@ -568,7 +571,7 @@ export default function Nft2() {
         emblemContract = getCuratedContract(targetContract[chainId])
         setDecimals(await covalContract.decimals())
         setPrice(250 * Math.pow(10, decimals))
-        setAllowance(
+        !allowance && setAllowance(
           await covalContract
             .allowance((accountOverride || account), contractAddresses.vaultHandlerV8[chainId])
             .then((balance: { toString: () => string }) => balance.toString())
@@ -585,13 +588,17 @@ export default function Nft2() {
             
             let balanceOf = await emblemContract.balanceOf((accountOverride || account), allowedContracts.tokenId).then((balance: { toString: () => string }) => balance.toString())
             
-            _owner = Number(balanceOf) > 0 ? (accountOverride || account) : "0x0000000000000000000000000000000000000000"            
+            _owner = Number(balanceOf) > 0 && (rawMetadata as any).ownershipInfo.owner == (accountOverride || account) ? (accountOverride || account) : "0x0000000000000000000000000000000000000000"            
             if (Number(balanceOf) > 0) {
               setOwnedCuratedBalance(balanceOf)
             }
           } else {
-            setOwnedCuratedBalance(1)            
-            _owner  = await emblemContract.ownerOf(allowedContracts.collectionType == 'ERC721a' ? allowedContracts.tokenId :tokenId)
+            setOwnedCuratedBalance(1)
+            try {
+              _owner  = await emblemContract.ownerOf(allowedContracts.collectionType == 'ERC721a' ? allowedContracts.tokenId :tokenId)
+            } catch(err) {
+              _owner = "0x0000000000000000000000000000000000000000"
+            }
             // alert(_owner)
           }
         } else {
@@ -603,12 +610,14 @@ export default function Nft2() {
       
       finish()
     } catch(err){
-      _owner = "0x0000000000000000000000000000000000000000"
+      console.log('error getting contract states', err)
+      if (status == 'unminted') {
+      // _owner = "0x0000000000000000000000000000000000000000"
+      }
       finish()
     }
 
     async function finish(){
-      
       let isApproved
       // if (targetContract[chainId]) {
       //   isApproved = await emblemContract.isApprovedForAll((accountOverride || account), contractAddresses.vaultHandlerV8[chainId])
@@ -621,6 +630,17 @@ export default function Nft2() {
         setApproved(true)
       // }
       setOwner(_owner)
+      // Log things being set
+      console.log('owner', _owner)
+      console.log('accountOverride', accountOverride)
+      console.log('account', account)
+      console.log('to', to)
+      console.log('mine', mine)
+      console.log('mineUnMinted', mineUnMinted)
+      console.log('status', status)
+      console.log('mintLockedForever', mintLockedForever)
+      console.log('owner', owner)
+
       setMine(_owner === (accountOverride || account) || (to === (accountOverride || account) && _owner === "0x0000000000000000000000000000000000000000"))
       setMineUnMinted(to === (accountOverride || account) && _owner === "0x0000000000000000000000000000000000000000")
       loadPasswordFromLocalStorage()
@@ -851,7 +871,18 @@ export default function Nft2() {
   }, [dbStale]);
 
   useEffect(() => {
-    ((accountOverride || account) && chainId && vaultChainId && chainId == vaultChainId) || ((query.noLayout && query.noLayout == 'true') || (query.slideshowOnly && query.slideshowOnly == 'true')) ? getContractStates() : null
+    // Check if we should get contract states
+    if (
+      // If owner is not set, or if owner is set to a non-zero address while status is unclaimed
+      // (!owner || (owner !== "0x0000000000000000000000000000000000000000" && status === "unclaimed")) &&
+      // User is connected and on the correct chain
+      ((accountOverride || account) && chainId && vaultChainId && chainId == vaultChainId) ||
+      // Or if special query parameters are set
+      ((query.noLayout && query.noLayout == 'true') || (query.slideshowOnly && query.slideshowOnly == 'true'))
+    ) {
+      // If conditions are met, get contract states
+      getContractStates();
+    }
   })
 
   useEffect(() => {
@@ -935,6 +966,18 @@ export default function Nft2() {
       (alternateContractAddress? alternateContractAddress : targetContract[chainId]? targetContract[chainId]: contractAddresses.emblemVault[vaultChainId]) +
       '/' +
       (targetContract? allowedContract.tokenId: tokenId)
+    , '_blank')
+  }
+
+  function visitEmblemMarketsLink() {
+    let allowedContract: any = targetContract
+    window.open(
+      'https://emblem.markets/' + 
+      (vaultChainId === 1 ? 'ethereum' : vaultChainId === 137 ? 'polygon' : 'ethereum') + 
+      '/asset/' +
+      (alternateContractAddress ? alternateContractAddress : targetContract ? targetContract[chainId] : contractAddresses.emblemVault[vaultChainId]) +
+      ':' +
+      (targetContract ? allowedContract.tokenId : tokenId)
     , '_blank')
   }
 
@@ -1058,11 +1101,11 @@ export default function Nft2() {
                     <Stack align="center">
                       <Box mt="2" ml="4" lineHeight="tight">
                         <Stack>                    
-                        { vaultChainId == chainId ? (
+                        { vaultChainId == chainId && owner ? (
                             <Text fontSize="xs">
                             
-                              <Link href={"./vaults?address="+owner}>
-                                Owner: {owner}
+                              <Link href={`/vaults?address=${(rawMetadata as any).ownershipInfo.owner == "0x0000000000000000000000000000000000000000" ? (rawMetadata as any).ownershipInfo.createdBy : (rawMetadata as any).ownershipInfo.owner}`}>
+                                Owner: {(rawMetadata as any).ownershipInfo.owner == "0x0000000000000000000000000000000000000000" ? (rawMetadata as any).ownershipInfo.createdBy : (rawMetadata as any).ownershipInfo.owner}
                               </Link>
                             
                             </Text>
@@ -1192,19 +1235,41 @@ export default function Nft2() {
                         </ButtonGroup>
                         </Box>
                       ) : null}
+                      {(!(status === 'claimed') && live && vaultChainId === 900) ? (
+                        <Button
+                          className="nft_button"
+                          width="100%"
+                          mt={3}
+                          onClick={() => { window.open(`https://core.metaplex.com/explorer/${(rawMetadata as any).targetContract.tokenId}?env=devnet`, '_blank') }}
+                        >
+                          View on Solana
+                        </Button>
+                      ) : null}
                       {(!(status === 'claimed') && live && (vaultChainId === 1 || vaultChainId === 137 ))? (
                         <Box display="flex" alignItems="baseline" justifyContent="space-between" mt="4">
                           {/* <Stack d="flex" width="100%"> */}
-                            <Button
+
+                          { vaultChainId == 1 ?(
+                              <Button
+                                className="nft_button"
+                                width="50%"
+                                m={5}
+                                onClick={() => {visitEmblemMarketsLink()}}
+                              >
+                                Emblem.Markets
+                              </Button>
+                              ) : null}
+
+                            {/* <Button
                               className="nft_button"
                               width={mine && vaultChainId == 1? "33%" : vaultChainId == 137? "100%": "50%"}
                               m={2.5}
                               mb={5}
                               onClick={() => {visitOpenSeaLink()}}>
                                 Opensea
-                            </Button>
+                            </Button> */}
 
-                            { vaultChainId == 1 ?(
+                            {/* { vaultChainId == 1 ?(
                               <Button
                                 className="nft_button"
                                 width="50%"
@@ -1213,7 +1278,7 @@ export default function Nft2() {
                               >
                                 LooksRare
                               </Button>
-                              ) : null}
+                              ) : null} */}
 
                             { mine && vaultChainId == 1? (
                               <Button

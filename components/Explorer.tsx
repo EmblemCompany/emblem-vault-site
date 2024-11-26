@@ -1,4 +1,4 @@
-import { Flex, Text, Link, Image, Stack, Spinner, useColorMode, Input, VStack, Button, Tabs, TabList, Tab, TabPanels, TabPanel, Modal, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton, ModalBody, useDisclosure, Select, Checkbox, List, ListItem } from '@chakra-ui/react'
+import { Flex, Text, Link, Image, Stack, Spinner, useColorMode, Input, VStack, Button, Tabs, TabList, Tab, TabPanels, TabPanel, Modal, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton, ModalBody, useDisclosure, Select, Checkbox, List, ListItem, Textarea } from '@chakra-ui/react'
 import { Box } from '@chakra-ui/react'
 import Loader from 'react-loader'
 import { useRouter } from 'next/router'
@@ -40,17 +40,20 @@ export default function Explorer() {
   const [livelinessProgress, setLivelinessProgress] = useState(null);
   const [vaults, setVaults] = useState([]);
   const [nonFilteredVaults, setNonFilteredVaults] = useState([]);
+  const [unqualifiedVaults, setUnqualifiedVaults] = useState([]);
   const DataTable = DataGrid;
   const [tabIndex, setTabIndex] = useState(tabIndexFromUrl);
   const { isOpen, onOpen, onClose } = useDisclosure()
   const [modalImage, setModalImage] = useState(null)
   const { colorMode } = useColorMode();
   const [testOnly, setTestOnly] = useState(true);
+  const [allowEOAOwned, setAllowEOAOwned] = useState(false);
   const isDark = colorMode === 'dark';
 
   const [isLoading, setIsLoading] = useState(true);
   const [curatedDataCache, setCuratedDataCache] = useState(null);
   const [selectionModel, setSelectionModel] = useState<GridSelectionModel>([]);
+  const [pastedTokenIds, setPastedTokenIds] = useState('');
 
   const fetchCuratedData = useCallback(async () => {
     if (curatedDataCache) {
@@ -101,6 +104,8 @@ export default function Explorer() {
         getCategoryVaults(decodeURIComponent(filterValueFromUrl));
       } else if (filterTypeFromUrl === 'status') {
         getStatusVaults(decodeURIComponent(filterValueFromUrl));
+      } else if (filterTypeFromUrl === 'contractAddress') {
+        getVaultsByContractAddress(decodeURIComponent(filterValueFromUrl));
       }
     }
   }, [filterValueFromUrl, vaultProject]);
@@ -189,11 +194,46 @@ async function getGasPrice() {
       });
   }
 
+  function getProvidedVaults() {
+    setState({ loaded: false });
+    const tokenIds = pastedTokenIds.split('\n').filter(id => id.trim() !== '');
+    
+    if (tokenIds.length === 0) {
+      alert('Please paste valid token IDs');
+      setState({ loaded: true });
+      return;
+    }
+  
+    fetch(`${EMBLEM_V3_API}/vaults`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': localStorage.apiKey,
+      },
+      body: JSON.stringify({ tokenIds }),
+    })
+      .then(response => response.json())
+      .then(data => {
+        setVaults(data);
+        setNonFilteredVaults(data);
+        setState({ loaded: true });
+        migrationConsole.log(`Loaded ${data.length} vaults from provided token IDs`);
+      })
+      .catch(error => {
+        console.error('Error fetching vaults:', error);
+        alert('Error fetching vaults. Please try again.');
+        setState({ loaded: true });
+      });
+  }
+
   function getProjectVaults(project) {
     setState({ loaded: false })
     setVaultProject(project)
     fetch(`${EMBLEM_V3_API}/vaults?project=${project}`, {
-      method: 'GET'
+      method: 'GET',
+      headers: {
+        'x-api-key': localStorage.apiKey,
+      },
     })
       .then(response => response.json())
       .then(data => {
@@ -208,7 +248,10 @@ async function getGasPrice() {
     setVaultProject(name)
    
     fetch(`${EMBLEM_V3_API}/vaults?asset_name=${encodeURIComponent(name)}`, {
-      method: 'GET'
+      method: 'GET',
+      headers: {
+        'x-api-key': localStorage.apiKey,
+      },
     })
       .then(response => response.json())
       .then(data => {
@@ -222,7 +265,10 @@ async function getGasPrice() {
     setState({ loaded: false })
     setVaultProject(chain)
     fetch(`${EMBLEM_V3_API}/vaults?asset_chain=${chain}`, {
-      method: 'GET'
+      method: 'GET',
+      headers: {
+        'x-api-key': localStorage.apiKey,
+      },
     })
       .then(response => response.json())
       .then(data => {
@@ -236,7 +282,10 @@ async function getGasPrice() {
     setState({ loaded: false })
     setVaultProject(category)
     fetch(`${EMBLEM_V3_API}/vaults?category=${category}`, {
-      method: 'GET'
+      method: 'GET',
+      headers: {
+        'x-api-key': localStorage.apiKey,
+      },
     })
       .then(response => response.json())
       .then(data => {
@@ -251,7 +300,10 @@ async function getGasPrice() {
     setState({ loaded: false })
     setVaultProject(status)
     fetch(`${EMBLEM_V3_API}/vaults?status=${status}`, {
-      method: 'GET'
+      method: 'GET',
+      headers: {
+        'x-api-key': localStorage.apiKey,
+      },
     })
       .then(response => response.json())
       .then(data => {
@@ -260,6 +312,24 @@ async function getGasPrice() {
       router.push(`${router.pathname}?filterType=status&filterValue=${status}&tab=${tabIndex}`);
       });
   }
+
+  // getVaultsByContractAddress
+  const getVaultsByContractAddress = (contractAddress: string) => {
+    setState({ loaded: false });
+    setVaultProject(contractAddress);
+    fetch(`${EMBLEM_V3_API}/vaults?contractAddress=${encodeURIComponent(contractAddress)}`, {
+      method: 'GET',
+      headers: {
+        'x-api-key': localStorage.apiKey,
+      },
+    })
+      .then(response => response.json())
+      .then(data => {
+        setVaults(data);
+        setState({ loaded: true });
+        router.push(`${router.pathname}?filterType=contractAddress&filterValue=${encodeURIComponent(contractAddress)}&tab=${tabIndex}`);
+      });
+  };
 
   function getCuratedByContractNetwork(contract, network) {
     if (curatedData && curatedData.length > 0) {
@@ -434,10 +504,24 @@ function handleMigration(keyField: string) {
       const vaultIdCell = Array.from(row.children).find(cell => cell.getAttribute('data-field') === keyField);
       const vaultId = vaultIdCell ? vaultIdCell.getAttribute('data-value') : null;
       const rowData = vaults.find((vault) => vault.tokenid === vaultId);
-
+      // Detect if the row is injected
+      const isInjectedRow = row.classList.contains('internal-balance-row');
+      
       if (rowData) {
         migrationConsole.log('Migrating vault:', rowData.tokenid);
-        fetch(`http://localhost:3001/jump/${rowData.tokenid}/${targetContract}/${rowData.network == "mainnet" ? 1 : 99999999999}?testOnly=${testOnly}`, {
+        let mintUrl = `http://localhost:3001/jump/${rowData.tokenid}/${targetContract}/${rowData.network == "mainnet" ? 1 : 99999999999}`
+        if (isInjectedRow) {
+          // Get the asset name from the actually selected row
+          const assetNameCell = Array.from(row.children).find(cell => cell.getAttribute('data-field') === 'asset_name');
+          const assetName = assetNameCell ? assetNameCell.getAttribute('data-value') : null;
+          if (assetName) {
+            mintUrl += `/${encodeURIComponent(assetName)}`;
+          } else {
+            migrationConsole.log(`Warning: Asset name not found for injected row (${index + 1}/${selectedRows.length})`);
+          }
+        }
+        mintUrl += `?testOnly=${testOnly}${allowEOAOwned ? '&allowEOAOwned=true' : ''}`
+        fetch(mintUrl, {
           method: 'GET',
           headers: {
             'content-type': 'application/json',
@@ -692,22 +776,11 @@ async function filterMigratable(e) {
     return isNotFlagged && isLegacyContract && hasPositiveBalance && isNotJumped && isNotClaimed && isAllowed && isMainnet && isMinted && !isExpired;
   });
 
-  const unqualifiedVaults = vaultList.filter(vault => {
-    const isNotFlagged = !vault.fraud;
-    const isLegacyContract = vault.category === "erc721Legacy";
-    const hasPositiveBalance = vault.balance >= 1;
-    const isNotJumped = vault.jumps_count === 0;
-    const isNotClaimed = vault.status !== 'claimed';
-    const isMinted = vault.status == 'minted';
-    const isMainnet = vault.network === 'mainnet'
+  const unqualifiedVaults = vaultList.filter(vault => !eligibleVaults.includes(vault));
 
-    // Assuming allowed is a function within contractRules
-    const isAllowed = contractRules.allowed(vault.balances, contractRules);
-
-    return !(isNotFlagged && isLegacyContract && hasPositiveBalance && isNotJumped && isNotClaimed && isAllowed && isMainnet && isMinted);
-  });
-
+  setUnqualifiedVaults(unqualifiedVaults);
   setVaults(showUnqualifiedVaults ? unqualifiedVaults : eligibleVaults);
+  migrationConsole.log(`Filtered to ${showUnqualifiedVaults ? 'unqualified' : 'eligible'} vaults`);
 }
 
 
@@ -894,6 +967,15 @@ const handleRowClick = (params: GridRowParams) => {
                   >
                     Test Only
                   </Checkbox>
+                  <Checkbox
+                    ml={5}
+                    isChecked={allowEOAOwned}
+                    onChange={(e) => {
+                      setAllowEOAOwned(e.target.checked);
+                    }}
+                  >
+                    Allow EOA Owned
+                  </Checkbox>
                   <Select margin={5} placeholder="Select contract" onChange={async (e) => await filterMigratable(e)} width="350px">
                     {curatedContracts && curatedContracts.map((contract, index) => (
                       <option key={index} value={contract.name}>
@@ -916,12 +998,25 @@ const handleRowClick = (params: GridRowParams) => {
                 />
                 <Checkbox
                   ml={5}
-                  onChange={async (e) => {
-                    setShowUnqualifiedVaults(e.target.checked)                  
+                  isChecked={showUnqualifiedVaults}
+                  onChange={(e) => {
+                    setShowUnqualifiedVaults(e.target.checked);
+                    setVaults(e.target.checked ? unqualifiedVaults : (vaults.length > unqualifiedVaults.length ? vaults : nonFilteredVaults.filter(v => !unqualifiedVaults.includes(v))));
                   }}
                 >
                   Show Unqualified Vaults
                 </Checkbox>
+                <Textarea
+                  placeholder="Paste TokenIds here (one per line)"
+                  value={pastedTokenIds}
+                  onChange={(e) => setPastedTokenIds(e.target.value)}
+                  width="300px"
+                  ml={5}
+                  rows={4}
+                />
+                <Button ml={2} onClick={getProvidedVaults}>
+                  Load
+                </Button>
                 </Flex>
                 <Flex alignItems="center">
                   <Button margin={5} onClick={() => refreshEmblemMarkets()}>
@@ -935,33 +1030,20 @@ const handleRowClick = (params: GridRowParams) => {
                   </Box>
                     <Button
                       margin={5}
-                      onClick={async () => {
-                        try {
-                          const response = await fetch(`${EMBLEM_V3_API}/vaults`, {
-                            method: 'GET'
-                          });
-                          if (!response.ok) {
-                            throw new Error('Network response was not ok');
+                      onClick={() => {
+                        const uniqueVaults = vaults.reduce((acc, current) => {
+                          const x = acc.find(item => item.asset_name === current.asset_name);
+                          if (!x) {
+                            return acc.concat([current]);
+                          } else {
+                            return acc;
                           }
-                          const newVaults = await response.json();
-                          console.log('Fetched vaults:', newVaults); // Add this line to check the structure
-                          setVaults(newVaults);
-                          setNonFilteredVaults(newVaults);
-
-                          // Re-apply any existing filters or sorting
-                          if (targetContract) {
-                            await filterMigratable({ target: { value: targetContract } });
-                          }
-
-                          // Update the UI to reflect the refresh
-                          migrationConsole.log('Vaults refreshed successfully');
-                        } catch (error) {
-                          console.error('Error refreshing vaults:', error);
-                          migrationConsole.log('Error refreshing vaults: ' + error.message);
-                        }
+                        }, []);
+                        setVaults(uniqueVaults);
+                        migrationConsole.log('Filtered to unique vaults by name using reduce');
                       }}
                     >
-                      Refresh Vaults
+                      Unique
                     </Button>
                 </Flex>
                 <Box width="100%" overflow="visible">
@@ -979,6 +1061,7 @@ const handleRowClick = (params: GridRowParams) => {
                     onSelectionModelChange={(newSelectionModel) => {
                       setSelectionModel(newSelectionModel);
                     }}
+                    onContractAddressClick={getVaultsByContractAddress}
                     enableColumnFilter={true}
                   />
                 </Box>

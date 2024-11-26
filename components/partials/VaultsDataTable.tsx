@@ -18,12 +18,16 @@ interface VaultsDataTableProps {
   onSelectionModelChange: (newSelectionModel: GridSelectionModel) => void;
   onRowClick?: (params: GridRowParams) => void;
   enableColumnFilter?: boolean;
+  onContractAddressClick: (contractAddress: string) => void;
 }
 
 const StyledDataGrid = styled(DataGrid)`
   .injected-row {
     background-color: rgba(0, 0, 0, 0.05);
     box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1), inset 0 -2px 4px rgba(255, 255, 255, 0.1);
+  }
+  .internal-balance-row {
+    background-color: #a0a0a0; // Mid-gray color
   }
 `;
 
@@ -40,6 +44,7 @@ const VaultsDataTable: React.FC<VaultsDataTableProps> = ({
   selectionModel,
   onSelectionModelChange,
   onRowClick,
+  onContractAddressClick
 }) => {
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
 
@@ -178,9 +183,17 @@ const VaultsDataTable: React.FC<VaultsDataTableProps> = ({
       renderCell: (params) => (
         <>
           {params.row.category !== 'erc721Legacy' && <Image src={getCuratedByContractNetwork(params.value as string, params.row.network)?.loadingImages[0]} boxSize="25px" />}
-          <Link href={`https://etherscan.io/address/${params.value}`} isExternal>
+          <Text
+            as="span"
+            cursor="pointer"
+            textDecoration="underline"
+            onClick={(e) => {
+              e.stopPropagation();
+              onContractAddressClick(params.value as string);
+            }}
+          >
             {params.row.category === 'erc721Legacy' ? 'Legacy' : getCuratedByContractNetwork(params.value as string, params.row.network)?.name}
-          </Link>
+          </Text>
         </>
       ),
       filterable: true,
@@ -205,17 +218,18 @@ const VaultsDataTable: React.FC<VaultsDataTableProps> = ({
           asset_chain: balance.coin,
           balance: balance.balance,
           image: balance.image,
+          // Include the tokenid for internal balance rows
+          tokenid: vault.tokenid,
           // Add other fields as needed, or use null for fields that don't apply
           network: null,
           balances: null,
           expired: null,
-          tokenid: null,
           category: null,
           status: null,
           contract: null,
           fraud: null,
           jumps_count: null,
-          isInjected: true, // Add this flag to identify injected rows
+          isInternalBalance: true, // Flag for internal balance rows
         }))
       ];
     }
@@ -236,7 +250,7 @@ const VaultsDataTable: React.FC<VaultsDataTableProps> = ({
         getRowId={(row) => row.id}
         rowHeight={52}
         getRowClassName={(params) => 
-          params.row.isInjected ? 'injected-row' : ''
+          params.row.isInternalBalance ? 'internal-balance-row' : ''
         }
         style={{
           backgroundColor: 'var(--background-color)',
