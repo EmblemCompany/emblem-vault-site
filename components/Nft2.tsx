@@ -512,7 +512,7 @@ export default function Nft2() {
     storedPw && acceptable ? setMintPassword(storedPw) : null //setMintPassword(null)
   }
 
-  const getSignedJWT = async (signature, tokenId, cb)=>{
+  const getSigningKey = async (signature, tokenId, cb)=>{
     var myHeaders = new Headers()
     myHeaders.append('chainid', chainId.toString())
     myHeaders.append('Content-Type', 'application/json')
@@ -691,10 +691,9 @@ export default function Nft2() {
         if (mineUnMinted && status != "claimed" && !mintLockedForever) {
           setMintLockedForever(true)
         }
-        getSignedJWT(signature, tokenId, (token)=>{
-          getTorusKeys(tokenId, token.token, (keys)=>{
+        getSigningKey(signature, tokenId, (token)=>{
             try {
-              var bytes = CryptoJS.AES.decrypt(vaultCiphertextV2, keys.privateKey)
+              var bytes = CryptoJS.AES.decrypt(vaultCiphertextV2, token.privateKey)
               let payload = JSON.parse(bytes.toString(CryptoJS.enc.Utf8)) 
               setKeyValues(payload.values)
               setMnemonic(payload.phrase)
@@ -715,7 +714,6 @@ export default function Nft2() {
             onOpenKeysModal()
           })          
         })
-    })
   }
 
   const getSTXKey = async (address: any, phrase: string)=>{

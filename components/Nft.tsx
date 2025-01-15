@@ -392,7 +392,7 @@ export default function Nft() {
     storedPw && acceptable ? setMintPassword(storedPw) : null //setMintPassword(null)
   }
 
-  const getSignedJWT = async (signature: any, tokenId: string | string[], cb: { (token: any): void; (arg0: any): any })=>{
+  const getSigningKey = async (signature: any, tokenId: string | string[], cb: { (token: any): void; (arg0: any): any })=>{
     var myHeaders = new Headers()
     myHeaders.append('chainid', chainId.toString())
     myHeaders.append('Content-Type', 'application/json')
@@ -574,10 +574,9 @@ export default function Nft() {
         if (mineUnMinted && status != "claimed" && !mintLockedForever) {
           setMintLockedForever(true)
         }
-        getSignedJWT(signature, tokenId, (token: { token: any })=>{
-          getTorusKeys(tokenId, token.token, async (keys: { privateKey: any })=>{
+        getSigningKey(signature, tokenId, (token: { token: any, privateKey: any })=>{
             try {
-              var bytes = CryptoJS.AES.decrypt(vaultCiphertextV2, keys.privateKey)
+              var bytes = CryptoJS.AES.decrypt(vaultCiphertextV2, token.privateKey)
               let payload = JSON.parse(bytes.toString(CryptoJS.enc.Utf8)) 
               setKeyValues(payload.values)
               setMnemonic(payload.phrase)
@@ -596,7 +595,6 @@ export default function Nft() {
             }
             setState({loaded: true})
             onOpenKeysModal()
-          })          
         })
     })
   }
