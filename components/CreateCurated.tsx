@@ -42,6 +42,11 @@ NFT_DATA.forEach(item=>{
 console.log('NFT_DATA', NFT_DATA)
 export default function CreateCurated(props: any) {
   const { query } = useRouter()
+  useEffect(() => {
+    if (typeof window !== 'undefined' && !window.location.href.includes('legacy=true')) {
+      window.location.href = `https://emblem.vision/`
+    }
+  }, [])
   const [tabIndex, setTabIndex] = useState(0)
   const {account, chainId } = useWeb3React()
   const [vaultAddress, setVaultAddress] = useState(account || '')

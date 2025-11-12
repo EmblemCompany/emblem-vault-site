@@ -1,4 +1,5 @@
 import { JSBI } from '@uniswap/sdk'
+import { abi as v2HandlerABI } from './abi/v2handler.json'
 import { abi as HandlerABI } from './abi/handler.json'
 import { abi as SalesABI } from './abi/sales.json'
 import { abi as CovalABI } from './abi/coval.json'
@@ -741,6 +742,11 @@ export const contractAddresses = {
     1313161554: '0x793F3cF97c57798732f3AA36416CaC742223aB20',
   },
   vaultHandlerAbi: HandlerABI,
+  v2VaultHandler: {
+    1: '0x214C964bBd3640971E111d3a994CbB89b296a9ad',
+    8453: '0xF04a4B0CE209aF4017648Fa93D2bB348eCb116d6',
+  },
+  v2HandlerAbi: v2HandlerABI,
   emblemVault: {
     1: '0x82c7a8f707110f5fbb16184a5933e9f78a34c6ab',
     4: '0xe70AbBc99D8eB32124BF022196c493DB4fBc50FD',

@@ -57,6 +57,8 @@ declare global {
   interface Window { phraseToKey: any, phrasePathToKey: any }
 }
 
+
+
 const AddrModal = dynamic(() => import('./AddrModal'))
 const KeysModal = dynamic(() => import('./KeysModal'))
 // const OfferModal = dynamic(() => import('./OfferModal'))
@@ -80,6 +82,12 @@ export default function Nft2() {
   const [showOffer, setShowOffer] = useState(query.offer || false)
   const [framed, setFramed] = useState(query.framed || true)
   const [tokenId, setTokenId] = useState(query.id)
+  const [legacyMode, setLegacyMode] = useState(query.legacy="true")
+  useEffect(() => {
+    if (typeof window !== 'undefined' && !window.location.href.includes('legacy=true')) {
+      window.location.href = `https://emblem.vision/vault/${tokenId}`
+    }
+  }, [])
   const [internalTokenId, setInternalTokenId] = useState()
   const [slideshowOnly, setSlideshowOnly] = useState(query.slideshowOnly || false)
   const [enableLegacy, setEnableLegacy] = useState(query.legacy || false)
@@ -237,7 +245,17 @@ export default function Nft2() {
           let data = await response.json()
           setCuratedMintingParameters(data)
           ;(vaultHandlerContract as Contract)
-            .buyWithSignedPrice(data._nftAddress, '0x0000000000000000000000000000000000000000', data._price, data._to, data._tokenId, data._nonce, data._signature, data.serialNumber, 1, {value: data._price})
+            .buyWithSignedPrice(
+              data._nftAddress, 
+              '0x0000000000000000000000000000000000000000', 
+              data._price, 
+              data._to, 
+              data._tokenId, 
+              data._nonce, 
+              data._signature, 
+              data.serialNumber, 
+              1, 
+              {value: data._price})
             .then(({ hash }: { hash: string }) => {
               setTimeout(() => {
                 setHash(hash)
@@ -348,8 +366,8 @@ export default function Nft2() {
     }
 
     
-    if (!jsonData.targetAsset && !jsonData.move_targetAsset && !enableLegacy) {
-      location.href = location.origin + '/nft?id=' + tokenId
+    if (!jsonData.targetAsset && !jsonData.move_targetAsset ) {
+      location.href = location.origin + '/nft?id=' + tokenId + (enableLegacy? '&legacy=true': '')
     }
     // framed && jsonData.image && !jsonData.image.includes('framed=') && !jsonData.image.includes('http') ? jsonData.image = jsonData.image + "&framed="+framed : null
     if (jsonData.ciphertextV2) {

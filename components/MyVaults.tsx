@@ -17,6 +17,11 @@ import { TransactionToast } from './TransactionToast'
 export default function MyVaults() {
   const { query } = useRouter()
   // const [ townHall, setTownHall] = useState(query.townHall || false)
+    useEffect(() => {
+      if (typeof window !== 'undefined' && !window.location.href.includes('legacy=true')) {
+        window.location.href = `https://emblem.vision/my-vaults`
+      }
+    }, [])
   const [showMigratable, setIsShowMigratable] = useState(false);
   const [showJumpable, setIsShowJumpable] = useState(false);
   const [showMintable, setIsShowMintable] = useState(false);
